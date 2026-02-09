@@ -12,7 +12,7 @@ import java.util.ArrayList;
 
 public class DamagePromptPopup extends JFrame {
 
-    private JComboBox<String> targetComboBoxHit;
+    private JComboBox<String> targetComboBox;
     private JComboBox<String> targetComboBoxSave;
 
     private JTextField hitRollInputField;
@@ -45,10 +45,10 @@ public class DamagePromptPopup extends JFrame {
     private JPanel getHitRollPanel() {
         JPanel panel = new JPanel(new GridLayout(0, 1));
         hitRollInputField = getInputField();
-        targetComboBoxHit = getComboBox();
+        targetComboBox = getComboBox();
 
         panel.add(new JLabel("Target:"));
-        panel.add(targetComboBoxHit);
+        panel.add(targetComboBox);
         panel.add(new JLabel("Roll to Hit:"));
         panel.add(hitRollInputField);
         panel.add(getOkButton(true));
@@ -88,7 +88,7 @@ public class DamagePromptPopup extends JFrame {
         button.addActionListener(e -> {
             JComboBox<String> targetComboBox = targetComboBoxSave;
             if (isHitRoll) {
-                targetComboBox = targetComboBoxHit;
+                targetComboBox = this.targetComboBox;
             }
             Combatant target = Locators.getCombatantWithNameFrom(targetList, (String) targetComboBox.getSelectedItem());
             if (target == null) {
@@ -103,8 +103,9 @@ public class DamagePromptPopup extends JFrame {
                 int saveRoll = InputPrompts.promptHealth("save roll");
                 registerAttack(target, saveRoll >= saveDC);
             }
-            Main.menu.update();
             dispose();
+            Main.menu.update();
+            Main.checkWinConditions();
         });
         return button;
     }

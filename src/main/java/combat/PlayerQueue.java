@@ -3,43 +3,34 @@ package combat;
 import combatants.Combatant;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class PlayerQueue {
 
+    private final TeamQueue friendlies;
+    private final TeamQueue enemies;
     private Combatant currentCombatant;
 
-    private final ArrayList<Combatant> friendlies;
-    private int friendlyIndex;
-
-    private final ArrayList<Combatant> enemies;
-    private int enemyIndex;
-
     public PlayerQueue(ArrayList<Combatant> friendlies, ArrayList<Combatant> enemies) {
-        this.friendlies = friendlies;
-        this.enemies = enemies;
+        sortList(friendlies);
+        sortList(enemies);
 
-        sortList(this.friendlies);
-        sortList(this.enemies);
-
-        friendlyIndex = 0;
-        enemyIndex = 0;
+        this.friendlies = new TeamQueue(friendlies);
+        this.enemies = new TeamQueue(enemies);
 
         currentCombatant = friendlies.getFirst();
     }
 
     public Combatant endTurnAndGetNext() {
-        if (!currentCombatant.isEnemy()) {
-            currentCombatant = enemies.getFirst();
-            indexFriendlies();
-        }
-        indexEnemies();
-        if (enemyIndex == -1) {
-            enemyIndex++;
-            currentCombatant = friendlies.get(friendlyIndex);
+        if (currentCombatant.isEnemy()) {
+            if (enemies.isTurnOver()) {
+                currentCombatant = friendlies.getNext();
+            } else {
+                currentCombatant = enemies.getNext();
+            }
         } else {
-            currentCombatant = enemies.get(enemyIndex);
+            currentCombatant = enemies.getNext();
         }
-
         if (!currentCombatant.getLifeStatus().isAlive()) {
             endTurnAndGetNext();
         }
@@ -50,22 +41,36 @@ public class PlayerQueue {
         return currentCombatant;
     }
 
-    private void indexFriendlies() {
-        friendlyIndex++;
-        if (friendlyIndex == friendlies.size()) {
-            friendlyIndex = 0;
-        }
-    }
-
-    private void indexEnemies() {
-        enemyIndex++;
-        if (enemyIndex == enemies.size()) {
-            enemyIndex = -1;
-        }
-    }
-
     private void sortList(ArrayList<Combatant> combatants) {
         combatants.sort((o1, o2) -> -1 * Integer.compare(o1.getInitiative(), o2.getInitiative()));
+    }
+
+    static class TeamQueue extends ArrayList<Combatant> {
+
+        private Combatant currentCombatant;
+        private int currentIndex;
+
+        public TeamQueue(List<Combatant> combatants) {
+            addAll(combatants);
+            currentCombatant = getFirst();
+            currentIndex = 0;
+        }
+
+        public Combatant getNext() {
+            if (currentCombatant.equals(getLast())) {
+                currentCombatant = getFirst();
+                currentIndex = 0;
+            } else {
+                currentIndex++;
+                currentCombatant = get(currentIndex);
+            }
+            return currentCombatant;
+        }
+
+        public boolean isTurnOver() {
+            return currentCombatant.equals(getLast());
+        }
+
     }
 
 }

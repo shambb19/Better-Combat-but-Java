@@ -4,6 +4,7 @@ import combatants.Combatant;
 import combatants.NPC;
 import combatants.PC;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -68,6 +69,50 @@ public enum Battle {
             }
         }
         return null;
+    }
+
+    public boolean areAllEnemiesDefeated() {
+        for (Combatant combatant : getEnemies()) {
+            if (combatant.getLifeStatus().isConscious()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean areAllFriendliesDefeated() {
+        for (Combatant combatant : getFriendlies()) {
+            if (combatant.getLifeStatus().isConscious()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public String percentToVictory() {
+        int healthSumMax = 0;
+        int healthSumFinal = 0;
+        for (Combatant enemy : getEnemies()) {
+            healthSumMax += enemy.getMaximumHealth();
+            healthSumFinal += enemy.getCurrentHealth();
+        }
+        double percentDecimal = (double) (healthSumMax - healthSumFinal) / healthSumMax;
+        return new DecimalFormat("##").format(100 * percentDecimal) + "%";
+    }
+
+    public String getFinalHealths() {
+        StringBuilder string = new StringBuilder();
+        for (Combatant partyMember : getFriendlies()) {
+            string.append(partyMember.getName()).append(": ");
+            if (partyMember.getLifeStatus().isConscious()) {
+                string.append(partyMember.getHealthString()).append("\n");
+            } else if (partyMember.getLifeStatus().isAlive()) {
+                string.append("Unconscious\n");
+            } else {
+                string.append("Dead\n");
+            }
+        }
+        return string.toString();
     }
 
 }
