@@ -1,7 +1,7 @@
 package combat;
 
 import com.formdev.flatlaf.intellijthemes.FlatHighContrastIJTheme;
-import gui.FinalizeCombatantsPopup;
+import gui.popup.FinalizeCombatantsPopup;
 import gui.Menu;
 import scenarios.Battle;
 

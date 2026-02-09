@@ -94,17 +94,21 @@ public class Combatant {
         return isEnemy;
     }
 
+    public int getArmorClass() {
+        return armorClass;
+    }
+
     @Override
     public String toString() {
         String toString = name + "\n";
         if (lifeStatus.isConscious()) {
             if (isEnemy) {
-                toString += "Health: ?";
+                toString += "Health: ?\n";
             } else {
                 toString += "Health: " + getHealthString() + "\n";
             }
         } else if (lifeStatus.isAlive()) {
-            toString += "Unconscious (" + lifeStatus.getSuccesses() + " life saves, " + lifeStatus.getFails() + " fails)";
+            toString += "Unconscious (" + lifeStatus.getSuccesses() + " life saves, " + lifeStatus.getFails() + " fails)\n";
         }
         toString += "Initiative: " + initiative + "\n";
         toString += "Inspirations Used: " + inspiration + "/2";
