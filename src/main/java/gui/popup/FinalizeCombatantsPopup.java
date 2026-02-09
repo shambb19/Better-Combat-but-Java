@@ -2,7 +2,7 @@ package gui.popup;
 
 import combat.Main;
 import combatants.Combatant;
-import gui.IntegerFieldListener;
+import gui.popup.listener.DieRollListener;
 
 import javax.swing.*;
 import java.awt.*;
@@ -38,13 +38,13 @@ public class FinalizeCombatantsPopup extends JFrame {
             JTextField currentHealthField = new JTextField();
             currentHealths[i] = currentHealthField;
             currentHealthField.putClientProperty("JComponent.roundRect", true);
-            currentHealthField.addKeyListener(new IntegerFieldListener());
+            currentHealthField.addKeyListener(new DieRollListener(friendlies.get(i).getMaximumHealth(), currentHealthField));
             currentHealthField.addActionListener(e -> checkAllBoxesFilled(currentHealths));
 
             JTextField initiativeField = new JTextField();
             initiatives[i] = initiativeField;
             initiativeField.putClientProperty("JComponent.roundRect", true);
-            initiativeField.addKeyListener(new IntegerFieldListener());
+            initiativeField.addKeyListener(new DieRollListener(20, initiativeField));
             initiativeField.addActionListener(e -> checkAllBoxesFilled(initiatives));
 
             add(currentHealthField);
@@ -118,7 +118,7 @@ public class FinalizeCombatantsPopup extends JFrame {
                 JTextField initiativeField = new JTextField();
                 initiativesEnemies[i] = initiativeField;
                 initiativeField.putClientProperty("JComponent.roundRect", true);
-                initiativeField.addKeyListener(new IntegerFieldListener());
+                initiativeField.addKeyListener(new DieRollListener(20, initiativeField));
                 initiativeField.addActionListener(e -> checkAllBoxesFilled(initiativesEnemies));
 
                 add(initiativeField);

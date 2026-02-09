@@ -6,14 +6,13 @@ import javax.swing.*;
 
 public class InputPrompts {
 
-    public static int promptHealth(boolean isDamage) {
-        String message = (isDamage) ? "damage" : "health";
+    public static int promptHealth(String message) {
         int value = -1;
         while (value < 0) {
             String input = JOptionPane.showInputDialog(
                     Main.menu,
-                    "Enter " + message + " amount.",
-                    "Better Combat but Java",
+                    "Enter " + message + ".",
+                    Main.TITLE,
                     JOptionPane.QUESTION_MESSAGE
             );
             try {
@@ -21,6 +20,15 @@ public class InputPrompts {
             } catch (Exception ignored) {}
         }
         return value;
+    }
+
+    public static void informAttackFail() {
+        JOptionPane.showMessageDialog(
+                Main.menu,
+                "The attack does not hit.",
+                Main.TITLE,
+                JOptionPane.INFORMATION_MESSAGE
+        );
     }
 
 }

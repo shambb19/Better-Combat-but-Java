@@ -9,6 +9,8 @@ import javax.swing.*;
 
 public class Main {
 
+    public static final String TITLE = "Better Combat but Java";
+
     public static Menu menu;
 
     public static Battle battle = null;

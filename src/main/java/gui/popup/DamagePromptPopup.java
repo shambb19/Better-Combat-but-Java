@@ -2,7 +2,7 @@ package gui.popup;
 
 import combat.Main;
 import combatants.Combatant;
-import gui.IntegerFieldListener;
+import gui.popup.listener.DieRollListener;
 import util.InputPrompts;
 import util.Locators;
 
@@ -12,8 +12,11 @@ import java.util.ArrayList;
 
 public class DamagePromptPopup extends JFrame {
 
-    private final JComboBox<String> targetComboBox;
-    private final JTextField hitRollInputField;
+    private JComboBox<String> targetComboBoxHit;
+    private JComboBox<String> targetComboBoxSave;
+
+    private JTextField hitRollInputField;
+    private JTextField saveDcInputField;
 
     private final ArrayList<Combatant> targetList;
 
@@ -24,44 +27,94 @@ public class DamagePromptPopup extends JFrame {
 
         targetList = Locators.getTargetList(true);
 
-        targetComboBox = new JComboBox<>();
-        targetComboBox.putClientProperty("JComponent.roundRect", true);
-        targetList.forEach(target -> targetComboBox.addItem(target.getName()));
-
-        hitRollInputField = new JTextField();
-        hitRollInputField.putClientProperty("JComponent.roundRect", true);
-        hitRollInputField.addKeyListener(new IntegerFieldListener());
-
-        add(new JLabel("Select Attack Target"));
-        add(targetComboBox);
-        add(new JLabel("Roll to Hit"));
-        add(hitRollInputField);
-        add(getOkButton());
+        add(getMainPanel());
 
         pack();
         setLocationRelativeTo(null);
     }
 
-    private JButton getOkButton() {
+    private JTabbedPane getMainPanel() {
+        JTabbedPane panel = new JTabbedPane();
+        panel.setTabPlacement(SwingConstants.TOP);
+
+        panel.addTab("Hit Roll", getHitRollPanel());
+        panel.addTab("Save DC", getSavingThrowPanel());
+        return panel;
+    }
+
+    private JPanel getHitRollPanel() {
+        JPanel panel = new JPanel(new GridLayout(0, 1));
+        hitRollInputField = getInputField();
+        targetComboBoxHit = getComboBox();
+
+        panel.add(new JLabel("Target:"));
+        panel.add(targetComboBoxHit);
+        panel.add(new JLabel("Roll to Hit:"));
+        panel.add(hitRollInputField);
+        panel.add(getOkButton(true));
+        return panel;
+    }
+
+    private JPanel getSavingThrowPanel() {
+        JPanel panel = new JPanel(new GridLayout(0, 1));
+        saveDcInputField = getInputField();
+        targetComboBoxSave = getComboBox();
+
+        panel.add(new JLabel("Target: "));
+        panel.add(targetComboBoxSave);
+        panel.add(new JLabel("Attack Save DC:"));
+        panel.add(saveDcInputField);
+        panel.add(getOkButton(false));
+        return panel;
+    }
+
+    private JTextField getInputField() {
+        JTextField field = new JTextField();
+        field.putClientProperty("JComponent.roundRect", true);
+        field.addKeyListener(new DieRollListener(20, field));
+        return field;
+    }
+
+    private JComboBox<String> getComboBox() {
+        JComboBox<String> comboBox = new JComboBox<>();
+        comboBox.putClientProperty("JComponent.roundRect", true);
+        targetList.forEach(target -> comboBox.addItem(target.getName()));
+        return comboBox;
+    }
+
+    private JButton getOkButton(boolean isHitRoll) {
         JButton button = new JButton("Attack");
         button.putClientProperty("JButton.buttonType", "roundRect");
         button.addActionListener(e -> {
+            JComboBox<String> targetComboBox = targetComboBoxSave;
+            if (isHitRoll) {
+                targetComboBox = targetComboBoxHit;
+            }
             Combatant target = Locators.getCombatantWithNameFrom(targetList, (String) targetComboBox.getSelectedItem());
             if (target == null) {
-                JOptionPane.showMessageDialog(Main.menu, "Select a target.", "Better Combat but Java", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(Main.menu, "Select a target.", Main.TITLE, JOptionPane.WARNING_MESSAGE);
                 return;
             }
-
-            int hitRoll = Integer.parseInt(hitRollInputField.getText());
-            if (hitRoll < target.getArmorClass()) {
-                JOptionPane.showMessageDialog(Main.menu, "The attack does not hit.", "Better Combat but Java", JOptionPane.INFORMATION_MESSAGE);
+            if (isHitRoll) {
+                int hitRoll = Integer.parseInt(hitRollInputField.getText());
+                registerAttack(target, hitRoll >= target.getArmorClass());
             } else {
-                target.damage(InputPrompts.promptHealth(true));
-                Main.menu.update();
+                int saveDC = Integer.parseInt(saveDcInputField.getText());
+                int saveRoll = InputPrompts.promptHealth("save roll");
+                registerAttack(target, saveRoll >= saveDC);
             }
+            Main.menu.update();
             dispose();
         });
         return button;
+    }
+
+    private void registerAttack(Combatant target, boolean isSuccessfulWhen) {
+        if (isSuccessfulWhen) {
+            target.damage(InputPrompts.promptHealth("damage amount"));
+        } else {
+            InputPrompts.informAttackFail();
+        }
     }
 
 }

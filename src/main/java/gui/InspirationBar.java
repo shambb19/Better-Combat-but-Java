@@ -1,16 +1,20 @@
 package gui;
 
+import combat.Main;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class InspirationBar extends JPanel {
 
     private int inspirationRolls;
+    private int numCompletions;
 
     private final InspirationProgressBar inspirationProgressBar;
 
     public InspirationBar() {
         inspirationRolls = 0;
+        numCompletions = 0;
 
         setLayout(new GridLayout(0, 1));
 
@@ -39,7 +43,18 @@ public class InspirationBar extends JPanel {
 
         public void update() {
             setValue(inspirationRolls);
-            setString(String.valueOf(inspirationRolls));
+            setString(inspirationRolls + " (" + numCompletions + ")");
+            if (getValue() == getMaximum()) {
+                JOptionPane.showMessageDialog(
+                        Main.menu,
+                        "10 inspiration points have been rolled. Take appropriate action.",
+                        Main.TITLE,
+                        JOptionPane.WARNING_MESSAGE
+                );
+                inspirationRolls = 0;
+                numCompletions++;
+                update();
+            }
         }
 
     }

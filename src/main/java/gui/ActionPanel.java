@@ -9,32 +9,26 @@ import util.Dice;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 
 public class ActionPanel extends JPanel {
 
     private final PlayerQueue queue;
-    private final ArrayList<Combatant> friendlies;
-    private final ArrayList<Combatant> enemies;
 
     private final JTextArea turnInformation = new JTextArea();
-    private final JButton attackButton = new JButton("Attack");
-    private final JButton healButton = new JButton("Heal");
 
     public ActionPanel() {
         queue = Main.queue;
 
         setLayout(new GridLayout(0, 1));
 
-        friendlies = Main.battle.getFriendlies();
-        enemies = Main.battle.getEnemies();
-
         turnInformation.setText(queue.getCurrentCombatant().toString());
         turnInformation.setEditable(false);
 
+        JButton attackButton = new JButton("Attack");
         attackButton.putClientProperty("JButton.buttonType", "roundRect");
         attackButton.addActionListener(e -> new DamagePromptPopup().setVisible(true));
 
+        JButton healButton = new JButton("Heal");
         healButton.putClientProperty("JButton.buttonType", "roundRect");
         healButton.addActionListener(e -> new HealPromptPopup().setVisible(true));
 

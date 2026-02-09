@@ -1,5 +1,7 @@
 package gui;
 
+import combat.Main;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -9,7 +11,7 @@ public class Menu extends JFrame {
     private final InitiativeListPanel initiativeListPanel;
 
     public Menu() {
-        setTitle("Better Combat but Java");
+        setTitle(Main.TITLE);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 

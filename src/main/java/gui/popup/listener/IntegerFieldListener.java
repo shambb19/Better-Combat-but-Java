@@ -1,4 +1,4 @@
-package gui;
+package gui.popup.listener;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -15,5 +15,7 @@ public class IntegerFieldListener implements KeyListener {
     public void keyPressed(KeyEvent e) {}
 
     @Override
-    public void keyReleased(KeyEvent e) {}
+    public void keyReleased(KeyEvent e) {
+        keyTyped(e);
+    }
 }

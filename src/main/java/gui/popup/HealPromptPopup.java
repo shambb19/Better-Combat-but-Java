@@ -2,7 +2,7 @@ package gui.popup;
 
 import combat.Main;
 import combatants.Combatant;
-import gui.IntegerFieldListener;
+import gui.popup.listener.IntegerFieldListener;
 import util.Locators;
 
 import javax.swing.*;
@@ -53,7 +53,7 @@ public class HealPromptPopup extends JFrame {
         button.addActionListener(e -> {
             Combatant target = Locators.getCombatantWithNameFrom(targetList, (String) targetComboBox.getSelectedItem());
             if (target == null) {
-                JOptionPane.showMessageDialog(Main.menu, "Select a target.", "Better Combat but Java", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(Main.menu, "Select a target.", Main.TITLE, JOptionPane.WARNING_MESSAGE);
                 return;
             }
             if (fullHealButton.isSelected()) {
