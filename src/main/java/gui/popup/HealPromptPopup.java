@@ -13,7 +13,7 @@ public class HealPromptPopup extends JFrame {
 
     private final JComboBox<String> targetComboBox;
     private final JTextField healAmountInputField;
-    private final JToggleButton fullHealButton;
+    private final JCheckBox fullHealButton;
 
     private final ArrayList<Combatant> targetList;
 
@@ -32,7 +32,7 @@ public class HealPromptPopup extends JFrame {
         healAmountInputField.putClientProperty("JComponent.roundRect", true);
         healAmountInputField.addKeyListener(new IntegerFieldListener());
 
-        fullHealButton = new JToggleButton("To Full Health", false);
+        fullHealButton = new JCheckBox("To Full Health");
         fullHealButton.putClientProperty("JButton.buttonType", "roundRect");
         fullHealButton.addActionListener(e -> healAmountInputField.setEnabled(!fullHealButton.isSelected()));
 
@@ -47,7 +47,7 @@ public class HealPromptPopup extends JFrame {
         setLocationRelativeTo(null);
     }
 
-    public JButton getOkButton() {
+    private JButton getOkButton() {
         JButton button = new JButton("Heal");
         button.putClientProperty("JButton.buttonType", "roundRect");
         button.addActionListener(e -> {

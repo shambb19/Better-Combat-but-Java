@@ -9,6 +9,7 @@ public class Menu extends JFrame {
 
     private final InspirationBar excessInspirationBar;
     private final InitiativeListPanel initiativeListPanel;
+    private final ActionPanel actionPanel;
 
     public Menu() {
         setTitle(Main.TITLE);
@@ -17,8 +18,9 @@ public class Menu extends JFrame {
 
         initiativeListPanel = new InitiativeListPanel();
         excessInspirationBar = new InspirationBar();
+        actionPanel = new ActionPanel();
 
-        add(new ActionPanel(), BorderLayout.CENTER);
+        add(actionPanel, BorderLayout.CENTER);
         add(initiativeListPanel, BorderLayout.EAST);
         add(excessInspirationBar, BorderLayout.NORTH);
 
@@ -32,6 +34,8 @@ public class Menu extends JFrame {
 
     public void update() {
         initiativeListPanel.refresh();
+        actionPanel.updateTurnInformation();
+        actionPanel.copyHealthBar(Main.queue.getCurrentCombatant().getHealthBar());
     }
 
 }

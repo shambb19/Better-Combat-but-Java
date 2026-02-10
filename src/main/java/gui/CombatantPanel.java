@@ -31,6 +31,8 @@ public class CombatantPanel extends JPanel {
 
         add(nameField, BorderLayout.WEST);
         add(healthBar, BorderLayout.EAST);
+
+        thisCombatant.setHealthBar(healthBar);
     }
 
     public void update() {

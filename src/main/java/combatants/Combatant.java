@@ -1,5 +1,6 @@
 package combatants;
 
+import javax.swing.*;
 import java.awt.*;
 
 public class Combatant {
@@ -8,15 +9,15 @@ public class Combatant {
 
     protected int initiative;
 
+    protected int armorClass;
+    protected boolean isEnemy;
+    protected int inspiration;
+
     protected int hpMax;
     protected int hpCurrent;
     protected LifeStatus lifeStatus = new LifeStatus();
 
-    protected int armorClass;
-
-    protected boolean isEnemy;
-
-    protected int inspiration;
+    protected JProgressBar healthBar;
 
     public Combatant(String name, int hpMax, int armorClass, boolean isEnemy) {
         this.name = name;
@@ -80,6 +81,14 @@ public class Combatant {
 
     public void setHealth(int newHealth) {
         hpCurrent = newHealth;
+    }
+
+    public JProgressBar getHealthBar() {
+        return healthBar;
+    }
+
+    public void setHealthBar(JProgressBar healthBar) {
+        this.healthBar = healthBar;
     }
 
     public int getInitiative() {

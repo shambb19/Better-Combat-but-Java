@@ -15,14 +15,20 @@ public class ActionPanel extends JPanel {
     private final PlayerQueue queue;
 
     private final JTextArea turnInformation = new JTextArea();
+    private final JProgressBar currentCombatantHealthBar;
 
     public ActionPanel() {
         queue = Main.queue;
 
         setLayout(new GridLayout(0, 1));
 
-        turnInformation.setText(queue.getCurrentCombatant().toString());
-        turnInformation.setEditable(false);
+        updateTurnInformation();
+
+        currentCombatantHealthBar = new JProgressBar();
+        currentCombatantHealthBar.putClientProperty("JComponent.roundRect", true);
+        currentCombatantHealthBar.setStringPainted(true);
+        currentCombatantHealthBar.setMinimum(0);
+        copyHealthBar(queue.getCurrentCombatant().getHealthBar());
 
         JButton attackButton = new JButton("Attack");
         attackButton.putClientProperty("JButton.buttonType", "roundRect");
@@ -33,6 +39,7 @@ public class ActionPanel extends JPanel {
         healButton.addActionListener(e -> new HealPromptPopup().setVisible(true));
 
         add(turnInformation);
+        add(currentCombatantHealthBar);
         add(attackButton);
         add(healButton);
         add(getInspirationUsedButton());
@@ -45,7 +52,7 @@ public class ActionPanel extends JPanel {
 
         endTurnButton.addActionListener(e -> {
             Combatant newCurrentCombatant = queue.endTurnAndGetNext();
-            turnInformation.setText(newCurrentCombatant.toString());
+            updateTurnInformation();
 
             if (!newCurrentCombatant.getLifeStatus().isConscious()) {
                 int deathSaveThrow = Dice.promptValueFromRoll("Death Save", 1, 20);
@@ -64,7 +71,7 @@ public class ActionPanel extends JPanel {
 
         inspirationButton.addActionListener(e -> {
             boolean isExcessInspiration = queue.getCurrentCombatant().useInspirationAndCheckExcess();
-            turnInformation.setText(queue.getCurrentCombatant().toString());
+            updateTurnInformation();
 
             if (isExcessInspiration) {
                 int excessInspirationRoll = Dice.promptValueFromRoll("Inspiration", 1, 4);
@@ -73,5 +80,25 @@ public class ActionPanel extends JPanel {
         });
 
         return inspirationButton;
+    }
+
+    public void updateTurnInformation() {
+        turnInformation.setText(queue.getCurrentCombatant().toString());
+        if (queue.getCurrentCombatant().isEnemy()) {
+            turnInformation.setForeground(new Color(122, 160, 245));
+        } else {
+            turnInformation.setForeground(Color.WHITE);
+        }
+    }
+
+    public void copyHealthBar(JProgressBar mimic) {
+        currentCombatantHealthBar.setString(mimic.getString());
+        currentCombatantHealthBar.setMaximum(mimic.getMaximum());
+        currentCombatantHealthBar.setForeground(mimic.getForeground());
+        if (queue.getCurrentCombatant().isEnemy()) {
+            currentCombatantHealthBar.setValue(currentCombatantHealthBar.getMaximum());
+        } else {
+            currentCombatantHealthBar.setValue(mimic.getValue());
+        }
     }
 }

@@ -18,7 +18,11 @@ public class PlayerQueue {
         this.friendlies = new TeamQueue(friendlies);
         this.enemies = new TeamQueue(enemies);
 
-        currentCombatant = friendlies.getFirst();
+        if (friendlies.getFirst().getInitiative() >= enemies.getFirst().getInitiative()) {
+            currentCombatant = friendlies.getFirst();
+        } else {
+            currentCombatant = enemies.getFirst();
+        }
     }
 
     public Combatant endTurnAndGetNext() {
