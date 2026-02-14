@@ -35,7 +35,7 @@ public class PlayerQueue {
         } else {
             currentCombatant = enemies.getNext();
         }
-        if (!currentCombatant.getLifeStatus().isAlive()) {
+        if (!currentCombatant.lifeStatus().isAlive()) {
             endTurnAndGetNext();
         }
         return currentCombatant;

@@ -3,7 +3,7 @@ package gui;
 import combat.Main;
 import combat.PlayerQueue;
 import combatants.Combatant;
-import gui.popup.DamagePromptPopup;
+import gui.popup.damage.DamagePromptPopup;
 import gui.popup.HealPromptPopup;
 import util.Dice;
 
@@ -54,9 +54,9 @@ public class ActionPanel extends JPanel {
             Combatant newCurrentCombatant = queue.endTurnAndGetNext();
             updateTurnInformation();
 
-            if (!newCurrentCombatant.getLifeStatus().isConscious()) {
+            if (!newCurrentCombatant.lifeStatus().isConscious()) {
                 int deathSaveThrow = Dice.promptValueFromRoll("Death Save", 1, 20);
-                newCurrentCombatant.getLifeStatus().rollDeathSave(deathSaveThrow);
+                newCurrentCombatant.lifeStatus().rollDeathSave(deathSaveThrow);
             }
 
             Main.menu.update();

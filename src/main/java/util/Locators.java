@@ -9,7 +9,7 @@ public class Locators {
 
     public static Combatant locateCombatant(ArrayList<Combatant> team, String target) {
         for (Combatant combatant : team) {
-            if (combatant.getName().equals(target)) {
+            if (combatant.name().equals(target)) {
                 return combatant;
             }
         }
@@ -33,7 +33,7 @@ public class Locators {
 
     public static Combatant getCombatantWithNameFrom(ArrayList<Combatant> source, String name) {
         for (Combatant combatant : source) {
-            if (combatant.getName().equals(name)) {
+            if (combatant.name().equals(name)) {
                 return combatant;
             }
         }

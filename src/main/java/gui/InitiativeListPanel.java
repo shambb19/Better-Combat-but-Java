@@ -38,7 +38,7 @@ public class InitiativeListPanel extends JPanel {
         Combatant currentCombatant = Main.queue.getCurrentCombatant();
 
         for (CombatantPanel panel : combatantPanels) {
-            if (panel.getThisCombatant().getName().equals(currentCombatant.getName())) {
+            if (panel.getThisCombatant().name().equals(currentCombatant.name())) {
                 panel.beginTurn();
             } else {
                 panel.endTurn();

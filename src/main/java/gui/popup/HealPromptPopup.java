@@ -2,7 +2,7 @@ package gui.popup;
 
 import combat.Main;
 import combatants.Combatant;
-import gui.popup.listener.IntegerFieldListener;
+import gui.listener.IntegerFieldListener;
 import util.Locators;
 
 import javax.swing.*;
@@ -26,7 +26,7 @@ public class HealPromptPopup extends JFrame {
 
         targetComboBox = new JComboBox<>();
         targetComboBox.putClientProperty("JComponent.roundRect", true);
-        targetList.forEach(target -> targetComboBox.addItem(target.getName()));
+        targetList.forEach(target -> targetComboBox.addItem(target.name()));
 
         healAmountInputField = new JTextField();
         healAmountInputField.putClientProperty("JComponent.roundRect", true);
@@ -57,7 +57,7 @@ public class HealPromptPopup extends JFrame {
                 return;
             }
             if (fullHealButton.isSelected()) {
-                target.heal(target.getMaximumHealth());
+                target.heal(target.maxHp());
             } else {
                 target.heal(Integer.parseInt(healAmountInputField.getText()));
             }

@@ -2,7 +2,7 @@ package gui.popup;
 
 import combat.Main;
 import combatants.Combatant;
-import gui.popup.listener.DieRollListener;
+import gui.listener.DieRollListener;
 
 import javax.swing.*;
 import java.awt.*;
@@ -33,12 +33,12 @@ public class FinalizeCombatantsPopup extends JFrame {
         initiatives = new JTextField[friendlies.size()];
 
         for (int i = 0; i < friendlies.size(); i++) {
-            add(new JLabel(friendlies.get(i).getName()));
+            add(new JLabel(friendlies.get(i).name()));
 
             JTextField currentHealthField = new JTextField();
             currentHealths[i] = currentHealthField;
             currentHealthField.putClientProperty("JComponent.roundRect", true);
-            currentHealthField.addKeyListener(new DieRollListener(friendlies.get(i).getMaximumHealth(), currentHealthField));
+            currentHealthField.addKeyListener(new DieRollListener(friendlies.get(i).maxHp(), currentHealthField));
             currentHealthField.addActionListener(e -> checkAllBoxesFilled(currentHealths));
 
             JTextField initiativeField = new JTextField();
@@ -113,7 +113,7 @@ public class FinalizeCombatantsPopup extends JFrame {
             initiativesEnemies = new JTextField[enemies.size()];
 
             for (int i = 0; i < enemies.size(); i++) {
-                add(new JLabel(enemies.get(i).getName()));
+                add(new JLabel(enemies.get(i).name()));
 
                 JTextField initiativeField = new JTextField();
                 initiativesEnemies[i] = initiativeField;

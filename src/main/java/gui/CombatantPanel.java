@@ -17,7 +17,7 @@ public class CombatantPanel extends JPanel {
 
         setLayout(new BorderLayout());
 
-        nameField = new JTextField(thisCombatant.getName());
+        nameField = new JTextField(thisCombatant.name());
         nameField.putClientProperty("JComponent.roundRect", true);
         nameField.setEditable(false);
         nameField.setEnabled(false);
@@ -25,7 +25,7 @@ public class CombatantPanel extends JPanel {
         healthBar = new JProgressBar();
         healthBar.putClientProperty("JComponent.roundRect", true);
         healthBar.setMinimum(0);
-        healthBar.setMaximum(thisCombatant.getMaximumHealth());
+        healthBar.setMaximum(thisCombatant.maxHp());
         healthBar.setStringPainted(true);
         update();
 
@@ -36,27 +36,27 @@ public class CombatantPanel extends JPanel {
     }
 
     public void update() {
-        if (thisCombatant.isEnemy() && thisCombatant.getLifeStatus().isConscious()) {
-            healthBar.setValue(thisCombatant.getMaximumHealth());
+        if (thisCombatant.isEnemy() && thisCombatant.lifeStatus().isConscious()) {
+            healthBar.setValue(thisCombatant.maxHp());
             healthBar.setForeground(new Color(122, 160, 245));
             healthBar.setString("?");
             return;
         }
-        if (!thisCombatant.getLifeStatus().isAlive()) {
+        if (!thisCombatant.lifeStatus().isAlive()) {
             healthBar.setValue(0);
             healthBar.setString("Dead :((");
             return;
         }
-        if (!thisCombatant.getLifeStatus().isConscious()) {
+        if (!thisCombatant.lifeStatus().isConscious()) {
             healthBar.setValue(0);
-            int successes = thisCombatant.getLifeStatus().getSuccesses();
-            int fails = thisCombatant.getLifeStatus().getFails();
+            int successes = thisCombatant.lifeStatus().getSuccesses();
+            int fails = thisCombatant.lifeStatus().getFails();
             String healthBarString = "Defeated (" + successes + "-" + fails + ")";
             healthBar.setString(healthBarString);
             return;
         }
         healthBar.setString(thisCombatant.getHealthString());
-        healthBar.setValue(thisCombatant.getCurrentHealth());
+        healthBar.setValue(thisCombatant.hp());
         healthBar.setForeground(thisCombatant.getHealthBarColor());
         healthBar.repaint();
     }

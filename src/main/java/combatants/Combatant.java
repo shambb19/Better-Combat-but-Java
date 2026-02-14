@@ -1,25 +1,57 @@
 package combatants;
 
+import damage.Spell;
+import damage.Weapon;
+
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 
 public class Combatant {
 
-    protected String name;
+    private String name;
 
-    protected int initiative;
+    private int initiative;
 
-    protected int armorClass;
-    protected boolean isEnemy;
-    protected int inspiration;
+    private int armorClass;
+    private boolean isEnemy;
+    private int inspiration;
+    private Stats stats;
 
-    protected int hpMax;
-    protected int hpCurrent;
-    protected LifeStatus lifeStatus = new LifeStatus();
+    private int hpMax;
+    private int hpCurrent;
+    private final LifeStatus lifeStatus = new LifeStatus();
 
-    protected JProgressBar healthBar;
+    private JProgressBar healthBar;
+
+    private ArrayList<Weapon> weapons = null;
+    private ArrayList<Spell> spells = null;
 
     public Combatant(String name, int hpMax, int armorClass, boolean isEnemy) {
+        defaultConstructor(name, hpMax, armorClass, isEnemy);
+    }
+
+    public Combatant(String name, int hpMax, int armorClass, boolean isEnemy,
+                     Stats stats
+    ) {
+        defaultConstructor(name, hpMax, armorClass, isEnemy);
+
+        this.stats = stats;
+    }
+
+    public Combatant(
+            String name, int hpMax, int armorClass, boolean isEnemy,
+            Stats stats, ArrayList<Weapon> weapons, ArrayList<Spell> spells
+    ) {
+        defaultConstructor(name, hpMax, armorClass, isEnemy);
+
+        this.stats = stats;
+
+        this.weapons = weapons;
+        this.spells = spells;
+    }
+
+    private void defaultConstructor(String name, int hpMax, int armorClass, boolean isEnemy) {
         this.name = name;
         this.hpMax = hpMax;
         this.armorClass = armorClass;
@@ -45,15 +77,11 @@ public class Combatant {
         hpCurrent = Math.min(hpMax, hpCurrent + healthRegained);
     }
 
-    public void setInitiative(int initiative) {
-        this.initiative = initiative;
-    }
-
-    public int getCurrentHealth() {
+    public int hp() {
         return hpCurrent;
     }
 
-    public int getMaximumHealth() {
+    public int maxHp() {
         return hpMax;
     }
 
@@ -95,7 +123,11 @@ public class Combatant {
         return initiative;
     }
 
-    public LifeStatus getLifeStatus() {
+    public void setInitiative(int initiative) {
+        this.initiative = initiative;
+    }
+
+    public LifeStatus lifeStatus() {
         return lifeStatus;
     }
 
@@ -103,29 +135,40 @@ public class Combatant {
         return isEnemy;
     }
 
-    public int getArmorClass() {
+    public int ac() {
         return armorClass;
+    }
+
+    public boolean hasWeapons() {
+        return weapons != null;
+    }
+
+    public ArrayList<Weapon> weapons() {
+        return weapons;
+    }
+
+    public boolean hasSpells() {
+        return spells != null;
+    }
+
+    public ArrayList<Spell> spells() {
+        return spells;
+    }
+
+    public Stats stats() {
+        return stats;
     }
 
     @Override
     public String toString() {
         String toString = name + "\n";
-        if (lifeStatus.isConscious()) {
-            if (isEnemy) {
-                toString += "Health: ?\n";
-            } else {
-                toString += "Health: " + getHealthString() + "\n";
-            }
-        } else if (lifeStatus.isAlive()) {
-            toString += "Unconscious (" + lifeStatus.getSuccesses() + " life saves, " + lifeStatus.getFails() + " fails)\n";
-        }
         toString += "Initiative: " + initiative + "\n";
         toString += "Inspirations Used: " + inspiration + "/2";
 
         return toString;
     }
 
-    public String getName() {
+    public String name() {
         return name;
     }
 
