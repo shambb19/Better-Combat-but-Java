@@ -16,6 +16,7 @@ public class ActionPanel extends JPanel {
 
     private final JTextArea turnInformation = new JTextArea();
     private final JProgressBar currentCombatantHealthBar;
+    private final JButton healButton;
 
     public ActionPanel() {
         queue = Main.queue;
@@ -34,7 +35,7 @@ public class ActionPanel extends JPanel {
         attackButton.putClientProperty("JButton.buttonType", "roundRect");
         attackButton.addActionListener(e -> new DamagePromptPopup().setVisible(true));
 
-        JButton healButton = new JButton("Heal");
+        healButton = new JButton("Heal");
         healButton.putClientProperty("JButton.buttonType", "roundRect");
         healButton.addActionListener(e -> new HealPromptPopup().setVisible(true));
 
@@ -100,5 +101,9 @@ public class ActionPanel extends JPanel {
         } else {
             currentCombatantHealthBar.setValue(mimic.getValue());
         }
+    }
+
+    public JButton getHealButton() {
+        return healButton;
     }
 }

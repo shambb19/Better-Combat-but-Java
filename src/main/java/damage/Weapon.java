@@ -45,6 +45,15 @@ public enum Weapon {
         return equals(Weapon.MANUAL);
     }
 
+    public static Weapon get(String name) {
+        for (Weapon weapon : values()) {
+            if (weapon.getName().equalsIgnoreCase(name)) {
+                return weapon;
+            }
+        }
+        return null;
+    }
+
     @Override
     public String toString() {
         return name;

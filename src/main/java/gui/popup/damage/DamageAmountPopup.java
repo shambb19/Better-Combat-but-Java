@@ -2,10 +2,12 @@ package gui.popup.damage;
 
 import combat.Main;
 import combatants.Combatant;
+import damage.Effect;
 import damage.Spell;
 import damage.Weapon;
 import gui.listener.DieRollListener;
 import gui.listener.IntegerFieldListener;
+import util.DeadEndMessage;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,6 +19,7 @@ public class DamageAmountPopup extends JFrame {
     private Weapon weapon;
     private Spell spell;
     private final boolean isManual;
+    private boolean isHalfDamage = false;
 
     private Combatant attacker;
     private final Combatant target;
@@ -33,10 +36,11 @@ public class DamageAmountPopup extends JFrame {
         construct();
     }
 
-    public DamageAmountPopup(Spell spell, Combatant target) {
+    public DamageAmountPopup(Spell spell, Combatant target, boolean isHalfDamage) {
         this.spell = spell;
         isManual = spell.isManual();
         this.target = target;
+        this.isHalfDamage = isHalfDamage;
         construct();
     }
 
@@ -100,9 +104,21 @@ public class DamageAmountPopup extends JFrame {
             add(new JLabel("+" + attacker.stats().mod(weapon.getMod()) + " from Stat Bonus"));
         }
 
+        if (isHalfDamage) {
+            add(new JLabel("Damage halved because attack failed (enter full value anyways)."));
+        }
+        if (target.isHexedBy(attacker)) {
+            add(new JLabel("+1d6 from Hex (enter below)"));
+        }
+
         if (!isManual) {
-            add(otherBonusDamageCheck);
-            add(otherBonusDamageField);
+            if (!target.isHexedBy(attacker)) {
+                add(otherBonusDamageCheck);
+                add(otherBonusDamageField);
+            } else {
+                add(otherBonusDamageField);
+                otherBonusDamageField.setEnabled(true);
+            }
         }
 
         add(okButton);
@@ -119,6 +135,8 @@ public class DamageAmountPopup extends JFrame {
                 return;
             }
             target.damage(calculateTotal());
+            attacker.putEffect(target, spell.getEffect());
+            if (spell != null && spell.getEffect().equals(Effect.ILLUSION)) DeadEndMessage.informIllusion(target);
             dispose();
         });
         return button;
@@ -135,6 +153,14 @@ public class DamageAmountPopup extends JFrame {
         }
         if (isManual) {
             return mainDamage;
+        }
+
+        if (spell != null) {
+            int total = mainDamage + bonusDamage;
+            if (isHalfDamage) {
+                return total / 2;
+            }
+            return total;
         }
         return mainDamage +
                 bonusDamage +

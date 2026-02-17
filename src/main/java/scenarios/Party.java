@@ -6,6 +6,7 @@ import combatants.Stats;
 import damage.Weapon;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public enum Party {
@@ -51,7 +52,8 @@ public enum Party {
                     Spell.PHANTASMAL_FORCE
             )
     ),
-    BRAXTON("Braxton", 27, 16, false,
+    BRAXTON("Braxton", 27, 16, false),
+    DREXEN("Drexen", 27, 16, false,
             new Stats(
                     10, false,
                     10, false,
@@ -71,7 +73,6 @@ public enum Party {
                     Spell.ELDRITCH_BLAST
             )
     ),
-    DREXEN("Drexen", 27, 16, false),
     ROLLO("Rollo", 27, 16, false),
     EZEKIEL("Ezekiel", 27, 16, false),
     ENZA("Enza", 30, 18, false);
@@ -106,8 +107,17 @@ public enum Party {
 
     public Combatant get() {
         if (weapons != null || spells != null) {
-            ArrayList<Weapon> weaponsList = (weapons != null) ? new ArrayList<>(weapons) : null;
-            ArrayList<Spell> spellsList = (spells != null) ? new ArrayList<>(spells) : null;
+            ArrayList<Weapon> weaponsList = null;
+            ArrayList<Spell> spellsList = null;
+
+            if (weapons != null) {
+                weaponsList = new ArrayList<>(weapons);
+                weaponsList.sort(Comparator.naturalOrder());
+            }
+            if (spells != null) {
+                spellsList = new ArrayList<>(spells);
+                spellsList.sort(Comparator.naturalOrder());
+            }
 
             return new Combatant(name, hpMax, armorClass, isEnemy, stats, weaponsList, spellsList);
         }

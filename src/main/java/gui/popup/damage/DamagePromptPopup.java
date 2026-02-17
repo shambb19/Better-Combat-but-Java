@@ -2,11 +2,12 @@ package gui.popup.damage;
 
 import combat.Main;
 import combatants.Combatant;
+import damage.Effect;
 import damage.Spell;
 import combatants.Stats;
 import damage.Weapon;
 import gui.listener.DieRollListener;
-import util.InputPrompts;
+import util.DeadEndMessage;
 import util.Locators;
 
 import javax.swing.*;
@@ -17,10 +18,10 @@ import java.util.Objects;
 public class DamagePromptPopup extends JFrame {
 
     private JPanel activeSpellPanel;
-    private JPanel spellPanelContainer; // NEW: container to swap panels safely
+    private JPanel spellPanelContainer;
 
     private enum SpellPanel {MANUAL, HIT, SAVE}
-    private SpellPanel activeSpellPanelName = SpellPanel.HIT; // DEFAULT INIT
+    private SpellPanel activeSpellPanelName = SpellPanel.HIT;
 
     private JComboBox<String> targetComboBoxWeapon;
     private JComboBox<String> targetComboBoxSpell;
@@ -68,11 +69,17 @@ public class DamagePromptPopup extends JFrame {
         targetComboBoxWeapon = getTargetComboBox();
         weaponComboBox = getWeaponBox();
 
+        String hitString = "Roll to Hit";
+        if (currentCombatant.isPoisoned()) {
+            hitString += " (with Disadvantage)";
+        }
+        hitString += ":";
+
         panel.add(new JLabel("Target:"));
         panel.add(targetComboBoxWeapon);
         panel.add(new JLabel("Weapon:"));
         panel.add(weaponComboBox);
-        panel.add(new JLabel("Roll to Hit:"));
+        panel.add(new JLabel(hitString));
         panel.add(weaponInputField);
         panel.add(getOkButton(true));
 
@@ -254,15 +261,22 @@ public class DamagePromptPopup extends JFrame {
         if (success) {
             new DamageAmountPopup(weapon, target).setVisible(true);
         } else {
-            InputPrompts.informAttackFail();
+            DeadEndMessage.informAttackFail();
         }
     }
 
     private void registerAttack(Combatant target, boolean success, Spell spell) {
         if (success) {
-            new DamageAmountPopup(spell, target).setVisible(true);
+            if (spell.equals(Spell.HEX)) {
+                Main.queue.getCurrentCombatant().putEffect(target, Effect.BONUS_DAMAGE);
+                DeadEndMessage.informHexSuccess(target);
+            } else {
+                new DamageAmountPopup(spell, target, false).setVisible(true);
+            }
+        } else if (spell.dealsHalfDamageAnyways()) {
+            new DamageAmountPopup(spell, target, true).setVisible(true);
         } else {
-            InputPrompts.informAttackFail();
+            DeadEndMessage.informAttackFail();
         }
     }
 }

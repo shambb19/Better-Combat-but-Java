@@ -35,9 +35,11 @@ public class PlayerQueue {
         } else {
             currentCombatant = enemies.getNext();
         }
-        if (!currentCombatant.lifeStatus().isAlive()) {
+        if (!currentCombatant.lifeStatus().isConscious()) {
             endTurnAndGetNext();
         }
+        currentCombatant.endDealtEffects();
+        currentCombatant.setCanReact(true);
         return currentCombatant;
     }
 

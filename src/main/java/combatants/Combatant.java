@@ -1,5 +1,6 @@
 package combatants;
 
+import damage.Effect;
 import damage.Spell;
 import damage.Weapon;
 
@@ -10,18 +11,23 @@ import java.util.ArrayList;
 public class Combatant {
 
     private String name;
+    private boolean isEnemy;
 
     private int initiative;
+    private int inspiration;
+
+    private final DealtEffectsList dealtEffects = new DealtEffectsList(this);
+    private final ArrayList<Combatant> hexedByList = new ArrayList<>();
+    private boolean isHealBlocked;
+    private boolean isReactionsBlocked;
+    private boolean isPoisoned;
 
     private int armorClass;
-    private boolean isEnemy;
-    private int inspiration;
     private Stats stats;
 
     private int hpMax;
     private int hpCurrent;
     private final LifeStatus lifeStatus = new LifeStatus();
-
     private JProgressBar healthBar;
 
     private ArrayList<Weapon> weapons = null;
@@ -159,17 +165,104 @@ public class Combatant {
         return stats;
     }
 
+    public boolean canHeal() {
+        return !isHealBlocked;
+    }
+
+    public void setCanHeal(boolean canHeal) {
+        isHealBlocked = !canHeal;
+    }
+
+    public boolean isPoisoned() {
+        return isPoisoned;
+    }
+
+    public void setPoisoned(boolean isPoisoned) {
+        this.isPoisoned = isPoisoned;
+    }
+
+    public boolean canReact() {
+        return !isReactionsBlocked;
+    }
+
+    public void setCanReact(boolean canReact) {
+        isReactionsBlocked = !canReact;
+    }
+
+    public void putEffect(Combatant target, Effect dealtEffect) {
+        dealtEffects.put(target, dealtEffect);
+    }
+
+    public void endDealtEffects() {
+        dealtEffects.clear();
+    }
+
+    public boolean isHexedBy(Combatant hexer) {
+        return hexedByList.contains(hexer);
+    }
+
+    public void setHexedBy(Combatant hexer) {
+        hexedByList.add(hexer);
+    }
+
     @Override
     public String toString() {
-        String toString = name + "\n";
-        toString += "Initiative: " + initiative + "\n";
-        toString += "Inspirations Used: " + inspiration + "/2";
+        StringBuilder toString = new StringBuilder(name + "\n");
+        toString.append("Initiative: ").append(initiative).append("\n")
+                .append("Inspirations Used: ").append(inspiration).append("/2\n");
 
-        return toString;
+        if (isPoisoned) {
+            toString.append("Poisoned\n");
+        }
+        if (isHealBlocked) {
+            toString.append("Healing Disabled\n");
+        }
+        hexedByList.forEach(hexer -> toString.append("Hexed by ").append(hexer.name()));
+
+        return toString.toString();
     }
 
     public String name() {
         return name;
+    }
+
+    static class DealtEffectsList {
+
+        private final Combatant parentCombatant;
+
+        private final ArrayList<Combatant> poisonedCombatants = new ArrayList<>();
+        private final ArrayList<Combatant> healBlockedCombatants = new ArrayList<>();
+
+        public DealtEffectsList(Combatant parentCombatant) {
+            this.parentCombatant = parentCombatant;
+        }
+
+        public void put(Combatant target, Effect effect) {
+            if (effect == null) {
+                return;
+            }
+            switch (effect) {
+                case Effect.POISON -> {
+                    poisonedCombatants.add(target);
+                    target.setPoisoned(true);
+                }
+                case Effect.HEAL_BLOCK -> {
+                    healBlockedCombatants.add(target);
+                    target.setCanHeal(false);
+                }
+                case Effect.BONUS_DAMAGE -> target.setHexedBy(parentCombatant);
+                case Effect.NO_REACTIONS -> target.setCanReact(false);
+            }
+        }
+
+        public void clear() {
+            poisonedCombatants.forEach(combatant -> combatant.setPoisoned(false));
+            healBlockedCombatants.forEach(combatant -> combatant.setCanHeal(true));
+
+            poisonedCombatants.clear();
+            healBlockedCombatants.clear();
+        }
+
     }
 
 }
