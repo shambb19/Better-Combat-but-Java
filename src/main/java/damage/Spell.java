@@ -73,6 +73,20 @@ public enum Spell {
         return effect.equals(Effect.HALF_DAMAGE);
     }
 
+    public static Spell get(String nameRaw) {
+        String[] nameWords = nameRaw.split("_");
+        StringBuilder name = new StringBuilder();
+        for (String word : nameWords) {
+            name.append(word).append(" ");
+        }
+        for (Spell spell : values()) {
+            if (spell.getName().equalsIgnoreCase(name.toString())) {
+                return spell;
+            }
+        }
+        return null;
+    }
+
     @Override
     public String toString() {
         return name;

@@ -6,22 +6,27 @@ public class Stats {
 
     public enum stat {STR, DEX, CON, INT, WIS, CHA}
 
-    private final int strength;
-    private final int dexterity;
-    private final int constitution;
-    private final int intelligence;
-    private final int wisdom;
-    private final int charisma;
+    private int strength;
+    private int dexterity;
+    private int constitution;
+    private int intelligence;
+    private int wisdom;
+    private int charisma;
 
-    private final boolean strProf;
-    private final boolean dexProf;
-    private final boolean conProf;
-    private final boolean intProf;
-    private final boolean wisProf;
-    private final boolean chaProf;
+    private boolean strProf;
+    private boolean dexProf;
+    private boolean conProf;
+    private boolean intProf;
+    private boolean wisProf;
+    private boolean chaProf;
 
     private final int proficiencyBonus;
     private final stat spellCastingAbilityModifier;
+
+    public Stats(int proficiencyBonus, stat spellCastingAbilityModifier) {
+        this.proficiencyBonus = proficiencyBonus;
+        this.spellCastingAbilityModifier = spellCastingAbilityModifier;
+    }
 
     public Stats(int STR, boolean strProf,
                  int DEX, boolean dexProf,
@@ -47,6 +52,35 @@ public class Stats {
 
         this.proficiencyBonus = proficiencyBonus;
         this.spellCastingAbilityModifier = spellCastingAbilityModifier;
+    }
+
+    public void put(stat stat, int value, boolean prof) {
+        switch (stat) {
+            case STR -> {
+                strength = value;
+                strProf = prof;
+            }
+            case DEX -> {
+                dexterity = value;
+                dexProf = prof;
+            }
+            case CON ->  {
+                constitution = value;
+                conProf = prof;
+            }
+            case INT -> {
+                intelligence = value;
+                intProf = prof;
+            }
+            case WIS -> {
+                wisdom = value;
+                wisProf = prof;
+            }
+            case CHA -> {
+                charisma = value;
+                chaProf = prof;
+            }
+        }
     }
 
     public int prof() {

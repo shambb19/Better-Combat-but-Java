@@ -251,7 +251,6 @@ public class Combatant {
                     target.setCanHeal(false);
                 }
                 case Effect.BONUS_DAMAGE -> target.setHexedBy(parentCombatant);
-                case Effect.NO_REACTIONS -> target.setCanReact(false);
             }
         }
 

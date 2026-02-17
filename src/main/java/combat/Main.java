@@ -1,6 +1,7 @@
 package combat;
 
 import com.formdev.flatlaf.intellijthemes.FlatHighContrastIJTheme;
+import gui.popup.FileInputPopup;
 import gui.popup.FinalizeCombatantsPopup;
 import gui.Menu;
 import scenarios.Battle;
@@ -18,8 +19,7 @@ public class Main {
 
     public static void main(String[] args) {
         FlatHighContrastIJTheme.setup();
-        promptBattleScenario();
-        new FinalizeCombatantsPopup().setVisible(true);
+        new FileInputPopup().setVisible(true);
     }
 
     public static void start() {
@@ -28,15 +28,6 @@ public class Main {
             menu = new Menu();
             menu.setVisible(true);
         });
-    }
-
-    public static void promptBattleScenario() {
-        Battle battle = null;
-        while (battle == null) {
-            String name = JOptionPane.showInputDialog(menu, "Enter Battle Scenario Name", "Better Combat but Java", JOptionPane.QUESTION_MESSAGE);
-            battle = Battle.get(name);
-        }
-        Main.battle = battle;
     }
 
     public static void checkWinConditions() {
