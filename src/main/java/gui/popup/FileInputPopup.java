@@ -21,14 +21,14 @@ public class FileInputPopup extends JFrame {
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setLayout(new GridLayout(0, 1));
 
-        partySelectPanel = new FileSelectPanel();
-        battleSelectPanel = new FileSelectPanel();
+        partySelectPanel = new FileSelectPanel(this);
+        battleSelectPanel = new FileSelectPanel(this);
 
         JButton okButton = new JButton("Confirm");
         okButton.putClientProperty("JButton.buttonType", "roundRect");
         okButton.addActionListener(e -> runOkButton());
 
-        add(new JLabel("(Optional) Upload preset party character:"));
+        add(new JLabel("(Optional) Upload preset party:"));
         add(partySelectPanel);
         add(new JLabel("(Required) Upload battle scenario:"));
         add(battleSelectPanel);
@@ -70,7 +70,7 @@ public class FileInputPopup extends JFrame {
         private final JButton uploadButton;
         private File selectedFile;
 
-        public FileSelectPanel() {
+        public FileSelectPanel(JFrame parent) {
             setLayout(new FlowLayout());
 
             uploadLabel = new JLabel("No file selected");
@@ -88,6 +88,7 @@ public class FileInputPopup extends JFrame {
                     selectedFile = fileChooser.getSelectedFile();
                     uploadButton.setText("Select a different file");
                     uploadLabel.setText(fileChooser.getSelectedFile().getName());
+                    parent.pack();
                 }
             });
 
