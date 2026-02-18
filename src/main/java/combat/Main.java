@@ -2,9 +2,7 @@ package combat;
 
 import com.formdev.flatlaf.intellijthemes.FlatHighContrastIJTheme;
 import gui.popup.FileInputPopup;
-import gui.popup.FinalizeCombatantsPopup;
 import gui.Menu;
-import scenarios.Battle;
 
 import javax.swing.*;
 
@@ -24,7 +22,7 @@ public class Main {
 
     public static void start() {
         SwingUtilities.invokeLater(()-> {
-            queue = new PlayerQueue(battle.getFriendlies(), battle.getEnemies());
+            queue = new PlayerQueue(battle.friendlies(), battle.enemies());
             menu = new Menu();
             menu.setVisible(true);
         });

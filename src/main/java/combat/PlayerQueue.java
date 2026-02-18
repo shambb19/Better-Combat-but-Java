@@ -19,9 +19,9 @@ public class PlayerQueue {
         this.enemies = new TeamQueue(enemies);
 
         if (friendlies.getFirst().getInitiative() >= enemies.getFirst().getInitiative()) {
-            currentCombatant = friendlies.getFirst();
+            currentCombatant = this.friendlies.getNext();
         } else {
-            currentCombatant = enemies.getFirst();
+            currentCombatant = this.enemies.getNext();
         }
     }
 
@@ -39,7 +39,6 @@ public class PlayerQueue {
             endTurnAndGetNext();
         }
         currentCombatant.endDealtEffects();
-        currentCombatant.setCanReact(true);
         return currentCombatant;
     }
 
@@ -59,7 +58,7 @@ public class PlayerQueue {
         public TeamQueue(List<Combatant> combatants) {
             addAll(combatants);
             currentCombatant = getFirst();
-            currentIndex = 0;
+            currentIndex = -1;
         }
 
         public Combatant getNext() {

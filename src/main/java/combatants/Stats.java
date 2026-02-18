@@ -28,32 +28,6 @@ public class Stats {
         this.spellCastingAbilityModifier = spellCastingAbilityModifier;
     }
 
-    public Stats(int STR, boolean strProf,
-                 int DEX, boolean dexProf,
-                 int CON, boolean conProf,
-                 int INT, boolean intProf,
-                 int WIS, boolean wisProf,
-                 int CHA, boolean chaProf,
-                 int proficiencyBonus,
-                 stat spellCastingAbilityModifier) {
-        this.strength = STR;
-        this.dexterity = DEX;
-        this.constitution = CON;
-        this.intelligence = INT;
-        this.wisdom = WIS;
-        this.charisma = CHA;
-
-        this.strProf = strProf;
-        this.dexProf = dexProf;
-        this.conProf = conProf;
-        this.intProf = intProf;
-        this.wisProf = wisProf;
-        this.chaProf = chaProf;
-
-        this.proficiencyBonus = proficiencyBonus;
-        this.spellCastingAbilityModifier = spellCastingAbilityModifier;
-    }
-
     public void put(stat stat, int value, boolean prof) {
         switch (stat) {
             case STR -> {
@@ -83,6 +57,17 @@ public class Stats {
         }
     }
 
+    public boolean isProf(stat stat) {
+        return switch (stat) {
+            case STR -> strProf;
+            case DEX -> dexProf;
+            case CON -> conProf;
+            case INT -> intProf;
+            case WIS -> wisProf;
+            case CHA -> chaProf;
+        };
+    }
+
     public int prof() {
         return proficiencyBonus;
     }
@@ -108,8 +93,34 @@ public class Stats {
         };
     }
 
-    public int spellMod() {
+    public stat spellMod() {
+        return spellCastingAbilityModifier;
+    }
+
+    public int spellModVal() {
         return mod(spellCastingAbilityModifier);
+    }
+
+    public String spellModStr() {
+        return spellCastingAbilityModifier.name().toLowerCase();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder string = new StringBuilder("stats=");
+        for (stat stat : stat.values()) {
+            string.append(statString(stat));
+        }
+        return string.deleteCharAt(string.length() - 1).toString();
+    }
+
+    private String statString(stat stat) {
+        StringBuilder string = new StringBuilder(stat.name().toLowerCase());
+        string.append("(").append(stat);
+        if (isProf(stat)) {
+            string.append("+");
+        }
+        return string.append(")/").toString();
     }
 
 }

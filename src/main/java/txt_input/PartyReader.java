@@ -77,7 +77,7 @@ public class PartyReader {
                 case "spells" -> addSpells(spells, value);
             }
         }
-        return new Combatant(name, hp, ac, true, stats, weapons, spells);
+        return new Combatant(name, hp, ac, false, stats, weapons, spells);
     }
 
     private Stats getStats(String statLine, int prof, Stats.stat spellMod) {

@@ -2,7 +2,7 @@ package txt_input;
 
 import combat.Main;
 import combatants.Combatant;
-import scenarios.Battle;
+import combat.Battle;
 
 import javax.swing.*;
 import java.io.File;

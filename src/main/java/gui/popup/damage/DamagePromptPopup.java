@@ -7,13 +7,14 @@ import damage.Spell;
 import combatants.Stats;
 import damage.Weapon;
 import gui.listener.DieRollListener;
-import util.DeadEndMessage;
 import util.Locators;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Objects;
+
+import static util.Message.*;
 
 public class DamagePromptPopup extends JFrame {
 
@@ -238,7 +239,7 @@ public class DamagePromptPopup extends JFrame {
                         Stats.stat saveType =
                                 ((Spell) Objects.requireNonNull(spellComboBox.getSelectedItem())).getSaveType();
                         int saveDC = 8 +
-                                currentCombatant.stats().spellMod() +
+                                currentCombatant.stats().spellModVal() +
                                 currentCombatant.stats().mod(saveType);
 
                         int opponentRoll =
@@ -261,7 +262,7 @@ public class DamagePromptPopup extends JFrame {
         if (success) {
             new DamageAmountPopup(weapon, target).setVisible(true);
         } else {
-            DeadEndMessage.informAttackFail();
+            informAttackFail();
         }
     }
 
@@ -269,14 +270,14 @@ public class DamagePromptPopup extends JFrame {
         if (success) {
             if (spell.equals(Spell.HEX)) {
                 Main.queue.getCurrentCombatant().putEffect(target, Effect.BONUS_DAMAGE);
-                DeadEndMessage.informHexSuccess(target);
+                informHexSuccess(target);
             } else {
                 new DamageAmountPopup(spell, target, false).setVisible(true);
             }
         } else if (spell.dealsHalfDamageAnyways()) {
             new DamageAmountPopup(spell, target, true).setVisible(true);
         } else {
-            DeadEndMessage.informAttackFail();
+            informAttackFail();
         }
     }
 }

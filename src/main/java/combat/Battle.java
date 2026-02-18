@@ -1,30 +1,14 @@
-package scenarios;
+package combat;
 
 import combatants.Combatant;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
-public class Battle {
-
-    private final ArrayList<Combatant> friendlies;
-    private final ArrayList<Combatant> enemies;
-
-    public Battle(ArrayList<Combatant> friendlies, ArrayList<Combatant> enemies) {
-        this.friendlies = friendlies;
-        this.enemies = enemies;
-    }
-
-    public ArrayList<Combatant> getFriendlies() {
-        return friendlies;
-    }
-
-    public ArrayList<Combatant> getEnemies() {
-        return enemies;
-    }
+public record Battle(ArrayList<Combatant> friendlies, ArrayList<Combatant> enemies) {
 
     public boolean areAllEnemiesDefeated() {
-        for (Combatant combatant : getEnemies()) {
+        for (Combatant combatant : enemies()) {
             if (combatant.lifeStatus().isConscious()) {
                 return false;
             }
@@ -33,7 +17,7 @@ public class Battle {
     }
 
     public boolean areAllFriendliesDefeated() {
-        for (Combatant combatant : getFriendlies()) {
+        for (Combatant combatant : friendlies()) {
             if (combatant.lifeStatus().isConscious()) {
                 return false;
             }
@@ -44,7 +28,7 @@ public class Battle {
     public String percentToVictory() {
         int healthSumMax = 0;
         int healthSumFinal = 0;
-        for (Combatant enemy : getEnemies()) {
+        for (Combatant enemy : enemies()) {
             healthSumMax += enemy.maxHp();
             healthSumFinal += enemy.hp();
         }
@@ -54,7 +38,7 @@ public class Battle {
 
     public String getFinalHealths() {
         StringBuilder string = new StringBuilder();
-        for (Combatant partyMember : getFriendlies()) {
+        for (Combatant partyMember : friendlies()) {
             string.append(partyMember.name()).append(": ");
             if (partyMember.lifeStatus().isConscious()) {
                 string.append(partyMember.getHealthString()).append("\n");

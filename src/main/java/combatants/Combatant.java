@@ -12,6 +12,7 @@ public class Combatant {
 
     private String name;
     private boolean isEnemy;
+    private final boolean isNPC;
 
     private int initiative;
     private int inspiration;
@@ -19,7 +20,6 @@ public class Combatant {
     private final DealtEffectsList dealtEffects = new DealtEffectsList(this);
     private final ArrayList<Combatant> hexedByList = new ArrayList<>();
     private boolean isHealBlocked;
-    private boolean isReactionsBlocked;
     private boolean isPoisoned;
 
     private int armorClass;
@@ -35,14 +35,7 @@ public class Combatant {
 
     public Combatant(String name, int hpMax, int armorClass, boolean isEnemy) {
         defaultConstructor(name, hpMax, armorClass, isEnemy);
-    }
-
-    public Combatant(String name, int hpMax, int armorClass, boolean isEnemy,
-                     Stats stats
-    ) {
-        defaultConstructor(name, hpMax, armorClass, isEnemy);
-
-        this.stats = stats;
+        isNPC = true;
     }
 
     public Combatant(
@@ -55,6 +48,8 @@ public class Combatant {
 
         this.weapons = weapons;
         this.spells = spells;
+
+        isNPC = false;
     }
 
     private void defaultConstructor(String name, int hpMax, int armorClass, boolean isEnemy) {
@@ -181,14 +176,6 @@ public class Combatant {
         this.isPoisoned = isPoisoned;
     }
 
-    public boolean canReact() {
-        return !isReactionsBlocked;
-    }
-
-    public void setCanReact(boolean canReact) {
-        isReactionsBlocked = !canReact;
-    }
-
     public void putEffect(Combatant target, Effect dealtEffect) {
         dealtEffects.put(target, dealtEffect);
     }
@@ -220,6 +207,35 @@ public class Combatant {
         hexedByList.forEach(hexer -> toString.append("Hexed by ").append(hexer.name()));
 
         return toString.toString();
+    }
+
+    public ArrayList<String> toTxt() {
+        ArrayList<String> txt = new ArrayList<>();
+        txt.add("{");
+        txt.add("name=" + name);
+        txt.add("hp=" + hpMax);
+        txt.add("ac=" + armorClass);
+
+        if (isNPC) {
+            txt.add("prof=" + stats.prof());
+            if (stats.spellMod() != null) {
+                txt.add("spellMod=" + stats.spellModStr());
+            }
+            txt.add(stats.toString());
+            if (weapons != null) {
+                StringBuilder weaponStr = new StringBuilder("weapons=");
+                weapons.forEach(weapon -> weaponStr.append(weapon.getName()).append("/"));
+                txt.add(weaponStr.toString());
+            }
+            if (spells != null) {
+                StringBuilder spellStr = new StringBuilder("spells=");
+                spells.forEach(spell -> spellStr.append(spell.getName()).append("/"));
+                txt.add(spellStr.toString());
+            }
+        }
+
+        txt.add("}");
+        return txt;
     }
 
     public String name() {
