@@ -7,12 +7,13 @@ import damage.Spell;
 import damage.Weapon;
 import gui.listener.DieRollListener;
 import gui.listener.IntegerFieldListener;
-import util.DeadEndMessage;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+
+import static util.Message.informIllusion;
 
 public class DamageAmountPopup extends JFrame {
 
@@ -136,7 +137,9 @@ public class DamageAmountPopup extends JFrame {
             }
             target.damage(calculateTotal());
             attacker.putEffect(target, spell.getEffect());
-            if (spell != null && spell.getEffect().equals(Effect.ILLUSION)) DeadEndMessage.informIllusion(target);
+            if (spell != null && spell.getEffect().equals(Effect.ILLUSION)) {
+                informIllusion(target);
+            }
             dispose();
         });
         return button;

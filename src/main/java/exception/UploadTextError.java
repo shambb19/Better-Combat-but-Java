@@ -6,7 +6,7 @@ import javax.swing.*;
 
 public class UploadTextError extends RuntimeException {
 
-    public enum cause {STATS};
+    public enum cause {STATS}
 
     private static final String statHelpMessage = "Remember that stats should be in the following format: " +
             "str(x)/dex(x+)/con(x)/int(x)/wis(x)/cha(x+) where x represents the stat value and + " +

@@ -7,27 +7,18 @@ import java.util.ArrayList;
 
 public class Locators {
 
-    public static Combatant locateCombatant(ArrayList<Combatant> team, String target) {
-        for (Combatant combatant : team) {
-            if (combatant.name().equals(target)) {
-                return combatant;
-            }
-        }
-        return null;
-    }
-
     public static ArrayList<Combatant> getTargetList(boolean isForDamage) {
         if (Main.queue.getCurrentCombatant().isEnemy()) {
             if (isForDamage) {
-                return Main.battle.getFriendlies();
+                return Main.battle.friendlies();
             } else {
-                return Main.battle.getEnemies();
+                return Main.battle.enemies();
             }
         }
         if (isForDamage) {
-            return Main.battle.getEnemies();
+            return Main.battle.enemies();
         } else {
-            return Main.battle.getFriendlies();
+            return Main.battle.friendlies();
         }
     }
 

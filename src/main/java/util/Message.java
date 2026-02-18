@@ -5,7 +5,7 @@ import combatants.Combatant;
 
 import javax.swing.*;
 
-public class DeadEndMessage {
+public class Message {
 
     public static void informAttackFail() {
         JOptionPane.showMessageDialog(

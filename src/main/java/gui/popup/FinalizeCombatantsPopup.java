@@ -27,7 +27,7 @@ public class FinalizeCombatantsPopup extends JFrame {
         add(new JLabel("Current HP"));
         add(new JLabel("Initiative Roll"));
 
-        friendlies = Main.battle.getFriendlies();
+        friendlies = Main.battle.friendlies();
 
         currentHealths = new JTextField[friendlies.size()];
         initiatives = new JTextField[friendlies.size()];
@@ -108,7 +108,7 @@ public class FinalizeCombatantsPopup extends JFrame {
             add(new JLabel("Enemy"));
             add(new JLabel("Initiative Roll"));
 
-            enemies = Main.battle.getEnemies();
+            enemies = Main.battle.enemies();
 
             initiativesEnemies = new JTextField[enemies.size()];
 

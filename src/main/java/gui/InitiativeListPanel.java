@@ -15,9 +15,9 @@ public class InitiativeListPanel extends JPanel {
         setLayout(new GridLayout(0, 1));
 
         add(new JLabel("Belligerent Enemies"));
-        addPanels(Main.battle.getEnemies());
+        addPanels(Main.battle.enemies());
         add(new JLabel("Party and Allies"));
-        addPanels(Main.battle.getFriendlies());
+        addPanels(Main.battle.friendlies());
     }
 
     private void addPanels(ArrayList<Combatant> combatants) {
