@@ -50,7 +50,7 @@ public class DamagePromptPopup extends JFrame {
         add(getMainPanel());
 
         pack();
-        setLocationRelativeTo(null);
+        setLocationRelativeTo(Main.menu);
     }
 
     private JTabbedPane getMainPanel() {
@@ -133,8 +133,8 @@ public class DamagePromptPopup extends JFrame {
             }
         }
 
-        box.addItem(Spell.MANUAL_SAVE);
         box.addItem(Spell.MANUAL_HIT);
+        box.addItem(Spell.MANUAL_SAVE);
 
         box.addActionListener(e -> switchSpellPanel((Spell) box.getSelectedItem()));
 
@@ -146,10 +146,10 @@ public class DamagePromptPopup extends JFrame {
 
         spellPanelContainer.removeAll();
 
-        if (selected.hasSave() || selected.equals(Spell.MANUAL_HIT)) {
+        if (selected.hasSave()) {
             activeSpellPanel = getSpellPanelSave();
             activeSpellPanelName = SpellPanel.SAVE;
-        } else if (selected.isManual()) {
+        } else if (selected.equals(Spell.MANUAL_SAVE)) {
             activeSpellPanel = getSpellPanelManual();
             activeSpellPanelName = SpellPanel.MANUAL;
         } else {
@@ -195,7 +195,11 @@ public class DamagePromptPopup extends JFrame {
     private JComboBox<String> getTargetComboBox() {
         JComboBox<String> comboBox = new JComboBox<>();
         comboBox.putClientProperty("JComponent.roundRect", true);
-        targetList.forEach(target -> comboBox.addItem(target.name()));
+        targetList.forEach(target -> {
+            if (target.lifeStatus().isConscious()) {
+                comboBox.addItem(target.name());
+            }
+        });
         return comboBox;
     }
 
@@ -261,6 +265,7 @@ public class DamagePromptPopup extends JFrame {
     private void registerAttack(Combatant target, boolean success, Weapon weapon) {
         if (success) {
             new DamageAmountPopup(weapon, target).setVisible(true);
+            Main.queue.getCurrentCombatant().logHit();
         } else {
             informAttackFail();
         }
@@ -274,8 +279,10 @@ public class DamagePromptPopup extends JFrame {
             } else {
                 new DamageAmountPopup(spell, target, false).setVisible(true);
             }
+            Main.queue.getCurrentCombatant().logHit();
         } else if (spell.dealsHalfDamageAnyways()) {
             new DamageAmountPopup(spell, target, true).setVisible(true);
+            Main.queue.getCurrentCombatant().logMiss();
         } else {
             informAttackFail();
         }

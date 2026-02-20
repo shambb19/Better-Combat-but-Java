@@ -20,6 +20,7 @@ public class FileInputPopup extends JFrame {
         setTitle("Input Battle Scenario");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setLayout(new GridLayout(0, 1));
+        setAlwaysOnTop(true);
 
         partySelectPanel = new FileSelectPanel(this);
         battleSelectPanel = new FileSelectPanel(this);
@@ -50,9 +51,13 @@ public class FileInputPopup extends JFrame {
             return;
         }
         ArrayList<Combatant> party = null;
+        PartyReader partyReader;
+        boolean isNeedsHpCur = true;
         if (partySelectPanel.getFile() != null) {
             try {
-                party = new PartyReader(partySelectPanel.getFile()).getCombatants();
+                partyReader = new PartyReader(partySelectPanel.getFile());
+                party = partyReader.getCombatants();
+                isNeedsHpCur = !partyReader.isHpRecorded();
             } catch (IOException e) {
                 return;
             }
@@ -60,7 +65,7 @@ public class FileInputPopup extends JFrame {
         try {
             Main.battle = new BattleReader(battleSelectPanel.getFile(), party).getBattle();
         } catch (IOException ignored) {}
-        new FinalizeCombatantsPopup().setVisible(true);
+        new FinalizeCombatantsPopup(isNeedsHpCur).setVisible(true);
         dispose();
     }
 

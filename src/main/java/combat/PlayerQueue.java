@@ -1,6 +1,7 @@
 package combat;
 
 import combatants.Combatant;
+import util.Message;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,9 +37,12 @@ public class PlayerQueue {
             currentCombatant = enemies.getNext();
         }
         if (!currentCombatant.lifeStatus().isConscious()) {
+            int saveRoll = Message.getDeathSaveRoll();
+            currentCombatant.lifeStatus().rollDeathSave(saveRoll);
             endTurnAndGetNext();
         }
         currentCombatant.endDealtEffects();
+        Main.menu.update();
         return currentCombatant;
     }
 

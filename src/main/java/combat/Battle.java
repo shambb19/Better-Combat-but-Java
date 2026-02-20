@@ -36,19 +36,4 @@ public record Battle(ArrayList<Combatant> friendlies, ArrayList<Combatant> enemi
         return new DecimalFormat("##").format(100 * percentDecimal) + "%";
     }
 
-    public String getFinalHealths() {
-        StringBuilder string = new StringBuilder();
-        for (Combatant partyMember : friendlies()) {
-            string.append(partyMember.name()).append(": ");
-            if (partyMember.lifeStatus().isConscious()) {
-                string.append(partyMember.getHealthString()).append("\n");
-            } else if (partyMember.lifeStatus().isAlive()) {
-                string.append("Unconscious\n");
-            } else {
-                string.append("Dead\n");
-            }
-        }
-        return string.toString();
-    }
-
 }

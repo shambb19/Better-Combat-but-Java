@@ -7,7 +7,8 @@ public enum Effect {
     POISON,
     ILLUSION,
     BONUS_DAMAGE,
-    SPLIT_ATTACK(3); // multiple rays that can be targeted towards different or same target
+    SPLIT_ATTACK(3),
+    NONE; // multiple rays that can be targeted towards different or same target
 
     private final int numRays;
 

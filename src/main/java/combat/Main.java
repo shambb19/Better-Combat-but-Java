@@ -1,6 +1,7 @@
 package combat;
 
 import com.formdev.flatlaf.intellijthemes.FlatHighContrastIJTheme;
+import gui.popup.CombatEndPopup;
 import gui.popup.FileInputPopup;
 import gui.Menu;
 
@@ -32,25 +33,8 @@ public class Main {
         if (!(battle.areAllEnemiesDefeated() || battle.areAllFriendliesDefeated())) {
             return;
         }
-        if (battle.areAllFriendliesDefeated()) {
-            JOptionPane.showMessageDialog(
-                    menu,
-                    "Your party has been defeated. " +
-                            "You were " + battle.percentToVictory() + " of the way to victory. " +
-                            "Ask your DM for further instructions.",
-                    TITLE,
-                    JOptionPane.WARNING_MESSAGE
-            );
-        } else {
-            JOptionPane.showMessageDialog(
-                    menu,
-                    "You are victorious! Here are your final healths:\n" + battle.getFinalHealths() +
-                            "Happy campaigning!",
-                    TITLE,
-                    JOptionPane.INFORMATION_MESSAGE
-            );
-        }
-        System.exit(0);
+        boolean isVictory = battle.areAllEnemiesDefeated();
+        new CombatEndPopup(isVictory).setVisible(true);
     }
 
 }

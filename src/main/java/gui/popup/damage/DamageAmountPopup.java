@@ -17,14 +17,12 @@ import static util.Message.informIllusion;
 
 public class DamageAmountPopup extends JFrame {
 
-    private Weapon weapon;
-    private Spell spell;
     private final boolean isManual;
     private boolean isHalfDamage = false;
-
-    private Combatant attacker;
     private final Combatant target;
-
+    private Weapon weapon;
+    private Spell spell;
+    private Combatant attacker;
     private JTextField mainDamageField;
     private JCheckBox otherBonusDamageCheck;
     private JTextField otherBonusDamageField;
@@ -51,6 +49,7 @@ public class DamageAmountPopup extends JFrame {
         setTitle("Damage Amount");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setLayout(new GridLayout(0, 1));
+        setAlwaysOnTop(true);
 
         String damageString;
         int numDice;
@@ -125,7 +124,7 @@ public class DamageAmountPopup extends JFrame {
         add(okButton);
 
         pack();
-        setLocationRelativeTo(null);
+        setLocationRelativeTo(Main.menu);
     }
 
     private JButton getOkButton() {
@@ -136,10 +135,15 @@ public class DamageAmountPopup extends JFrame {
                 return;
             }
             target.damage(calculateTotal());
-            attacker.putEffect(target, spell.getEffect());
-            if (spell != null && spell.getEffect().equals(Effect.ILLUSION)) {
-                informIllusion(target);
+            if (spell != null) {
+                attacker.putEffect(target, spell.getEffect());
+                if (spell.getEffect().equals(Effect.ILLUSION)) {
+                    informIllusion(target);
+                }
             }
+            attacker.logDamageDealt(calculateTotal());
+            Main.menu.update();
+            Main.checkWinConditions();
             dispose();
         });
         return button;

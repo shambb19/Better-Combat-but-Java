@@ -77,6 +77,7 @@ public class ActionPanel extends JPanel {
             if (isExcessInspiration) {
                 int excessInspirationRoll = Dice.promptValueFromRoll("Inspiration", 1, 4);
                 Main.menu.logInspiration(excessInspirationRoll);
+                Main.queue.getCurrentCombatant().logInspirationRoll(excessInspirationRoll);
             }
         });
 

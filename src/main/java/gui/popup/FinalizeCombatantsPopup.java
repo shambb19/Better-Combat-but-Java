@@ -10,49 +10,74 @@ import java.util.ArrayList;
 
 public class FinalizeCombatantsPopup extends JFrame {
 
-    JTextField[] currentHealths;
-    JTextField[] initiatives;
+    private final JTextField[] currentHealths;
+    private final JTextField[] initiatives;
+    private final JTextField[] initiativesEnemies;
 
-    ArrayList<Combatant> friendlies;
+    private final ArrayList<Combatant> friendlies;
+    private final ArrayList<Combatant> enemies;
 
-    JButton okButton;
+    private final boolean isNeedsHpCur;
 
-    public FinalizeCombatantsPopup() {
+    public FinalizeCombatantsPopup(boolean isNeedsHpCur) {
+        this.isNeedsHpCur = isNeedsHpCur;
+
         setTitle("Finalize Combat Information");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setAlwaysOnTop(true);
         setLayout(new GridLayout(0, 3));
 
         add(new JLabel("Player"));
-        add(new JLabel("Current HP"));
         add(new JLabel("Initiative Roll"));
+        if (isNeedsHpCur) {
+            add(new JLabel("Current HP"));
+        } else {
+            add(new JLabel());
+        }
 
         friendlies = Main.battle.friendlies();
+        enemies = Main.battle.enemies();
 
         currentHealths = new JTextField[friendlies.size()];
         initiatives = new JTextField[friendlies.size()];
+        initiativesEnemies = new JTextField[enemies.size()];
+
+        addDivider();
 
         for (int i = 0; i < friendlies.size(); i++) {
-            add(new JLabel(friendlies.get(i).name()));
+            JTextField initiativeField = new JTextField();
+            initiatives[i] = initiativeField;
+            initiativeField.putClientProperty("JComponent.roundRect", true);
+            initiativeField.addKeyListener(new DieRollListener(20, initiativeField));
 
             JTextField currentHealthField = new JTextField();
             currentHealths[i] = currentHealthField;
             currentHealthField.putClientProperty("JComponent.roundRect", true);
             currentHealthField.addKeyListener(new DieRollListener(friendlies.get(i).maxHp(), currentHealthField));
-            currentHealthField.addActionListener(e -> checkAllBoxesFilled(currentHealths));
 
-            JTextField initiativeField = new JTextField();
-            initiatives[i] = initiativeField;
-            initiativeField.putClientProperty("JComponent.roundRect", true);
-            initiativeField.addKeyListener(new DieRollListener(20, initiativeField));
-            initiativeField.addActionListener(e -> checkAllBoxesFilled(initiatives));
-
-            add(currentHealthField);
+            add(new JLabel(friendlies.get(i).name()));
             add(initiativeField);
+            if (isNeedsHpCur) {
+                add(currentHealthField);
+            } else {
+                add(new JLabel());
+            }
         }
 
-        okButton = createOkButton();
-        add(okButton);
+        addDivider();
+
+        for (int i = 0; i < enemies.size(); i++) {
+            JTextField initiativeField = new JTextField();
+            initiativesEnemies[i] = initiativeField;
+            initiativeField.putClientProperty("JComponent.roundRect", true);
+            initiativeField.addKeyListener(new DieRollListener(20, initiativeField));
+
+            add(new JLabel(enemies.get(i).name()));
+            add(initiativeField);
+            add(new JLabel());
+        }
+
+        add(createOkButton());
 
         pack();
         setLocationRelativeTo(null);
@@ -64,89 +89,28 @@ public class FinalizeCombatantsPopup extends JFrame {
 
         button.addActionListener(e -> {
             for (int i = 0; i < friendlies.size(); i++) {
-                int updatedHealth = Integer.parseInt(currentHealths[i].getText());
+                if (isNeedsHpCur) {
+                    int updatedHealth = Integer.parseInt(currentHealths[i].getText());
+                    friendlies.get(i).setHealth(updatedHealth);
+                }
                 int initiative = Integer.parseInt(initiatives[i].getText());
-                friendlies.get(i).setHealth(updatedHealth);
                 friendlies.get(i).setInitiative(initiative);
             }
-            new FinalizeEnemiesPopup().setVisible(true);
+            for (int i = 0; i < enemies.size(); i++) {
+                int initiative = Integer.parseInt(initiativesEnemies[i].getText());
+                enemies.get(i).setInitiative(initiative);
+            }
             dispose();
+            Main.start();
         });
 
         return button;
     }
 
-    private void checkAllBoxesFilled(JTextField[] checkedFields) {
-        boolean allBoxesCorrectlyFilled = true;
-        for (JTextField field : checkedFields) {
-            if (field.getText().isEmpty()) {
-                allBoxesCorrectlyFilled = false;
-            }
-            try {
-                Integer.parseInt(field.getText());
-            } catch (Exception ignored) {
-                allBoxesCorrectlyFilled = false;
-            }
+    private void addDivider() {
+        for (int i = 0; i < 3; i++) {
+            add(new JSeparator());
         }
-        okButton.setEnabled(allBoxesCorrectlyFilled);
-    }
-
-    class FinalizeEnemiesPopup extends JFrame {
-
-        ArrayList<Combatant> enemies;
-
-        JTextField[] initiativesEnemies;
-
-        JButton okButtonEnemies;
-
-        public FinalizeEnemiesPopup() {
-            setTitle("Finalize Combat Information");
-            setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-            setAlwaysOnTop(true);
-            setLayout(new GridLayout(0, 2));
-
-            add(new JLabel("Enemy"));
-            add(new JLabel("Initiative Roll"));
-
-            enemies = Main.battle.enemies();
-
-            initiativesEnemies = new JTextField[enemies.size()];
-
-            for (int i = 0; i < enemies.size(); i++) {
-                add(new JLabel(enemies.get(i).name()));
-
-                JTextField initiativeField = new JTextField();
-                initiativesEnemies[i] = initiativeField;
-                initiativeField.putClientProperty("JComponent.roundRect", true);
-                initiativeField.addKeyListener(new DieRollListener(20, initiativeField));
-                initiativeField.addActionListener(e -> checkAllBoxesFilled(initiativesEnemies));
-
-                add(initiativeField);
-            }
-
-            okButtonEnemies = createEnemyOKButton();
-            add(okButtonEnemies);
-
-            pack();
-            setLocationRelativeTo(null);
-        }
-
-        private JButton createEnemyOKButton() {
-            JButton button = new JButton("Confirm");
-            button.putClientProperty("JButton.buttonType", "roundRect");
-
-            button.addActionListener(e -> {
-                for (int i = 0; i < enemies.size(); i++) {
-                    int initiative = Integer.parseInt(initiativesEnemies[i].getText());
-                    enemies.get(i).setInitiative(initiative);
-                }
-                Main.start();
-                dispose();
-            });
-
-            return button;
-        }
-
     }
 
 }

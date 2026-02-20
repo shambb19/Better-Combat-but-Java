@@ -20,6 +20,8 @@ public class PartyReader {
     private final ArrayList<String> currentRead;
     private final ArrayList<Combatant> readCombatants;
 
+    private boolean isHpCurRecoded;
+
     public PartyReader(File party) throws IOException {
         allLines = new ArrayList<>(Files.readAllLines(party.toPath()));
         allLines.replaceAll(String::trim);
@@ -55,9 +57,9 @@ public class PartyReader {
     // in the document. Ideally, fix this later.
     private Combatant getCurrentRead() {
         String name = "name";
-        int hp = 20, ac = 10;
+        int hp = 20, hpCur = -1, ac = 10;
         Stats stats = null;
-        int prof = 2;
+        int level = 1;
         Stats.stat spellMod = null;
         ArrayList<Weapon> weapons = new ArrayList<>();
         ArrayList<Spell> spells = new ArrayList<>();
@@ -69,15 +71,29 @@ public class PartyReader {
             switch (identifier) {
                 case "name" -> name = value;
                 case "hp" -> hp = num(value);
+                case "hpCur" -> {
+                    hpCur = num(value);
+                    isHpCurRecoded = true;
+                }
                 case "ac" -> ac = num(value);
-                case "prof" -> prof = num(value);
+                case "level" -> level = num(value);
                 case "spellMod" -> spellMod = mod(value);
-                case "stats" -> stats = getStats(value, prof, spellMod);
+                case "stats" -> stats = getStats(value, level, spellMod);
                 case "weapons" -> addWeapons(weapons, value);
                 case "spells" -> addSpells(spells, value);
             }
         }
-        return new Combatant(name, hp, ac, false, stats, weapons, spells);
+        if (weapons.isEmpty()) {
+            weapons = null;
+        }
+        if (spells.isEmpty()) {
+            spells = null;
+        }
+        Combatant combatant = new Combatant(name, hp, ac, false, stats, weapons, spells);
+        if (hpCur >= 0) {
+            combatant.setHealth(hpCur);
+        }
+        return combatant;
     }
 
     private Stats getStats(String statLine, int prof, Stats.stat spellMod) {
@@ -111,7 +127,12 @@ public class PartyReader {
     private void addSpells(ArrayList<Spell> host, String line) {
         String[] spells = line.split("/");
         for (String spell : spells) {
-            host.add(Spell.get(spell));
+            Spell newSpell = Spell.get(spell);
+            if (newSpell != null) {
+                host.add(Spell.get(spell));
+            } else {
+                System.out.println(spell + " null");
+            }
         }
     }
 
@@ -129,6 +150,10 @@ public class PartyReader {
 
     private int num(String value) {
         return Integer.parseInt(value);
+    }
+
+    public boolean isHpRecorded() {
+        return isHpCurRecoded;
     }
 
 }

@@ -21,6 +21,7 @@ public class HealPromptPopup extends JFrame {
         setTitle("Enter Heal Information");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setLayout(new GridLayout(0, 1));
+        setAlwaysOnTop(true);
 
         targetList = Locators.getTargetList(false);
 
@@ -44,7 +45,7 @@ public class HealPromptPopup extends JFrame {
         add(getOkButton());
 
         pack();
-        setLocationRelativeTo(null);
+        setLocationRelativeTo(Main.menu);
     }
 
     private JButton getOkButton() {
@@ -56,11 +57,15 @@ public class HealPromptPopup extends JFrame {
                 JOptionPane.showMessageDialog(Main.menu, "Select a target.", Main.TITLE, JOptionPane.WARNING_MESSAGE);
                 return;
             }
+            int healAmount;
             if (fullHealButton.isSelected()) {
-                target.heal(target.maxHp());
+                healAmount = target.maxHp();
             } else {
-                target.heal(Integer.parseInt(healAmountInputField.getText()));
+                healAmount = Integer.parseInt(healAmountInputField.getText());
             }
+            target.heal(healAmount);
+            Main.queue.getCurrentCombatant().logHealGiven(healAmount);
+
             Main.menu.update();
             dispose();
         });

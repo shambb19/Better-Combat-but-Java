@@ -23,8 +23,18 @@ public class Stats {
     private final int proficiencyBonus;
     private final stat spellCastingAbilityModifier;
 
-    public Stats(int proficiencyBonus, stat spellCastingAbilityModifier) {
-        this.proficiencyBonus = proficiencyBonus;
+    public Stats(int level, stat spellCastingAbilityModifier) {
+        if (level < 5) {
+            proficiencyBonus = 2;
+        } else if (level < 9) {
+            proficiencyBonus = 3;
+        } else if (level < 13) {
+            proficiencyBonus = 4;
+        } else if (level < 17) {
+            proficiencyBonus = 5;
+        } else {
+            proficiencyBonus = 6;
+        }
         this.spellCastingAbilityModifier = spellCastingAbilityModifier;
     }
 
@@ -55,6 +65,17 @@ public class Stats {
                 chaProf = prof;
             }
         }
+    }
+
+    public int get(stat stat) {
+        return switch (stat) {
+            case STR -> strength;
+            case DEX -> dexterity;
+            case CON -> constitution;
+            case INT -> intelligence;
+            case WIS -> wisdom;
+            case CHA -> charisma;
+        };
     }
 
     public boolean isProf(stat stat) {
@@ -116,7 +137,7 @@ public class Stats {
 
     private String statString(stat stat) {
         StringBuilder string = new StringBuilder(stat.name().toLowerCase());
-        string.append("(").append(stat);
+        string.append("(").append(get(stat));
         if (isProf(stat)) {
             string.append("+");
         }

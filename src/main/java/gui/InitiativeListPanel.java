@@ -31,6 +31,7 @@ public class InitiativeListPanel extends JPanel {
 
     public void refresh() {
         combatantPanels.forEach(CombatantPanel::update);
+        combatantPanels.forEach(CombatantPanel::repaint);
         updateActiveCombatant();
     }
 

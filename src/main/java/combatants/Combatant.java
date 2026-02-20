@@ -14,24 +14,25 @@ public class Combatant {
     private boolean isEnemy;
     private final boolean isNPC;
 
-    private int initiative;
-    private int inspiration;
+    private int initiative, inspiration, inspirationRolls;
 
     private final DealtEffectsList dealtEffects = new DealtEffectsList(this);
     private final ArrayList<Combatant> hexedByList = new ArrayList<>();
-    private boolean isHealBlocked;
-    private boolean isPoisoned;
+    private boolean isHealBlocked, isPoisoned;
 
     private int armorClass;
+    private int level;
     private Stats stats;
 
-    private int hpMax;
-    private int hpCurrent;
+    private int hpMax, hpCurrent;
     private final LifeStatus lifeStatus = new LifeStatus();
     private JProgressBar healthBar;
 
     private ArrayList<Weapon> weapons = null;
     private ArrayList<Spell> spells = null;
+
+    private int totalDamageDealt, totalHealsGiven, totalHealsReceived;
+    private int totalAttackSuccesses, totalAttackFails;
 
     public Combatant(String name, int hpMax, int armorClass, boolean isEnemy) {
         defaultConstructor(name, hpMax, armorClass, isEnemy);
@@ -60,6 +61,13 @@ public class Combatant {
 
         hpCurrent = hpMax;
         inspiration = 0;
+
+        totalDamageDealt = 0;
+        totalHealsGiven = 0;
+        totalHealsReceived = 0;
+
+        totalAttackSuccesses = 0;
+        totalAttackFails = 0;
     }
 
     public boolean useInspirationAndCheckExcess() {
@@ -76,6 +84,7 @@ public class Combatant {
 
     public void heal(int healthRegained) {
         hpCurrent = Math.min(hpMax, hpCurrent + healthRegained);
+        totalHealsReceived += healthRegained;
     }
 
     public int hp() {
@@ -136,6 +145,10 @@ public class Combatant {
         return isEnemy;
     }
 
+    public boolean isNPC() {
+        return isNPC;
+    }
+
     public int ac() {
         return armorClass;
     }
@@ -192,6 +205,54 @@ public class Combatant {
         hexedByList.add(hexer);
     }
 
+    public void logDamageDealt(int dmgAmount) {
+        totalDamageDealt += dmgAmount;
+    }
+
+    public int getTotalDamageDealt() {
+        return totalDamageDealt;
+    }
+
+    public void logHealGiven(int healAmount) {
+        totalHealsGiven += healAmount;
+    }
+
+    public int getTotalHealsGiven() {
+        return totalHealsGiven;
+    }
+
+    public int getTotalHealsReceived() {
+        return totalHealsReceived;
+    }
+
+    public void logHit() {
+        totalAttackSuccesses++;
+    }
+
+    public int getTotalAttackSuccesses() {
+        return totalAttackSuccesses;
+    }
+
+    public void logMiss() {
+        totalAttackFails++;
+    }
+
+    public int getTotalAttackFails() {
+        return totalAttackFails;
+    }
+
+    public void logInspirationRoll(int inspirationRoll) {
+        this.inspirationRolls += inspirationRoll;
+    }
+
+    public int getInspirationRolls() {
+        return inspirationRolls;
+    }
+
+    public void levelUp() {
+        level++;
+    }
+
     @Override
     public String toString() {
         StringBuilder toString = new StringBuilder(name + "\n");
@@ -214,10 +275,11 @@ public class Combatant {
         txt.add("{");
         txt.add("name=" + name);
         txt.add("hp=" + hpMax);
+        txt.add("hpCur=" + hpCurrent);
         txt.add("ac=" + armorClass);
 
-        if (isNPC) {
-            txt.add("prof=" + stats.prof());
+        if (!isNPC) {
+            txt.add("level=" + level);
             if (stats.spellMod() != null) {
                 txt.add("spellMod=" + stats.spellModStr());
             }
@@ -229,7 +291,7 @@ public class Combatant {
             }
             if (spells != null) {
                 StringBuilder spellStr = new StringBuilder("spells=");
-                spells.forEach(spell -> spellStr.append(spell.getName()).append("/"));
+                spells.forEach(spell -> spellStr.append(spell.getNameRoot()).append("/"));
                 txt.add(spellStr.toString());
             }
         }
