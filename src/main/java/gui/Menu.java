@@ -37,6 +37,8 @@ public class Menu extends JFrame {
         actionPanel.updateTurnInformation();
         actionPanel.copyHealthBar(Main.queue.getCurrentCombatant().getHealthBar());
         actionPanel.getHealButton().setEnabled(Main.queue.getCurrentCombatant().canHeal());
+
+        Main.checkWinConditions();
     }
 
 }

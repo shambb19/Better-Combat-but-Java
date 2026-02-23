@@ -28,14 +28,14 @@ public class Combatant {
     private final LifeStatus lifeStatus = new LifeStatus();
     private JProgressBar healthBar;
 
-    private ArrayList<Weapon> weapons = null;
-    private ArrayList<Spell> spells = null;
+    private ArrayList<Weapon> weapons;
+    private ArrayList<Spell> spells;
 
     private int totalDamageDealt, totalHealsGiven, totalHealsReceived;
     private int totalAttackSuccesses, totalAttackFails;
 
     public Combatant(String name, int hpMax, int armorClass, boolean isEnemy) {
-        defaultConstructor(name, hpMax, armorClass, isEnemy);
+        defaultConstructor(name, hpMax, armorClass, isEnemy, null, null);
         isNPC = true;
     }
 
@@ -43,17 +43,15 @@ public class Combatant {
             String name, int hpMax, int armorClass, boolean isEnemy,
             Stats stats, ArrayList<Weapon> weapons, ArrayList<Spell> spells
     ) {
-        defaultConstructor(name, hpMax, armorClass, isEnemy);
+        defaultConstructor(name, hpMax, armorClass, isEnemy, weapons, spells);
 
         this.stats = stats;
-
-        this.weapons = weapons;
-        this.spells = spells;
 
         isNPC = false;
     }
 
-    private void defaultConstructor(String name, int hpMax, int armorClass, boolean isEnemy) {
+    private void defaultConstructor(String name, int hpMax, int armorClass, boolean isEnemy,
+                                    ArrayList<Weapon> weapons, ArrayList<Spell> spells) {
         this.name = name;
         this.hpMax = hpMax;
         this.armorClass = armorClass;
@@ -68,6 +66,19 @@ public class Combatant {
 
         totalAttackSuccesses = 0;
         totalAttackFails = 0;
+
+        this.weapons = new ArrayList<>();
+        if (weapons != null) {
+            this.weapons.addAll(weapons);
+        }
+        this.weapons.add(Weapon.MANUAL);
+
+        this.spells = new ArrayList<>();
+        if (spells != null) {
+            this.spells.addAll(spells);
+        }
+        this.spells.add(Spell.MANUAL_HIT);
+        this.spells.add(Spell.MANUAL_SAVE);
     }
 
     public boolean useInspirationAndCheckExcess() {
@@ -153,16 +164,8 @@ public class Combatant {
         return armorClass;
     }
 
-    public boolean hasWeapons() {
-        return weapons != null;
-    }
-
     public ArrayList<Weapon> weapons() {
         return weapons;
-    }
-
-    public boolean hasSpells() {
-        return spells != null;
     }
 
     public ArrayList<Spell> spells() {
@@ -255,6 +258,10 @@ public class Combatant {
 
     @Override
     public String toString() {
+        return name;
+    }
+
+    public String actionList() {
         StringBuilder toString = new StringBuilder(name + "\n");
         toString.append("Initiative: ").append(initiative).append("\n")
                 .append("Inspirations Used: ").append(inspiration).append("/2\n");

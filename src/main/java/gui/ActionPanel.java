@@ -85,7 +85,7 @@ public class ActionPanel extends JPanel {
     }
 
     public void updateTurnInformation() {
-        turnInformation.setText(queue.getCurrentCombatant().toString());
+        turnInformation.setText(queue.getCurrentCombatant().actionList());
         if (queue.getCurrentCombatant().isEnemy()) {
             turnInformation.setForeground(new Color(122, 160, 245));
         } else {

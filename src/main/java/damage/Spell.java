@@ -19,8 +19,8 @@ public enum Spell {
     SCORCHING_RAY("Scorching Ray", "scorching_ray", 2, 6, null, Effect.SPLIT_ATTACK),
     ELDRITCH_BLAST("Eldritch Blast", "eldritch_blast", 1, 10, null, Effect.NONE),
 
-    MANUAL_HIT("Manual with Hit Roll", "null", -1, -1, null, null),
-    MANUAL_SAVE("Manual with Save DC", "null", -1, -1, null, null);
+    MANUAL_HIT("Manual with Hit Roll", "null", -1, -1, null, Effect.NONE),
+    MANUAL_SAVE("Manual with Save DC", "null", -1, -1, null, Effect.NONE);
 
 
     private final String name;
