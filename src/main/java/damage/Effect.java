@@ -7,8 +7,9 @@ public enum Effect {
     POISON,
     ILLUSION,
     BONUS_DAMAGE,
+    //TODO add code for SPLIT_ATTACK (probably in gui.popup.damage.SpellPanel)
     SPLIT_ATTACK(3),
-    NONE; // multiple rays that can be targeted towards different or same target
+    NONE;
 
     private final int numRays;
 

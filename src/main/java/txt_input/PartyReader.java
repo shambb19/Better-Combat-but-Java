@@ -89,7 +89,7 @@ public class PartyReader {
         if (spells.isEmpty()) {
             spells = null;
         }
-        Combatant combatant = new Combatant(name, hp, ac, false, stats, weapons, spells);
+        Combatant combatant = new Combatant(name, hp, ac, stats, weapons, spells);
         if (hpCur >= 0) {
             combatant.setHealth(hpCur);
         }

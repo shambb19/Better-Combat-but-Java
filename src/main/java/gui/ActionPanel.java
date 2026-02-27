@@ -120,9 +120,9 @@ public class ActionPanel extends JPanel {
 
     private void setIcon(JButton button, icons name) {
         Image image = new ImageIcon(Objects.requireNonNull(getClass().getResource(buttonPics.get(name)))).getImage();
-        Image resized = image.getScaledInstance(130, 100, Image.SCALE_SMOOTH);
+        Image resized = image.getScaledInstance(80, 80, Image.SCALE_SMOOTH);
 
         button.setIcon(new ImageIcon(resized));
-        button.setPreferredSize(new Dimension(130, 100));
+        //button.setPreferredSize(new Dimension(130, 100));
     }
 }
