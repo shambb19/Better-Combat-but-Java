@@ -20,7 +20,7 @@ public class ActionPanel extends JPanel {
     private final JProgressBar currentCombatantHealthBar;
     private final JButton healButton;
 
-    private enum icons {ATTACK, HEAL, INSPIRATION, END_TURN};
+    private enum icons {ATTACK, HEAL, INSPIRATION, END_TURN}
     Map<icons, String> buttonPics = Map.of(
             icons.ATTACK, "/attack-button.png",
             icons.HEAL, "/heal-button.png",
@@ -42,10 +42,12 @@ public class ActionPanel extends JPanel {
 
         JButton attackButton = new JButton();
         attackButton.addActionListener(e -> new DamagePromptPopup().setVisible(true));
+        attackButton.setToolTipText("Attack");
         setIcon(attackButton, icons.ATTACK);
 
         healButton = new JButton();
         healButton.addActionListener(e -> new HealPromptPopup().setVisible(true));
+        healButton.setToolTipText("Heal");
         setIcon(healButton, icons.HEAL);
 
         add(turnInformation);
@@ -59,6 +61,7 @@ public class ActionPanel extends JPanel {
     private JButton getEndTurnButton() {
         JButton endTurnButton = new JButton();
         setIcon(endTurnButton, icons.END_TURN);
+        endTurnButton.setToolTipText("End Turn");
 
         endTurnButton.addActionListener(e -> {
             Combatant newCurrentCombatant = queue.endTurnAndGetNext();
@@ -78,6 +81,7 @@ public class ActionPanel extends JPanel {
     private JButton getInspirationUsedButton() {
         JButton inspirationButton = new JButton();
         setIcon(inspirationButton, icons.INSPIRATION);
+        inspirationButton.setToolTipText("Use Inspiration");
 
         inspirationButton.addActionListener(e -> {
             boolean isExcessInspiration = queue.getCurrentCombatant().useInspirationAndCheckExcess();
@@ -123,6 +127,5 @@ public class ActionPanel extends JPanel {
         Image resized = image.getScaledInstance(80, 80, Image.SCALE_SMOOTH);
 
         button.setIcon(new ImageIcon(resized));
-        //button.setPreferredSize(new Dimension(130, 100));
     }
 }
