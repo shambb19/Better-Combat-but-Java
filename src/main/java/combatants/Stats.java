@@ -23,6 +23,11 @@ public class Stats {
     private final int proficiencyBonus;
     private final stat spellCastingAbilityModifier;
 
+    /**
+     * Stores str, dex, con, int, wis, cha stats, skill proficiency,
+     * proficiency bonuses, spell casting ability modifiers, and calculates
+     * them on demand.
+     */
     public Stats(int level, stat spellCastingAbilityModifier) {
         if (level < 5) {
             proficiencyBonus = 2;
@@ -38,6 +43,10 @@ public class Stats {
         this.spellCastingAbilityModifier = spellCastingAbilityModifier;
     }
 
+    /**
+     * Sets the stat param to the value param.
+     * @param prof if true, logs proficiency in the stat param.
+     */
     public void put(stat stat, int value, boolean prof) {
         switch (stat) {
             case STR -> {
@@ -67,6 +76,9 @@ public class Stats {
         }
     }
 
+    /**
+     * @return the raw stat for the given param
+     */
     public int get(stat stat) {
         return switch (stat) {
             case STR -> strength;
@@ -78,6 +90,10 @@ public class Stats {
         };
     }
 
+    /**
+     * @return true if the combatant has proficiency in the
+     * stat param
+     */
     public boolean isProf(stat stat) {
         return switch (stat) {
             case STR -> strProf;
@@ -89,10 +105,17 @@ public class Stats {
         };
     }
 
+    /**
+     * @return the combatant's proficiency bonus
+     */
     public int prof() {
         return proficiencyBonus;
     }
 
+    /**
+     * @return the modifier for the stat param using the (stat - 10)/2 rounded down
+     * calculations, and adding proficiency bonus if present.
+     */
     @SuppressWarnings("all")
     public int mod(stat stat) {
         DoubleBinaryOperator modCalculator = (x, y) -> ((x - 10) / 2) + y;
@@ -114,18 +137,32 @@ public class Stats {
         };
     }
 
+    /**
+     * @return the stat field for which the combatant has a spell casting
+     * ability modifier
+     */
     public stat spellMod() {
         return spellCastingAbilityModifier;
     }
 
+    /**
+     * @return The value of the spell casting ability modifier
+     */
     public int spellModVal() {
         return mod(spellCastingAbilityModifier);
     }
 
+    /**
+     * For logging only
+     * @return string version of spellMod()
+     */
     public String spellModStr() {
         return spellCastingAbilityModifier.name().toLowerCase();
     }
 
+    /**
+     * @return the line of text to log stats in the .txt file for this combatant's party
+     */
     @Override
     public String toString() {
         StringBuilder string = new StringBuilder("stats=");
@@ -135,6 +172,9 @@ public class Stats {
         return string.deleteCharAt(string.length() - 1).toString();
     }
 
+    /**
+     * @return The string for this specific stat using stat(val<?>+<?>)
+     */
     private String statString(stat stat) {
         StringBuilder string = new StringBuilder(stat.name().toLowerCase());
         string.append("(").append(get(stat));

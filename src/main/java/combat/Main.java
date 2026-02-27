@@ -29,6 +29,9 @@ public class Main {
         });
     }
 
+    /**
+     * Opens a CombatEndPopup if one of the teams has been completely defeated.
+     */
     public static void checkWinConditions() {
         if (!(battle.areAllEnemiesDefeated() || battle.areAllFriendliesDefeated())) {
             return;

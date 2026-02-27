@@ -25,6 +25,9 @@ public record Battle(ArrayList<Combatant> friendlies, ArrayList<Combatant> enemi
         return true;
     }
 
+    /**
+     * @return the percent, rounded to the nearest whole number, of enemy hp successfully taken by the friendly team.
+     */
     public String percentToVictory() {
         int healthSumMax = 0;
         int healthSumFinal = 0;

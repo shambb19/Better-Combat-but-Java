@@ -28,6 +28,11 @@ public class DamageAmountPopup extends JFrame {
     private JTextField otherBonusDamageField;
     private JButton okButton;
 
+    /**
+     * Creates a popup to prompt damage dealt by a weapon.
+     * @param weapon the weapon used
+     * @param target the targeted combatant
+     */
     public DamageAmountPopup(Weapon weapon, Combatant target) {
         this.weapon = weapon;
         isManual = weapon.isManual();
@@ -35,6 +40,12 @@ public class DamageAmountPopup extends JFrame {
         construct();
     }
 
+    /**
+     * Creates a popup to prompt damage dealt by a spell.
+     * @param spell the spell used
+     * @param target the targeted combatant
+     * @param isHalfDamage true if the spell has the effect HALF_DAMAGE
+     */
     public DamageAmountPopup(Spell spell, Combatant target, boolean isHalfDamage) {
         this.spell = spell;
         isManual = spell.isManual();
@@ -43,6 +54,9 @@ public class DamageAmountPopup extends JFrame {
         construct();
     }
 
+    /**
+     * Separated constructor to avoid code redundancy.
+     */
     private void construct() {
         attacker = Main.queue.getCurrentCombatant();
 
@@ -127,6 +141,12 @@ public class DamageAmountPopup extends JFrame {
         setLocationRelativeTo(Main.menu);
     }
 
+    /**
+     * Ok Button handles the dealing of damage and the logging of any
+     * effects associated with the spell (if one was used in the attack,
+     * as well as updating the menu accordingly).
+     * @return the completed ok button
+     */
     private JButton getOkButton() {
         JButton button = new JButton("Deal Damage");
         button.putClientProperty("JButton.buttonType", "roundRect");
@@ -149,6 +169,12 @@ public class DamageAmountPopup extends JFrame {
         return button;
     }
 
+    /**
+     * @return the total damage dealt from the following sources: 1. The main damage roll,
+     * 2. The number (if present) in the bonus damage field, 3. Proficiency bonuses
+     * (assumed to be present for simplicity of code), 4. stat bonuses, 5.
+     * if the attacker has the HALF_DAMAGE de-buff.
+     */
     private int calculateTotal() {
         int mainDamage = 0;
         if (!mainDamageField.getText().isEmpty()) {
@@ -175,6 +201,10 @@ public class DamageAmountPopup extends JFrame {
                 attacker.stats().mod(weapon.getMod());
     }
 
+    /**
+     * Changes the text of the ok button to show the amount of damage that would be
+     * dealt if it is pressed at the current moment.
+     */
     private void updateButtonText() {
         int damage = calculateTotal();
         if (damage <= 0) {

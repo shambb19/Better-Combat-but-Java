@@ -13,6 +13,10 @@ public class DamagePromptPopup extends JFrame {
     private final ArrayList<Combatant> targetList;
     private final Combatant currentCombatant;
 
+    /**
+     * Creates the damage prompt popup, including a tab for
+     * spell input and one for weapon input.
+     */
     public DamagePromptPopup() {
         currentCombatant = Main.queue.getCurrentCombatant();
 

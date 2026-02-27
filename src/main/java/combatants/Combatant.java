@@ -34,22 +34,31 @@ public class Combatant {
     private int totalDamageDealt, totalHealsGiven, totalHealsReceived;
     private int totalAttackSuccesses, totalAttackFails;
 
+    /**
+     * NPC constructor
+     */
     public Combatant(String name, int hpMax, int armorClass, boolean isEnemy) {
         defaultConstructor(name, hpMax, armorClass, isEnemy, null, null);
         isNPC = true;
     }
 
+    /**
+     * PC Constructor; defaults isEnemy to false
+     */
     public Combatant(
-            String name, int hpMax, int armorClass, boolean isEnemy,
+            String name, int hpMax, int armorClass,
             Stats stats, ArrayList<Weapon> weapons, ArrayList<Spell> spells
     ) {
-        defaultConstructor(name, hpMax, armorClass, isEnemy, weapons, spells);
+        defaultConstructor(name, hpMax, armorClass, false, weapons, spells);
 
         this.stats = stats;
 
         isNPC = false;
     }
 
+    /**
+     * Separated from constructors to avoid code redundancy. Assigns default values.
+     */
     private void defaultConstructor(String name, int hpMax, int armorClass, boolean isEnemy,
                                     ArrayList<Weapon> weapons, ArrayList<Spell> spells) {
         this.name = name;
@@ -81,11 +90,19 @@ public class Combatant {
         this.spells.add(Spell.MANUAL_SAVE);
     }
 
+    /**
+     * Increments the number of inspirations used
+     * @return true if the combatant has used more than two inspirations
+     */
     public boolean useInspirationAndCheckExcess() {
         inspiration++;
         return inspiration > 2;
     }
 
+    /**
+     * Deals the param damage. Logs the combatant as unconscious if hp is 0.
+     * @param damage The input amount of damage
+     */
     public void damage(int damage) {
         hpCurrent = Math.max(0, hpCurrent - damage);
         if (hpCurrent == 0) {
@@ -93,6 +110,9 @@ public class Combatant {
         }
     }
 
+    /**
+     * Heals the combatant for the param amount without over-healing
+     */
     public void heal(int healthRegained) {
         hpCurrent = Math.min(hpMax, hpCurrent + healthRegained);
         totalHealsReceived += healthRegained;
@@ -110,6 +130,9 @@ public class Combatant {
         return (double) hpCurrent / hpMax;
     }
 
+    /**
+     * @return black if combatant is unconscious, green for safe hp, yellow for low hp, red for critical hp
+     */
     public Color getHealthBarColor() {
         if (!lifeStatus.isConscious()) {
             return Color.BLACK;
@@ -124,6 +147,9 @@ public class Combatant {
         }
     }
 
+    /**
+     * @return a string of the current and max hp's as an unsimplified fraction
+     */
     public String getHealthString() {
         return hpCurrent + "/" + hpMax;
     }
@@ -192,10 +218,20 @@ public class Combatant {
         this.isPoisoned = isPoisoned;
     }
 
+    /**
+     * Logs an effect dealt to the target param by the root combatant. Because most effects end
+     * on the attacker's next turn, these are handles in the static DealtEffectsList class in
+     * Combatant.
+     * @param target the combatant to whom the effect is dealt
+     * @param dealtEffect the effect dealt
+     */
     public void putEffect(Combatant target, Effect dealtEffect) {
         dealtEffects.put(target, dealtEffect);
     }
 
+    /**
+     * Ends all effects dealt by the root combatant (outer method)
+     */
     public void endDealtEffects() {
         dealtEffects.clear();
     }
@@ -261,6 +297,9 @@ public class Combatant {
         return name;
     }
 
+    /**
+     * @return the string used to display the combatant's stats in the ActionPanel JPanel.
+     */
     public String actionList() {
         StringBuilder toString = new StringBuilder(name + "\n");
         toString.append("Initiative: ").append(initiative).append("\n")
@@ -277,6 +316,9 @@ public class Combatant {
         return toString.toString();
     }
 
+    /**
+     * @return the lines of text for this combatant to be logged in a .txt file for its party.
+     */
     public ArrayList<String> toTxt() {
         ArrayList<String> txt = new ArrayList<>();
         txt.add("{");
@@ -318,10 +360,18 @@ public class Combatant {
         private final ArrayList<Combatant> poisonedCombatants = new ArrayList<>();
         private final ArrayList<Combatant> healBlockedCombatants = new ArrayList<>();
 
+        /**
+         * Creates a list of combatants poisoned and heal blocked by the root
+         * combatant. Other effects added later will also be logged here.
+         * @param parentCombatant the root combatant
+         */
         public DealtEffectsList(Combatant parentCombatant) {
             this.parentCombatant = parentCombatant;
         }
 
+        /**
+         * Logs the effect param as dealt to the target param.
+         */
         public void put(Combatant target, Effect effect) {
             if (effect == null) {
                 return;
@@ -339,6 +389,9 @@ public class Combatant {
             }
         }
 
+        /**
+         * Ends all effects dealt by the root combatant (inner method)
+         */
         public void clear() {
             poisonedCombatants.forEach(combatant -> combatant.setPoisoned(false));
             healBlockedCombatants.forEach(combatant -> combatant.setCanHeal(true));

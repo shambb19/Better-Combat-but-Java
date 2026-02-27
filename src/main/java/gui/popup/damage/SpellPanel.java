@@ -65,6 +65,15 @@ public class SpellPanel extends JPanel {
         return box;
     }
 
+    /**
+     * Switches the present method of inputting attack success based on the spell
+     * selected in the JComboBox param. For example, selecting a spell that has
+     * a save DC will switch to the dialog for entering a saving throw, and a spell
+     * with a hit throw will switch to that dialog. Spells not added into the system
+     * that have a saving throw will simply have a JCheckBox because when the players
+     * roll it, they will already know if the attack succeeds, so there is no point
+     * entering that into the program.
+     */
     @SuppressWarnings("all")
     private void logSpellChange(JComboBox<Spell> box) {
         variablePanel.removeAll();
@@ -81,6 +90,9 @@ public class SpellPanel extends JPanel {
         }
     }
 
+    /**
+     * Logic to switch to the component specified in logSpellChange
+     */
     private void putComponent(spellPanel spellPanel, String labelText) {
         JPanel panel = new JPanel(new FlowLayout());
 
@@ -102,6 +114,11 @@ public class SpellPanel extends JPanel {
         attackComponents.put(spellPanel.MANUAL_SAVE, new JCheckBox("Attack Succeeds?"));
     }
 
+    /**
+     * Button includes logic for compiling all information necessary to determine
+     * attack success and then passing it to the registerAttack method.
+     * @return the completed ok button
+     */
     @SuppressWarnings("all")
     private JButton getOkButton() {
         JButton button = new JButton("Confirm");
@@ -132,6 +149,15 @@ public class SpellPanel extends JPanel {
         return button;
     }
 
+    /**
+     * On a successful attack, prompts a damage popup, handles any remaining possible
+     * spell effects, and updates the menu accordingly. On a failed attack, prompts
+     * a dialog informing the user of such.
+     * @param target the targeted combatant
+     * @param success the conditions required for an attack to be successful; parameter
+     *                entered as a condition (i.e. roll>=ac), not raw boolean.
+     * @param spell the spell used
+     */
     private void registerAttack(Combatant target, boolean success, Spell spell) {
         if (success) {
             if (spell.equals(Spell.HEX)) {

@@ -51,6 +51,11 @@ public class WeaponPanel extends JPanel {
         return box;
     }
 
+    /**
+     * Button includes logic for compiling relevant hit rolls and armor classes before
+     * passing them to the registerAttack method.
+     * @return the completed ok button
+     */
     @SuppressWarnings("all")
     private JButton getOkButton() {
         JButton button = new JButton("Confirm");
@@ -69,6 +74,14 @@ public class WeaponPanel extends JPanel {
         return button;
     }
 
+    /**
+     * On a successful attack, prompts a damage popup and updates the menu accordingly.
+     * On a failed hit, prompts a dialog that informs the user of such.
+     * @param target the targeted combatant
+     * @param success the conditions required for an attack to be successful; parameter
+     *                entered as a condition (i.e. roll>=ac), not raw boolean.
+     * @param weapon the weapon used
+     */
     private void registerAttack(Combatant target, boolean success, Weapon weapon) {
         if (success) {
             new DamageAmountPopup(weapon, target).setVisible(true);

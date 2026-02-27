@@ -9,6 +9,8 @@ import util.Dice;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Map;
+import java.util.Objects;
 
 public class ActionPanel extends JPanel {
 
@@ -18,6 +20,14 @@ public class ActionPanel extends JPanel {
     private final JProgressBar currentCombatantHealthBar;
     private final JButton healButton;
 
+    private enum icons {ATTACK, HEAL, INSPIRATION, END_TURN};
+    Map<icons, String> buttonPics = Map.of(
+            icons.ATTACK, "/attack-button.png",
+            icons.HEAL, "/heal-button.png",
+            icons.INSPIRATION, "/inspiration-button.png",
+            icons.END_TURN, "/end-turn-button.png"
+    );
+
     public ActionPanel() {
         queue = Main.queue;
 
@@ -26,18 +36,17 @@ public class ActionPanel extends JPanel {
         updateTurnInformation();
 
         currentCombatantHealthBar = new JProgressBar();
-        currentCombatantHealthBar.putClientProperty("JComponent.roundRect", true);
         currentCombatantHealthBar.setStringPainted(true);
         currentCombatantHealthBar.setMinimum(0);
         copyHealthBar(queue.getCurrentCombatant().getHealthBar());
 
-        JButton attackButton = new JButton("Attack");
-        attackButton.putClientProperty("JButton.buttonType", "roundRect");
+        JButton attackButton = new JButton();
         attackButton.addActionListener(e -> new DamagePromptPopup().setVisible(true));
+        setIcon(attackButton, icons.ATTACK);
 
-        healButton = new JButton("Heal");
-        healButton.putClientProperty("JButton.buttonType", "roundRect");
+        healButton = new JButton();
         healButton.addActionListener(e -> new HealPromptPopup().setVisible(true));
+        setIcon(healButton, icons.HEAL);
 
         add(turnInformation);
         add(currentCombatantHealthBar);
@@ -48,8 +57,8 @@ public class ActionPanel extends JPanel {
     }
 
     private JButton getEndTurnButton() {
-        JButton endTurnButton = new JButton("End Turn");
-        endTurnButton.putClientProperty("JButton.buttonType", "roundRect");
+        JButton endTurnButton = new JButton();
+        setIcon(endTurnButton, icons.END_TURN);
 
         endTurnButton.addActionListener(e -> {
             Combatant newCurrentCombatant = queue.endTurnAndGetNext();
@@ -67,8 +76,8 @@ public class ActionPanel extends JPanel {
     }
 
     private JButton getInspirationUsedButton() {
-        JButton inspirationButton = new JButton("Use Inspiration");
-        inspirationButton.putClientProperty("JButton.buttonType", "roundRect");
+        JButton inspirationButton = new JButton();
+        setIcon(inspirationButton, icons.INSPIRATION);
 
         inspirationButton.addActionListener(e -> {
             boolean isExcessInspiration = queue.getCurrentCombatant().useInspirationAndCheckExcess();
@@ -91,6 +100,7 @@ public class ActionPanel extends JPanel {
         } else {
             turnInformation.setForeground(Color.WHITE);
         }
+        turnInformation.setEditable(false);
     }
 
     public void copyHealthBar(JProgressBar mimic) {
@@ -106,5 +116,13 @@ public class ActionPanel extends JPanel {
 
     public JButton getHealButton() {
         return healButton;
+    }
+
+    private void setIcon(JButton button, icons name) {
+        Image image = new ImageIcon(Objects.requireNonNull(getClass().getResource(buttonPics.get(name)))).getImage();
+        Image resized = image.getScaledInstance(130, 100, Image.SCALE_SMOOTH);
+
+        button.setIcon(new ImageIcon(resized));
+        button.setPreferredSize(new Dimension(130, 100));
     }
 }

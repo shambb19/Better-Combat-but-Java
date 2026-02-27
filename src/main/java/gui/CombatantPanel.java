@@ -55,6 +55,10 @@ public class CombatantPanel extends JPanel {
             healthBar.setString(healthBarString);
             return;
         }
+        if (thisCombatant.hp() == 0) {
+            healthBar.setValue(0);
+            healthBar.setString("Alive but down for the count");
+        }
         healthBar.setString(thisCombatant.getHealthString());
         healthBar.setValue(thisCombatant.hp());
         healthBar.setForeground(thisCombatant.getHealthBarColor());
