@@ -1,0 +1,110 @@
+package util;
+
+import main.CombatMain;
+import character_info.Combatant;
+import combat_menu.CombatMenu;
+
+import javax.swing.*;
+import java.io.IOException;
+
+public class Message {
+
+    public static int getDeathSaveRoll() {
+        int roll = -1;
+        boolean isFirstTry = true;
+        while (roll < 0) {
+            String text = "Roll Death Save for " + CombatMain.QUEUE.getCurrentCombatant().name() + ".";
+            if (!isFirstTry) {
+                text = "Please enter an integer. " + text;
+            }
+            String result = JOptionPane.showInputDialog(
+                    CombatMain.COMBAT_MENU,
+                    text,
+                    CombatMenu.TITLE,
+                    JOptionPane.QUESTION_MESSAGE
+            );
+            try {
+                roll = Integer.parseInt(result);
+            } catch (Exception ignored) {}
+        }
+        return roll;
+    }
+
+    public static void informAttackFail() {
+        JOptionPane.showMessageDialog(
+                CombatMain.COMBAT_MENU,
+                "The attack does not hit.",
+                CombatMenu.TITLE,
+                JOptionPane.INFORMATION_MESSAGE
+        );
+        CombatMain.QUEUE.getCurrentCombatant().logMiss();
+    }
+
+    public static void informHexSuccess(Combatant target) {
+        JOptionPane.showMessageDialog(
+                CombatMain.COMBAT_MENU,
+                target.name() + " has been successfully hexed. " +
+                        "They will now receive 1d6 additional damage from " +
+                        CombatMain.QUEUE.getCurrentCombatant().name() + ".",
+                CombatMenu.TITLE,
+                JOptionPane.INFORMATION_MESSAGE
+        );
+    }
+
+    public static void informIllusion(Combatant target) {
+        JOptionPane.showMessageDialog(
+                CombatMain.COMBAT_MENU,
+                target.name() + " is now under the illusion of your choice. " +
+                        "Remember that or something, idk.",
+                CombatMenu.TITLE,
+                JOptionPane.INFORMATION_MESSAGE
+        );
+    }
+
+    public static int confirmIf(String reason) {
+        return JOptionPane.showConfirmDialog(
+                CombatMain.COMBAT_MENU,
+                "Are you sure you would like to " + reason + "?",
+                CombatMenu.TITLE,
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.QUESTION_MESSAGE
+        );
+    }
+
+    public static void bye() {
+        JOptionPane.showMessageDialog(
+                CombatMain.COMBAT_MENU,
+                "Goodbye! Thanks for playing!",
+                CombatMenu.TITLE,
+                JOptionPane.INFORMATION_MESSAGE
+        );
+    }
+
+    public static void fileError(Exception error) {
+        JOptionPane.showMessageDialog(
+                null,
+                "There was an error reading this file: " + error.getMessage(),
+                CombatMenu.TITLE,
+                JOptionPane.ERROR_MESSAGE
+        );
+    }
+
+    public static void throwFileDownloadError(JPanel root, IOException error) {
+        JOptionPane.showMessageDialog(
+                root,
+                "There was an error downloading the file: " + error.getMessage(),
+                "File Download Error",
+                JOptionPane.ERROR_MESSAGE
+        );
+    }
+
+    public static void template(String text) {
+        JOptionPane.showMessageDialog(
+                CombatMain.COMBAT_MENU,
+                text,
+                CombatMenu.TITLE,
+                JOptionPane.INFORMATION_MESSAGE
+        );
+    }
+
+}
