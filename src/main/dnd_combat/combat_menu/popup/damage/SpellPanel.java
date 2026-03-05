@@ -62,7 +62,6 @@ public class SpellPanel extends JPanel {
         box.addItem(Spell.MANUAL_SAVE);
         box.addActionListener(e -> logSpellChange(box));
 
-        box.setSelectedItem(spells.getFirst());
         logSpellChange(box);
         return box;
     }

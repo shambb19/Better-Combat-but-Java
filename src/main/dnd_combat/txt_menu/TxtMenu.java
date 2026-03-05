@@ -2,6 +2,7 @@ package txt_menu;
 
 import character_info.Combatant;
 import scenario_info.Battle;
+import scenario_info.Scenario;
 import txt_input.BattleReader;
 
 import javax.swing.*;
@@ -12,20 +13,22 @@ public class TxtMenu extends JFrame {
 
     public static final String TITLE = "Campaign Creator";
 
-    private final CompletedCombatantLists completedList;
+    private final CompletedElementsList completedList;
 
     private final LowerSplitPane splitPane;
     private final CombatantInputPanel inputPanel;
+    private final ScenarioInputPanel scenarioPanel;
     private final DownloadDocDisplayPanel displayPanel;
 
     public TxtMenu() {
         initialize();
 
-        completedList = new CompletedCombatantLists(this);
+        completedList = new CompletedElementsList(this);
 
         inputPanel = new CombatantInputPanel(this);
+        scenarioPanel = new ScenarioInputPanel(completedList, this);
         displayPanel = new DownloadDocDisplayPanel();
-        splitPane = new LowerSplitPane(inputPanel, displayPanel);
+        splitPane = new LowerSplitPane(inputPanel, scenarioPanel, displayPanel);
 
         construct();
     }
@@ -35,11 +38,12 @@ public class TxtMenu extends JFrame {
 
         Battle battle = new BattleReader(input).getBattle();
 
-        completedList = new CompletedCombatantLists(battle, this);
+        completedList = new CompletedElementsList(battle, this);
 
         inputPanel = new CombatantInputPanel(this);
+        scenarioPanel = new ScenarioInputPanel(completedList, this);
         displayPanel = new DownloadDocDisplayPanel(battle);
-        splitPane = new LowerSplitPane(inputPanel, displayPanel);
+        splitPane = new LowerSplitPane(inputPanel, scenarioPanel, displayPanel);
 
         construct();
     }
@@ -69,20 +73,45 @@ public class TxtMenu extends JFrame {
         }
     }
 
+    public void editScenario(Scenario selection, boolean isNew) {
+        if (isNew) {
+            scenarioPanel.openNew();
+        } else {
+            scenarioPanel.openExisting(selection);
+        }
+    }
+
     public void logCombatantCompleted(Combatant combatant) {
-        System.out.println(combatant.toTxt());
         completedList.findAndLocateCopy(combatant);
         if (combatant.isEnemy()) {
             completedList.addEnemy(combatant);
         } else {
             completedList.addFriendly(combatant);
         }
-        displayPanel.addCombatant(combatant);
+        displayPanel.addElement(combatant);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
+    }
+
+    public void logScenarioCompleted(Scenario scenario) {
+        completedList.addScenario(scenario);
+        displayPanel.addElement(scenario);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
     }
 
     public void setInputPanelEnabled(boolean isEnabled) {
-        splitPane.setInputPanelEnabled(isEnabled);
+        if (isEnabled) {
+            splitPane.changeInputPanel(LowerSplitPane.COMBATANT_INPUT);
+        } else {
+            splitPane.changeInputPanel(LowerSplitPane.DISABLED);
+        }
+    }
+
+    public void setScenarioPanelEnabled(boolean isEnabled) {
+        if (isEnabled) {
+            splitPane.changeInputPanel(LowerSplitPane.SCENARIO_INPUT);
+        } else {
+            splitPane.changeInputPanel(LowerSplitPane.DISABLED);
+        }
     }
 
 }

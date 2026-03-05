@@ -14,12 +14,14 @@ public class SystemMain {
     private static void promptRunMode() {
         int result = JOptionPane.showOptionDialog(
                 null,
-                "Select a run version.",
+                "Select a run version. This looks weird with so little text so did you know " +
+                        "that when Viggo Mortensen kicked the orc helmet in The Two Towers he actually " +
+                        "broke his toe, and so his yell was real and not acting?",
                 "Better Combat but Java",
                 JOptionPane.DEFAULT_OPTION,
                 JOptionPane.QUESTION_MESSAGE,
                 new ImageIcon("/inspiration-button.png"),
-                new String[] {"Run Combat", "Create New Combat Scenario", "Edit Existing Scenario"},
+                new String[] {"Run Combat", "Create New Campaign", "Edit Existing Campaign"},
                 null
         );
         switch (result) {

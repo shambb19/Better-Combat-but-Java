@@ -1,90 +1,160 @@
 package combat_menu.popup;
 
-import main.CombatMain;
 import character_info.Combatant;
-import combat_menu.listener.DieRollListener;
+import main.CombatMain;
+import scenario_info.Scenario;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
+import java.util.HashMap;
 
 public class FinalizeCombatantsPopup extends JFrame {
 
-    private final JTextField[] initiatives;
-    private final JTextField[] initiativesEnemies;
+    private final HashMap<Combatant, JPanel> friendlies = new HashMap<>();
+    private final HashMap<Combatant, JPanel> enemies = new HashMap<>();
 
-    private final ArrayList<Combatant> friendlies;
-    private final ArrayList<Combatant> enemies;
+    private final JComboBox<Scenario> scenarioBox = new JComboBox<>();
+
+    private final JPanel partyContainer = new JPanel(new GridLayout(0, 1));
+    private final JPanel dynamicContainer = new JPanel(new GridLayout(0, 1));
 
     public FinalizeCombatantsPopup() {
         setTitle("Finalize Combat Information");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setAlwaysOnTop(true);
-        setLayout(new GridLayout(0, 2));
 
-        add(new JLabel("Combatant"));
-        add(new JLabel("Initiative Roll"));
+        setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
 
-        friendlies = CombatMain.BATTLE.friendlies();
-        enemies = CombatMain.BATTLE.enemies();
+        add(getHeaderPanel());
 
-        initiatives = new JTextField[friendlies.size()];
-        initiativesEnemies = new JTextField[enemies.size()];
+        add(setupScenarioBox());
+        add(new JSeparator());
 
-        addDivider();
+        add(new JLabel("--- PARTY ---"));
+        add(partyContainer);
+        initializeParty();
 
-        for (int i = 0; i < friendlies.size(); i++) {
-            JTextField initiativeField = new JTextField();
-            initiatives[i] = initiativeField;
-            initiativeField.putClientProperty("JComponent.roundRect", true);
-            initiativeField.addKeyListener(new DieRollListener(20, initiativeField));
+        add(dynamicContainer);
 
-            add(new JLabel(friendlies.get(i).name()));
-            add(initiativeField);
-        }
+        JButton button = new JButton("Confirm");
+        button.addActionListener(e -> logAndBegin());
+        add(button);
 
-        addDivider();
-
-        for (int i = 0; i < enemies.size(); i++) {
-            JTextField initiativeField = new JTextField();
-            initiativesEnemies[i] = initiativeField;
-            initiativeField.putClientProperty("JComponent.roundRect", true);
-            initiativeField.addKeyListener(new DieRollListener(20, initiativeField));
-
-            add(new JLabel(enemies.get(i).name()));
-            add(initiativeField);
-        }
-
-        add(createOkButton());
+        updateScenario((Scenario) scenarioBox.getSelectedItem());
 
         pack();
         setLocationRelativeTo(null);
     }
 
-    private JButton createOkButton() {
-        JButton button = new JButton("Confirm");
-        button.putClientProperty("JButton.buttonType", "roundRect");
+    private JPanel getHeaderPanel() {
+        JPanel panel = new JPanel(new GridLayout(1, 3));
+        panel.add(new JLabel("Combatant"));
+        panel.add(new JLabel("Initiative Roll"));
+        panel.add(new JLabel("Absent?"));
 
-        button.addActionListener(e -> {
-            for (int i = 0; i < friendlies.size(); i++) {
-                int initiative = Integer.parseInt(initiatives[i].getText());
-                friendlies.get(i).setInitiative(initiative);
-            }
-            for (int i = 0; i < enemies.size(); i++) {
-                int initiative = Integer.parseInt(initiativesEnemies[i].getText());
-                enemies.get(i).setInitiative(initiative);
-            }
-            dispose();
-            CombatMain.start();
-        });
-
-        return button;
+        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, panel.getPreferredSize().height));
+        return panel;
     }
 
-    private void addDivider() {
-        for (int i = 0; i < 2; i++) {
-            add(new JSeparator());
+    private JComboBox<Scenario> setupScenarioBox() {
+        CombatMain.BATTLE.scenarios().forEach(scenarioBox::addItem);
+
+        Scenario all = new Scenario("Everyone", CombatMain.BATTLE.friendlies(), CombatMain.BATTLE.enemies());
+        scenarioBox.addItem(all);
+        scenarioBox.setSelectedItem(all);
+
+        scenarioBox.addActionListener(e -> {
+            Scenario selected = (Scenario) scenarioBox.getSelectedItem();
+            if (selected != null) {
+                updateScenario(selected);
+            }
+        });
+
+        return scenarioBox;
+    }
+
+    private void initializeParty() {
+        CombatMain.BATTLE.friendlies().stream()
+                .filter(c -> !c.isNPC())
+                .forEach(pc -> {
+                    JPanel panel = pc.getCombatantPanel();
+                    friendlies.put(pc, panel);
+                    partyContainer.add(panel);
+                });
+    }
+
+    private void updateScenario(Scenario scenario) {
+        enemies.clear();
+        friendlies.entrySet().removeIf(entry -> entry.getKey().isNPC());
+
+        dynamicContainer.removeAll();
+
+        dynamicContainer.add(new JLabel("--- ALLIES ---"));
+        scenario.with().forEach(npc -> {
+            if (npc.isNPC()) {
+                JPanel panel = npc.getCombatantPanel();
+                friendlies.put(npc, panel);
+                dynamicContainer.add(panel);
+            }
+        });
+
+        dynamicContainer.add(new JSeparator());
+
+        dynamicContainer.add(new JLabel("--- ENEMIES ---"));
+        scenario.against().forEach(npc -> {
+            JPanel panel = npc.getCombatantPanel();
+            enemies.put(npc, panel);
+            dynamicContainer.add(panel);
+        });
+
+        revalidate();
+        repaint();
+        pack();
+    }
+
+    private int getInitiative(JPanel combatantPanel) {
+        String text = ((JTextField) combatantPanel.getComponent(1)).getText();
+        try {
+            return text.isEmpty() ? 0 : Integer.parseInt(text);
+        } catch (NumberFormatException e) {
+            return 0;
         }
     }
 
+    private boolean isAbsent(JPanel combatantPanel) {
+        Component component = combatantPanel.getComponent(2);
+        if (component instanceof JCheckBox box) {
+            return box.isSelected();
+        }
+        return false;
+    }
+
+    private void logAndBegin() {
+        CombatMain.BATTLE.friendlies().removeIf(combatant -> {
+            if (!friendlies.containsKey(combatant)) {
+                return true;
+            }
+
+            JPanel panel = friendlies.get(combatant);
+            if (isAbsent(panel)) {
+                return true;
+            }
+
+            combatant.setInitiative(getInitiative(panel));
+            return false;
+        });
+
+        CombatMain.BATTLE.enemies().removeIf(combatant -> {
+            if (!enemies.containsKey(combatant)) {
+                return true;
+            }
+
+            JPanel panel = enemies.get(combatant);
+            combatant.setInitiative(getInitiative(panel));
+            return false;
+        });
+
+        dispose();
+        CombatMain.start();
+    }
 }

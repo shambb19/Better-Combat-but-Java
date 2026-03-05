@@ -1,5 +1,6 @@
 package character_info;
 
+import combat_menu.listener.DieRollListener;
 import damage_implements.Effect;
 import damage_implements.Spell;
 import damage_implements.Weapon;
@@ -309,6 +310,28 @@ public class Combatant {
 
     public void levelUp() {
         level++;
+    }
+
+    public JPanel getCombatantPanel() {
+        JPanel panel = new JPanel(new GridLayout(0, 3));
+
+        JLabel label = new JLabel(name);
+
+        JTextField initiativeField = new JTextField();
+        initiativeField.addKeyListener(new DieRollListener(1, 20, initiativeField));
+
+        JCheckBox absentBox = new JCheckBox();
+        absentBox.addActionListener(e -> initiativeField.setEnabled(!absentBox.isSelected()));
+
+        panel.add(label);
+        panel.add(initiativeField);
+        if (isEnemy || isNPC) {
+            panel.add(new JLabel());
+        } else {
+            panel.add(absentBox);
+        }
+
+        return panel;
     }
 
     @Override

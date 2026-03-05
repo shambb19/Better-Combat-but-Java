@@ -7,13 +7,12 @@ import damage_implements.Weapon;
 import exception.UploadTextError;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import static util.Reader.identifier;
 import static util.Reader.withoutIdentifier;
 
 public class PartyReader {
-
-    private boolean isHpCurRecoded;
 
     private final Combatant combatant;
 
@@ -48,10 +47,7 @@ public class PartyReader {
             switch (identifier) {
                 case "name" -> name = value;
                 case "hp" -> hp = num(value);
-                case "hpCur" -> {
-                    hpCur = num(value);
-                    isHpCurRecoded = true;
-                }
+                case "hpCur" -> hpCur = num(value);
                 case "ac" -> ac = num(value);
                 case "level" -> level = num(value);
                 case "spellMod" -> spellMod = mod(value);
@@ -59,12 +55,6 @@ public class PartyReader {
                 case "weapons" -> addWeapons(weapons, value);
                 case "spells" -> addSpells(spells, value);
             }
-        }
-        if (weapons.isEmpty()) {
-            weapons = null;
-        }
-        if (spells.isEmpty()) {
-            spells = null;
         }
         Combatant combatant = new Combatant(name, hp, ac, stats, weapons, spells);
         if (hpCur >= 0) {
@@ -99,6 +89,7 @@ public class PartyReader {
         for (String weapon : weapons) {
             host.add(Weapon.get(weapon));
         }
+        host.removeIf(Objects::isNull);
     }
 
     private void addSpells(ArrayList<Spell> host, String line) {
@@ -111,6 +102,7 @@ public class PartyReader {
                 System.out.println(spell + " null");
             }
         }
+        host.removeIf(Objects::isNull);
     }
 
     private Stats.stat mod(String key) {

@@ -4,6 +4,7 @@ import character_info.Combatant;
 import combat_menu.CombatMenu;
 import main.CombatMain;
 import scenario_info.Battle;
+import scenario_info.Scenario;
 import util.Message;
 
 import javax.swing.*;
@@ -17,7 +18,7 @@ import static util.Reader.withoutIdentifier;
 
 public class BattleReader {
 
-    private boolean errorOccured;
+    private boolean errorOccurred;
 
     private final ArrayList<String> friendlyLines = new ArrayList<>();
     private final ArrayList<Combatant> readFriendlies = new ArrayList<>();
@@ -25,24 +26,28 @@ public class BattleReader {
     private final ArrayList<String> enemyLines = new ArrayList<>();
     private final ArrayList<Combatant> readEnemies = new ArrayList<>();
 
+    private final ArrayList<String> scenarioLines = new ArrayList<>();
+    private final ArrayList<Scenario> readScenarios = new ArrayList<>();
+
     public BattleReader(File scenario) {
         try {
             splitFile(scenario);
             handleFriendlies();
             handleEnemies();
-            errorOccured = false;
+            handleScenarios();
+            errorOccurred = false;
         } catch (Exception e) {
             Message.fileError(e);
             e.printStackTrace();
-            errorOccured = true;
+            errorOccurred = true;
         }
     }
 
     public Battle getBattle() {
-        if (errorOccured) {
+        if (errorOccurred) {
             return null;
         }
-        return new Battle(readFriendlies, readEnemies);
+        return new Battle(readFriendlies, readEnemies, readScenarios);
     }
 
     private void splitFile(File scenario) throws IOException {
@@ -63,12 +68,11 @@ public class BattleReader {
         while (!allLines.isEmpty()) {
             String line = allLines.getFirst();
 
-            if (line.equals("<Allies>")) {
-                addTeamToList(allLines, friendlyLines, "<Allies>");
-            } else if (line.equals("<Enemies>")) {
-                addTeamToList(allLines, enemyLines, "<Enemies>");
-            } else {
-                allLines.removeFirst();
+            switch (line) {
+                case "<Allies>" -> addSectionToList(allLines, friendlyLines, "<Allies>");
+                case "<Enemies>" -> addSectionToList(allLines, enemyLines, "<Enemies>");
+                case "<Scenarios>" -> addSectionToList(allLines, scenarioLines, "<Scenarios>");
+                default -> allLines.removeFirst();
             }
         }
 
@@ -76,7 +80,7 @@ public class BattleReader {
         enemyLines.replaceAll(String::trim);
     }
 
-    private void addTeamToList(ArrayList<String> source, ArrayList<String> destination, String key) {
+    private void addSectionToList(ArrayList<String> source, ArrayList<String> destination, String key) {
 
         if (source.isEmpty()) return;
 
@@ -99,7 +103,7 @@ public class BattleReader {
 
     private void handleFriendlies() {
         while (!friendlyLines.isEmpty()) {
-            ArrayList<String> currentRead = isolateAndGetNextFriendly();
+            ArrayList<String> currentRead = nextElementWithHeader(friendlyLines);
             String header = currentRead.removeFirst().substring(1);
 
             switch (header) {
@@ -111,7 +115,29 @@ public class BattleReader {
 
     private void handleEnemies() {
         while (!enemyLines.isEmpty()) {
-            readEnemies.add(getNpc(isolateAndGetNextEnemy(), true));
+            readEnemies.add(getNpc(nextElementWithoutHeader(enemyLines), true));
+        }
+    }
+
+    private void handleScenarios() {
+        while (!scenarioLines.isEmpty()) {
+            ArrayList<String> currentRead = nextElementWithoutHeader(scenarioLines);
+
+            String name = "name";
+            ArrayList<Combatant> with = new ArrayList<>();
+            ArrayList<Combatant> against = new ArrayList<>();
+
+            while (!currentRead.isEmpty()) {
+                String key = identifier(currentRead.getFirst());
+                String value = withoutIdentifier(currentRead.removeFirst());
+                switch (key) {
+                    case "name" -> name = value;
+                    case "with" -> with = getCombatantsFromString(value, readFriendlies);
+                    case "against" -> against = getCombatantsFromString(value, readEnemies);
+                }
+            }
+
+            readScenarios.add(new Scenario(name, with, against));
         }
     }
 
@@ -130,17 +156,22 @@ public class BattleReader {
         return new Combatant(name, hp, ac, isEnemyTeam);
     }
 
-    private ArrayList<String> isolateAndGetNextFriendly() {
-        return getCombatantWithHeader(friendlyLines);
+    private ArrayList<Combatant> getCombatantsFromString(String list, ArrayList<Combatant> source) {
+        String[] names = list.split("/");
+        ArrayList<Combatant> combatants = new ArrayList<>();
+
+        for (String s : names) {
+            for (Combatant combatant : source) {
+                if (s.equals(combatant.name())) {
+                    combatants.add(combatant);
+                }
+            }
+        }
+
+        return combatants;
     }
 
-    private ArrayList<String> isolateAndGetNextEnemy() {
-        ArrayList<String> currentRead = getCombatantWithHeader(enemyLines);
-        currentRead.removeFirst();
-        return currentRead;
-    }
-
-    private ArrayList<String> getCombatantWithHeader(ArrayList<String> source) {
+    private ArrayList<String> nextElementWithHeader(ArrayList<String> source) {
         ArrayList<String> currentRead = new ArrayList<>();
 
         while (!source.getFirst().equals("}")) {
@@ -148,6 +179,12 @@ public class BattleReader {
         }
         source.removeFirst();
 
+        return currentRead;
+    }
+
+    private ArrayList<String> nextElementWithoutHeader(ArrayList<String> source) {
+        ArrayList<String> currentRead = nextElementWithHeader(source);
+        currentRead.removeFirst();
         return currentRead;
     }
 

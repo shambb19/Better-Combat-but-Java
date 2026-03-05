@@ -28,8 +28,8 @@ public class CombatantInputPanel extends JPanel {
     private final JPanel spellCastPanel;
     private final StatsInputPanel statPanel;
 
-    private final DamageImplementsInputPanel weaponPanel;
-    private final DamageImplementsInputPanel spellPanel;
+    private final ListSelectionPanel<Weapon> weaponPanel;
+    private final ListSelectionPanel<Spell> spellPanel;
 
     private final JPanel infoAll;
     private final JPanel infoPC;
@@ -53,23 +53,14 @@ public class CombatantInputPanel extends JPanel {
         spellCastPanel = getSpellCastPanel();
         statPanel = new StatsInputPanel();
 
-        weaponPanel = new DamageImplementsInputPanel(true);
-        spellPanel = new DamageImplementsInputPanel(false);
+        weaponPanel = new ListSelectionPanel<>(Weapon.getAllAsList(), "Weapons");
+        spellPanel = new ListSelectionPanel<>(Spell.getAllAsList(), "Spells");
 
         JButton okButton = new JButton("Confirm");
-        okButton.addActionListener(e -> {
-            try {
-                logAndGetCombatant();
-            } catch (Exception error) {
-                JOptionPane.showMessageDialog(
-                    root,
-                    "Error Loading Combatant: " + error.getMessage(),
-                    TxtMenu.TITLE,
-                    JOptionPane.ERROR_MESSAGE
-                );
-                error.printStackTrace();
-            }
-        });
+        okButton.addActionListener(e -> logAndGetCombatant());
+
+        JButton cancelButton = new JButton("Cancel");
+        cancelButton.addActionListener(e -> root.setInputPanelEnabled(false));
 
         infoAll = asFlowLayout(
                 List.of(namePanel, isNpcBox, isEnemyBox, hpPanel, acPanel)
@@ -83,48 +74,60 @@ public class CombatantInputPanel extends JPanel {
         add(statPanel);
         add(weaponPanel);
         add(spellPanel);
-        add(okButton);
+        add(getButtonPanel(okButton, cancelButton));
     }
 
     public void logAndGetCombatant() {
-        Combatant combatant;
+        try {
+            Combatant combatant;
 
-        boolean isEnemy = isEnemyBox.isSelected();
-        String name = getTemplateValue(namePanel);
-        int hp = Integer.parseInt(getTemplateValue(hpPanel));
-        int ac = Integer.parseInt(getTemplateValue(acPanel));
+            boolean isEnemy = isEnemyBox.isSelected();
+            String name = getTemplateValue(namePanel);
+            int hp = Integer.parseInt(getTemplateValue(hpPanel));
+            int ac = Integer.parseInt(getTemplateValue(acPanel));
 
-        combatant = new Combatant(name, hp, ac, isEnemy);
+            getTemplateField(namePanel).setEnabled(true);
 
-        if (isNpcBox.isSelected()) {
+            combatant = new Combatant(name, hp, ac, isEnemy);
+
+            if (isNpcBox.isSelected()) {
+                root.logCombatantCompleted(combatant);
+                toggleNpc(false);
+                root.setInputPanelEnabled(false);
+                return;
+            }
+
+            int level = Integer.parseInt(getTemplateValue(levelPanel));
+            Stats.stat spellCastMod = getSpellCastValue();
+            Stats stats = new Stats(level, spellCastMod);
+            statPanel.addTo(stats);
+
+            ArrayList<Weapon> weapons = weaponPanel.getSelected();
+            ArrayList<Spell> spells = spellPanel.getSelected();
+
+            String hpCur = getTemplateValue(hpCurPanel);
+
+            combatant = new Combatant(
+                    name, hp, ac,
+                    stats, weapons, spells
+            );
+
+            if (!hpCur.isEmpty()) {
+                combatant.setHealth(Integer.parseInt(hpCur));
+            }
+
             root.logCombatantCompleted(combatant);
             toggleNpc(false);
             root.setInputPanelEnabled(false);
-            return;
+        } catch (Exception error) {
+            JOptionPane.showMessageDialog(
+                    root,
+                    "Error Loading Combatant: " + error.getMessage(),
+                    TxtMenu.TITLE,
+                    JOptionPane.ERROR_MESSAGE
+            );
+            error.printStackTrace();
         }
-
-        int level = Integer.parseInt(getTemplateValue(levelPanel));
-        Stats.stat spellCastMod = getSpellCastValue();
-        Stats stats = new Stats(level, spellCastMod);
-        statPanel.addTo(stats);
-
-        ArrayList<Weapon> weapons = weaponPanel.getSelectedAsWeapons();
-        ArrayList<Spell> spells = spellPanel.getSelectedAsSpells();
-
-        String hpCur = getTemplateValue(hpCurPanel);
-
-        combatant = new Combatant(
-                name, hp, ac,
-                stats, weapons, spells
-        );
-
-        if (!hpCur.isEmpty()) {
-            combatant.setHealth(Integer.parseInt(hpCur));
-        }
-
-        root.logCombatantCompleted(combatant);
-        toggleNpc(false);
-        root.setInputPanelEnabled(false);
     }
 
     public void openNew(boolean isEnemy) {
@@ -164,8 +167,8 @@ public class CombatantInputPanel extends JPanel {
             statPanel.setTo(selection);
             setSpellCastPanelTo(selection);
 
-            weaponPanel.setTo(selection);
-            spellPanel.setTo(selection);
+            weaponPanel.setTo(selection.weapons());
+            spellPanel.setTo(selection.spells());
         }
 
         toggleNpc(selection.isNPC());
@@ -222,6 +225,15 @@ public class CombatantInputPanel extends JPanel {
 
         panel.add(label);
         panel.add(statsBox);
+
+        return panel;
+    }
+
+    private JPanel getButtonPanel(JButton okButton, JButton cancelButton) {
+        JPanel panel = new JPanel(new FlowLayout());
+
+        panel.add(okButton);
+        panel.add(cancelButton);
 
         return panel;
     }

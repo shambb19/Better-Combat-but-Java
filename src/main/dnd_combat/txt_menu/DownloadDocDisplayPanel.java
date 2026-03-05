@@ -2,6 +2,7 @@ package txt_menu;
 
 import character_info.Combatant;
 import scenario_info.Battle;
+import scenario_info.Scenario;
 import util.Message;
 
 import javax.swing.*;
@@ -21,15 +22,19 @@ public class DownloadDocDisplayPanel extends JPanel {
     private JTextArea display;
 
     private static final String LINE_END = "\n";
+    private static final String EMPTY_LINE = "";
     private static final String ALLY_BRACKET = "<Allies>";
     private static final String ENEMY_BRACKET = "<Enemies>";
+    private static final String SCENARIO_BRACKET = "<Scenarios>";
 
     private final ArrayList<Combatant> friendlies;
     private final ArrayList<Combatant> enemies;
+    private final ArrayList<Scenario> scenarios;
 
     public DownloadDocDisplayPanel() {
         friendlies = new ArrayList<>();
         enemies = new ArrayList<>();
+        scenarios = new ArrayList<>();
 
         construct();
     }
@@ -37,6 +42,7 @@ public class DownloadDocDisplayPanel extends JPanel {
     public DownloadDocDisplayPanel(Battle input) {
         friendlies = input.friendlies();
         enemies = input.enemies();
+        scenarios = input.scenarios();
 
         construct();
     }
@@ -64,16 +70,23 @@ public class DownloadDocDisplayPanel extends JPanel {
         add(sendPanel, BorderLayout.SOUTH);
     }
 
-    public void addCombatant(Combatant selection) {
-        if (selection.isEnemy()) {
-            addOrReplace(enemies, selection);
-        } else {
-            addOrReplace(friendlies, selection);
-        }
-
+    private void buildText() {
         StringBuilder displayText = new StringBuilder();
         displayTextAsList().forEach(line -> displayText.append(line).append(LINE_END));
         display.setText(displayText.toString());
+    }
+
+    public void addElement(Object selection) {
+        if (selection instanceof Combatant combatant) {
+            if (combatant.isEnemy()) {
+                addOrReplace(enemies, combatant);
+            } else {
+                addOrReplace(friendlies, combatant);
+            }
+        } else if (selection instanceof Scenario scenario) {
+            addOrReplaceScenario(scenario);
+        }
+        buildText();
     }
 
     private void addOrReplace(ArrayList<Combatant> destination, Combatant combatant) {
@@ -88,6 +101,14 @@ public class DownloadDocDisplayPanel extends JPanel {
         }
     }
 
+    private void addOrReplaceScenario(Scenario scenario) {
+        if (scenarios.contains(scenario)) {
+            scenarios.set(scenarios.indexOf(scenario), scenario);
+        } else {
+            scenarios.add(scenario);
+        }
+    }
+
     private void download() {
         File file = new File(
             new File(System.getProperty("user.home"), "Downloads"),
@@ -98,7 +119,7 @@ public class DownloadDocDisplayPanel extends JPanel {
             for (String line : displayTextAsList()) {
                 writer.write(line + LINE_END);
             }
-            Desktop.getDesktop().open(file);
+            template("Downloaded!");
         } catch (IOException io) {
             Message.throwFileDownloadError(this, io);
         }
@@ -121,6 +142,7 @@ public class DownloadDocDisplayPanel extends JPanel {
         ArrayList<String> text = new ArrayList<>();
         text.addAll(getListText(ALLY_BRACKET, friendlies));
         text.addAll(getListText(ENEMY_BRACKET, enemies));
+        text.addAll(getScenarioListText());
         return text;
     }
 
@@ -128,14 +150,30 @@ public class DownloadDocDisplayPanel extends JPanel {
         ArrayList<String> text = new ArrayList<>();
 
         text.add(bracket);
-        text.add("");
+        text.add(EMPTY_LINE);
         if (input.isEmpty()) {
-            text.add("");
+            text.add(EMPTY_LINE);
         } else {
             input.forEach(combatant -> text.addAll(combatant.toTxt()));
         }
         text.add(bracket);
-        text.add("");
+        text.add(EMPTY_LINE);
+
+        return text;
+    }
+
+    private ArrayList<String> getScenarioListText() {
+        ArrayList<String> text = new ArrayList<>();
+
+        text.add(SCENARIO_BRACKET);
+        text.add(EMPTY_LINE);
+        if (scenarios.isEmpty()) {
+            text.add(EMPTY_LINE);
+        } else {
+            scenarios.forEach(scenario -> text.addAll(scenario.toTxt()));
+        }
+        text.add(SCENARIO_BRACKET);
+        text.add(EMPTY_LINE);
 
         return text;
     }

@@ -1,58 +1,35 @@
 package txt_menu;
 
-import character_info.Combatant;
-import damage_implements.Spell;
-import damage_implements.Weapon;
-
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class DamageImplementsInputPanel extends JPanel {
-
-    private final boolean isWeapons;
+public class ListSelectionPanel<T> extends JPanel {
 
     private final ImplementListPane availableList;
     private final ImplementListPane selectedList;
 
-    public DamageImplementsInputPanel(boolean isWeapons) {
-        this.isWeapons = isWeapons;
-
+    public ListSelectionPanel(ArrayList<Object> sourceList, String name) {
         setLayout(new GridLayout(0, 2));
 
-        String listName;
-        if (isWeapons) {
-            availableList = new ImplementListPane(Weapon.getAllAsList(), this);
-            listName = "Weapons";
-        } else {
-            availableList = new ImplementListPane(Spell.getAllAsList(), this);
-            listName = "Spells";
-        }
-
+        availableList = new ImplementListPane(sourceList, this);
         selectedList = new ImplementListPane(null, this);
 
-        add(new JLabel("Available " + listName + ":"));
-        add(new JLabel("Selected " + listName + ":"));
+        add(new JLabel("Available " + name + ":"));
+        add(new JLabel("Selected " + name + ":"));
         add(availableList);
         add(selectedList);
     }
 
-    public ArrayList<Weapon> getSelectedAsWeapons() {
-        ArrayList<Weapon> weaponList = new ArrayList<>();
-        for (Object weapon : selectedList.getList()) {
-            weaponList.add((Weapon) weapon);
+    @SuppressWarnings("unchecked")
+    public ArrayList<T> getSelected() {
+        ArrayList<T> list = new ArrayList<>();
+        for (Object item : selectedList.getList()) {
+            list.add((T) item);
         }
-        weaponList.removeIf(Objects::isNull);
-        return weaponList;
-    }
-
-    public ArrayList<Spell> getSelectedAsSpells() {
-        ArrayList<Spell> spellList = new ArrayList<>();
-        for (Object spell : selectedList.getList()) {
-            spellList.add((Spell) spell);
-        }
-        return spellList;
+        list.removeIf(Objects::isNull);
+        return list;
     }
 
     public void swapWithOtherList(Object swappedImplement) {
@@ -73,16 +50,18 @@ public class DamageImplementsInputPanel extends JPanel {
         }
     }
 
-    public void setTo(Combatant combatant) {
+    public void setTo(ArrayList<T> selectedList) {
         reset();
-        availableList.getList().forEach(implement -> {
-            boolean isHasImplement = (isWeapons)
-                    ? combatant.hasWeapon(implement)
-                    : combatant.hasSpell(implement);
-            if (isHasImplement) {
-                swapWithOtherList(implement);
+        selectedList.forEach(item -> {
+            if (availableList.contains(item)) {
+                swapWithOtherList(item);
             }
         });
+    }
+
+    public void updateSourceList(ArrayList<Object> newSource) {
+        reset();
+        availableList.updateSourceList(newSource);
     }
 
     static class ImplementListPane extends JScrollPane {
@@ -90,7 +69,8 @@ public class DamageImplementsInputPanel extends JPanel {
         private final ArrayList<Object> implementList;
         private final JList<Object> list;
 
-        public ImplementListPane(ArrayList<Object> allImplements, DamageImplementsInputPanel root) {
+        @SuppressWarnings("all")
+        public ImplementListPane(ArrayList<Object> allImplements, ListSelectionPanel root) {
             implementList = Objects.requireNonNullElseGet(allImplements, ArrayList::new);
             list = new JList<>(implementList.toArray());
             list.addListSelectionListener(e -> root.swapWithOtherList(list.getSelectedValue()));
@@ -108,6 +88,12 @@ public class DamageImplementsInputPanel extends JPanel {
         public void remove(Object implement) {
             implementList.remove(implement);
             refresh();
+        }
+
+        public void updateSourceList(ArrayList<Object> newList) {
+            implementList.clear();
+            implementList.addAll(newList);
+            list.setListData(implementList.toArray());
         }
 
         public boolean contains(Object o) {

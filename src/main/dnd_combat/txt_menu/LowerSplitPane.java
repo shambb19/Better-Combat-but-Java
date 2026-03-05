@@ -8,10 +8,11 @@ public class LowerSplitPane extends JSplitPane {
     private final JPanel cards;
     private final CardLayout cardLayout;
 
-    private static final String INPUT_CARD = "INPUT";
-    private static final String DISABLED_CARD = "DISABLED";
+    public static final String COMBATANT_INPUT = "COMBATANT";
+    public static final String SCENARIO_INPUT = "SCENARIO";
+    public static final String DISABLED = "DISABLED";
 
-    public LowerSplitPane(JPanel inputPanel, JPanel displayPanel) {
+    public LowerSplitPane(JPanel combatantPanel, JPanel scenarioPanel, JPanel displayPanel) {
         super(JSplitPane.HORIZONTAL_SPLIT);
 
         cardLayout = new CardLayout();
@@ -21,24 +22,21 @@ public class LowerSplitPane extends JSplitPane {
         disabledPanel.setEnabled(false);
         disabledPanel.putClientProperty("FlatLaf.style", "font: $h1.regular.font");
 
-        cards.add(inputPanel, INPUT_CARD);
-        cards.add(disabledPanel, DISABLED_CARD);
+        cards.add(combatantPanel, COMBATANT_INPUT);
+        cards.add(scenarioPanel, SCENARIO_INPUT);
+        cards.add(disabledPanel, DISABLED);
 
         setLeftComponent(cards);
         setRightComponent(displayPanel);
 
-        cardLayout.show(cards, DISABLED_CARD);
+        cardLayout.show(cards, DISABLED);
 
         setResizeWeight(0.5);
         setDividerLocation(0.5);
     }
 
-    public void setInputPanelEnabled(boolean isEnabled) {
-        if (isEnabled) {
-            cardLayout.show(cards, INPUT_CARD);
-        } else {
-            cardLayout.show(cards, DISABLED_CARD);
-        }
+    public void changeInputPanel(String card) {
+        cardLayout.show(cards, card);
 
         setDividerLocation(0.5);
     }
