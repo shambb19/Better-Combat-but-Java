@@ -1,10 +1,11 @@
 package combat_menu.popup.damage;
 
+import damage_implements.Spell;
+import damage_implements.Spells;
 import main.CombatMain;
 import character_info.Combatant;
 import character_info.Stats;
 import damage_implements.Effect;
-import damage_implements.Spell;
 
 import javax.swing.*;
 import java.awt.*;
@@ -58,8 +59,8 @@ public class SpellPanel extends JPanel {
         JComboBox<Spell> box = new JComboBox<>();
         box.putClientProperty("JComponent.roundRect", "true");
         spells.forEach(box::addItem);
-        box.addItem(Spell.MANUAL_HIT);
-        box.addItem(Spell.MANUAL_SAVE);
+        box.addItem(Spells.MANUAL_HIT);
+        box.addItem(Spells.MANUAL_SAVE);
         box.addActionListener(e -> logSpellChange(box));
 
         logSpellChange(box);
@@ -79,7 +80,7 @@ public class SpellPanel extends JPanel {
     private void logSpellChange(JComboBox<Spell> box) {
         variablePanel.removeAll();
         Spell selected = (Spell) box.getSelectedItem();
-        if (selected.equals(Spell.MANUAL_SAVE)) {
+        if (selected.equals(Spells.MANUAL_SAVE)) {
             variablePanel.add(attackComponents.get(spellPanel.MANUAL_SAVE));
             activePanelType = spellPanel.MANUAL_SAVE;
         } else if (selected.hasSave()) {
@@ -133,7 +134,7 @@ public class SpellPanel extends JPanel {
                     registerAttack(target, hitRoll >= target.ac(), spell);
                 }
                 case SAVE -> {
-                    Stats.stat saveType = spell.getSaveType();
+                    Stats.stat saveType = spell.savingThrow();
                     int saveDC = 8 +
                             attacker.stats().spellModVal() +
                             attacker.stats().mod(saveType);
@@ -162,16 +163,14 @@ public class SpellPanel extends JPanel {
      */
     private void registerAttack(Combatant target, boolean success, Spell spell) {
         if (success) {
-            if (spell.equals(Spell.HEX)) {
+            if (spell.effect().equals(Effect.BONUS_DAMAGE)) {
                 CombatMain.QUEUE.getCurrentCombatant().putEffect(target, Effect.BONUS_DAMAGE);
                 informHexSuccess(target);
             } else {
                 new DamageAmountPopup(spell, target, false).setVisible(true);
             }
-            CombatMain.QUEUE.getCurrentCombatant().logHit();
         } else if (spell.dealsHalfDamageAnyways()) {
             new DamageAmountPopup(spell, target, true).setVisible(true);
-            CombatMain.QUEUE.getCurrentCombatant().logMiss();
         } else {
             informAttackFail();
         }

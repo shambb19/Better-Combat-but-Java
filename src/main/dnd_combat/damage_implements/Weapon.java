@@ -3,67 +3,23 @@ package damage_implements;
 import character_info.Stats;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 
-public enum Weapon {
+import static damage_implements.Weapons.MANUAL;
 
-    DAGGER("Dagger", "dagger", 1, 4, Stats.stat.DEX),
-    CROSSBOW_LIGHT("Light Crossbow", "crossbow_light", 1, 10, Stats.stat.DEX),
-
-    LONGSWORD("Longsword", "longsword", 1, 8, Stats.stat.STR),
-    QUARTERSTAFF("Quarterstaff", "quarterstaff", 1, 6, Stats.stat.STR),
-    JAVELIN("Javelin", "javelin", 1, 6, Stats.stat.DEX),
-    LANCE("Lance", "lance", 1, 10, Stats.stat.STR),
-
-    MANUAL("Manual Entry", null, -1, -1, null);
-    // longsword, quarterstaff, javelin, lance
-
-    private final String name;
-    private final String nameRoot;
-    private final int numDamageDice;
-    private final int dieSize;
-    private final Stats.stat damageType;
-
-    Weapon(String name, String nameRoot, int numDamageDice, int dieSize, Stats.stat damageType) {
-        this.name = name;
-        this.nameRoot = nameRoot;
-        this.numDamageDice = numDamageDice;
-        this.dieSize = dieSize;
-        this.damageType = damageType;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getNameRoot() {
-        return nameRoot;
-    }
+public record Weapon(String name, int numDice, int dieSize, Stats.stat stat) {
 
     public String getDamageString() {
-        return numDamageDice + "d" + dieSize;
-    }
-
-    public int getNumDice() {
-        return numDamageDice;
-    }
-
-    public int getDieSize() {
-        return dieSize;
-    }
-
-    public Stats.stat getMod() {
-        return damageType;
+        return numDice + "d" + dieSize;
     }
 
     public boolean isManual() {
-        return equals(Weapon.MANUAL);
+        return equals(MANUAL) || name.equals(MANUAL.name);
     }
 
     public static Weapon get(String name) {
-        for (Weapon weapon : values()) {
-            if (weapon.getName().equalsIgnoreCase(name)) {
+        for (Weapon weapon : Weapons.get()) {
+            if (weapon.name.equalsIgnoreCase(name)) {
                 return weapon;
             }
         }
@@ -71,7 +27,7 @@ public enum Weapon {
     }
 
     public static ArrayList<Object> getAllAsList() {
-        ArrayList<Weapon> list = new ArrayList<>(Arrays.stream(values()).toList());
+        ArrayList<Weapon> list = Weapons.get();
         list.sort(Comparator.comparing(weapon -> weapon.name));
         list.remove(MANUAL);
         return new ArrayList<>(list);
@@ -81,5 +37,4 @@ public enum Weapon {
     public String toString() {
         return name;
     }
-
 }

@@ -5,6 +5,7 @@ import character_info.Stats;
 import combat_menu.listener.IntegerFieldListener;
 import damage_implements.Spell;
 import damage_implements.Weapon;
+
 import static util.Swing.*;
 
 import javax.swing.*;

@@ -47,9 +47,11 @@ public class BattleReader {
         if (errorOccurred) {
             return null;
         }
-        return new Battle(readFriendlies, readEnemies, readScenarios);
+        return new Battle
+                (readFriendlies, readFriendlies,
+                readEnemies, readEnemies,
+                readScenarios);
     }
-
     private void splitFile(File scenario) throws IOException {
         ArrayList<String> allLines;
         try {

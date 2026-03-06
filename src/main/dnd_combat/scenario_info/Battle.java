@@ -5,7 +5,17 @@ import character_info.Combatant;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
-public record Battle(ArrayList<Combatant> friendlies, ArrayList<Combatant> enemies, ArrayList<Scenario> scenarios) {
+public record Battle(ArrayList<Combatant> friendlies, ArrayList<Combatant> friendliesOriginal,
+                     ArrayList<Combatant> enemies, ArrayList<Combatant> enemiesOriginal,
+                     ArrayList<Scenario> scenarios) {
+
+    public void reset() {
+        friendlies.clear();
+        friendlies.addAll(friendliesOriginal);
+
+        enemies.clear();
+        enemies.addAll(enemiesOriginal);
+    }
 
     public boolean areAllEnemiesDefeated() {
         for (Combatant combatant : enemies()) {

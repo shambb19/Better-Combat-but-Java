@@ -15,26 +15,25 @@ public enum Effect {
     FULL_HP_OPTION,
     NONE;
 
-    private int numRays;
+    Effect() {}
 
-    private int numDice;
-    private int dieValue;
-
-    Effect() {
-        this.numRays = 0;
-        this.numDice = 0;
-        this.dieValue = 0;
+    public static Effect withRawName(String rawName) {
+        for (Effect effect : values()) {
+            if (effect.name().equals(rawName)) {
+                return effect;
+            }
+        }
+        return null;
     }
 
-    public Effect withRays(int totalAttacks) {
-        this.numRays = totalAttacks;
-        return this;
-    }
+    public static String getRawNamesString() {
+        StringBuilder str = new StringBuilder("Effects (enter exact): ");
 
-    public Effect withMaxDmg(int numDice, int dieValue) {
-        this.numDice = numDice;
-        this.dieValue = dieValue;
-        return this;
+        for (Effect effect : values()) {
+            str.append(effect.name()).append(", ");
+        }
+
+        return str.toString();
     }
 
 }

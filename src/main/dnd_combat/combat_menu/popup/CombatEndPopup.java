@@ -1,9 +1,9 @@
 package combat_menu.popup;
 
+import combat_menu.CombatMenu;
 import main.CombatMain;
 import character_info.Combatant;
-import character_info.Highlights;
-import txt_input.PartyWriter;
+import txt_input.CampaignWriter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -27,7 +27,6 @@ public class CombatEndPopup extends JFrame {
         add(new JLabel(isVictory ? victoryMessage : lossMessage));
         add(new JSeparator());
         add(new JLabel("Options:"));
-        add(seeCombatHighlightsButton());
         add(partyLevelUpButton());
         add(downloadUpdatedPartyTxtButton());
         add(exitButton());
@@ -36,22 +35,11 @@ public class CombatEndPopup extends JFrame {
         setLocationRelativeTo(CombatMain.COMBAT_MENU);
     }
 
-    public JButton seeCombatHighlightsButton() {
-        JButton button = new JButton("See Highlights");
-        button.putClientProperty("JButton.buttonType", "roundRect");
-        button.addActionListener(e -> template(Highlights.get()));
-        return button;
-    }
-
     public JButton partyLevelUpButton() {
         JButton button = new JButton("Level Up the Party");
         button.putClientProperty("JButton.buttonType", "roundRect");
         button.addActionListener(e -> {
-            for (Combatant combatant : CombatMain.BATTLE.friendlies()) {
-                if (!combatant.isNPC()) {
-                    combatant.levelUp();
-                }
-            }
+            CombatMain.BATTLE.friendlies().forEach(Combatant::levelUp);
             button.setEnabled(false);
             button.setText("Party Level Increased");
         });
@@ -59,12 +47,12 @@ public class CombatEndPopup extends JFrame {
     }
 
     public JButton downloadUpdatedPartyTxtButton() {
-        JButton button = new JButton("Download Updated Party .txt File");
+        JButton button = new JButton("Download Updated .txt File");
         button.putClientProperty("JButton.buttonType", "roundRect");
         button.addActionListener(e -> {
             try {
                 setVisible(false);
-                JFileChooser fileChooser = new JFileChooser(new PartyWriter().getFile());
+                JFileChooser fileChooser = new JFileChooser(new CampaignWriter().getFile());
                 int result = fileChooser.showSaveDialog(CombatMain.COMBAT_MENU);
                 if (result == JFileChooser.APPROVE_OPTION) {
                     button.setText("Re-download .txt File");
@@ -83,7 +71,12 @@ public class CombatEndPopup extends JFrame {
         button.putClientProperty("JButton.buttonType", "roundRect");
         button.addActionListener(e -> {
             if (confirmIf("quit") == JOptionPane.OK_OPTION) {
-                bye();
+                JOptionPane.showMessageDialog(
+                        CombatMain.COMBAT_MENU,
+                        "Goodbye! Thanks for playing :)",
+                        CombatMenu.TITLE,
+                        JOptionPane.INFORMATION_MESSAGE
+                );
                 dispose();
                 System.exit(0);
             }

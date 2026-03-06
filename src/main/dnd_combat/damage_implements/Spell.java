@@ -3,69 +3,15 @@ package damage_implements;
 import character_info.Stats;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 
-public enum Spell {
+import static damage_implements.Spells.MANUAL_HIT;
+import static damage_implements.Spells.MANUAL_SAVE;
 
-    CHILL_TOUCH("Chill Touch", "chill_touch", 1, 8, null, Effect.HEAL_BLOCK),
-    POISON_SPRAY("Poison Spray", "poison_spray", 1, 12, Stats.stat.CON, Effect.NONE),
-    SHOCKING_GRASP("Shocking Grasp", "shocking_grasp", 1, 8, null, Effect.NONE),
-    RAY_OF_SICKNESS("Ray of Sickness", "ray_of_sickness", 2, 8, null, Effect.POISON),
-    THUNDER_WAVE("Thunder Wave", "thunder_wave", 2, 8, Stats.stat.CON, Effect.HALF_DAMAGE),
-    HELLISH_REBUKE("Hellish Rebuke", "hellish_rebuke", 2, 10, Stats.stat.DEX, Effect.HALF_DAMAGE),
-    PHANTASMAL_FORCE("Phantasmal Force", "phantasmal_force", 2, 8, Stats.stat.INT, Effect.ILLUSION),
-
-    BURNING_HANDS("Burning Hands", "burning_hands", 4, 6, Stats.stat.DEX, Effect.HALF_DAMAGE),
-    HEX("Hex", "hex", 1, 6, Stats.stat.WIS, Effect.BONUS_DAMAGE),
-        // The effects of hex technically last for one hour. I decided not to code this because that amounts to 600 turns of
-        // combat, and I figured this limit would never reasonably be reached. Be advised.
-    SCORCHING_RAY("Scorching Ray", "scorching_ray", 2, 6, null, Effect.SPLIT_ATTACK.withRays(3)),
-    ELDRITCH_BLAST("Eldritch Blast", "eldritch_blast", 1, 10, null, Effect.NONE),
-
-    TOLL_THE_DEAD("Toll the Dead", "toll_the_dead", 1, 8, Stats.stat.WIS, Effect.FULL_HP_OPTION.withMaxDmg(1, 12)),
-    HUNTERS_MARK("Hunter's Mark", "hunters_mark", 1, 6, null, Effect.BONUS_DAMAGE),
-
-    MANUAL_HIT("Manual with Hit Roll", null, -1, -1, null, Effect.NONE),
-    MANUAL_SAVE("Manual with Save DC", null, -1, -1, null, Effect.NONE);
-
-    // TODO implement wrathful smite spell
-
-
-    private final String name;
-    private final String nameRoot;
-    private final int numDamageDice;
-    private final int dieSize;
-    private final Stats.stat savingThrow;
-    private final Effect effect;
-
-    Spell(String name, String nameRoot, int numDamageDice, int dieSize, Stats.stat savingThrow, Effect effect) {
-        this.name = name;
-        this.nameRoot = nameRoot;
-        this.numDamageDice = numDamageDice;
-        this.dieSize = dieSize;
-        this.savingThrow = savingThrow;
-        this.effect = effect;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getNameRoot() {
-        return nameRoot;
-    }
+public record Spell(String name, int numDice, int dieSize, Stats.stat savingThrow, Effect effect) {
 
     public String getDamageString() {
-        return numDamageDice + "d" + dieSize;
-    }
-
-    public int getNumDice() {
-        return numDamageDice;
-    }
-
-    public int getDieSize() {
-        return dieSize;
+        return numDice + "d" + dieSize;
     }
 
     public boolean isManual() {
@@ -76,14 +22,6 @@ public enum Spell {
         return savingThrow != null;
     }
 
-    public Stats.stat getSaveType() {
-        return savingThrow;
-    }
-
-    public Effect getEffect() {
-        return effect;
-    }
-
     public boolean dealsHalfDamageAnyways() {
         if (effect == null) {
             return false;
@@ -91,9 +29,9 @@ public enum Spell {
         return effect.equals(Effect.HALF_DAMAGE);
     }
 
-    public static Spell get(String nameRaw) {
-        for (Spell spell : values()) {
-            if (nameRaw.equals(spell.nameRoot)) {
+    public static Spell get(String nameString) {
+        for (Spell spell : Spells.get()) {
+            if (nameString.equals(spell.name)) {
                 return spell;
             }
         }
@@ -101,7 +39,7 @@ public enum Spell {
     }
 
     public static ArrayList<Object> getAllAsList() {
-        ArrayList<Spell> list = new ArrayList<>(Arrays.stream(values()).toList());
+        ArrayList<Spell> list = Spells.get();
         list.sort(Comparator.comparing(spell -> spell.name));
         list.remove(MANUAL_HIT);
         list.remove(MANUAL_SAVE);
@@ -112,4 +50,5 @@ public enum Spell {
     public String toString() {
         return name;
     }
+
 }

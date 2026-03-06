@@ -15,12 +15,16 @@ public class CombatMain {
 
     public static CombatMenu COMBAT_MENU;
 
+    public static File INPUT = null;
     public static Battle BATTLE = null;
     public static PlayerQueue QUEUE;
 
     public static void run() {
-        File input = new FileGetter().getFile();
-        BATTLE = new BattleReader(input).getBattle();
+        if (INPUT == null) {
+            INPUT = new FileGetter().getFile();
+        }
+
+        BATTLE = new BattleReader(INPUT).getBattle();
 
         new FinalizeCombatantsPopup().setVisible(true);
     }
@@ -42,6 +46,10 @@ public class CombatMain {
         }
         boolean isVictory = BATTLE.areAllEnemiesDefeated();
         new CombatEndPopup(isVictory).setVisible(true);
+    }
+
+    public static void kill() {
+        COMBAT_MENU.dispose();
     }
 
 }

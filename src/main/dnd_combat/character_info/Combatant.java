@@ -4,6 +4,7 @@ import combat_menu.listener.DieRollListener;
 import damage_implements.Effect;
 import damage_implements.Spell;
 import damage_implements.Weapon;
+import util.Message;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,7 +16,7 @@ public class Combatant {
     private boolean isEnemy;
     private final boolean isNPC;
 
-    private int initiative, inspiration, inspirationRolls;
+    private int initiative, inspiration;
 
     private final DealtEffectsList dealtEffects = new DealtEffectsList(this);
     private final ArrayList<Combatant> hexedByList = new ArrayList<>();
@@ -31,9 +32,6 @@ public class Combatant {
 
     private ArrayList<Weapon> weapons;
     private ArrayList<Spell> spells;
-
-    private int totalDamageDealt, totalHealsGiven, totalHealsReceived;
-    private int totalAttackSuccesses, totalAttackFails;
 
     /**
      * NPC constructor
@@ -69,13 +67,6 @@ public class Combatant {
 
         hpCurrent = hpMax;
         inspiration = 0;
-
-        totalDamageDealt = 0;
-        totalHealsGiven = 0;
-        totalHealsReceived = 0;
-
-        totalAttackSuccesses = 0;
-        totalAttackFails = 0;
 
         this.weapons = new ArrayList<>();
         if (weapons != null) {
@@ -113,7 +104,6 @@ public class Combatant {
      */
     public void heal(int healthRegained) {
         hpCurrent = Math.min(hpMax, hpCurrent + healthRegained);
-        totalHealsReceived += healthRegained;
     }
 
     public int hp() {
@@ -192,22 +182,8 @@ public class Combatant {
         return weapons;
     }
 
-    public boolean hasWeapon(Object implement) {
-        if (!(implement instanceof Weapon)) {
-            return false;
-        }
-        return weapons.contains(implement);
-    }
-
     public ArrayList<Spell> spells() {
         return spells;
-    }
-
-    public boolean hasSpell(Object implement) {
-        if (!(implement instanceof Spell)) {
-            return false;
-        }
-        return spells.contains(implement);
     }
 
     public Stats stats() {
@@ -260,55 +236,18 @@ public class Combatant {
         hexedByList.add(hexer);
     }
 
-    public void logDamageDealt(int dmgAmount) {
-        totalDamageDealt += dmgAmount;
-    }
-
-    public int getTotalDamageDealt() {
-        return totalDamageDealt;
-    }
-
-    public void logHealGiven(int healAmount) {
-        totalHealsGiven += healAmount;
-    }
-
-    public int getTotalHealsGiven() {
-        return totalHealsGiven;
-    }
-
-    public int getTotalHealsReceived() {
-        return totalHealsReceived;
-    }
-
-    public void logHit() {
-        totalAttackSuccesses++;
-    }
-
-    public int getTotalAttackSuccesses() {
-        return totalAttackSuccesses;
-    }
-
-    public void logMiss() {
-        totalAttackFails++;
-    }
-
-    public int getTotalAttackFails() {
-        return totalAttackFails;
-    }
-
-    public void logInspirationRoll(int inspirationRoll) {
-        this.inspirationRolls += inspirationRoll;
-    }
-
-    public int getInspirationRolls() {
-        return inspirationRolls;
-    }
-
     public int level() {
         return level;
     }
 
     public void levelUp() {
+        if (isNPC) {
+            return;
+        }
+        hpMax = Message.getWithLoopUntilInt(
+                name + "'s health increase after level up?",
+                "We love level ups!"
+        );
         level++;
     }
 
@@ -386,12 +325,12 @@ public class Combatant {
             if (weapons != null && !weapons.isEmpty()) {
                 System.out.println(weapons);
                 StringBuilder weaponStr = new StringBuilder("weapons=");
-                weapons.forEach(weapon -> weaponStr.append(weapon.getNameRoot()).append("/"));
+                weapons.forEach(weapon -> weaponStr.append(weapon.name()).append("/"));
                 txt.add(weaponStr.toString());
             }
             if (spells != null && !spells.isEmpty()) {
                 StringBuilder spellStr = new StringBuilder("spells=");
-                spells.forEach(spell -> spellStr.append(spell.getNameRoot()).append("/"));
+                spells.forEach(spell -> spellStr.append(spell.name()).append("/"));
                 txt.add(spellStr.toString());
             }
         }

@@ -9,8 +9,7 @@ import exception.UploadTextError;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import static util.Reader.identifier;
-import static util.Reader.withoutIdentifier;
+import static util.Reader.*;
 
 public class PartyReader {
 
@@ -98,23 +97,9 @@ public class PartyReader {
             Spell newSpell = Spell.get(spell);
             if (newSpell != null) {
                 host.add(newSpell);
-            } else {
-                System.out.println(spell + " null");
             }
         }
         host.removeIf(Objects::isNull);
-    }
-
-    private Stats.stat mod(String key) {
-        return switch (key) {
-            case "str" -> Stats.stat.STR;
-            case "dex" -> Stats.stat.DEX;
-            case "con" -> Stats.stat.CON;
-            case "int" -> Stats.stat.INT;
-            case "wis" -> Stats.stat.WIS;
-            case "cha" -> Stats.stat.CHA;
-            default -> throw new UploadTextError(UploadTextError.cause.STATS);
-        };
     }
 
     private int num(String value) {

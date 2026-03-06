@@ -29,7 +29,6 @@ public class TxtMenu extends JFrame {
         scenarioPanel = new ScenarioInputPanel(completedList, this);
         displayPanel = new DownloadDocDisplayPanel();
         splitPane = new LowerSplitPane(inputPanel, scenarioPanel, displayPanel);
-
         construct();
     }
 
@@ -52,6 +51,7 @@ public class TxtMenu extends JFrame {
         setTitle(TITLE);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
+        setJMenuBar(new TextMenuBar());
     }
 
     private void construct() {

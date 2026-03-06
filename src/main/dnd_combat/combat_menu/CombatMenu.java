@@ -14,9 +14,9 @@ public class CombatMenu extends JFrame {
     private final ActionPanel actionPanel;
 
     public CombatMenu() {
-        setTitle(CombatMenu.TITLE);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
+        setJMenuBar(new CombatMenuBar(this));
 
         initiativeListPanel = new InitiativeListPanel();
         excessInspirationBar = new InspirationBar();

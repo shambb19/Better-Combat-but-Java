@@ -1,8 +1,9 @@
 package combat_menu.popup.damage;
 
+import damage_implements.Weapon;
+import damage_implements.Weapons;
 import main.CombatMain;
 import character_info.Combatant;
-import damage_implements.Weapon;
 import combat_menu.listener.DieRollListener;
 
 import javax.swing.*;
@@ -48,7 +49,7 @@ public class WeaponPanel extends JPanel {
         JComboBox<Weapon> box = new JComboBox<>();
         box.putClientProperty("JComponent.roundRect", true);
         weapons.forEach(box::addItem);
-        box.addItem(Weapon.MANUAL);
+        box.addItem(Weapons.MANUAL);
         return box;
     }
 
@@ -86,7 +87,6 @@ public class WeaponPanel extends JPanel {
     private void registerAttack(Combatant target, boolean success, Weapon weapon) {
         if (success) {
             new DamageAmountPopup(weapon, target).setVisible(true);
-            CombatMain.QUEUE.getCurrentCombatant().logHit();
         } else {
             informAttackFail();
         }

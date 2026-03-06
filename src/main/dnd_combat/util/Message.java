@@ -37,7 +37,6 @@ public class Message {
                 CombatMenu.TITLE,
                 JOptionPane.INFORMATION_MESSAGE
         );
-        CombatMain.QUEUE.getCurrentCombatant().logMiss();
     }
 
     public static void informHexSuccess(Combatant target) {
@@ -71,13 +70,20 @@ public class Message {
         );
     }
 
-    public static void bye() {
-        JOptionPane.showMessageDialog(
-                CombatMain.COMBAT_MENU,
-                "Goodbye! Thanks for playing!",
-                CombatMenu.TITLE,
-                JOptionPane.INFORMATION_MESSAGE
-        );
+    public static int getWithLoopUntilInt(String message, String title) {
+        int value = -1;
+        while (value < 0) {
+            String result = JOptionPane.showInputDialog(
+                null,
+                    message,
+                    title,
+                    JOptionPane.QUESTION_MESSAGE
+            );
+            try {
+                value = Integer.parseInt(result);
+            } catch (Exception ignored) {}
+        }
+        return value;
     }
 
     public static void fileError(Exception error) {

@@ -1,10 +1,11 @@
 package combat_menu.popup.damage;
 
+import damage_implements.Spell;
+import damage_implements.Weapon;
+import damage_implements.Weapons;
 import main.CombatMain;
 import character_info.Combatant;
 import damage_implements.Effect;
-import damage_implements.Spell;
-import damage_implements.Weapon;
 import combat_menu.listener.DieRollListener;
 import combat_menu.listener.IntegerFieldListener;
 
@@ -70,17 +71,21 @@ public class DamageAmountPopup extends JFrame {
         int dieSize;
         if (weapon != null) {
             damageString = weapon.getDamageString();
-            numDice = weapon.getNumDice();
-            dieSize = weapon.getDieSize();
+            numDice = weapon.numDice();
+            dieSize = weapon.dieSize();
         } else {
             damageString = spell.getDamageString();
-            numDice = spell.getNumDice();
-            dieSize = spell.getDieSize();
+            numDice = spell.numDice();
+            dieSize = spell.dieSize();
         }
 
         mainDamageField = new JTextField();
         mainDamageField.putClientProperty("JComponent.roundRect", true);
-        mainDamageField.addKeyListener(new DieRollListener(numDice, dieSize, mainDamageField));
+        if (isManual) {
+            mainDamageField.addKeyListener(new IntegerFieldListener());
+        } else {
+            mainDamageField.addKeyListener(new DieRollListener(numDice, dieSize, mainDamageField));
+        }
         mainDamageField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
@@ -113,9 +118,9 @@ public class DamageAmountPopup extends JFrame {
         }
         add(mainDamageField);
 
-        if (weapon != null && !weapon.equals(Weapon.MANUAL)) {
+        if (weapon != null && !weapon.equals(Weapons.MANUAL)) {
             add(new JLabel("+" + attacker.stats().prof() + " for Proficiency"));
-            add(new JLabel("+" + attacker.stats().mod(weapon.getMod()) + " from Stat Bonus"));
+            add(new JLabel("+" + attacker.stats().mod(weapon.stat()) + " from Stat Bonus"));
         }
 
         if (isHalfDamage) {
@@ -156,12 +161,11 @@ public class DamageAmountPopup extends JFrame {
             }
             target.damage(calculateTotal());
             if (spell != null) {
-                attacker.putEffect(target, spell.getEffect());
-                if (spell.getEffect().equals(Effect.ILLUSION)) {
+                attacker.putEffect(target, spell.effect());
+                if (spell.effect().equals(Effect.ILLUSION)) {
                     informIllusion(target);
                 }
             }
-            attacker.logDamageDealt(calculateTotal());
             CombatMain.COMBAT_MENU.update();
             CombatMain.checkWinConditions();
             dispose();
@@ -198,7 +202,7 @@ public class DamageAmountPopup extends JFrame {
         return mainDamage +
                 bonusDamage +
                 attacker.stats().prof() +
-                attacker.stats().mod(weapon.getMod());
+                attacker.stats().mod(weapon.stat());
     }
 
     /**

@@ -13,6 +13,7 @@ a pom.xml document. As such, each section will look like this:
 ~logic and such
 
 <Allies>
+
 ```
 with the header substituted for ```<Enemies>``` or ```<Scenarios>``` 
 respectively.
@@ -101,3 +102,118 @@ weapons=dagger/lance/javelin
 weapons=longsword/crossbow
 ```
 is also valid.
+
+### Putting the PC Together
+Finally, the pc uses the header code ```party``` so a correct PC will look 
+similar to the following:
+
+```text
+{party
+name=Gandalf the Grey
+hp=62
+ac=14
+spellMod=wis
+stats=str(12)/dex(14)/con(14)/int(18)/wis(20+)/cha(20+)
+weapons=Longsword/Staff
+spells=Beam of Light/Intimidate Bilbo
+spells=You Shall Not Pass/Speak Language of Mordor
+}
+```
+### Current HP
+Both NPCs and PCs have the option to set a current health. This is completely
+optional and, upon runs of the program, will be handled on the backend, but if
+you want, it can be handled with ```hpCur=value```.
+
+## Scenarios
+Scenarios allow you to combine created combatants into different encounters 
+that you can easily call at runtime. They require only a name, list of 
+included friendly NPCS ONLY and enemies. All party members are implicitly 
+included in all scenarios (you will have an option to mark them absent at 
+runtime), so they are not part of this.
+
+A correct scenario will look like this:
+
+```text
+{
+name=Korriban Duel
+with=Kao Cen Darach/Satele Shan
+against=Darth Malgus/Darth Vitiate
+}
+```
+Soon to be implemented is the ability to add quantities of a combatant.
+This will be done with an underscore and the number, like
+```against=Stormtrooper_20```
+
+## Putting it All Together
+Below is a full correct example:
+```text
+<Allies>
+
+{party
+name=Frodo Baggins
+hp=20
+ac=18
+stats=str(10)/dex(12)/con(16+)/int(13)/wis(16+)/cha(14)
+weapons=Sting
+}
+
+{party
+name=Samwise Gamgee
+hp=20
+ac=10
+stats=str(14)/dex(9)/con(16+)/int(9)/wis(16+)/cha(11)
+weapons=Dagger/Pot
+}
+
+{npc
+name=Pippin Took
+hp=20
+ac=14
+}
+
+{npc
+name=Merry Brandybuck
+hp=20
+ac=12
+}
+
+<Allies>
+
+<Enemies>
+
+{
+name=Orc
+hp=20
+ac=16
+}
+
+{
+name=Uruk-hai
+hp=40
+ac=17
+}
+
+{
+name=Nazgul
+hp=160
+ac=19
+}
+
+<Enemies>
+
+<Scenarios>
+
+{
+name=Forest Chase
+with=Pippin Took/Merry Brandybuck
+against=Nazgul_2
+}
+
+{
+name=Breaking of the Fellowship
+with=Pippin Took/Merry Brandybuck
+against=Orc_12/Uruk-hai
+}
+
+<Scenarios>
+```
