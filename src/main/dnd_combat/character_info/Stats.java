@@ -1,5 +1,7 @@
 package character_info;
 
+import util.Reader;
+
 import java.util.function.DoubleBinaryOperator;
 
 public class Stats {
@@ -21,7 +23,7 @@ public class Stats {
     private boolean chaProf;
 
     private final int proficiencyBonus;
-    private final stat spellCastingAbilityModifier;
+    private stat spellCastingAbilityModifier;
 
     /**
      * Stores str, dex, con, int, wis, cha stats, skill proficiency,
@@ -41,6 +43,31 @@ public class Stats {
             proficiencyBonus = 6;
         }
         this.spellCastingAbilityModifier = spellCastingAbilityModifier;
+    }
+
+    public void manualAdjust(String code) {
+        String[] codes = code.split("\\.");
+
+        if (codes[0].equals("spellMod")) {
+            spellCastingAbilityModifier = Reader.mod(codes[1]);
+            return;
+        }
+
+        stat stat = Reader.mod(codes[0]);
+        String val = codes[1];
+
+        int statVal;
+        boolean statProf;
+
+        assert stat != null;
+        if (val.startsWith("prof=")) {
+            statVal = get(stat);
+            statProf = val.endsWith("true");
+        } else {
+            statVal = Integer.parseInt(val);
+            statProf = isProf(stat);
+        }
+        put(stat, statVal, statProf);
     }
 
     /**

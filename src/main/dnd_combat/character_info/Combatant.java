@@ -4,6 +4,7 @@ import combat_menu.listener.DieRollListener;
 import damage_implements.Effect;
 import damage_implements.Spell;
 import damage_implements.Weapon;
+import admin.Admin;
 import util.Message;
 
 import javax.swing.*;
@@ -76,6 +77,29 @@ public class Combatant {
         this.spells = new ArrayList<>();
         if (spells != null) {
             this.spells.addAll(spells);
+        }
+    }
+
+    public void manualAdjust(String key, String value) {
+        if (key.equals(Admin.NAME_EDIT_CODE)) {
+            name = value;
+            return;
+        } else if (key.equals(Admin.SPELL_MOD_EDIT_CODE) || key.equals(Admin.STAT_EDIT_CODE)) {
+            stats.manualAdjust(value);
+            return;
+        }
+
+        int valInt = Integer.parseInt(value);
+        switch (key) {
+            case Admin.HP_EDIT_CODE -> hpMax = valInt;
+            case Admin.HP_CUR_EDIT_CODE -> {
+                if (valInt < hpCurrent) {
+                    damage(hpCurrent - valInt);
+                } else {
+                    heal(valInt - hpCurrent);
+                }
+            }
+            case Admin.AC_EDIT_CODE -> armorClass = valInt;
         }
     }
 

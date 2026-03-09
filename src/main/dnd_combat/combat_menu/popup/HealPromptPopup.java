@@ -65,7 +65,6 @@ public class HealPromptPopup extends JFrame {
                 healAmount = Integer.parseInt(healAmountInputField.getText());
             }
             target.heal(healAmount);
-            CombatMain.QUEUE.getCurrentCombatant().logHealGiven(healAmount);
 
             CombatMain.COMBAT_MENU.update();
             dispose();

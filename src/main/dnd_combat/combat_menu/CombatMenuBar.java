@@ -1,8 +1,8 @@
 package combat_menu;
 
+import admin.Admin;
 import main.CombatMain;
 import main.SystemMain;
-import util.Message;
 
 import javax.swing.*;
 
@@ -25,11 +25,19 @@ public class CombatMenuBar extends JMenuBar {
             }
         });
 
-        JMenuItem healthAdjust = new JMenuItem("Health Adjust");
-        healthAdjust.addActionListener(e -> Message.template("This doesn't do anything yet. Sorry!!"));
+        JMenuItem admin = new JMenuItem("Admin");
+        admin.addActionListener(e -> {
+            String result = JOptionPane.showInputDialog(
+                    null,
+                    "Enter admin code",
+                    "Admin",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+            Admin.logAdminRequest(result);
+        });
 
         add(end);
-        add(healthAdjust);
+        add(admin);
     }
 
 }

@@ -5,7 +5,6 @@ import scenario_info.PlayerQueue;
 import character_info.Combatant;
 import combat_menu.popup.damage.DamagePromptPopup;
 import combat_menu.popup.HealPromptPopup;
-import util.Dice;
 
 import javax.swing.*;
 import java.awt.*;
@@ -68,7 +67,7 @@ public class ActionPanel extends JPanel {
             updateTurnInformation();
 
             if (!newCurrentCombatant.lifeStatus().isConscious()) {
-                int deathSaveThrow = Dice.promptValueFromRoll("Death Save", 1, 20);
+                int deathSaveThrow = promptValueFromRoll("Death Save",20);
                 newCurrentCombatant.lifeStatus().rollDeathSave(deathSaveThrow);
             }
 
@@ -88,9 +87,8 @@ public class ActionPanel extends JPanel {
             updateTurnInformation();
 
             if (isExcessInspiration) {
-                int excessInspirationRoll = Dice.promptValueFromRoll("Inspiration", 1, 4);
+                int excessInspirationRoll = promptValueFromRoll("Inspiration",4);
                 CombatMain.COMBAT_MENU.logInspiration(excessInspirationRoll);
-                CombatMain.QUEUE.getCurrentCombatant().logInspirationRoll(excessInspirationRoll);
             }
         });
 
@@ -127,5 +125,21 @@ public class ActionPanel extends JPanel {
         Image resized = image.getScaledInstance(80, 80, Image.SCALE_SMOOTH);
 
         button.setIcon(new ImageIcon(resized));
+    }
+
+    private static int promptValueFromRoll(String rollMeaning, int dieSize) {
+        int collectedValue = -1;
+        while (collectedValue < 0 || collectedValue > dieSize) {
+            try {
+                String input = JOptionPane.showInputDialog(
+                        CombatMain.COMBAT_MENU,
+                        "Enter " + "1d" + dieSize + " roll for " + rollMeaning + ".",
+                        "Better Combat but Java",
+                        JOptionPane.QUESTION_MESSAGE
+                );
+                collectedValue = Integer.parseInt(input);
+            } catch (Exception ignored) {}
+        }
+        return collectedValue;
     }
 }

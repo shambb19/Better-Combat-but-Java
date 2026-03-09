@@ -138,7 +138,7 @@ public class CombatantInputPanel extends JPanel {
         isEnemyBox.setSelected(isEnemy);
 
         List.of(
-            namePanel, hpPanel, acPanel, levelPanel
+            namePanel, hpPanel, acPanel, hpCurPanel, levelPanel
         ).forEach(component -> getTemplateField(component).setText(""));
 
         statPanel.reset();
@@ -163,6 +163,7 @@ public class CombatantInputPanel extends JPanel {
         getTemplateField(acPanel).setText(String.valueOf(selection.ac()));
 
         if (!selection.isNPC()) {
+            getTemplateField(hpCurPanel).setText(String.valueOf(selection.hp()));
             getTemplateField(levelPanel).setText(String.valueOf(selection.level()));
 
             statPanel.setTo(selection);

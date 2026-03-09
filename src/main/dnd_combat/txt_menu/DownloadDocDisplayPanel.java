@@ -110,9 +110,10 @@ public class DownloadDocDisplayPanel extends JPanel {
     }
 
     private void download() {
+        int numRand = (int) (Math.random()*1000);
         File file = new File(
             new File(System.getProperty("user.home"), "Downloads"),
-            "New Campaign " + LocalDate.now() + ".txt"
+            "New Campaign " + LocalDate.now() + " " + numRand + ".txt"
         );
 
         try (FileWriter writer = new FileWriter(file)) {

@@ -6,6 +6,7 @@ import main.CombatMain;
 import scenario_info.Battle;
 import scenario_info.Scenario;
 import util.Message;
+import util.Reader;
 
 import javax.swing.*;
 import java.io.File;
@@ -110,14 +111,14 @@ public class BattleReader {
 
             switch (header) {
                 case "party" -> readFriendlies.add(new PartyReader(currentRead).get());
-                case "npc" -> readFriendlies.add(getNpc(currentRead, false));
+                case "npc" -> readFriendlies.add(Reader.decodeNPC(currentRead, false));
             }
         }
     }
 
     private void handleEnemies() {
         while (!enemyLines.isEmpty()) {
-            readEnemies.add(getNpc(nextElementWithoutHeader(enemyLines), true));
+            readEnemies.add(Reader.decodeNPC(nextElementWithoutHeader(enemyLines), true));
         }
     }
 
@@ -141,21 +142,6 @@ public class BattleReader {
 
             readScenarios.add(new Scenario(name, with, against));
         }
-    }
-
-    private Combatant getNpc(ArrayList<String> currentRead, boolean isEnemyTeam) {
-        String name = "name";
-        int hp = 20, ac = 10;
-        while (!currentRead.isEmpty()) {
-            String key = identifier(currentRead.getFirst());
-            String value = withoutIdentifier(currentRead.removeFirst());
-            switch (key) {
-                case "name" -> name = value;
-                case "hp" -> hp = Integer.parseInt(value);
-                case "ac" -> ac = Integer.parseInt(value);
-            }
-        }
-        return new Combatant(name, hp, ac, isEnemyTeam);
     }
 
     private ArrayList<Combatant> getCombatantsFromString(String list, ArrayList<Combatant> source) {

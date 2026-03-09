@@ -1,6 +1,8 @@
 package damage_implements;
 
 import character_info.Stats;
+import admin.Admin;
+import util.Reader;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -8,18 +10,14 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
-import static util.Reader.*;
-
 public class Spells {
+
+    // TODO add effect advantage for guiding bolt
 
     private static final ArrayList<Spell> spells = new ArrayList<>();
 
     public static final Spell MANUAL_HIT = new Spell("Manual with Hit Roll", -1, -1, null, null);
     public static final Spell MANUAL_SAVE = new Spell("Manual with Save Throw", -1, -1, null, null);
-
-    public static ArrayList<Spell> get() {
-        return spells;
-    }
 
     public static void init(URL url) {
         ArrayList<String> lines = new ArrayList<>();
@@ -41,6 +39,53 @@ public class Spells {
         decodeFile(lines);
     }
 
+    public static ArrayList<Spell> get() {
+        return spells;
+    }
+
+    public static void add(Spell spell) {
+        spells.add(spell);
+    }
+
+    public static void manualAdjust(String name, String key, String value) {
+        Spell target = null;
+        for (Spell spell : spells) {
+            if (spell.name().equals(name)) {
+                target = spell;
+            }
+        }
+        if (target == null) {
+            return;
+        }
+
+        replace(target, key, value);
+    }
+
+    private static void replace(Spell spell, String key, String value) {
+        int i = spells.indexOf(spell);
+        Spell adjusted = null;
+        switch (key) {
+            case Admin.NAME_EDIT_CODE -> adjusted = new Spell(value, spell.numDice(), spell.dieSize(), spell.savingThrow(), spell.effect());
+            case Admin.DAMAGE_EDIT_CODE -> {
+                int numDice = Reader.getNumDice(value);
+                int dieSize = Reader.getDieSize(value);
+                adjusted = new Spell(spell.name(), numDice, dieSize, spell.savingThrow(), spell.effect());
+            }
+            case Admin.STAT_EDIT_CODE -> {
+                Stats.stat stat = Reader.mod(value);
+                adjusted = new Spell(spell.name(), spell.numDice(), spell.dieSize(), stat, spell.effect());
+            }
+            case Admin.EFFECT_EDIT_CODE -> {
+                Effect effect = Effect.withRawName(value);
+                adjusted = new Spell(spell.name(), spell.numDice(), spell.dieSize(), spell.savingThrow(), effect);
+            }
+        }
+
+        if (adjusted != null) {
+            spells.set(i, adjusted);
+        }
+    }
+
     private static void decodeFile(ArrayList<String> lines) {
         while (!lines.isEmpty()) {
             ArrayList<String> currentRead = new ArrayList<>();
@@ -51,29 +96,7 @@ public class Spells {
             }
             lines.removeFirst();
 
-            String name = "name";
-            int numDice = 0, dieSize = 0;
-            Stats.stat saveThrow = null;
-            Effect effect = null;
-
-            while (!currentRead.isEmpty()) {
-                String key = identifier(currentRead.getFirst());
-                String value = withoutIdentifier(currentRead.removeFirst());
-
-                switch (key) {
-                    case "name" -> name = value;
-                    case "dmg" -> {
-                        numDice = getNumDice(value);
-                        dieSize = getDieSize(value);
-                    }
-                    case "numDice" -> numDice = Integer.parseInt(value);
-                    case "dieSize" -> dieSize = Integer.parseInt(value);
-                    case "save" -> saveThrow = mod(value);
-                    case "effect" -> effect = Effect.withRawName(value);
-                }
-            }
-
-            spells.add(new Spell(name, numDice, dieSize, saveThrow, effect));
+            spells.add(Reader.decodeSpell(currentRead));
         }
     }
 
