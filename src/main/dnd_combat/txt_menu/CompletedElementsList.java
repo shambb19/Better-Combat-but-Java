@@ -3,6 +3,7 @@ package txt_menu;
 import character_info.Combatant;
 import scenario_info.Battle;
 import scenario_info.Scenario;
+import util.Message;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionListener;
@@ -56,14 +57,12 @@ public class CompletedElementsList extends JPanel {
 
     /**
      * @param combatant the completed combatant that will be added to its pane
-     * @return true if the pane found a combatant with the same name as the parameter and
-     * removed it before adding the parameter.
      */
-    public boolean addCombatant(Combatant combatant) {
+    public void addCombatant(Combatant combatant) {
         if (combatant.isEnemy()) {
-            return enemyPane.add(combatant);
+            enemyPane.add(combatant);
         } else {
-            return friendlyPane.add(combatant);
+            friendlyPane.add(combatant);
         }
     }
 
@@ -86,11 +85,9 @@ public class CompletedElementsList extends JPanel {
 
     /**
      * @param scenario the completed scenario that will be added to its pane
-     * @return true if the pane found a scenario with the same name as the parameter and
-     * removed it before adding the parameter.
      */
-    public boolean addScenario(Scenario scenario) {
-        return scenarioPane.add(scenario);
+    public void addScenario(Scenario scenario) {
+        scenarioPane.add(scenario);
     }
 
     public void findAndLocateCopy(Combatant copy) {
@@ -145,17 +142,11 @@ public class CompletedElementsList extends JPanel {
             setViewportView(list);
         }
 
-        public boolean add(T element) {
-            boolean isDuplicate = false;
-
+        public void add(T element) {
             list.removeListSelectionListener(listener);
 
             T existingElement = hasWithName(element);
-            if (existingElement != null) {
-                model.removeElement(existingElement);
-                isDuplicate = true;
-            }
-
+            model.removeElement(existingElement);
             model.addElement(element);
             moveTemplateToLast();
 
@@ -163,8 +154,6 @@ public class CompletedElementsList extends JPanel {
 
             revalidate();
             repaint();
-
-            return isDuplicate;
         }
 
         public void remove(T element) {
@@ -210,23 +199,20 @@ public class CompletedElementsList extends JPanel {
                         selectedScenario = (Scenario) selectedValue;
                     }
 
-                    String message = "Would you like to edit " + name + "?";
-                    if (isNew) {
-                        message = "Would you like to add a " + name.toLowerCase() + "?";
+                    int route = 0;
+                    if (!isNew) {
+                        route = Message.editOrRemoveOption(name);
                     }
 
-                    int result = JOptionPane.showConfirmDialog(
-                            root,
-                            message,
-                            TxtMenu.TITLE,
-                            JOptionPane.YES_NO_OPTION
-                    );
-                    if (result == JOptionPane.YES_OPTION) {
-                        if (selectedValue instanceof Combatant) {
-                            root.editCombatant(selectedCombatant, isNew);
-                        } else {
-                            root.editScenario(selectedScenario, isNew);
+                    switch (route) {
+                        case 0 -> {
+                            if (selectedValue instanceof Combatant) {
+                                root.editCombatant(selectedCombatant, isNew);
+                            } else {
+                                root.editScenario(selectedScenario, isNew);
+                            }
                         }
+                        case 1 -> remove(selectedValue);
                     }
                 }
             };

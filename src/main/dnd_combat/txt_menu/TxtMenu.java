@@ -27,7 +27,7 @@ public class TxtMenu extends JFrame {
 
         inputPanel = new CombatantInputPanel(this);
         scenarioPanel = new ScenarioInputPanel(completedList, this);
-        displayPanel = new DownloadDocDisplayPanel(completedList);
+        displayPanel = new DownloadDocDisplayPanel();
         splitPane = new LowerSplitPane(inputPanel, scenarioPanel, displayPanel);
         construct();
     }
@@ -41,7 +41,7 @@ public class TxtMenu extends JFrame {
 
         inputPanel = new CombatantInputPanel(this);
         scenarioPanel = new ScenarioInputPanel(completedList, this);
-        displayPanel = new DownloadDocDisplayPanel(battle, completedList);
+        displayPanel = new DownloadDocDisplayPanel(battle);
         splitPane = new LowerSplitPane(inputPanel, scenarioPanel, displayPanel);
 
         construct();

@@ -1,6 +1,7 @@
 package txt_menu;
 
 import character_info.Combatant;
+import character_info.Stat;
 import character_info.Stats;
 import combat_menu.listener.IntegerFieldListener;
 
@@ -10,18 +11,18 @@ import java.util.Map;
 
 public class StatsInputPanel extends JPanel {
 
-    private final Map<JPanel, Stats.stat> statMap;
+    private final Map<JPanel, Stat> statMap;
 
     public StatsInputPanel() {
         setLayout(new GridLayout(0, 6));
 
         statMap = Map.of(
-                fieldTemplate("STR"), Stats.stat.STR,
-                fieldTemplate("DEX"), Stats.stat.DEX,
-                fieldTemplate("CON"), Stats.stat.CON,
-                fieldTemplate("INT"), Stats.stat.INT,
-                fieldTemplate("WIS"), Stats.stat.WIS,
-                fieldTemplate("CHA"), Stats.stat.CHA
+                fieldTemplate("STR"), Stat.STR,
+                fieldTemplate("DEX"), Stat.DEX,
+                fieldTemplate("CON"), Stat.CON,
+                fieldTemplate("INT"), Stat.INT,
+                fieldTemplate("WIS"), Stat.WIS,
+                fieldTemplate("CHA"), Stat.CHA
         );
 
         statMap.forEach((panel, stat) -> add(panel));
@@ -63,7 +64,7 @@ public class StatsInputPanel extends JPanel {
         Stats stats = combatant.stats();
 
         for (JPanel panel : statMap.keySet()) {
-            Stats.stat stat = statMap.get(panel);
+            Stat stat = statMap.get(panel);
 
             templateTextField(panel).setText(String.valueOf(stats.get(stat)));
         }

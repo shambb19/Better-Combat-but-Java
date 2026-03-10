@@ -1,13 +1,10 @@
 package character_info;
 
 import damage_implements.Weapon;
-import util.TxtReader;
 
 import java.util.function.DoubleUnaryOperator;
 
 public class Stats {
-
-    public enum stat {STR, DEX, CON, INT, WIS, CHA}
 
     private int level;
 
@@ -42,7 +39,7 @@ public class Stats {
             return;
         }
 
-        stat stat = TxtReader.mod(codes[0]);
+        Stat stat = Stat.get(codes[0]);
         String val = codes[1];
 
         int statVal;
@@ -56,7 +53,7 @@ public class Stats {
     /**
      * Sets the stat param to the value param.
      */
-    public void put(stat stat, int value) {
+    public void put(Stat stat, int value) {
         switch (stat) {
             case STR -> strength = value;
             case DEX -> dexterity = value;
@@ -70,7 +67,7 @@ public class Stats {
     /**
      * @return the raw stat for the given param
      */
-    public int get(stat stat) {
+    public int get(Stat stat) {
         return switch (stat) {
             case STR -> strength;
             case DEX -> dexterity;
@@ -93,7 +90,7 @@ public class Stats {
      * calculations, and adding proficiency bonus if present.
      */
     @SuppressWarnings("all")
-    public int mod(stat stat) {
+    public int mod(Stat stat) {
         DoubleUnaryOperator modCalculator = x -> (x - 10) / 2;
         return (int) switch (stat) {
             case STR -> modCalculator.applyAsDouble(strength);
@@ -113,7 +110,7 @@ public class Stats {
      * @return the stat field for which the combatant has a spell casting
      * ability modifier
      */
-    public stat spellMod() {
+    public Stat spellMod() {
         return characterClass.spellMod();
     }
 
@@ -125,13 +122,17 @@ public class Stats {
     }
 
     public int weaponAttackBonus(Weapon weapon) {
-        int str = mod(stat.STR);
-        int dex = mod(stat.DEX);
+        int str = mod(Stat.STR);
+        int dex = mod(Stat.DEX);
         return switch (weapon.stat()) {
             case STR -> str;
             case DEX -> dex;
             default -> Math.max(str, dex);
         };
+    }
+
+    public int level() {
+        return level;
     }
 
     // TODO finish implementing
@@ -146,7 +147,7 @@ public class Stats {
     @Override
     public String toString() {
         StringBuilder string = new StringBuilder("stats=");
-        for (stat stat : stat.values()) {
+        for (Stat stat : Stat.values()) {
             string.append(statString(stat));
         }
         return string.deleteCharAt(string.length() - 1).toString();
@@ -155,7 +156,7 @@ public class Stats {
     /**
      * @return The string for this specific stat using "stat" + "val" (i.e. str16)
      */
-    private String statString(stat stat) {
+    private String statString(Stat stat) {
         return stat.name().toLowerCase() + get(stat) + "/";
     }
 

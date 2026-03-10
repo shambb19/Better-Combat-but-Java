@@ -21,8 +21,6 @@ import static util.Message.template;
 
 public class DownloadDocDisplayPanel extends JPanel {
 
-    private final CompletedElementsList sibling;
-
     private JTextArea display;
 
     private static final String LINE_END = "\n";
@@ -35,9 +33,7 @@ public class DownloadDocDisplayPanel extends JPanel {
     private final ArrayList<Combatant> enemies;
     private final ArrayList<Scenario> scenarios;
 
-    public DownloadDocDisplayPanel(CompletedElementsList sibling) {
-        this.sibling = sibling;
-
+    public DownloadDocDisplayPanel() {
         friendlies = new ArrayList<>();
         enemies = new ArrayList<>();
         scenarios = new ArrayList<>();
@@ -45,9 +41,7 @@ public class DownloadDocDisplayPanel extends JPanel {
         construct();
     }
 
-    public DownloadDocDisplayPanel(Battle input, CompletedElementsList sibling) {
-        this.sibling = sibling;
-
+    public DownloadDocDisplayPanel(Battle input) {
         friendlies = input.friendlies();
         enemies = input.enemies();
         scenarios = input.scenarios();
@@ -101,8 +95,9 @@ public class DownloadDocDisplayPanel extends JPanel {
     }
 
     private void addOrReplace(ArrayList<Combatant> destination, Combatant combatant) {
-        if (sibling.addCombatant(combatant)) {
-            Combatant oldVer = Locators.getCombatantWithNameFrom(destination, combatant.name());
+        Combatant oldVer = Locators.getCombatantWithNameFrom(destination, combatant.name());
+
+        if (oldVer != null && destination.contains(oldVer)) {
             destination.set(destination.indexOf(oldVer), combatant);
         } else {
             if (combatant.isNPC()) {
@@ -111,12 +106,14 @@ public class DownloadDocDisplayPanel extends JPanel {
                 destination.addFirst(combatant);
             }
         }
+
         destination.sort(Comparator.comparing(Combatant::name));
     }
 
     private void addOrReplaceScenario(Scenario scenario) {
-        if (sibling.addScenario(scenario)) {
-            Scenario oldVer = Locators.getScenarioWithNameFrom(scenarios, scenario.name());
+        Scenario oldVer = Locators.getScenarioWithNameFrom(scenarios, scenario.name());
+
+        if (oldVer != null && scenarios.contains(oldVer)) {
             scenarios.set(scenarios.indexOf(oldVer), scenario);
         } else {
             scenarios.add(scenario);

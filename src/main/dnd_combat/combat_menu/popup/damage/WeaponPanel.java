@@ -1,5 +1,6 @@
 package combat_menu.popup.damage;
 
+import character_info.Stat;
 import character_info.Stats;
 import damage_implements.Weapon;
 import damage_implements.Weapons;
@@ -73,7 +74,7 @@ public class WeaponPanel extends JPanel {
             Stats attackerStats = attacker.stats();
 
             Weapon weapon = (Weapon) weaponsBox.getSelectedItem();
-            Stats.stat weaponStat = weapon.stat();
+            Stat weaponStat = weapon.stat();
 
             Combatant target = (Combatant) targetBox.getSelectedItem();
 

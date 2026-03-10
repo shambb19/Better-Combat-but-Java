@@ -1,7 +1,7 @@
 package util;
 
 import character_info.Combatant;
-import character_info.Stats;
+import character_info.Stat;
 import damage_implements.Effect;
 import damage_implements.Spell;
 import damage_implements.Weapon;
@@ -39,7 +39,7 @@ public class TxtReader {
                 params[0],
                 getNumDice(params[1]),
                 getDieSize(params[1]),
-                mod(params[2]),
+                Stat.get(params[2]),
                 Effect.withRawName(params[3])
         );
     }
@@ -63,7 +63,7 @@ public class TxtReader {
             params[0],
             getNumDice(params[1]),
             getDieSize(params[1]),
-            mod(params[2])
+            Stat.get(params[2])
         );
     }
 
@@ -91,23 +91,6 @@ public class TxtReader {
      */
     public static String withoutIdentifier(String line) {
         return line.substring(line.indexOf("=") + 1);
-    }
-
-    /**
-     * @param key the three-letter abbreviation for a DnD main stat
-     * @return the Stats.stat enum value associated with that abbreviation (for example, "str"
-     * would return the Strength enum value)
-     */
-    public static Stats.stat mod(String key) {
-        return switch (key.toLowerCase()) {
-            case "str" -> Stats.stat.STR;
-            case "dex" -> Stats.stat.DEX;
-            case "con" -> Stats.stat.CON;
-            case "int" -> Stats.stat.INT;
-            case "wis" -> Stats.stat.WIS;
-            case "cha" -> Stats.stat.CHA;
-            default -> null;
-        };
     }
 
     /**

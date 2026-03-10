@@ -129,6 +129,7 @@ public class CombatantInputPanel extends JPanel {
             resetAndClose();
         } catch (Exception error) {
             JOptionPane.showMessageDialog(root, "Error: " + error.getMessage(), TxtMenu.TITLE, JOptionPane.ERROR_MESSAGE);
+            error.printStackTrace();
         }
     }
 
@@ -167,7 +168,7 @@ public class CombatantInputPanel extends JPanel {
 
         if (!selection.isNPC()) {
             curHpField.setText(String.valueOf(selection.hp()));
-            levelField.setText(String.valueOf(selection.level()));
+            levelField.setText(String.valueOf(selection.stats().level()));
             classBox.setSelectedItem(selection.stats().class5e());
             statPanel.setTo(selection);
             weaponPanel.setTo(selection.weapons());

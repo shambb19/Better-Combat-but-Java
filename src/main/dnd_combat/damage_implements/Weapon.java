@@ -1,13 +1,13 @@
 package damage_implements;
 
-import character_info.Stats;
+import character_info.Stat;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 
 import static damage_implements.Weapons.MANUAL;
 
-public record Weapon(String name, int numDice, int dieSize, Stats.stat stat) {
+public record Weapon(String name, int numDice, int dieSize, Stat stat) {
 
     public String getDamageString() {
         return numDice + "d" + dieSize;

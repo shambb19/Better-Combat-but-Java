@@ -24,7 +24,6 @@ public class Combatant {
     private boolean isHealBlocked, isPoisoned;
 
     private int armorClass;
-    private int level;
     private Stats stats;
 
     private int hpMax, hpCurrent;
@@ -280,10 +279,6 @@ public class Combatant {
         hexedByList.add(hexer);
     }
 
-    public int level() {
-        return level;
-    }
-
     public void levelUp() {
         if (isNPC) {
             return;
@@ -360,7 +355,7 @@ public class Combatant {
         txt.add("ac=" + armorClass);
 
         if (!isNPC) {
-            txt.add("level=" + level);
+            txt.add("level=" + stats.level());
             txt.add("class=" + stats.class5e());
             txt.add(stats.toString());
 

@@ -2,7 +2,6 @@ package main;
 
 import combat_menu.popup.FileGetter;
 import org.apache.commons.io.FileUtils;
-import org.aspectj.util.FileUtil;
 import txt_menu.TxtMenu;
 
 import java.io.File;

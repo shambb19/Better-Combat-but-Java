@@ -3,6 +3,7 @@ package util;
 import main.CombatMain;
 import character_info.Combatant;
 import combat_menu.CombatMenu;
+import txt_menu.TxtMenu;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -86,6 +87,26 @@ public class Message {
         return value;
     }
 
+    public static int editOrRemoveOption(String name) {
+        int result = JOptionPane.showOptionDialog(
+                null,
+                "What would you like to do with " + name + "?",
+                TxtMenu.TITLE,
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                new String[] {"Edit", "Remove", "Cancel"},
+                null
+        );
+        if (result == 1) {
+            int confirm = question("Are you sure you would like to remove " + name + "?");
+            if (confirm != JOptionPane.YES_OPTION) {
+                return 2;
+            }
+        }
+        return result;
+    }
+
     public static void fileError(Exception error) {
         JOptionPane.showMessageDialog(
                 null,
@@ -106,10 +127,19 @@ public class Message {
 
     public static void template(String text) {
         JOptionPane.showMessageDialog(
-                CombatMain.COMBAT_MENU,
+                null,
                 text,
                 CombatMenu.TITLE,
                 JOptionPane.INFORMATION_MESSAGE
+        );
+    }
+
+    public static int question(String text) {
+        return JOptionPane.showConfirmDialog(
+                null,
+                text,
+                TxtMenu.TITLE,
+                JOptionPane.YES_NO_OPTION
         );
     }
 

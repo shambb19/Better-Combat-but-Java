@@ -1,10 +1,10 @@
 package combat_menu.popup.damage;
 
+import character_info.Stat;
 import damage_implements.Spell;
 import damage_implements.Spells;
 import main.CombatMain;
 import character_info.Combatant;
-import character_info.Stats;
 import damage_implements.Effect;
 
 import javax.swing.*;
@@ -134,7 +134,7 @@ public class SpellPanel extends JPanel {
                     registerAttack(target, attackVal >= target.ac(), spell);
                 }
                 case SAVE -> {
-                    Stats.stat saveType = spell.savingThrow();
+                    Stat saveType = spell.savingThrow();
                     int saveDC = 8 +
                             attacker.stats().spellAttackBonus() +
                             attacker.stats().mod(saveType);

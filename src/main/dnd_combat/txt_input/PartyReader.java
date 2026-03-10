@@ -2,6 +2,7 @@ package txt_input;
 
 import character_info.Class5e;
 import character_info.Combatant;
+import character_info.Stat;
 import character_info.Stats;
 import damage_implements.Spell;
 import damage_implements.Weapon;
@@ -72,7 +73,8 @@ public class PartyReader {
         for (String string : stat) {
             String statName = string.substring(0, 3);
             String value = string.substring(3);
-            stats.put(mod(statName), Integer.parseInt(value));
+
+            stats.put(Objects.requireNonNull(Stat.get(statName)), Integer.parseInt(value));
         }
         try {
             return stats;

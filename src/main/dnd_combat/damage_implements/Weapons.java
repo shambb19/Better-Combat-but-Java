@@ -1,15 +1,12 @@
 package damage_implements;
 
 import admin.Admin;
-import character_info.Stats;
+import character_info.Stat;
 import org.apache.commons.io.FileUtils;
 import util.TxtReader;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 
@@ -64,7 +61,7 @@ public class Weapons {
                 adjusted = new Weapon(weapon.name(), numDice, dieSize, weapon.stat());
             }
             case Admin.STAT_EDIT_CODE -> {
-                Stats.stat stat = TxtReader.mod(value);
+                Stat stat = Stat.get(value);
                 adjusted = new Weapon(weapon.name(), weapon.numDice(), weapon.dieSize(), stat);
             }
         }

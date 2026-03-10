@@ -1,6 +1,6 @@
 package damage_implements;
 
-import character_info.Stats;
+import character_info.Stat;
 import admin.Admin;
 import org.apache.commons.io.FileUtils;
 import util.TxtReader;
@@ -65,7 +65,7 @@ public class Spells {
                 adjusted = new Spell(spell.name(), numDice, dieSize, spell.savingThrow(), spell.effect());
             }
             case Admin.STAT_EDIT_CODE -> {
-                Stats.stat stat = TxtReader.mod(value);
+                Stat stat = Stat.get(value);
                 adjusted = new Spell(spell.name(), spell.numDice(), spell.dieSize(), stat, spell.effect());
             }
             case Admin.EFFECT_EDIT_CODE -> {
