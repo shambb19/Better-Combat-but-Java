@@ -7,11 +7,8 @@ import combat_menu.listener.IntegerFieldListener;
 import damage_implements.Spell;
 import damage_implements.Weapon;
 
-import static util.Swing.*;
-
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
 
 public class CombatantInputPanel extends JPanel {
@@ -21,130 +18,137 @@ public class CombatantInputPanel extends JPanel {
     private final JCheckBox isNpcBox;
     private final JCheckBox isEnemyBox;
 
-    private final JPanel namePanel;
-    private final JPanel hpPanel;
-    private final JPanel acPanel;
+    private final JTextField nameField = new JTextField(10);
+    private final JTextField maxHpField = new JTextField(5);
+    private final JTextField acField = new JTextField(5);
+    private final JTextField curHpField = new JTextField(5);
+    private final JTextField levelField = new JTextField(5);
+    private final JComboBox<Class5e> classBox = new JComboBox<>(Class5e.values());
 
-    private final JPanel hpCurPanel;
-    private final JPanel levelPanel;
-    private final JPanel spellCastPanel;
     private final StatsInputPanel statPanel;
-
     private final ListSelectionPanel<Weapon> weaponPanel;
     private final ListSelectionPanel<Spell> spellPanel;
 
-    private final JPanel infoAll;
-    private final JPanel infoPC;
+    private final JPanel listSplitPane;
 
     public CombatantInputPanel(TxtMenu root) {
         this.root = root;
-
-        setLayout(new GridLayout(0, 1));
+        setLayout(new BorderLayout(5, 5));
 
         isNpcBox = new JCheckBox("NPC?");
         isNpcBox.addActionListener(e -> toggleNpc(isNpcBox.isSelected()));
-
         isEnemyBox = new JCheckBox("Enemy?");
 
-        namePanel = fieldTemplate("Name", false);
-        hpPanel = fieldTemplate("Max HP", true);
-        acPanel = fieldTemplate("Armor Class", true);
+        List.of(
+                maxHpField, acField, curHpField, levelField
+        ).forEach(field -> field.addKeyListener(new IntegerFieldListener()));
+        classBox.setSelectedIndex(-1);
 
-        hpCurPanel = fieldTemplate("Current HP (Optional)", true);
-        levelPanel = fieldTemplate("Level", true);
-        spellCastPanel = getClassPanel();
         statPanel = new StatsInputPanel();
-
         weaponPanel = new ListSelectionPanel<>(Weapon.getAllAsList(), "Weapons");
         spellPanel = new ListSelectionPanel<>(Spell.getAllAsList(), "Spells");
 
+        JPanel headerPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(2, 5, 2, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        addComponent(headerPanel, new JLabel("Name:"), gbc, 0, 0);
+        gbc.weightx = 1.0;
+        addComponent(headerPanel, nameField, gbc, 1, 0);
+        gbc.weightx = 0;
+        addComponent(headerPanel, isNpcBox, gbc, 2, 0);
+        addComponent(headerPanel, isEnemyBox, gbc, 3, 0);
+
+        addComponent(headerPanel, new JLabel("Max HP:"), gbc, 0, 1);
+        addComponent(headerPanel, maxHpField, gbc, 1, 1);
+        addComponent(headerPanel, new JLabel("AC:"), gbc, 2, 1);
+        addComponent(headerPanel, acField, gbc, 3, 1);
+
+        addComponent(headerPanel, new JLabel("Cur HP:"), gbc, 0, 2);
+        addComponent(headerPanel, curHpField, gbc, 1, 2);
+        addComponent(headerPanel, new JLabel("Level:"), gbc, 2, 2);
+        addComponent(headerPanel, levelField, gbc, 3, 2);
+
+        addComponent(headerPanel, new JLabel("Class:"), gbc, 0, 3);
+        gbc.gridwidth = 3;
+        addComponent(headerPanel, classBox, gbc, 1, 3);
+        gbc.gridwidth = 1;
+
+        listSplitPane = new JPanel(new GridLayout(0, 1));
+        listSplitPane.add(weaponPanel);
+        listSplitPane.add(spellPanel);
+
+        JPanel northWrapper = new JPanel(new BorderLayout());
+        northWrapper.add(headerPanel, BorderLayout.NORTH);
+        northWrapper.add(statPanel, BorderLayout.SOUTH);
+
         JButton okButton = new JButton("Confirm");
         okButton.addActionListener(e -> logAndGetCombatant());
-
         JButton cancelButton = new JButton("Cancel");
         cancelButton.addActionListener(e -> root.setInputPanelEnabled(false));
 
-        infoAll = asFlowLayout(
-                List.of(namePanel, isNpcBox, isEnemyBox, hpPanel, acPanel)
-        );
-        infoPC = asFlowLayout(
-                hpCurPanel, levelPanel, spellCastPanel
-        );
+        add(northWrapper, BorderLayout.NORTH);
+        add(listSplitPane, BorderLayout.CENTER);
+        add(getButtonPanel(okButton, cancelButton), BorderLayout.SOUTH);
+    }
 
-        add(infoAll);
-        add(infoPC);
-        add(statPanel);
-        add(weaponPanel);
-        add(spellPanel);
-        add(getButtonPanel(okButton, cancelButton));
+    private void addComponent(JPanel p, Component c, GridBagConstraints gbc, int x, int y) {
+        gbc.gridx = x;
+        gbc.gridy = y;
+        p.add(c, gbc);
     }
 
     public void logAndGetCombatant() {
         try {
-            Combatant combatant;
-
+            String name = nameField.getText();
+            int hp = Integer.parseInt(maxHpField.getText());
+            int ac = Integer.parseInt(acField.getText());
             boolean isEnemy = isEnemyBox.isSelected();
-            String name = getTemplateValue(namePanel);
-            int hp = Integer.parseInt(getTemplateValue(hpPanel));
-            int ac = Integer.parseInt(getTemplateValue(acPanel));
 
-            getTemplateField(namePanel).setEnabled(true);
-
-            combatant = new Combatant(name, hp, ac, isEnemy);
+            nameField.setEnabled(true);
 
             if (isNpcBox.isSelected()) {
-                root.logCombatantCompleted(combatant);
-                toggleNpc(false);
-                root.setInputPanelEnabled(false);
+                root.logCombatantCompleted(new Combatant(name, hp, ac, isEnemy));
+                resetAndClose();
                 return;
             }
 
-            int level = Integer.parseInt(getTemplateValue(levelPanel));
-            Class5e class5e = getCharacterClass();
+            int level = Integer.parseInt(levelField.getText());
+            Class5e class5e = (Class5e) classBox.getSelectedItem();
             Stats stats = new Stats(class5e, level);
             statPanel.addTo(stats);
 
-            ArrayList<Weapon> weapons = weaponPanel.getSelected();
-            ArrayList<Spell> spells = spellPanel.getSelected();
+            Combatant combatant = new Combatant(name, hp, ac, stats, weaponPanel.getSelected(), spellPanel.getSelected());
 
-            String hpCur = getTemplateValue(hpCurPanel);
-
-            combatant = new Combatant(
-                    name, hp, ac,
-                    stats, weapons, spells
-            );
-
-            if (!hpCur.isEmpty()) {
-                combatant.setHealth(Integer.parseInt(hpCur));
+            if (!curHpField.getText().isEmpty()) {
+                combatant.setHealth(Integer.parseInt(curHpField.getText()));
             }
 
             root.logCombatantCompleted(combatant);
-            toggleNpc(false);
-            root.setInputPanelEnabled(false);
+            resetAndClose();
         } catch (Exception error) {
-            JOptionPane.showMessageDialog(
-                    root,
-                    "Error Loading Combatant: " + error.getMessage(),
-                    TxtMenu.TITLE,
-                    JOptionPane.ERROR_MESSAGE
-            );
-            error.printStackTrace();
+            JOptionPane.showMessageDialog(root, "Error: " + error.getMessage(), TxtMenu.TITLE, JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private void resetAndClose() {
+        toggleNpc(false);
+        root.setInputPanelEnabled(false);
     }
 
     public void openNew(boolean isEnemy) {
         root.setInputPanelEnabled(true);
-
         isNpcBox.setSelected(isEnemy);
         isEnemyBox.setSelected(isEnemy);
 
         List.of(
-            namePanel, hpPanel, acPanel, hpCurPanel, levelPanel
-        ).forEach(component -> getTemplateField(component).setText(""));
+            nameField, maxHpField, acField, curHpField, levelField
+        ).forEach(field -> field.setText(""));
+        nameField.setEnabled(true);
 
         statPanel.reset();
-        resetClassPanel();
-
+        classBox.setSelectedIndex(-1);
         weaponPanel.reset();
         spellPanel.reset();
 
@@ -153,23 +157,19 @@ public class CombatantInputPanel extends JPanel {
 
     public void openExisting(Combatant selection) {
         root.setInputPanelEnabled(true);
-
         isNpcBox.setSelected(selection.isNPC());
         isEnemyBox.setSelected(selection.isEnemy());
 
-        getTemplateField(namePanel).setText(selection.name());
-        getTemplateField(namePanel).setEnabled(false);
-
-        getTemplateField(hpPanel).setText(String.valueOf(selection.maxHp()));
-        getTemplateField(acPanel).setText(String.valueOf(selection.ac()));
+        nameField.setText(selection.name());
+        nameField.setEnabled(false);
+        maxHpField.setText(String.valueOf(selection.maxHp()));
+        acField.setText(String.valueOf(selection.ac()));
 
         if (!selection.isNPC()) {
-            getTemplateField(hpCurPanel).setText(String.valueOf(selection.hp()));
-            getTemplateField(levelPanel).setText(String.valueOf(selection.level()));
-
+            curHpField.setText(String.valueOf(selection.hp()));
+            levelField.setText(String.valueOf(selection.level()));
+            classBox.setSelectedItem(selection.stats().class5e());
             statPanel.setTo(selection);
-            setClassPanelTo(selection);
-
             weaponPanel.setTo(selection.weapons());
             spellPanel.setTo(selection.spells());
         }
@@ -177,80 +177,22 @@ public class CombatantInputPanel extends JPanel {
         toggleNpc(selection.isNPC());
     }
 
-    private JPanel fieldTemplate(String name, boolean isInputNum) {
-        JPanel panel = new JPanel(new FlowLayout());
-
-        JLabel label = new JLabel(name + ":");
-
-        JTextField field = new JTextField();
-        if (isInputNum) {
-            field.addKeyListener(new IntegerFieldListener());
-        }
-
-        panel.add(label);
-        panel.add(field);
-        return panel;
-    }
-
-    private JTextField getTemplateField(JPanel panel) {
-        return (JTextField) panel.getComponent(1);
-    }
-
-    private String getTemplateValue(JPanel panel) {
-        return ((JTextField) panel.getComponent(1)).getText();
-    }
-
-    @SuppressWarnings("unchecked")
-    private Class5e getCharacterClass() {
-        return (Class5e) ((JComboBox<Stats.stat>) spellCastPanel.getComponent(1)).getSelectedItem();
-    }
-
-    @SuppressWarnings("unchecked")
-    private void setClassPanelTo(Combatant combatant) {
-        ((JComboBox<Class5e>) spellCastPanel.getComponent(1)).setSelectedItem(combatant.stats().class5e());
-    }
-
-    @SuppressWarnings("unchecked")
-    private void resetClassPanel() {
-        ((JComboBox<Class5e>) spellCastPanel.getComponent(1)).setSelectedIndex(-1);
-    }
-
-    private JPanel getClassPanel() {
-        JPanel panel = new JPanel(new FlowLayout());
-
-        JLabel label = new JLabel("Class:");
-
-        JComboBox<Class5e> statsBox = new JComboBox<>();
-        for (Class5e class5e : Class5e.values()) {
-            statsBox.addItem(class5e);
-        }
-        statsBox.setSelectedIndex(-1);
-
-        panel.add(label);
-        panel.add(statsBox);
-
-        return panel;
-    }
-
-    private JPanel getButtonPanel(JButton okButton, JButton cancelButton) {
-        JPanel panel = new JPanel(new FlowLayout());
-
-        panel.add(okButton);
-        panel.add(cancelButton);
-
-        return panel;
-    }
-
     private void toggleNpc(boolean isNpc) {
-        infoAll.setVisible(true);
-
-        infoPC.setVisible(!isNpc);
         statPanel.setVisible(!isNpc);
-        weaponPanel.setVisible(!isNpc);
-        spellPanel.setVisible(!isNpc);
+        listSplitPane.setVisible(!isNpc);
+
+        curHpField.setEnabled(!isNpc);
+        levelField.setEnabled(!isNpc);
+        classBox.setEnabled(!isNpc);
 
         revalidate();
         repaint();
     }
 
+    private JPanel getButtonPanel(JButton okButton, JButton cancelButton) {
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        panel.add(okButton);
+        panel.add(cancelButton);
+        return panel;
+    }
 }

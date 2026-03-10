@@ -13,15 +13,15 @@ public class StatsInputPanel extends JPanel {
     private final Map<JPanel, Stats.stat> statMap;
 
     public StatsInputPanel() {
-        setLayout(new GridLayout(0, 3));
+        setLayout(new GridLayout(0, 6));
 
         statMap = Map.of(
-                fieldTemplate("Strength"), Stats.stat.STR,
-                fieldTemplate("Dexterity"), Stats.stat.DEX,
-                fieldTemplate("Constitution"), Stats.stat.CON,
-                fieldTemplate("Intelligence"), Stats.stat.INT,
-                fieldTemplate("Wisdom"), Stats.stat.WIS,
-                fieldTemplate("Charisma"), Stats.stat.CHA
+                fieldTemplate("STR"), Stats.stat.STR,
+                fieldTemplate("DEX"), Stats.stat.DEX,
+                fieldTemplate("CON"), Stats.stat.CON,
+                fieldTemplate("INT"), Stats.stat.INT,
+                fieldTemplate("WIS"), Stats.stat.WIS,
+                fieldTemplate("CHA"), Stats.stat.CHA
         );
 
         statMap.forEach((panel, stat) -> add(panel));
@@ -35,11 +35,8 @@ public class StatsInputPanel extends JPanel {
         JTextField field = new JTextField();
         field.addKeyListener(new IntegerFieldListener());
 
-        JCheckBox profBox = new JCheckBox("Proficient?");
-
         panel.add(label);
         panel.add(field);
-        panel.add(profBox);
 
         return panel;
     }
@@ -52,22 +49,13 @@ public class StatsInputPanel extends JPanel {
         return (JTextField) panel.getComponent(1);
     }
 
-    private boolean prof(JPanel panel) {
-        return templateCheckBox(panel).isSelected();
-    }
-
-    private JCheckBox templateCheckBox(JPanel panel) {
-        return (JCheckBox) panel.getComponent(2);
-    }
-
     public void addTo(Stats directory) {
-        statMap.forEach((panel, stat) -> directory.put(stat, val(panel), prof(panel)));
+        statMap.forEach((panel, stat) -> directory.put(stat, val(panel)));
     }
 
     public void reset() {
         for (JPanel panel : statMap.keySet()) {
             templateTextField(panel).setText("");
-            templateCheckBox(panel).setSelected(false);
         }
     }
 
@@ -78,7 +66,6 @@ public class StatsInputPanel extends JPanel {
             Stats.stat stat = statMap.get(panel);
 
             templateTextField(panel).setText(String.valueOf(stats.get(stat)));
-            templateCheckBox(panel).setSelected(stats.isProf(stat));
         }
     }
 

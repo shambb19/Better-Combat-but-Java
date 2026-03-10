@@ -2,7 +2,7 @@ package character_info;
 
 import util.TxtReader;
 
-import java.util.function.DoubleBinaryOperator;
+import java.util.function.DoubleUnaryOperator;
 
 public class Stats {
 
@@ -16,13 +16,6 @@ public class Stats {
     private int intelligence;
     private int wisdom;
     private int charisma;
-
-    private boolean strProf;
-    private boolean dexProf;
-    private boolean conProf;
-    private boolean intProf;
-    private boolean wisProf;
-    private boolean chaProf;
 
     private final Class5e characterClass;
     private int proficiencyBonus;
@@ -52,49 +45,24 @@ public class Stats {
         String val = codes[1];
 
         int statVal;
-        boolean statProf;
 
         assert stat != null;
-        if (val.startsWith("prof=")) {
-            statVal = get(stat);
-            statProf = val.endsWith("true");
-        } else {
-            statVal = Integer.parseInt(val);
-            statProf = isProf(stat);
-        }
-        put(stat, statVal, statProf);
+        statVal = Integer.parseInt(val);
+
+        put(stat, statVal);
     }
 
     /**
      * Sets the stat param to the value param.
-     * @param prof if true, logs proficiency in the stat param.
      */
-    public void put(stat stat, int value, boolean prof) {
+    public void put(stat stat, int value) {
         switch (stat) {
-            case STR -> {
-                strength = value;
-                strProf = prof;
-            }
-            case DEX -> {
-                dexterity = value;
-                dexProf = prof;
-            }
-            case CON ->  {
-                constitution = value;
-                conProf = prof;
-            }
-            case INT -> {
-                intelligence = value;
-                intProf = prof;
-            }
-            case WIS -> {
-                wisdom = value;
-                wisProf = prof;
-            }
-            case CHA -> {
-                charisma = value;
-                chaProf = prof;
-            }
+            case STR -> strength = value;
+            case DEX -> dexterity = value;
+            case CON -> constitution = value;
+            case INT -> intelligence = value;
+            case WIS -> wisdom = value;
+            case CHA -> charisma = value;
         }
     }
 
@@ -113,21 +81,6 @@ public class Stats {
     }
 
     /**
-     * @return true if the combatant has proficiency in the
-     * stat param
-     */
-    public boolean isProf(stat stat) {
-        return switch (stat) {
-            case STR -> strProf;
-            case DEX -> dexProf;
-            case CON -> conProf;
-            case INT -> intProf;
-            case WIS -> wisProf;
-            case CHA -> chaProf;
-        };
-    }
-
-    /**
      * @return the combatant's proficiency bonus
      */
     public int prof() {
@@ -140,22 +93,14 @@ public class Stats {
      */
     @SuppressWarnings("all")
     public int mod(stat stat) {
-        DoubleBinaryOperator modCalculator = (x, y) -> ((x - 10) / 2) + y;
-        int y = switch (stat) {
-            case STR -> (strProf) ? proficiencyBonus : 0;
-            case DEX -> (dexProf) ? proficiencyBonus : 0;
-            case CON -> (conProf) ? proficiencyBonus : 0;
-            case INT -> (intProf) ? proficiencyBonus : 0;
-            case WIS -> (wisProf) ? proficiencyBonus : 0;
-            case CHA -> (chaProf) ? proficiencyBonus : 0;
-        };
+        DoubleUnaryOperator modCalculator = x -> (x - 10) / 2;
         return (int) switch (stat) {
-            case STR -> modCalculator.applyAsDouble(strength, y);
-            case DEX -> modCalculator.applyAsDouble(dexterity, y);
-            case CON -> modCalculator.applyAsDouble(constitution, y);
-            case INT -> modCalculator.applyAsDouble(intelligence, y);
-            case WIS -> modCalculator.applyAsDouble(wisdom, y);
-            case CHA -> modCalculator.applyAsDouble(charisma, y);
+            case STR -> modCalculator.applyAsDouble(strength);
+            case DEX -> modCalculator.applyAsDouble(dexterity);
+            case CON -> modCalculator.applyAsDouble(constitution);
+            case INT -> modCalculator.applyAsDouble(intelligence);
+            case WIS -> modCalculator.applyAsDouble(wisdom);
+            case CHA -> modCalculator.applyAsDouble(charisma);
         };
     }
 
@@ -197,15 +142,10 @@ public class Stats {
     }
 
     /**
-     * @return The string for this specific stat using stat(val<?>+<?>)
+     * @return The string for this specific stat using "stat" + "val" (i.e. str16)
      */
     private String statString(stat stat) {
-        StringBuilder string = new StringBuilder(stat.name().toLowerCase());
-        string.append("(").append(get(stat));
-        if (isProf(stat)) {
-            string.append("+");
-        }
-        return string.append(")/").toString();
+        return stat.name().toLowerCase() + get(stat) + "/";
     }
 
     private void setProf() {

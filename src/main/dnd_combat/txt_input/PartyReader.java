@@ -69,13 +69,8 @@ public class PartyReader {
         String[] stat = statLine.split("/");
         for (String string : stat) {
             String statName = string.substring(0, 3);
-            String value = string.substring(string.indexOf("(") + 1, string.indexOf(")"));
-            boolean statProf = false;
-            if (value.charAt(value.length() - 1) == '+') {
-                statProf = true;
-                value = value.substring(0, value.length() - 1);
-            }
-            stats.put(mod(statName), Integer.parseInt(value), statProf);
+            String value = string.substring(3);
+            stats.put(mod(statName), Integer.parseInt(value));
         }
         try {
             return stats;

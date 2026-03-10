@@ -11,15 +11,16 @@ public class ListSelectionPanel<T> extends JPanel {
     private final ImplementListPane selectedList;
 
     public ListSelectionPanel(ArrayList<Object> sourceList, String name) {
-        setLayout(new GridLayout(0, 2));
+        setLayout(new BorderLayout());
 
         availableList = new ImplementListPane(sourceList, this);
         selectedList = new ImplementListPane(null, this);
 
-        add(new JLabel("Available " + name + ":"));
-        add(new JLabel("Selected " + name + ":"));
-        add(availableList);
-        add(selectedList);
+        JLabel available = new JLabel("Available " + name + ":");
+        JLabel selected = new JLabel("Selected " + name + ":");
+
+        add(horizontalPanelWith(available, selected), BorderLayout.NORTH);
+        add(horizontalPanelWith(availableList, selectedList));
     }
 
     @SuppressWarnings("unchecked")
@@ -110,6 +111,13 @@ public class ListSelectionPanel<T> extends JPanel {
             repaint();
         }
 
+    }
+
+    private JPanel horizontalPanelWith(JComponent left, JComponent right) {
+        JPanel panel = new JPanel(new GridLayout(0, 2));
+        panel.add(left);
+        panel.add(right);
+        return panel;
     }
 
 }
