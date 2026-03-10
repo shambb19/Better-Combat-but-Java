@@ -77,7 +77,7 @@ public class WeaponPanel extends JPanel {
 
             Combatant target = (Combatant) targetBox.getSelectedItem();
 
-            int hitRoll = fieldVal + attackerStats.prof() + attackerStats.mod(weaponStat);
+            int hitRoll = fieldVal + attackerStats.prof() + attackerStats.weaponAttackBonus(weapon);
 
             registerAttack(target, hitRoll >= target.ac(), weapon);
             root.dispose();

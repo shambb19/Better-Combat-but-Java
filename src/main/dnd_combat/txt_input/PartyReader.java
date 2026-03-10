@@ -46,8 +46,10 @@ public class PartyReader {
 
             switch (identifier) {
                 case "name" -> name = value;
-                case "hp" -> hp = num(value);
-                case "hpCur" -> hpCur = num(value);
+                case "hp" -> {
+                    hp = getHp(value);
+                    hpCur = getHpCur(value);
+                }
                 case "ac" -> ac = num(value);
                 case "level" -> level = num(value);
                 case "class" -> class5e = Class5e.withName(value);

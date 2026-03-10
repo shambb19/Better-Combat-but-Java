@@ -1,0 +1,39 @@
+Club,1d4,str
+Dagger,1d4,both
+Greatclub,1d8,str
+Handaxe,1d6,str
+Javelin,1d6,str
+Light Hammer,1d4,str
+Mace,1d6,str
+Quarterstaff,1d6,str
+Sickle,1d4,str
+Spear,1d6,str
+
+Light Crossbow,1d8,dex
+Dart,1d4,both
+Shortbow,1d6,dex
+Sling,1d4,dex
+
+Battleaxe,1d8,str
+Flail,1d8,str
+Glaive,1d10,str
+Greataxe,1d12,str
+Greatsword,2d6,str
+Halberd,1d10,str
+Lance,1d12,str
+Longsword,1d8,str
+Maul,2d6,str
+Morningstar,1d8,str
+Pike,1d10,str
+Rapier,1d8,both
+Scimitar,1d6,both
+Shortsword,1d6,both
+Trident,1d6,str
+War Pick,1d8,str
+Warhammer,1d8,str
+Whip,1d4,both
+
+Blowgun,1d1,dex
+Hand Crossbow,1d6,dex
+Heavy Crossbow,1d10,dex
+Longbow,1d8,dex

@@ -1,0 +1,67 @@
+<Allies>
+
+{party
+name=Rollo
+hp=35/35
+ac=16
+level=0
+class=cleric
+stats=str12/dex12/con16/int11/wis19/cha6
+weapons=Longsword/
+spells=Guiding Bolt/Ray of Frost/Sacred Flame/Starry Wisp/
+}
+
+{party
+name=Braxton
+hp=32/32
+ac=18
+level=0
+class=paladin
+stats=str16/dex8/con12/int10/wis13/cha17
+weapons=Javelin/Lance/Longsword/Quarterstaff/
+spells=Toll the Dead/Hunter's Mark/
+}
+
+{party
+name=Belladonna
+hp=18/30
+ac=14
+level=0
+class=warlock
+stats=str11/dex13/con14/int16/wis12/cha10
+weapons=Dagger/
+spells=Chill Touch/Poison Spray/Shocking Grasp/Ray of Sickness/Thunder Wave/
+}
+
+{party
+name=Drexen
+hp=27/27
+ac=11
+level=0
+class=sorcerer
+stats=str10/dex13/con12/int9/wis11/cha14
+spells=Chill Touch/Eldritch Blast/Hex/Burning Hands/Scorching Ray/
+}
+
+{party
+name=Karis Veluthra
+hp=24/24
+ac=14
+level=0
+class=rogue
+stats=str7/dex12/con11/int16/wis14/cha15
+weapons=Dagger/Light Crossbow/
+}
+
+<Allies>
+
+<Enemies>
+
+
+<Enemies>
+
+<Scenarios>
+
+
+<Scenarios>
+

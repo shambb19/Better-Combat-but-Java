@@ -210,12 +210,24 @@ public class Combatant {
         return isNPC || !weapons.isEmpty();
     }
 
+    public String weaponStr() {
+        StringBuilder weaponStr = new StringBuilder("weapons=");
+        weapons.forEach(weapon -> weaponStr.append(weapon.name()).append("/"));
+        return weaponStr.toString();
+    }
+
     public ArrayList<Spell> spells() {
         return spells;
     }
 
     public boolean hasSpells() {
         return isNPC || !spells.isEmpty();
+    }
+
+    public String spellStr() {
+        StringBuilder spellStr = new StringBuilder("spells=");
+        spells.forEach(spell -> spellStr.append(spell.name()).append("/"));
+        return spellStr.toString();
     }
 
     public Stats stats() {
@@ -344,24 +356,20 @@ public class Combatant {
         }
         txt.add(header);
         txt.add("name=" + name);
-        txt.add("hp=" + hpMax);
-        txt.add("hpCur=" + hpCurrent);
+        txt.add("hp=" + hpCurrent + "/" + hpMax);
         txt.add("ac=" + armorClass);
 
         if (!isNPC) {
             txt.add("level=" + level);
             txt.add("class=" + stats.class5e());
             txt.add(stats.toString());
-            if (weapons != null && !weapons.isEmpty()) {
-                System.out.println(weapons);
-                StringBuilder weaponStr = new StringBuilder("weapons=");
-                weapons.forEach(weapon -> weaponStr.append(weapon.name()).append("/"));
-                txt.add(weaponStr.toString());
+
+            if (!weapons.isEmpty()) {
+                txt.add(weaponStr());
             }
-            if (spells != null && !spells.isEmpty()) {
-                StringBuilder spellStr = new StringBuilder("spells=");
-                spells.forEach(spell -> spellStr.append(spell.name()).append("/"));
-                txt.add(spellStr.toString());
+
+            if (!spells.isEmpty()) {
+                txt.add(spellStr());
             }
         }
 

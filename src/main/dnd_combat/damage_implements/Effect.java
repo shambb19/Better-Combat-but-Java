@@ -2,20 +2,21 @@ package damage_implements;
 
 public enum Effect {
 
-    HEAL_BLOCK,
-    HALF_DAMAGE,
-    POISON,
-    ILLUSION,
-    BONUS_DAMAGE,
+    HEAL_BLOCK(null),
+    HALF_DAMAGE(null),
+    POISON(null),
+    ILLUSION(null),
+    BONUS_DAMAGE(null),
     //TODO add code for SPLIT_ATTACK (probably in gui.popup.damage.SpellPanel)
     // should prompt for a number of targets on [1, numRays]
-    SPLIT_ATTACK,
-    //TODO add code for FULL_HP_OPTION (probably in gui.popup.damage.DamageAmountPopup)
-    // should deal increased damage if target is on full health.
-    FULL_HP_OPTION,
-    NONE;
+    SPLIT_ATTACK(null),
+    NONE(null);
 
-    Effect() {}
+    private final String description;
+
+    Effect(final String description) {
+        this.description = description;
+    }
 
     public static Effect withRawName(String rawName) {
         for (Effect effect : values()) {

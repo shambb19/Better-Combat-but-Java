@@ -83,8 +83,8 @@ public class Admin {
         switch (ref) {
             case FRIENDLY_REF_CODE -> CombatMain.BATTLE.friendlies().add(decodeNPC(params, false));
             case ENEMY_REF_CODE -> CombatMain.BATTLE.enemies().add(decodeNPC(params, false));
-            case WEAPON_REF_CODE -> Weapons.add(decodeWeapon(params));
-            case SPELL_REF_CODE -> Spells.add(decodeSpell(params));
+            case WEAPON_REF_CODE -> Weapons.add(decodeWeapon(codes));
+            case SPELL_REF_CODE -> Spells.add(decodeSpell(codes));
         }
     }
 

@@ -1,0 +1,17 @@
+Chill Touch,1d8,null,HEAL_BLOCK
+Poison Spray,1d12,con,NONE
+Shocking Grasp,1d8,null,NONE
+Ray of Sickness,2d8,null,POISON
+Thunder Wave,2d8,con,HALF_DAMAGE
+Hellish Rebuke,2d10,dex,HALF_DAMAGE
+Phantasmal Force,2d8,int,ILLUSION
+Burning Hands,4d6,dex,HALF_DAMAGE
+Hex,1d6,wis,BONUS_DAMAGE
+Scorching Ray,2d6,null,SPLIT_ATTACK
+Eldritch Blast,1d10,null,NONE
+Toll the Dead,1d8,wis,FULL_HP_OPTION
+Hunter's Mark,1d6,null,BONUS_DAMAGE
+Ray of Frost,1d8,null,NONE
+Sacred Flame,1d8,dex,NONE
+Starry Wisp,1d8,null,NONE
+Guiding Bolt,4d6,null,NONE

@@ -2,12 +2,15 @@ package damage_implements;
 
 import admin.Admin;
 import character_info.Stats;
+import org.apache.commons.io.FileUtils;
 import util.TxtReader;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 
 public class Weapons {
@@ -16,23 +19,16 @@ public class Weapons {
     public static final Weapon MANUAL = new Weapon("Manual", -1, -1, null);
 
     public static void init(URL url) {
-        ArrayList<String> lines = new ArrayList<>();
+        File file = FileUtils.toFile(url);
+        try {
+            ArrayList<String> lines = new ArrayList<>(Files.readAllLines(file.toPath()));
 
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(url.openStream(), StandardCharsets.UTF_8))) {
-
-            String line;
-            while ((line = reader.readLine()) != null) {
-                lines.add(line);
-            }
-
+            lines.replaceAll(String::trim);
+            lines.removeIf(String::isBlank);
+            decodeFile(lines);
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        lines.replaceAll(String::trim);
-        lines.removeIf(String::isBlank);
-        decodeFile(lines);
     }
 
     public static ArrayList<Weapon> get() {
@@ -80,15 +76,8 @@ public class Weapons {
 
     public static void decodeFile(ArrayList<String> lines) {
         while (!lines.isEmpty()) {
-            ArrayList<String> currentRead = new ArrayList<>();
-
-            lines.removeFirst();
-            while (!lines.getFirst().equals("}")) {
-                currentRead.add(lines.removeFirst());
-            }
-            lines.removeFirst();
-
-            weapons.add(TxtReader.decodeWeapon(currentRead));
+            String line = lines.removeFirst();
+            weapons.add(TxtReader.decodeWeapon(line));
         }
     }
 

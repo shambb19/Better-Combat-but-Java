@@ -53,6 +53,7 @@ public class DownloadDocDisplayPanel extends JPanel {
         scenarios = input.scenarios();
 
         construct();
+        buildText();
     }
 
     private void construct() {
@@ -82,6 +83,8 @@ public class DownloadDocDisplayPanel extends JPanel {
         StringBuilder displayText = new StringBuilder();
         displayTextAsList().forEach(line -> displayText.append(line).append(LINE_END));
         display.setText(displayText.toString());
+
+        display.setCaretPosition(0);
     }
 
     public void addElement(Object selection) {

@@ -1,5 +1,6 @@
 package character_info;
 
+import damage_implements.Weapon;
 import util.TxtReader;
 
 import java.util.function.DoubleUnaryOperator;
@@ -121,6 +122,16 @@ public class Stats {
      */
     public int spellAttackBonus() {
         return mod(spellMod()) + proficiencyBonus;
+    }
+
+    public int weaponAttackBonus(Weapon weapon) {
+        int str = mod(stat.STR);
+        int dex = mod(stat.DEX);
+        return switch (weapon.stat()) {
+            case STR -> str;
+            case DEX -> dex;
+            default -> Math.max(str, dex);
+        };
     }
 
     // TODO finish implementing

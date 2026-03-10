@@ -30,61 +30,50 @@ public class TxtReader {
     }
 
     /**
-     * @param params the lines of .txt code presented (i.e. name=Fireball or effect=BONUS_DAMAGE)
+     * @param params the separated parameters of the weapon object
+     *               (for example: {"Fireball", "8d6", "dex", "HALF_DAMAGE"}) to be decoded.
      * @return a completed Spell object based on the given parameters
      */
-    public static Spell decodeSpell(ArrayList<String> params) {
-        String name = "name";
-        int numDice = 0, dieSize = 0;
-        Stats.stat saveThrow = null;
-        Effect effect = null;
-
-        while (!params.isEmpty()) {
-            String key = identifier(params.getFirst());
-            String value = withoutIdentifier(params.removeFirst());
-
-            switch (key) {
-                case "name" -> name = value;
-                case "dmg" -> {
-                    numDice = getNumDice(value);
-                    dieSize = getDieSize(value);
-                }
-                case "numDice" -> numDice = Integer.parseInt(value);
-                case "dieSize" -> dieSize = Integer.parseInt(value);
-                case "save" -> saveThrow = mod(value);
-                case "effect" -> effect = Effect.withRawName(value);
-            }
-        }
-
-        return new Spell(name, numDice, dieSize, saveThrow, effect);
+    public static Spell decodeSpell(String[] params) {
+        return new Spell(
+                params[0],
+                getNumDice(params[1]),
+                getDieSize(params[1]),
+                mod(params[2]),
+                Effect.withRawName(params[3])
+        );
     }
 
     /**
-     * @param params the lines of .txt code presented (i.e. name=Crossbow or dieSize=10)
+     * @param line the line of .txt code presented (i.e. "Fireball,8d6,dex,HALF_DAMAGE")
+     * @return a completed Spell object based on the given parameters
+     */
+    public static Spell decodeSpell(String line) {
+        String[] params = line.split(",");
+        return decodeSpell(params);
+    }
+
+    /**
+     * @param params the separated parameters of the weapon object
+     *               (for example: {"Dagger", "1d4", "both"}) to be decoded.
      * @return a completed Weapon object based on the given parameters
      */
-    public static Weapon decodeWeapon(ArrayList<String> params) {
-        String name = "name";
-        int numDice = 0, dieSize = 0;
-        Stats.stat stat = null;
+    public static Weapon decodeWeapon(String[] params) {
+        return new Weapon(
+            params[0],
+            getNumDice(params[1]),
+            getDieSize(params[1]),
+            mod(params[2])
+        );
+    }
 
-        while (!params.isEmpty()) {
-            String key = identifier(params.getFirst());
-            String value = withoutIdentifier(params.removeFirst());
-
-            switch (key) {
-                case "name" -> name = value;
-                case "dmg" -> {
-                    numDice = getNumDice(value);
-                    dieSize = getDieSize(value);
-                }
-                case "numDice" -> numDice = Integer.parseInt(value);
-                case "dieSize" -> dieSize = Integer.parseInt(value);
-                case "stat" -> stat = mod(value);
-            }
-        }
-
-        return new Weapon(name, numDice, dieSize, stat);
+    /**
+     * @param line the line of .txt code presented (i.e. "Dagger,1d4,both")
+     * @return a completed Weapon object based on the given parameters
+     */
+    public static Weapon decodeWeapon(String line) {
+        String[] params = line.split(",");
+        return decodeWeapon(params);
     }
 
     /**
@@ -135,6 +124,22 @@ public class TxtReader {
      */
     public static int getDieSize(String fullString) {
         return Integer.parseInt(fullString.split("d")[1]);
+    }
+
+    /**
+     * @param fullString A hp value in traditional hp notation cur/max (i.e. 6/10)
+     * @return the maximum hp value as int (for example, "6/10" returns 10)
+     */
+    public static int getHp(String fullString) {
+        return Integer.parseInt(fullString.split("/")[1]);
+    }
+
+    /**
+     * @param fullString A hp value in traditional hp notation cur/max (i.e. 6/10)
+     * @return the current hp value as int (for example, "6/10" returns 6)
+     */
+    public static int getHpCur(String fullString) {
+        return Integer.parseInt(fullString.split("/")[0]);
     }
 
 }

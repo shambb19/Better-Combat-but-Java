@@ -10,6 +10,13 @@ import java.util.Objects;
 
 public class SystemMain {
 
+    public static final String[] initOptions = {
+            "Run Combat",
+            "New Campaign",
+            "Open Campaign",
+            "Load Kyreun Campaign"
+    };
+
     public static final URL WEAPON_RES = SystemMain.class.getResource("/weapons.txt");
     public static final URL SPELL_RES = SystemMain.class.getResource("/spells.txt");
 
@@ -40,14 +47,15 @@ public class SystemMain {
                 JOptionPane.DEFAULT_OPTION,
                 JOptionPane.QUESTION_MESSAGE,
                 ICON,
-                new String[] {"Run Combat", "Create New Campaign", "Edit Existing Campaign"},
+                initOptions,
                 null
         );
 
         switch (result) {
             case 0 -> CombatMain.run();
             case 1 -> CreatorMain.run();
-            case 2 -> CreatorMain.runWithInput();
+            case 2 -> CreatorMain.runWithPrompt();
+            case 3 -> CreatorMain.runDefault();
         }
     }
 

@@ -2,12 +2,12 @@ package damage_implements;
 
 import character_info.Stats;
 import admin.Admin;
+import org.apache.commons.io.FileUtils;
 import util.TxtReader;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 
 public class Spells {
@@ -20,23 +20,16 @@ public class Spells {
     public static final Spell MANUAL_SAVE = new Spell("Manual with Save Throw", -1, -1, null, null);
 
     public static void init(URL url) {
-        ArrayList<String> lines = new ArrayList<>();
+        File file = FileUtils.toFile(url);
+        try {
+            ArrayList<String> lines = new ArrayList<>(Files.readAllLines(file.toPath()));
 
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(url.openStream(), StandardCharsets.UTF_8))) {
-
-            String line;
-            while ((line = reader.readLine()) != null) {
-                lines.add(line);
-            }
-
+            lines.replaceAll(String::trim);
+            lines.removeIf(String::isBlank);
+            decodeFile(lines);
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        lines.replaceAll(String::trim);
-        lines.removeIf(String::isBlank);
-        decodeFile(lines);
     }
 
     public static ArrayList<Spell> get() {
@@ -88,15 +81,8 @@ public class Spells {
 
     private static void decodeFile(ArrayList<String> lines) {
         while (!lines.isEmpty()) {
-            ArrayList<String> currentRead = new ArrayList<>();
-
-            lines.removeFirst();
-            while (!lines.getFirst().equals("}")) {
-                currentRead.add(lines.removeFirst());
-            }
-            lines.removeFirst();
-
-            spells.add(TxtReader.decodeSpell(currentRead));
+            String line = lines.removeFirst();
+            spells.add(TxtReader.decodeSpell(line));
         }
     }
 
