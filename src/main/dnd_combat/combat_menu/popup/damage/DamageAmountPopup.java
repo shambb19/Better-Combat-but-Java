@@ -8,6 +8,7 @@ import character_info.combatant.Combatant;
 import damage_implements.Effect;
 import combat_menu.listener.DieRollListener;
 import combat_menu.listener.IntegerFieldListener;
+import util.Message;
 
 import javax.swing.*;
 import java.awt.*;
@@ -164,6 +165,11 @@ public class DamageAmountPopup extends JFrame {
                 if (spell.effect().equals(Effect.ILLUSION)) {
                     informIllusion(target);
                 }
+                if (spell.effect().equals(Effect.ADVANTAGE_SOON)) {
+                    String message = "Roll with advantage if you attack " + target +
+                            " again this turn. You will lose the bonus otherwise!";
+                    Message.template(message);
+                }
             }
             CombatMain.COMBAT_MENU.update();
             CombatMain.checkWinConditions();
@@ -210,7 +216,7 @@ public class DamageAmountPopup extends JFrame {
     private void updateButtonText() {
         int damage = calculateTotal();
         if (damage <= 0) {
-            okButton.setText("Deal Damage");
+            okButton.setText("Enter Damage to Attack");
             okButton.setEnabled(false);
         } else {
             okButton.setText("Deal " + damage + " Damage");

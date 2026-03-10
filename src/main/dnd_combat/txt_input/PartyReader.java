@@ -38,8 +38,8 @@ public class PartyReader {
         ArrayList<Spell> spells = new ArrayList<>();
 
         while (!lines.isEmpty()) {
-            String identifier = identifier(lines.getFirst());
-            String value = withoutIdentifier(lines.removeFirst());
+            String identifier = key(lines.getFirst());
+            String value = value(lines.removeFirst());
 
             switch (identifier) {
                 case "name" -> name = value;
@@ -50,7 +50,7 @@ public class PartyReader {
                 case "ac" -> ac = num(value);
                 case "level" -> level = num(value);
                 case "class" -> class5e = Class5e.withName(value);
-                case "stats" -> stats = getStats(value, level, class5e);
+                case "stats" -> stats = addStats(value, level, class5e);
                 case "weapons" -> addWeapons(weapons, value);
                 case "spells" -> addSpells(spells, value);
             }
@@ -62,10 +62,10 @@ public class PartyReader {
         return combatant;
     }
 
-    private Stats getStats(String statLine, int level, Class5e characterClass) {
+    private Stats addStats(String statLine, int level, Class5e characterClass) {
         Stats stats = new Stats(characterClass, level);
 
-        String[] stat = statLine.split("/");
+        String[] stat = statLine.split(",");
         for (String string : stat) {
             String statName = string.substring(0, 3);
             String value = string.substring(3);
@@ -76,7 +76,7 @@ public class PartyReader {
     }
 
     private void addWeapons(ArrayList<Weapon> host, String line) {
-        String[] weapons = line.split("/");
+        String[] weapons = line.split(",");
         for (String weapon : weapons) {
             host.add(Weapon.get(weapon));
         }
@@ -84,7 +84,7 @@ public class PartyReader {
     }
 
     private void addSpells(ArrayList<Spell> host, String line) {
-        String[] spells = line.split("/");
+        String[] spells = line.split(",");
         for (String spell : spells) {
             Spell newSpell = Spell.get(spell);
             if (newSpell != null) {

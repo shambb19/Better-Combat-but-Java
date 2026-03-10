@@ -19,8 +19,8 @@ public class TxtReader {
         String name = "name";
         int hp = 20, ac = 10;
         while (!params.isEmpty()) {
-            String key = identifier(params.getFirst());
-            String value = withoutIdentifier(params.removeFirst());
+            String key = key(params.getFirst());
+            String value = value(params.removeFirst());
             switch (key) {
                 case "name" -> name = value;
                 case "hp" -> hp = getHp(value);
@@ -82,16 +82,16 @@ public class TxtReader {
      * @return only the identifier for that line without the '=' (for example,
      * "name=Frodo" would return "Frodo")
      */
-    public static String identifier(String line) {
-        return line.substring(0, line.indexOf("="));
+    public static String key(String line) {
+        return line.split(" <= ")[0];
     }
 
     /**
      * @param line any line of .txt code (name=Frodo, level=6, effect=NONE, etc.)
      * @return only the value for that line (for example, "name=Frodo" would return "Frodo")
      */
-    public static String withoutIdentifier(String line) {
-        return line.substring(line.indexOf("=") + 1);
+    public static String value(String line) {
+        return line.split(" <= ")[1];
     }
 
     /**

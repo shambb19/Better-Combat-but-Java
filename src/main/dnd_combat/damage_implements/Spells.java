@@ -10,8 +10,6 @@ import java.util.ArrayList;
 
 public class Spells {
 
-    // TODO add effect advantage for guiding bolt
-
     private static final ArrayList<Spell> spells = new ArrayList<>();
 
     public static final Spell MANUAL_HIT = new Spell("Manual with Hit Roll", -1, -1, null, null);

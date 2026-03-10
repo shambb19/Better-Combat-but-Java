@@ -130,7 +130,7 @@ public class Stats {
      */
     @Override
     public String toString() {
-        StringBuilder string = new StringBuilder("stats=");
+        StringBuilder string = new StringBuilder("stats <= ");
         for (Stat stat : Stat.values()) {
             string.append(statString(stat));
         }
@@ -141,7 +141,7 @@ public class Stats {
      * @return The string for this specific stat using "stat" + "val" (i.e. str16)
      */
     private String statString(Stat stat) {
-        return stat.name().toLowerCase() + get(stat) + "/";
+        return stat.name().toLowerCase() + get(stat) + ",";
     }
 
     private void setProf() {

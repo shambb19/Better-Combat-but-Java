@@ -4,12 +4,12 @@ import _main.CombatMain;
 import character_info.combatant.PC;
 import combat_menu.CombatMenu;
 import txt_input.CampaignWriter;
-import util.Message;
 
 import javax.swing.*;
 import java.awt.*;
 
 import static util.Message.confirmIf;
+import static util.Message.template;
 
 public class CombatEndPopup extends JFrame {
 
@@ -47,7 +47,8 @@ public class CombatEndPopup extends JFrame {
             String message = "As of v3.4.0, only proficiency bonuses are handled internally. " +
                     "All other changes (hp, stats, etc.) need to be manually entered in the Campaign Creator " +
                     "for now. If you buy Braden a Red Bull he might fix that :P";
-            Message.template(message);
+            template(message);
+
             button.setEnabled(false);
             button.setText("Party Level Increased");
         });
@@ -62,6 +63,11 @@ public class CombatEndPopup extends JFrame {
             JFileChooser fileChooser = new JFileChooser(new CampaignWriter().getFile());
             int result = fileChooser.showSaveDialog(CombatMain.COMBAT_MENU);
             if (result == JFileChooser.APPROVE_OPTION) {
+                String message = "Downloaded to the Downloads folder! Note that all dead NPCs and unconscious enemies " +
+                        "have been removed from the campaign. If this is a mistake, you can manually edit the old file to match " +
+                        "the conditions after this encounter, or you can re-add them in the Campaign Creator.";
+                template(message);
+
                 button.setText("Re-download .txt File");
                 setVisible(true);
             }

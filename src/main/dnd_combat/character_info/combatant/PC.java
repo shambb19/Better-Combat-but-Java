@@ -47,9 +47,9 @@ public class PC extends Combatant {
     }
 
     public String weaponStr() {
-        StringBuilder weaponStr = new StringBuilder("weapons=");
-        weapons.forEach(weapon -> weaponStr.append(weapon.name()).append("/"));
-        return weaponStr.toString();
+        StringBuilder weaponStr = new StringBuilder("weapons <= ");
+        weapons.forEach(weapon -> weaponStr.append(weapon.name()).append(","));
+        return weaponStr.deleteCharAt(weaponStr.length() - 1).toString();
     }
 
     public ArrayList<Spell> spells() {
@@ -57,9 +57,9 @@ public class PC extends Combatant {
     }
 
     public String spellStr() {
-        StringBuilder spellStr = new StringBuilder("spells=");
-        spells.forEach(spell -> spellStr.append(spell.name()).append("/"));
-        return spellStr.toString();
+        StringBuilder spellStr = new StringBuilder("spells <= ");
+        spells.forEach(spell -> spellStr.append(spell.name()).append(","));
+        return spellStr.deleteCharAt(spellStr.length() - 1).toString();
     }
 
     public Stats stats() {
@@ -98,11 +98,11 @@ public class PC extends Combatant {
     public ArrayList<String> toTxt() {
         ArrayList<String> txt = new ArrayList<>();
         txt.add(".party");
-        txt.add("name=" + name);
-        txt.add("hp=" + hpCurrent + "/" + hpMax);
-        txt.add("ac=" + armorClass);
-        txt.add("level=" + stats.level());
-        txt.add("class=" + stats.class5e());
+        txt.add("name <= " + name);
+        txt.add("hp <= " + hpCurrent + "/" + hpMax);
+        txt.add("ac <= " + armorClass);
+        txt.add("level <= " + stats.level());
+        txt.add("class <= " + stats.class5e());
         txt.add(stats.toString());
 
         if (!weapons.isEmpty()) {

@@ -2,6 +2,7 @@ package txt_input;
 
 import _main.CombatMain;
 import character_info.combatant.Combatant;
+import character_info.combatant.PC;
 import scenario_info.Scenario;
 import util.Message;
 
@@ -60,8 +61,16 @@ public class CampaignWriter {
     private void writeCombatants() {
         code.add(COMBATANT_HEADER);
         code.add(LINE);
-        friendlySource.forEach(c -> code.addAll(c.toTxt()));
-        enemySource.forEach(c -> code.addAll(c.toTxt()));
+        friendlySource.forEach(c -> {
+            if (c instanceof PC || c.lifeStatus().isAlive()) {
+                code.addAll(c.toTxt());
+            }
+        });
+        enemySource.forEach(c -> {
+            if (c.lifeStatus().isConscious()) {
+                code.addAll(c.toTxt());
+            }
+        });
     }
 
     private void writeScenarios() {
@@ -78,6 +87,10 @@ public class CampaignWriter {
     }
 
     public File getFile() {
+        code = new ArrayList<>();
+        writeCombatants();
+        writeScenarios();
+
         try (FileWriter writer = new FileWriter(file)) {
             code.forEach(line -> {
                 try {

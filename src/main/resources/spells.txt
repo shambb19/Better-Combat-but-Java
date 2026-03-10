@@ -14,4 +14,4 @@ Hunter's Mark,1d6,null,BONUS_DAMAGE
 Ray of Frost,1d8,null,NONE
 Sacred Flame,1d8,dex,NONE
 Starry Wisp,1d8,null,NONE
-Guiding Bolt,4d6,null,NONE
+Guiding Bolt,4d6,null,ADVANTAGE_SOON

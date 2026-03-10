@@ -16,7 +16,7 @@ Each individual combatant or scenario is also headed by a code with the syntax
 
 
 Finally, individual parameters must be written without spaces and in all
-lowercase, like ```key=value```.
+lowercase, like ```key <= value```.
 ***
 
 ## Part 2: NPCs and Enemies
@@ -31,9 +31,9 @@ following:
 
 ```text
 .npc
-name=Elrond
-hp=42
-ac=14
+name <= Elrond
+hp <= 42/42
+ac <= 14
 ```
 
 Enemies are formatted identically to NPCs but with the header code ```.enemy```.
@@ -51,22 +51,22 @@ PCs have the same three parameters as NPCs as well as the following:
 Level is self-explanatory, but for the others:
 
 ### Class
-This is written like ```class=bard``` with that key and the class written in
+This is written like ```class <= bard``` with that key and the class written in
 lowercase.
 
 ### Main Field Stats
-These are written like ```stats=str12/dex10/con16/int16/wis12/cha10```
-with that key. Stats are separated by ```/```. Each stat has its abbreviation and value
+These are written like ```stats <= str12,dex10,con16,int16,wis12,cha10```
+with that key. Stats are separated by ```,```. Each stat has its abbreviation and value
 with no separation.
 
 ### Weapons and Spells
-These are written in a list like ```weapons=Dagger/Longsword``` or
-```spells=Eldritch Blast/Toll the Dead/Hex```, with lowercase and 
-underscore-separated words, separated by ```/```. If a combatant has many,
+These are written in a list like ```weapons <= Dagger,Longsword``` or
+```spells <= Eldritch Blast,Toll the Dead,Hex```, with lowercase and 
+underscore-separated words, separated by ```,```. If a combatant has many,
 they can be split to multiple lines for readability. For example,
 ```
-weapons=dagger/lance/javelin
-weapons=longsword/crossbow
+weapons <= Dagger,Lance,Javelin
+weapons <= Longsword,Crossbow
 ```
 is also valid.
 
@@ -76,31 +76,30 @@ similar to the following:
 
 ```text
 .party
-name=Gandalf the Grey
-hp=48/62
-ac=14
-spellMod=wis
-stats=str12/dex14/con14/int18/wis20/cha20
-weapons=Longsword/Staff
-spells=Beam of Light/Intimidate Bilbo
-spells=You Shall Not Pass/Speak Language of Mordor
-}
+name <= Gandalf the Grey
+hp <= 48/62
+ac <= 14
+spellMod <= wis
+stats <= str12,dex14,con14,int18,wis20,cha20
+weapons <= Longsword,Staff
+spells <= Beam of Light,Intimidate Bilbo
+spells <= You Shall Not Pass,Speak Language of Mordor
 ```
 
 ## Scenarios
 Scenarios allow you to combine created combatants into different encounters 
 that you can easily call at runtime. They require only a name, list of 
-included friendly NPCS ONLY and enemies. All party members are implicitly 
+included friendly NPCs ONLY and enemies. All party members are implicitly 
 included in all scenarios (you will have an option to mark them absent at 
-runtime), so they are not part of this.
+runtime), so they are not part of this. Multiples of combatants are allowed.
 
 A correct scenario will look like this:
 
 ```text
 .scenario
-name=Korriban Duel
-with=Kao Cen Darach/Satele Shan
-against=Darth Malgus/Darth Vitiate
+name <= Korriban Duel
+with <= Kao Cen Darach,Satele Shan
+against <= Darth Malgus,Darth Vitiate,Sith Trooper,Sith Trooper
 ```
 
 ## Putting it All Together
@@ -109,56 +108,56 @@ Below is a full correct example:
 <Combatants>
 
 .party
-name=Frodo Baggins
-hp=20
-ac=18
-class=fighter
-stats=str10/dex12/con16/int13/wis16/cha14
-weapons=Sting
+name <= Frodo Baggins
+hp <= 20/20
+ac <= 18
+class <= fighter
+stats <= str10,dex12,con16,int13,wis16,cha14
+weapons <= Sting
 
 .party
-name=Samwise Gamgee
-hp=20
-ac=10
-class=paladin
-stats=str14/dex9/con16/int9/wis16/cha11
-weapons=Dagger/Pot
+name <= Samwise Gamgee
+hp <= 20/20
+ac <= 10
+class <= paladin
+stats <= str14,dex9,con16,int9,wis16,cha11
+weapons <= Dagger,Pot
 
 .npc
-name=Pippin Took
-hp=20
-ac=14
+name <= Pippin Took
+hp <= 20/20
+ac <= 14
 
 .npc
-name=Merry Brandybuck
-hp=20
-ac=12
+name <= Merry Brandybuck
+hp <= 20/20
+ac <= 12
 
 .enemy
-name=Orc
-hp=20
-ac=16
+name <= Orc
+hp <= 20/20
+ac <= 16
 
 .enemy
-name=Uruk-hai
-hp=40
-ac=17
+name <= Uruk-hai
+hp <= 40/40
+ac <= 17
 
 .enemy
-name=Nazgul
-hp=160
-ac=19
+name <= Nazgul
+hp <= 160/160
+ac <= 19
 
 
 <Scenarios>
 
 .scenario
-name=Forest Chase
-with=Pippin Took/Merry Brandybuck
-against=Nazgul_2
+name <= Forest Chase
+with <= Pippin Took,Merry Brandybuck
+against <= Nazgul
 
 .scenario
-name=Breaking of the Fellowship
-with=Pippin Took/Merry Brandybuck
-against=Orc_12/Uruk-hai
+name <= Breaking of the Fellowship
+with <= Pippin Took,Merry Brandybuck
+against <= Orc,Orc,Uruk-hai
 ```

@@ -2,21 +2,18 @@ package damage_implements;
 
 public enum Effect {
 
-    HEAL_BLOCK(null),
-    HALF_DAMAGE(null),
-    POISON(null),
-    ILLUSION(null),
-    BONUS_DAMAGE(null),
+    HEAL_BLOCK,
+    HALF_DAMAGE,
+    POISON,
+    ILLUSION,
+    BONUS_DAMAGE,
     //TODO add code for SPLIT_ATTACK (probably in gui.popup.damage.SpellPanel)
     // should prompt for a number of targets on [1, numRays]
-    SPLIT_ATTACK(null),
-    NONE(null);
+    SPLIT_ATTACK,
+    ADVANTAGE_SOON,
+    NONE;
 
-    private final String description;
-
-    Effect(final String description) {
-        this.description = description;
-    }
+    Effect() {}
 
     public static Effect withRawName(String rawName) {
         for (Effect effect : values()) {

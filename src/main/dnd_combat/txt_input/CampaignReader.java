@@ -106,8 +106,8 @@ public class CampaignReader {
             ArrayList<Combatant> against = new ArrayList<>();
 
             while (!currentRead.isEmpty()) {
-                String key = identifier(currentRead.getFirst());
-                String value = withoutIdentifier(currentRead.removeFirst());
+                String key = key(currentRead.getFirst());
+                String value = value(currentRead.removeFirst());
                 switch (key) {
                     case "name" -> name = value;
                     case "with" -> with = getCombatantsFromString(value, readFriendlies);
