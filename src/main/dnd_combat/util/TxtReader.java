@@ -1,6 +1,7 @@
 package util;
 
-import character_info.Combatant;
+import character_info.combatant.Combatant;
+import character_info.combatant.NPC;
 import character_info.Stat;
 import damage_implements.Effect;
 import damage_implements.Spell;
@@ -22,11 +23,11 @@ public class TxtReader {
             String value = withoutIdentifier(params.removeFirst());
             switch (key) {
                 case "name" -> name = value;
-                case "hp" -> hp = Integer.parseInt(value);
+                case "hp" -> hp = getHp(value);
                 case "ac" -> ac = Integer.parseInt(value);
             }
         }
-        return new Combatant(name, hp, ac, isEnemyTeam);
+        return new NPC(name, hp, ac, isEnemyTeam);
     }
 
     /**

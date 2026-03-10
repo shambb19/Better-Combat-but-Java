@@ -1,8 +1,7 @@
 package combat_menu;
 
-import admin.Admin;
-import main.CombatMain;
-import main.SystemMain;
+import _main.CombatMain;
+import _main.SystemMain;
 
 import javax.swing.*;
 
@@ -25,19 +24,7 @@ public class CombatMenuBar extends JMenuBar {
             }
         });
 
-        JMenuItem admin = new JMenuItem("Admin");
-        admin.addActionListener(e -> {
-            String result = JOptionPane.showInputDialog(
-                    null,
-                    "Enter admin code",
-                    "Admin",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
-            Admin.logAdminRequest(result);
-        });
-
         add(end);
-        add(admin);
     }
 
 }

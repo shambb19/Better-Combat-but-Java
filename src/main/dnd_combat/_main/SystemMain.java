@@ -1,4 +1,4 @@
-package main;
+package _main;
 
 import com.formdev.flatlaf.intellijthemes.FlatSpacegrayIJTheme;
 import damage_implements.Spells;

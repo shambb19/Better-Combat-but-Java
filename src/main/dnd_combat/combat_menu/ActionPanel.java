@@ -1,8 +1,8 @@
 package combat_menu;
 
-import main.CombatMain;
+import _main.CombatMain;
 import scenario_info.PlayerQueue;
-import character_info.Combatant;
+import character_info.combatant.Combatant;
 import combat_menu.popup.damage.DamagePromptPopup;
 import combat_menu.popup.HealPromptPopup;
 
@@ -18,6 +18,7 @@ public class ActionPanel extends JPanel {
     private final JTextArea turnInformation = new JTextArea();
     private final JProgressBar currentCombatantHealthBar;
     private final JButton healButton;
+    private final JButton inspirationButton;
 
     private enum icons {ATTACK, HEAL, INSPIRATION, END_TURN}
     Map<icons, String> buttonPics = Map.of(
@@ -31,8 +32,6 @@ public class ActionPanel extends JPanel {
         queue = CombatMain.QUEUE;
 
         setLayout(new GridLayout(0, 1));
-
-        updateTurnInformation();
 
         currentCombatantHealthBar = new JProgressBar();
         currentCombatantHealthBar.setStringPainted(true);
@@ -49,12 +48,19 @@ public class ActionPanel extends JPanel {
         healButton.setToolTipText("Heal");
         setIcon(healButton, icons.HEAL);
 
+        inspirationButton = new JButton();
+        inspirationButton.addActionListener(e -> useInspiration());
+        inspirationButton.setToolTipText("Use Inspiration");
+        setIcon(inspirationButton, icons.INSPIRATION);
+
         add(turnInformation);
         add(currentCombatantHealthBar);
         add(attackButton);
         add(healButton);
-        add(getInspirationUsedButton());
+        add(inspirationButton);
         add(getEndTurnButton());
+
+        updateTurnInformation();
     }
 
     private JButton getEndTurnButton() {
@@ -77,31 +83,27 @@ public class ActionPanel extends JPanel {
         return endTurnButton;
     }
 
-    private JButton getInspirationUsedButton() {
-        JButton inspirationButton = new JButton();
-        setIcon(inspirationButton, icons.INSPIRATION);
-        inspirationButton.setToolTipText("Use Inspiration");
+    private void useInspiration() {
+        boolean isExcessInspiration = queue.getCurrentCombatant().useInspirationAndCheckExcess();
+        updateTurnInformation();
 
-        inspirationButton.addActionListener(e -> {
-            boolean isExcessInspiration = queue.getCurrentCombatant().useInspirationAndCheckExcess();
-            updateTurnInformation();
-
-            if (isExcessInspiration) {
-                int excessInspirationRoll = promptValueFromRoll("Inspiration",4);
-                CombatMain.COMBAT_MENU.logInspiration(excessInspirationRoll);
-            }
-        });
-
-        return inspirationButton;
+        if (isExcessInspiration) {
+            int excessInspirationRoll = promptValueFromRoll("Inspiration",4);
+            CombatMain.COMBAT_MENU.logInspiration(excessInspirationRoll);
+        }
     }
 
     public void updateTurnInformation() {
         turnInformation.setText(queue.getCurrentCombatant().actionList());
+
         if (queue.getCurrentCombatant().isEnemy()) {
             turnInformation.setForeground(new Color(122, 160, 245));
+            inspirationButton.setEnabled(false);
         } else {
             turnInformation.setForeground(Color.WHITE);
+            inspirationButton.setEnabled(true);
         }
+
         turnInformation.setEditable(false);
     }
 

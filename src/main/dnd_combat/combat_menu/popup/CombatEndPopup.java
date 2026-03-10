@@ -1,16 +1,15 @@
 package combat_menu.popup;
 
+import _main.CombatMain;
+import character_info.combatant.PC;
 import combat_menu.CombatMenu;
-import main.CombatMain;
-import character_info.Combatant;
 import txt_input.CampaignWriter;
 import util.Message;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
 
-import static util.Message.*;
+import static util.Message.confirmIf;
 
 public class CombatEndPopup extends JFrame {
 
@@ -40,7 +39,11 @@ public class CombatEndPopup extends JFrame {
         JButton button = new JButton("Level Up the Party");
         button.putClientProperty("JButton.buttonType", "roundRect");
         button.addActionListener(e -> {
-            CombatMain.BATTLE.friendlies().forEach(Combatant::levelUp);
+            CombatMain.BATTLE.friendlies().forEach(friendly -> {
+                if (friendly instanceof PC pc) {
+                    pc.levelUp();
+                }
+            });
             String message = "As of v3.4.0, only proficiency bonuses are handled internally. " +
                     "All other changes (hp, stats, etc.) need to be manually entered in the Campaign Creator " +
                     "for now. If you buy Braden a Red Bull he might fix that :P";
@@ -55,17 +58,12 @@ public class CombatEndPopup extends JFrame {
         JButton button = new JButton("Download Updated .txt File");
         button.putClientProperty("JButton.buttonType", "roundRect");
         button.addActionListener(e -> {
-            try {
-                setVisible(false);
-                JFileChooser fileChooser = new JFileChooser(new CampaignWriter().getFile());
-                int result = fileChooser.showSaveDialog(CombatMain.COMBAT_MENU);
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    button.setText("Re-download .txt File");
-                    setVisible(true);
-                }
-            } catch (IOException io) {
-                fileError(io);
-                button.setEnabled(false);
+            setVisible(false);
+            JFileChooser fileChooser = new JFileChooser(new CampaignWriter().getFile());
+            int result = fileChooser.showSaveDialog(CombatMain.COMBAT_MENU);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                button.setText("Re-download .txt File");
+                setVisible(true);
             }
         });
         return button;

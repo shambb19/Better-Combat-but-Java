@@ -1,6 +1,7 @@
-package txt_menu;
+package campaign_creator;
 
-import character_info.Combatant;
+import character_info.combatant.Combatant;
+import character_info.combatant.PC;
 import scenario_info.Scenario;
 
 import javax.swing.*;
@@ -34,7 +35,7 @@ public class ScenarioInputPanel extends JPanel {
         nameField = new JTextField();
 
         ArrayList<Object> friendlies = sibling.getFriendlyNPCs();
-        friendlies.removeIf(friendly -> !((Combatant) friendly).isNPC());
+        friendlies.removeIf(friendly -> friendly instanceof PC);
 
         friendlyPanel = new ListSelectionPanel<>(friendlies, "Friendly NPCs");
         enemyPanel = new ListSelectionPanel<>(sibling.getEnemies(), "Enemies");

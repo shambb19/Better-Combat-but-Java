@@ -1,12 +1,10 @@
 package txt_input;
 
-import character_info.Class5e;
-import character_info.Combatant;
-import character_info.Stat;
-import character_info.Stats;
+import character_info.*;
+import character_info.combatant.Combatant;
+import character_info.combatant.PC;
 import damage_implements.Spell;
 import damage_implements.Weapon;
-import exception.UploadTextError;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -26,10 +24,8 @@ public class PartyReader {
         return combatant;
     }
 
-    // Note that stat reading requires that proficiency and spell modifiers are entered before stats
-    // in the document. Ideally, fix this later.
     private Combatant decodeAndGetCombatant(ArrayList<String> lines) {
-        if (lines.getFirst().equals("{party")) {
+        if (lines.getFirst().equals(".party")) {
             lines.removeFirst();
         }
 
@@ -59,7 +55,7 @@ public class PartyReader {
                 case "spells" -> addSpells(spells, value);
             }
         }
-        Combatant combatant = new Combatant(name, hp, ac, stats, weapons, spells);
+        Combatant combatant = new PC(name, hp, ac, stats, weapons, spells);
         if (hpCur >= 0) {
             combatant.setHealth(hpCur);
         }
@@ -76,11 +72,7 @@ public class PartyReader {
 
             stats.put(Objects.requireNonNull(Stat.get(statName)), Integer.parseInt(value));
         }
-        try {
-            return stats;
-        } catch (Exception ignored) {
-            throw new UploadTextError(UploadTextError.cause.STATS);
-        }
+        return stats;
     }
 
     private void addWeapons(ArrayList<Weapon> host, String line) {

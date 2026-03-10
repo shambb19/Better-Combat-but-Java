@@ -1,12 +1,15 @@
 package combat_menu.popup;
 
-import character_info.Combatant;
-import main.CombatMain;
+import character_info.combatant.Combatant;
+import _main.CombatMain;
+import character_info.combatant.NPC;
+import character_info.combatant.PC;
 import scenario_info.Scenario;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;
+import java.util.Objects;
 
 public class FinalizeCombatantsPopup extends JFrame {
 
@@ -40,7 +43,7 @@ public class FinalizeCombatantsPopup extends JFrame {
         button.addActionListener(e -> logAndBegin());
         add(button);
 
-        updateScenario((Scenario) scenarioBox.getSelectedItem());
+        updateScenario((Scenario) Objects.requireNonNull(scenarioBox.getSelectedItem()));
 
         pack();
         setLocationRelativeTo(null);
@@ -75,7 +78,7 @@ public class FinalizeCombatantsPopup extends JFrame {
 
     private void initializeParty() {
         CombatMain.BATTLE.friendlies().stream()
-                .filter(c -> !c.isNPC())
+                .filter(c -> c instanceof PC)
                 .forEach(pc -> {
                     JPanel panel = pc.getCombatantPanel();
                     friendlies.put(pc, panel);
@@ -85,13 +88,13 @@ public class FinalizeCombatantsPopup extends JFrame {
 
     private void updateScenario(Scenario scenario) {
         enemies.clear();
-        friendlies.entrySet().removeIf(entry -> entry.getKey().isNPC());
+        friendlies.entrySet().removeIf(entry -> entry.getKey() instanceof NPC);
 
         dynamicContainer.removeAll();
 
         dynamicContainer.add(new JLabel("--- ALLIES ---"));
         scenario.with().forEach(npc -> {
-            if (npc.isNPC()) {
+            if (npc instanceof NPC) {
                 JPanel panel = npc.getCombatantPanel();
                 friendlies.put(npc, panel);
                 dynamicContainer.add(panel);

@@ -4,99 +4,66 @@ deal with that, this is how to manually type campaign code:
 
 ***
 ## Part 1: General Syntax
-There are three sections to the code: Allies, Enemies, and Scenarios.
-These sections are designated with those names in brackets, similar to 
-a pom.xml document. As such, each section will look like this:
+There are two sections to the code: Combatants and Scenarios.
+These sections are designated with those names in brackets but do
+not need to be closed by another one.
 ```text
-<Allies>
-
+<Combatants>
 ~logic and such
-
-<Allies>
-
 ```
-with the header substituted for ```<Enemies>``` or ```<Scenarios>``` 
-respectively.
+Each individual combatant or scenario is also headed by a code with the syntax
+```.code```.
 
-Within each section, components should be enclosed by curly brackets
-ON DIFFERENT LINES.
-
-This is valid:
-```text
-{
-~logic and such
-}
-{
-~more logic
-}
-```
-but this is NOT:
-```text
-{
-logic and such
-} {
-~more logic that will cause an error
-}
-```
-This isn't java and I read docs with less than 200 lines of code, so 
-it will need to be a little picky. Also, in the Ally section, components
-will need indicators next to their opening bracket. This will be explained
-more in their respective sections.
 
 Finally, individual parameters must be written without spaces and in all
 lowercase, like ```key=value```.
-
-### Note about Whitespace
-Blank lines are allowed and tested to be so. Spaces are coded to work (and
-do so in names for sure) but can throw random errors, and I have no idea
-where they come from, so avoiding spaces when possible is ideal.
-
 ***
 
-## Part 2: NPCs
+## Part 2: NPCs and Enemies
 
 PCs have three parameters:
 1. Name
 2. Maximum HP
 3. Armor Class
 
-and uses the header code ```npc```. So, a correct NPC will look like the 
+and uses the header code ```.npc```. So, a correct NPC will look like the 
 following:
 
 ```text
-{npc
+.npc
 name=Elrond
 hp=42
 ac=14
-}
 ```
+
+Enemies are formatted identically to NPCs but with the header code ```.enemy```.
 ***
 
 ## Part 3: PCs
 
 PCs have the same three parameters as NPCs as well as the following:
 1. Level
-2. Spell-casting Ability Modifier (Optional)
+2. Class
 3. Main Field Stats
 4. Weapons (Optional)
 5. Spells (Optional)
 
 Level is self-explanatory, but for the others:
 
-### Spell-Casting Ability Modifier
-This is written like ```spellMod=cha``` with that key and the stat in
-question written as its three-letter abbreviation in lowercase.
+### Class
+This is written like ```class=bard``` with that key and the class written in
+lowercase.
 
 ### Main Field Stats
-These are written like ```stats=str(12)/dex(10)/con(16+)/int(16+)/wis(12)/cha(10)```
-with that key. Stats are separated by ```/```. Each stat has its abbreviation,
-the value, and a plus if the combatant has proficiency in that stat.
+These are written like ```stats=str12/dex10/con16/int16/wis12/cha10```
+with that key. Stats are separated by ```/```. Each stat has its abbreviation and value
+with no separation.
 
 ### Weapons and Spells
-These are written in a list like ```weapons=dagger/longsword``` or
-```spells=eldritch_blast/toll_the_dead/hex```, with lowercase and 
+These are written in a list like ```weapons=Dagger/Longsword``` or
+```spells=Eldritch Blast/Toll the Dead/Hex```, with lowercase and 
 underscore-separated words, separated by ```/```. If a combatant has many,
-they can be split to multiple lines for readabiltiy. For example,
+they can be split to multiple lines for readability. For example,
 ```
 weapons=dagger/lance/javelin
 weapons=longsword/crossbow
@@ -104,25 +71,21 @@ weapons=longsword/crossbow
 is also valid.
 
 ### Putting the PC Together
-Finally, the pc uses the header code ```party``` so a correct PC will look 
+Finally, the pc uses the header code ```.party``` so a correct PC will look 
 similar to the following:
 
 ```text
-{party
+.party
 name=Gandalf the Grey
-hp=62
+hp=48/62
 ac=14
 spellMod=wis
-stats=str(12)/dex(14)/con(14)/int(18)/wis(20+)/cha(20+)
+stats=str12/dex14/con14/int18/wis20/cha20
 weapons=Longsword/Staff
 spells=Beam of Light/Intimidate Bilbo
 spells=You Shall Not Pass/Speak Language of Mordor
 }
 ```
-### Current HP
-Both NPCs and PCs have the option to set a current health. This is completely
-optional and, upon runs of the program, will be handled on the backend, but if
-you want, it can be handled with ```hpCur=value```.
 
 ## Scenarios
 Scenarios allow you to combine created combatants into different encounters 
@@ -134,86 +97,68 @@ runtime), so they are not part of this.
 A correct scenario will look like this:
 
 ```text
-{
+.scenario
 name=Korriban Duel
 with=Kao Cen Darach/Satele Shan
 against=Darth Malgus/Darth Vitiate
-}
 ```
-Soon to be implemented is the ability to add quantities of a combatant.
-This will be done with an underscore and the number, like
-```against=Stormtrooper_20```
 
 ## Putting it All Together
 Below is a full correct example:
 ```text
-<Allies>
+<Combatants>
 
-{party
+.party
 name=Frodo Baggins
 hp=20
 ac=18
-stats=str(10)/dex(12)/con(16+)/int(13)/wis(16+)/cha(14)
+class=fighter
+stats=str10/dex12/con16/int13/wis16/cha14
 weapons=Sting
-}
 
-{party
+.party
 name=Samwise Gamgee
 hp=20
 ac=10
-stats=str(14)/dex(9)/con(16+)/int(9)/wis(16+)/cha(11)
+class=paladin
+stats=str14/dex9/con16/int9/wis16/cha11
 weapons=Dagger/Pot
-}
 
-{npc
+.npc
 name=Pippin Took
 hp=20
 ac=14
-}
 
-{npc
+.npc
 name=Merry Brandybuck
 hp=20
 ac=12
-}
 
-<Allies>
-
-<Enemies>
-
-{
+.enemy
 name=Orc
 hp=20
 ac=16
-}
 
-{
+.enemy
 name=Uruk-hai
 hp=40
 ac=17
-}
 
-{
+.enemy
 name=Nazgul
 hp=160
 ac=19
-}
 
-<Enemies>
 
 <Scenarios>
 
-{
+.scenario
 name=Forest Chase
 with=Pippin Took/Merry Brandybuck
 against=Nazgul_2
-}
 
-{
+.scenario
 name=Breaking of the Fellowship
 with=Pippin Took/Merry Brandybuck
 against=Orc_12/Uruk-hai
-}
-
-<Scenarios>
 ```

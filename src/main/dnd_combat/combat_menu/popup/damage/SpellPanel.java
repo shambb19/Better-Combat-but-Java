@@ -1,10 +1,11 @@
 package combat_menu.popup.damage;
 
+import character_info.combatant.PC;
 import character_info.Stat;
 import damage_implements.Spell;
 import damage_implements.Spells;
-import main.CombatMain;
-import character_info.Combatant;
+import _main.CombatMain;
+import character_info.combatant.Combatant;
 import damage_implements.Effect;
 
 import javax.swing.*;
@@ -20,6 +21,7 @@ public class SpellPanel extends JPanel {
     private final JFrame root;
 
     private final Combatant attacker;
+    private final ArrayList<Spell> spells;
 
     private final JComboBox<Combatant> targetBox;
     private final JComboBox<Spell> spellsBox;
@@ -37,12 +39,18 @@ public class SpellPanel extends JPanel {
 
         this.attacker = currentCombatant;
 
+        if (attacker instanceof PC pc) {
+            spells = pc.spells();
+        } else {
+            spells = new ArrayList<>();
+        }
+
         putComponent(spellPanel.HIT, "Roll to Hit:");
         putComponent(spellPanel.SAVE, "Opponent Save Roll:");
         putManualSaveComponent();
 
         this.targetBox = targetBox;
-        spellsBox = getSpellBox(currentCombatant.spells());
+        spellsBox = getSpellBox();
 
         setLayout(new GridLayout(0, 1));
 
@@ -54,7 +62,7 @@ public class SpellPanel extends JPanel {
         add(getOkButton());
     }
 
-    private JComboBox<Spell> getSpellBox(ArrayList<Spell> spells) {
+    private JComboBox<Spell> getSpellBox() {
         JComboBox<Spell> box = new JComboBox<>();
         box.putClientProperty("JComponent.roundRect", "true");
         spells.forEach(box::addItem);
@@ -130,14 +138,12 @@ public class SpellPanel extends JPanel {
             Spell spell = (Spell) spellsBox.getSelectedItem();
             switch (activePanelType) {
                 case HIT -> {
-                    int attackVal = hitRoll + attacker.stats().spellAttackBonus();
+                    int attackVal = hitRoll + attacker.spellAttackBonus();
                     registerAttack(target, attackVal >= target.ac(), spell);
                 }
                 case SAVE -> {
                     Stat saveType = spell.savingThrow();
-                    int saveDC = 8 +
-                            attacker.stats().spellAttackBonus() +
-                            attacker.stats().mod(saveType);
+                    int saveDC = attacker.saveDc();
 
                     registerAttack(target, saveRoll < saveDC, spell);
                 }

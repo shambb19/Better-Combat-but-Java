@@ -1,6 +1,0 @@
-
-{
-name=Hand Crossbow
-dmg=1d6
-stat=dex
-}

@@ -3,8 +3,8 @@ package combat_menu.popup.damage;
 import damage_implements.Spell;
 import damage_implements.Weapon;
 import damage_implements.Weapons;
-import main.CombatMain;
-import character_info.Combatant;
+import _main.CombatMain;
+import character_info.combatant.Combatant;
 import damage_implements.Effect;
 import combat_menu.listener.DieRollListener;
 import combat_menu.listener.IntegerFieldListener;
@@ -119,7 +119,7 @@ public class DamageAmountPopup extends JFrame {
         add(mainDamageField);
 
         if (weapon != null && !weapon.equals(Weapons.MANUAL)) {
-            add(new JLabel("+" + attacker.stats().mod(weapon.stat()) + " from Stat Bonus"));
+            add(new JLabel("+" + attacker.mod(weapon.stat()) + " from Stat Bonus"));
         }
 
         if (isHalfDamage) {
@@ -200,7 +200,7 @@ public class DamageAmountPopup extends JFrame {
         }
         return mainDamage +
                 bonusDamage +
-                attacker.stats().mod(weapon.stat());
+                attacker.mod(weapon.stat());
     }
 
     /**

@@ -1,6 +1,6 @@
-package txt_menu;
+package campaign_creator;
 
-import character_info.Combatant;
+import character_info.combatant.PC;
 import character_info.Stat;
 import character_info.Stats;
 import combat_menu.listener.IntegerFieldListener;
@@ -60,7 +60,7 @@ public class StatsInputPanel extends JPanel {
         }
     }
 
-    public void setTo(Combatant combatant) {
+    public void setTo(PC combatant) {
         Stats stats = combatant.stats();
 
         for (JPanel panel : statMap.keySet()) {

@@ -1,6 +1,6 @@
 package scenario_info;
 
-import character_info.Combatant;
+import character_info.combatant.Combatant;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;

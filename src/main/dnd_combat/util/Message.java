@@ -1,9 +1,9 @@
 package util;
 
-import main.CombatMain;
-import character_info.Combatant;
+import _main.CombatMain;
+import character_info.combatant.Combatant;
 import combat_menu.CombatMenu;
-import txt_menu.TxtMenu;
+import campaign_creator.TxtMenu;
 
 import javax.swing.*;
 import java.io.IOException;

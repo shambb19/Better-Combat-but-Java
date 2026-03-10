@@ -1,11 +1,10 @@
 package scenario_info;
 
-import character_info.Combatant;
-import main.CombatMain;
+import character_info.combatant.Combatant;
+import _main.CombatMain;
 import util.Message;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class PlayerQueue {
 
@@ -22,8 +21,11 @@ public class PlayerQueue {
         sortList(friendlies);
         sortList(enemies);
 
-        this.friendlies = new TeamQueue(friendlies);
-        this.enemies = new TeamQueue(enemies);
+        this.friendlies = new TeamQueue();
+        this.friendlies.addAll(friendlies);
+
+        this.enemies = new TeamQueue();
+        this.enemies.addAll(enemies);
 
         if (friendlies.getFirst().getInitiative() >= enemies.getFirst().getInitiative()) {
             currentCombatant = this.friendlies.getNext();
@@ -49,11 +51,13 @@ public class PlayerQueue {
         } else {
             currentCombatant = enemies.getNext();
         }
+
         if (!currentCombatant.lifeStatus().isConscious()) {
             int saveRoll = Message.getDeathSaveRoll();
             currentCombatant.lifeStatus().rollDeathSave(saveRoll);
             endTurnAndGetNext();
         }
+
         currentCombatant.endDealtEffects();
         CombatMain.COMBAT_MENU.update();
         return currentCombatant;
@@ -73,42 +77,18 @@ public class PlayerQueue {
 
     static class TeamQueue extends ArrayList<Combatant> {
 
-        private Combatant currentCombatant;
-        private int currentIndex;
+        private int currentIndex = -1;
 
-        /**
-         * ArrayList extension that tracks the index of the current combatant for readability.
-         * @param combatants the root list
-         */
-        public TeamQueue(List<Combatant> combatants) {
-            addAll(combatants);
-            currentCombatant = getFirst();
-            currentIndex = -1;
-        }
-
-        /**
-         * Provides the next combatant without checking for effects, consciousness, or any other factors
-         * @return next combatant
-         */
         public Combatant getNext() {
-            if (currentCombatant.equals(getLast())) {
-                currentCombatant = getFirst();
-                currentIndex = 0;
-            } else {
-                currentIndex++;
-                currentCombatant = get(currentIndex);
+            if (currentIndex == size() - 1) {
+                currentIndex = -1;
             }
-            return currentCombatant;
+            return get(++currentIndex);
         }
 
-        /**
-         * Used only for the enemy team.
-         * @return true when the entire enemy team has had a turn. Prompts a return to the friendly queue.
-         */
         public boolean isTurnOver() {
-            return currentCombatant.equals(getLast());
+            return currentIndex == size() - 1;
         }
-
     }
 
 }

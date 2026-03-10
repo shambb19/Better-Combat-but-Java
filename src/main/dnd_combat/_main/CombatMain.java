@@ -1,4 +1,4 @@
-package main;
+package _main;
 
 import combat_menu.popup.FinalizeCombatantsPopup;
 import scenario_info.Battle;
@@ -6,7 +6,7 @@ import scenario_info.PlayerQueue;
 import combat_menu.popup.CombatEndPopup;
 import combat_menu.popup.FileGetter;
 import combat_menu.CombatMenu;
-import txt_input.BattleReader;
+import txt_input.CampaignReader;
 
 import javax.swing.*;
 import java.io.File;
@@ -24,7 +24,7 @@ public class CombatMain {
             INPUT = new FileGetter().getFile();
         }
 
-        BATTLE = new BattleReader(INPUT).getBattle();
+        BATTLE = new CampaignReader(INPUT).getBattle();
 
         new FinalizeCombatantsPopup().setVisible(true);
     }

@@ -1,11 +1,10 @@
 package combat_menu.popup.damage;
 
-import character_info.Stat;
-import character_info.Stats;
+import character_info.combatant.PC;
 import damage_implements.Weapon;
 import damage_implements.Weapons;
-import main.CombatMain;
-import character_info.Combatant;
+import _main.CombatMain;
+import character_info.combatant.Combatant;
 import combat_menu.listener.DieRollListener;
 
 import javax.swing.*;
@@ -18,6 +17,8 @@ public class WeaponPanel extends JPanel {
 
     private final JFrame root;
 
+    private final ArrayList<Weapon> weapons;
+
     private final JComboBox<Combatant> targetBox;
     private final JComboBox<Weapon> weaponsBox;
     private final JTextField rollInputField;
@@ -25,8 +26,14 @@ public class WeaponPanel extends JPanel {
     public WeaponPanel(JComboBox<Combatant> targetBox, Combatant currentCombatant, JFrame root) {
         this.root = root;
 
+        if (currentCombatant instanceof PC pc) {
+            weapons = pc.weapons();
+        } else {
+            weapons = new ArrayList<>();
+        }
+
         this.targetBox = targetBox;
-        weaponsBox = getWeaponComboBox(currentCombatant.weapons());
+        weaponsBox = getWeaponComboBox();
 
         String hitString = "Roll to Hit";
         if (CombatMain.QUEUE.getCurrentCombatant().isPoisoned()) {
@@ -47,7 +54,7 @@ public class WeaponPanel extends JPanel {
         add(getOkButton());
     }
 
-    private JComboBox<Weapon> getWeaponComboBox(ArrayList<Weapon> weapons) {
+    private JComboBox<Weapon> getWeaponComboBox() {
         JComboBox<Weapon> box = new JComboBox<>();
         box.putClientProperty("JComponent.roundRect", true);
         weapons.forEach(box::addItem);
@@ -71,14 +78,10 @@ public class WeaponPanel extends JPanel {
             int fieldVal = Integer.parseInt(rollInputField.getText());
 
             Combatant attacker = CombatMain.QUEUE.getCurrentCombatant();
-            Stats attackerStats = attacker.stats();
-
             Weapon weapon = (Weapon) weaponsBox.getSelectedItem();
-            Stat weaponStat = weapon.stat();
-
             Combatant target = (Combatant) targetBox.getSelectedItem();
 
-            int hitRoll = fieldVal + attackerStats.prof() + attackerStats.weaponAttackBonus(weapon);
+            int hitRoll = fieldVal + attacker.attackBonus(weapon);
 
             registerAttack(target, hitRoll >= target.ac(), weapon);
             root.dispose();

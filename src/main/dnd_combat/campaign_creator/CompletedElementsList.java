@@ -1,6 +1,8 @@
-package txt_menu;
+package campaign_creator;
 
-import character_info.Combatant;
+import character_info.combatant.Combatant;
+import character_info.combatant.NPC;
+import character_info.combatant.PC;
 import scenario_info.Battle;
 import scenario_info.Scenario;
 import util.Message;
@@ -20,10 +22,10 @@ public class CompletedElementsList extends JPanel {
     private ScrollPane<Combatant> enemyPane;
     private ScrollPane<Scenario> scenarioPane;
 
-    private static final Combatant FRIENDLY_NEW = new Combatant(
+    private static final Combatant FRIENDLY_NEW = new NPC(
             "New Ally", -1, -1, false
     );
-    private static final Combatant ENEMY_NEW = new Combatant(
+    private static final Combatant ENEMY_NEW = new NPC(
             "New Enemy", -1, -1, true
     );
     private static final Scenario SCENARIO_NEW = new Scenario(
@@ -71,7 +73,7 @@ public class CompletedElementsList extends JPanel {
         for (int i = 0; i < friendlyPane.model.getSize(); i++) {
             friendlies.add(friendlyPane.model.elementAt(i));
         }
-        friendlies.removeIf(friendly -> !((Combatant) friendly).isNPC());
+        friendlies.removeIf(friendly -> friendly instanceof PC);
         return friendlies;
     }
 

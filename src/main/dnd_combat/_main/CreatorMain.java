@@ -1,8 +1,8 @@
-package main;
+package _main;
 
 import combat_menu.popup.FileGetter;
 import org.apache.commons.io.FileUtils;
-import txt_menu.TxtMenu;
+import campaign_creator.TxtMenu;
 
 import java.io.File;
 import java.net.URL;

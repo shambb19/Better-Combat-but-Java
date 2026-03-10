@@ -1,9 +1,9 @@
-package txt_menu;
+package campaign_creator;
 
-import character_info.Combatant;
+import character_info.combatant.Combatant;
 import scenario_info.Battle;
 import scenario_info.Scenario;
-import txt_input.BattleReader;
+import txt_input.CampaignReader;
 
 import javax.swing.*;
 import java.awt.*;
@@ -35,7 +35,7 @@ public class TxtMenu extends JFrame {
     public TxtMenu(File input) {
         initialize();
 
-        Battle battle = new BattleReader(input).getBattle();
+        Battle battle = new CampaignReader(input).getBattle();
 
         completedList = new CompletedElementsList(battle, this);
 

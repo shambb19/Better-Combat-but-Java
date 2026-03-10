@@ -1,6 +1,6 @@
 package character_info;
 
-import main.CombatMain;
+import _main.CombatMain;
 
 public class LifeStatus {
 

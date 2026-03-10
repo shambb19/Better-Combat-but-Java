@@ -1,19 +1,17 @@
-package txt_menu;
+package campaign_creator;
 
-import character_info.Combatant;
+import character_info.combatant.Combatant;
+import character_info.combatant.NPC;
 import scenario_info.Battle;
 import scenario_info.Scenario;
+import txt_input.CampaignWriter;
 import util.Locators;
-import util.Message;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 
@@ -22,12 +20,6 @@ import static util.Message.template;
 public class DownloadDocDisplayPanel extends JPanel {
 
     private JTextArea display;
-
-    private static final String LINE_END = "\n";
-    private static final String EMPTY_LINE = "";
-    private static final String ALLY_BRACKET = "<Allies>";
-    private static final String ENEMY_BRACKET = "<Enemies>";
-    private static final String SCENARIO_BRACKET = "<Scenarios>";
 
     private final ArrayList<Combatant> friendlies;
     private final ArrayList<Combatant> enemies;
@@ -47,7 +39,7 @@ public class DownloadDocDisplayPanel extends JPanel {
         scenarios = input.scenarios();
 
         construct();
-        buildText();
+        setText();
     }
 
     private void construct() {
@@ -73,14 +65,6 @@ public class DownloadDocDisplayPanel extends JPanel {
         add(sendPanel, BorderLayout.SOUTH);
     }
 
-    private void buildText() {
-        StringBuilder displayText = new StringBuilder();
-        displayTextAsList().forEach(line -> displayText.append(line).append(LINE_END));
-        display.setText(displayText.toString());
-
-        display.setCaretPosition(0);
-    }
-
     public void addElement(Object selection) {
         if (selection instanceof Combatant combatant) {
             if (combatant.isEnemy()) {
@@ -91,7 +75,12 @@ public class DownloadDocDisplayPanel extends JPanel {
         } else if (selection instanceof Scenario scenario) {
             addOrReplaceScenario(scenario);
         }
-        buildText();
+        setText();
+    }
+
+    private void setText() {
+        display.setText(displayTextAsString());
+        display.setCaretPosition(0);
     }
 
     private void addOrReplace(ArrayList<Combatant> destination, Combatant combatant) {
@@ -100,7 +89,7 @@ public class DownloadDocDisplayPanel extends JPanel {
         if (oldVer != null && destination.contains(oldVer)) {
             destination.set(destination.indexOf(oldVer), combatant);
         } else {
-            if (combatant.isNPC()) {
+            if (combatant instanceof NPC) {
                 destination.addLast(combatant);
             } else {
                 destination.addFirst(combatant);
@@ -122,19 +111,13 @@ public class DownloadDocDisplayPanel extends JPanel {
     }
 
     private void download() {
-        int numRand = (int) (Math.random()*1000);
-        File file = new File(
-            new File(System.getProperty("user.home"), "Downloads"),
-            "New Campaign " + LocalDate.now() + " " + numRand + ".txt"
-        );
+        CampaignWriter writer = new CampaignWriter("New Campaign", friendlies, enemies, scenarios);
+        File savedFile = writer.getFile();
 
-        try (FileWriter writer = new FileWriter(file)) {
-            for (String line : displayTextAsList()) {
-                writer.write(line + LINE_END);
-            }
-            template("Downloaded!");
-        } catch (IOException io) {
-            Message.throwFileDownloadError(this, io);
+        if (savedFile != null && savedFile.exists()) {
+            template("Downloaded! Saved to: " + savedFile.getAbsolutePath());
+        } else {
+            System.err.println("Failed to save the campaign file.");
         }
     }
 
@@ -147,48 +130,9 @@ public class DownloadDocDisplayPanel extends JPanel {
 
     private String displayTextAsString() {
         StringBuilder string = new StringBuilder();
-        displayTextAsList().forEach(line -> string.append(line).append(LINE_END));
+        CampaignWriter writer = new CampaignWriter(friendlies, enemies, scenarios);
+        writer.getCode().forEach(line -> string.append(line).append("\n"));
         return string.toString();
-    }
-
-    private ArrayList<String> displayTextAsList() {
-        ArrayList<String> text = new ArrayList<>();
-        text.addAll(getListText(ALLY_BRACKET, friendlies));
-        text.addAll(getListText(ENEMY_BRACKET, enemies));
-        text.addAll(getScenarioListText());
-        return text;
-    }
-
-    private ArrayList<String> getListText(String bracket, ArrayList<Combatant> input) {
-        ArrayList<String> text = new ArrayList<>();
-
-        text.add(bracket);
-        text.add(EMPTY_LINE);
-        if (input.isEmpty()) {
-            text.add(EMPTY_LINE);
-        } else {
-            input.forEach(combatant -> text.addAll(combatant.toTxt()));
-        }
-        text.add(bracket);
-        text.add(EMPTY_LINE);
-
-        return text;
-    }
-
-    private ArrayList<String> getScenarioListText() {
-        ArrayList<String> text = new ArrayList<>();
-
-        text.add(SCENARIO_BRACKET);
-        text.add(EMPTY_LINE);
-        if (scenarios.isEmpty()) {
-            text.add(EMPTY_LINE);
-        } else {
-            scenarios.forEach(scenario -> text.addAll(scenario.toTxt()));
-        }
-        text.add(SCENARIO_BRACKET);
-        text.add(EMPTY_LINE);
-
-        return text;
     }
 
 }

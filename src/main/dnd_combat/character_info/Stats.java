@@ -30,26 +30,6 @@ public class Stats {
         setProf();
     }
 
-    public void manualAdjust(String code) {
-        String[] codes = code.split("\\.");
-
-        if (codes[0].equals("level")) {
-            level = Integer.parseInt(codes[1]);
-            setProf();
-            return;
-        }
-
-        Stat stat = Stat.get(codes[0]);
-        String val = codes[1];
-
-        int statVal;
-
-        assert stat != null;
-        statVal = Integer.parseInt(val);
-
-        put(stat, statVal);
-    }
-
     /**
      * Sets the stat param to the value param.
      */
@@ -119,6 +99,10 @@ public class Stats {
      */
     public int spellAttackBonus() {
         return mod(spellMod()) + proficiencyBonus;
+    }
+
+    public int saveDc() {
+        return 8 + mod(spellMod()) + proficiencyBonus;
     }
 
     public int weaponAttackBonus(Weapon weapon) {

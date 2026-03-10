@@ -1,7 +1,5 @@
 package damage_implements;
 
-import character_info.Stat;
-import admin.Admin;
 import org.apache.commons.io.FileUtils;
 import util.TxtReader;
 
@@ -38,45 +36,6 @@ public class Spells {
 
     public static void add(Spell spell) {
         spells.add(spell);
-    }
-
-    public static void manualAdjust(String name, String key, String value) {
-        Spell target = null;
-        for (Spell spell : spells) {
-            if (spell.name().equals(name)) {
-                target = spell;
-            }
-        }
-        if (target == null) {
-            return;
-        }
-
-        replace(target, key, value);
-    }
-
-    private static void replace(Spell spell, String key, String value) {
-        int i = spells.indexOf(spell);
-        Spell adjusted = null;
-        switch (key) {
-            case Admin.NAME_EDIT_CODE -> adjusted = new Spell(value, spell.numDice(), spell.dieSize(), spell.savingThrow(), spell.effect());
-            case Admin.DAMAGE_EDIT_CODE -> {
-                int numDice = TxtReader.getNumDice(value);
-                int dieSize = TxtReader.getDieSize(value);
-                adjusted = new Spell(spell.name(), numDice, dieSize, spell.savingThrow(), spell.effect());
-            }
-            case Admin.STAT_EDIT_CODE -> {
-                Stat stat = Stat.get(value);
-                adjusted = new Spell(spell.name(), spell.numDice(), spell.dieSize(), stat, spell.effect());
-            }
-            case Admin.EFFECT_EDIT_CODE -> {
-                Effect effect = Effect.withRawName(value);
-                adjusted = new Spell(spell.name(), spell.numDice(), spell.dieSize(), spell.savingThrow(), effect);
-            }
-        }
-
-        if (adjusted != null) {
-            spells.set(i, adjusted);
-        }
     }
 
     private static void decodeFile(ArrayList<String> lines) {

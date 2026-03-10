@@ -1,6 +1,6 @@
 package combat_menu;
 
-import main.CombatMain;
+import _main.CombatMain;
 
 import javax.swing.*;
 import java.awt.*;

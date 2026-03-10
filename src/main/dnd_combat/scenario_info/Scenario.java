@@ -1,6 +1,6 @@
 package scenario_info;
 
-import character_info.Combatant;
+import character_info.combatant.Combatant;
 
 import java.util.ArrayList;
 
@@ -8,7 +8,7 @@ public record Scenario(String name, ArrayList<Combatant> with, ArrayList<Combata
 
     public ArrayList<String> toTxt() {
         ArrayList<String> txt = new ArrayList<>();
-        txt.add("{");
+        txt.add(".scenario");
         txt.add("name=" + name);
 
         if (!with.isEmpty()) {
@@ -21,8 +21,7 @@ public record Scenario(String name, ArrayList<Combatant> with, ArrayList<Combata
         against.forEach(combatant -> againstString.append(combatant.name()).append("/"));
         txt.add(againstString.toString());
 
-        txt.add("}");
-
+        txt.add("");
         return txt;
     }
 

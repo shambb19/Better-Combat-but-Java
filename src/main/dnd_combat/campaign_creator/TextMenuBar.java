@@ -1,9 +1,9 @@
-package txt_menu;
+package campaign_creator;
 
 import damage_implements.Effect;
 import damage_implements.Spells;
 import damage_implements.Weapons;
-import main.SystemMain;
+import _main.SystemMain;
 import util.Message;
 
 import javax.swing.*;

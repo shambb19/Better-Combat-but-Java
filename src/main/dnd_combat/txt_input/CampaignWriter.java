@@ -1,7 +1,8 @@
 package txt_input;
 
-import main.CombatMain;
-import character_info.Combatant;
+import _main.CombatMain;
+import character_info.combatant.Combatant;
+import scenario_info.Scenario;
 import util.Message;
 
 import java.io.File;
@@ -12,51 +13,84 @@ import java.util.ArrayList;
 
 public class CampaignWriter {
 
-    private static final String FRIENDLY_HEADER = "<Allies>";
-    private static final String ENEMY_HEADER = "<Enemies>";
+    private static final String COMBATANT_HEADER = "<Combatants>";
     private static final String SCENARIO_HEADER = "<Scenarios>";
     private static final String LINE = "";
 
+    private final ArrayList<Combatant> friendlySource;
+    private final ArrayList<Combatant> enemySource;
+    private final ArrayList<Scenario> scenarioSource;
+
     private final File file;
+    private ArrayList<String> code;
 
-    public CampaignWriter() throws IOException {
-        file = new File("campaign post encounter " + LocalDate.now() + ".txt");
+    public CampaignWriter() {
+        int numRand = (int) (Math.random()*1000);
+        file = new File(
+                new File(System.getProperty("user.home"), "Downloads"),
+                "campaign post encounter " + LocalDate.now() + " " + numRand + ".txt"
+        );
+
+        friendlySource = CombatMain.BATTLE.friendliesOriginal();
+        enemySource = CombatMain.BATTLE.enemiesOriginal();
+        scenarioSource = CombatMain.BATTLE.scenarios();
+    }
+
+    public CampaignWriter(String fileTitle,
+                          ArrayList<Combatant> friendlies, ArrayList<Combatant> enemies, ArrayList<Scenario> scenarios) {
+        int numRand = (int) (Math.random()*1000);
+        file = new File(
+                new File(System.getProperty("user.home"), "Downloads"),
+                fileTitle + " " + LocalDate.now() + " " + numRand + ".txt"
+        );
+
+        friendlySource = friendlies;
+        enemySource = enemies;
+        scenarioSource = scenarios;
+    }
+
+    public CampaignWriter(ArrayList<Combatant> friendlies, ArrayList<Combatant> enemies, ArrayList<Scenario> scenarios) {
+        file = null;
+
+        friendlySource = friendlies;
+        enemySource = enemies;
+        scenarioSource = scenarios;
+    }
+
+    private void writeCombatants() {
+        code.add(COMBATANT_HEADER);
+        code.add(LINE);
+        friendlySource.forEach(c -> code.addAll(c.toTxt()));
+        enemySource.forEach(c -> code.addAll(c.toTxt()));
+    }
+
+    private void writeScenarios() {
+        code.add(SCENARIO_HEADER);
+        code.add(LINE);
+        scenarioSource.forEach(scenario -> code.addAll(scenario.toTxt()));
+    }
+
+    public ArrayList<String> getCode() {
+        code = new ArrayList<>();
+        writeCombatants();
+        writeScenarios();
+        return code;
+    }
+
+    public File getFile() {
         try (FileWriter writer = new FileWriter(file)) {
-            ArrayList<String> txt = new ArrayList<>();
-            writeTeam(txt, CombatMain.BATTLE.friendliesOriginal(), FRIENDLY_HEADER);
-            writeTeam(txt, CombatMain.BATTLE.enemiesOriginal(), ENEMY_HEADER);
-            writeScenarios(txt);
-
-            txt.forEach(line -> {
+            code.forEach(line -> {
                 try {
                     writer.write(line);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             });
+            return file;
         } catch (IOException e) {
             Message.throwFileDownloadError(null, e);
+            return null;
         }
-    }
-
-    private void writeTeam(ArrayList<String> dest, ArrayList<Combatant> source, String header) {
-        dest.add(header);
-        dest.add(LINE);
-        source.forEach(combatant -> dest.addAll(combatant.toTxt()));
-        dest.add(header);
-        dest.add(LINE);
-    }
-
-    private void writeScenarios(ArrayList<String> dest) {
-        dest.add(SCENARIO_HEADER);
-        dest.add(LINE);
-        CombatMain.BATTLE.scenarios().forEach(scenario -> dest.addAll(scenario.toTxt()));
-        dest.add(SCENARIO_HEADER);
-        dest.add(LINE);
-    }
-
-    public File getFile() {
-        return file;
     }
 
 }

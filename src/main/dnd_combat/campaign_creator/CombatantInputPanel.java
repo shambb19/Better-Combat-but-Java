@@ -1,8 +1,9 @@
-package txt_menu;
+package campaign_creator;
 
-import character_info.Class5e;
-import character_info.Combatant;
-import character_info.Stats;
+import character_info.*;
+import character_info.combatant.Combatant;
+import character_info.combatant.NPC;
+import character_info.combatant.PC;
 import combat_menu.listener.IntegerFieldListener;
 import damage_implements.Spell;
 import damage_implements.Weapon;
@@ -109,7 +110,7 @@ public class CombatantInputPanel extends JPanel {
             nameField.setEnabled(true);
 
             if (isNpcBox.isSelected()) {
-                root.logCombatantCompleted(new Combatant(name, hp, ac, isEnemy));
+                root.logCombatantCompleted(new NPC(name, hp, ac, isEnemy));
                 resetAndClose();
                 return;
             }
@@ -119,7 +120,7 @@ public class CombatantInputPanel extends JPanel {
             Stats stats = new Stats(class5e, level);
             statPanel.addTo(stats);
 
-            Combatant combatant = new Combatant(name, hp, ac, stats, weaponPanel.getSelected(), spellPanel.getSelected());
+            Combatant combatant = new PC(name, hp, ac, stats, weaponPanel.getSelected(), spellPanel.getSelected());
 
             if (!curHpField.getText().isEmpty()) {
                 combatant.setHealth(Integer.parseInt(curHpField.getText()));
@@ -158,7 +159,7 @@ public class CombatantInputPanel extends JPanel {
 
     public void openExisting(Combatant selection) {
         root.setInputPanelEnabled(true);
-        isNpcBox.setSelected(selection.isNPC());
+        isNpcBox.setSelected(selection instanceof NPC);
         isEnemyBox.setSelected(selection.isEnemy());
 
         nameField.setText(selection.name());
@@ -166,16 +167,16 @@ public class CombatantInputPanel extends JPanel {
         maxHpField.setText(String.valueOf(selection.maxHp()));
         acField.setText(String.valueOf(selection.ac()));
 
-        if (!selection.isNPC()) {
-            curHpField.setText(String.valueOf(selection.hp()));
-            levelField.setText(String.valueOf(selection.stats().level()));
-            classBox.setSelectedItem(selection.stats().class5e());
-            statPanel.setTo(selection);
-            weaponPanel.setTo(selection.weapons());
-            spellPanel.setTo(selection.spells());
+        if (selection instanceof PC pc) {
+            curHpField.setText(String.valueOf(pc.hp()));
+            levelField.setText(String.valueOf(pc.stats().level()));
+            classBox.setSelectedItem(pc.stats().class5e());
+            statPanel.setTo(pc);
+            weaponPanel.setTo(pc.weapons());
+            spellPanel.setTo(pc.spells());
         }
 
-        toggleNpc(selection.isNPC());
+        toggleNpc(selection instanceof NPC);
     }
 
     private void toggleNpc(boolean isNpc) {

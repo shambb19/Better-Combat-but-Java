@@ -1,7 +1,7 @@
 package combat_menu.popup.damage;
 
-import main.CombatMain;
-import character_info.Combatant;
+import _main.CombatMain;
+import character_info.combatant.Combatant;
 import util.Locators;
 
 import javax.swing.*;
@@ -36,13 +36,8 @@ public class DamagePromptPopup extends JFrame {
         JTabbedPane panel = new JTabbedPane();
         panel.setTabPlacement(SwingConstants.TOP);
 
-        if (currentCombatant.hasWeapons()) {
-            panel.addTab("Weapon", new WeaponPanel(getTargetComboBox(), currentCombatant, this));
-        }
-
-        if (currentCombatant.hasSpells()) {
-            panel.addTab("Spell", new SpellPanel(getTargetComboBox(), currentCombatant, this));
-        }
+        panel.addTab("Weapon", new WeaponPanel(getTargetComboBox(), currentCombatant, this));
+        panel.addTab("Spell", new SpellPanel(getTargetComboBox(), currentCombatant, this));
 
         return panel;
     }

@@ -1,7 +1,7 @@
 package util;
 
-import main.CombatMain;
-import character_info.Combatant;
+import _main.CombatMain;
+import character_info.combatant.Combatant;
 import scenario_info.Scenario;
 
 import java.util.ArrayList;

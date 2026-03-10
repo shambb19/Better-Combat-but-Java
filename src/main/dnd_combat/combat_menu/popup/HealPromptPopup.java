@@ -1,7 +1,7 @@
 package combat_menu.popup;
 
-import main.CombatMain;
-import character_info.Combatant;
+import _main.CombatMain;
+import character_info.combatant.Combatant;
 import combat_menu.listener.IntegerFieldListener;
 import combat_menu.CombatMenu;
 import util.Locators;
