@@ -206,8 +206,16 @@ public class Combatant {
         return weapons;
     }
 
+    public boolean hasWeapons() {
+        return isNPC || !weapons.isEmpty();
+    }
+
     public ArrayList<Spell> spells() {
         return spells;
+    }
+
+    public boolean hasSpells() {
+        return isNPC || !spells.isEmpty();
     }
 
     public Stats stats() {
@@ -272,7 +280,7 @@ public class Combatant {
                 name + "'s health increase after level up?",
                 "We love level ups!"
         );
-        level++;
+        stats.levelUp();
     }
 
     public JPanel getCombatantPanel() {
@@ -342,9 +350,7 @@ public class Combatant {
 
         if (!isNPC) {
             txt.add("level=" + level);
-            if (stats.spellMod() != null) {
-                txt.add("spellMod=" + stats.spellModStr());
-            }
+            txt.add("class=" + stats.class5e());
             txt.add(stats.toString());
             if (weapons != null && !weapons.isEmpty()) {
                 System.out.println(weapons);
@@ -400,7 +406,10 @@ public class Combatant {
                     healBlockedCombatants.add(target);
                     target.setCanHeal(false);
                 }
-                case Effect.BONUS_DAMAGE -> target.setHexedBy(parentCombatant);
+                case Effect.BONUS_DAMAGE -> {
+                    target.setHexedBy(parentCombatant);
+                    Message.informHexSuccess(target);
+                }
             }
         }
 

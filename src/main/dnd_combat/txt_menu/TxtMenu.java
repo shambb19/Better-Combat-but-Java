@@ -27,7 +27,7 @@ public class TxtMenu extends JFrame {
 
         inputPanel = new CombatantInputPanel(this);
         scenarioPanel = new ScenarioInputPanel(completedList, this);
-        displayPanel = new DownloadDocDisplayPanel();
+        displayPanel = new DownloadDocDisplayPanel(completedList);
         splitPane = new LowerSplitPane(inputPanel, scenarioPanel, displayPanel);
         construct();
     }
@@ -41,7 +41,7 @@ public class TxtMenu extends JFrame {
 
         inputPanel = new CombatantInputPanel(this);
         scenarioPanel = new ScenarioInputPanel(completedList, this);
-        displayPanel = new DownloadDocDisplayPanel(battle);
+        displayPanel = new DownloadDocDisplayPanel(battle, completedList);
         splitPane = new LowerSplitPane(inputPanel, scenarioPanel, displayPanel);
 
         construct();
@@ -83,11 +83,7 @@ public class TxtMenu extends JFrame {
 
     public void logCombatantCompleted(Combatant combatant) {
         completedList.findAndLocateCopy(combatant);
-        if (combatant.isEnemy()) {
-            completedList.addEnemy(combatant);
-        } else {
-            completedList.addFriendly(combatant);
-        }
+        completedList.addCombatant(combatant);
         displayPanel.addElement(combatant);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
     }

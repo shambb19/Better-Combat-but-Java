@@ -2,7 +2,7 @@ package damage_implements;
 
 import character_info.Stats;
 import admin.Admin;
-import util.Reader;
+import util.TxtReader;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -67,12 +67,12 @@ public class Spells {
         switch (key) {
             case Admin.NAME_EDIT_CODE -> adjusted = new Spell(value, spell.numDice(), spell.dieSize(), spell.savingThrow(), spell.effect());
             case Admin.DAMAGE_EDIT_CODE -> {
-                int numDice = Reader.getNumDice(value);
-                int dieSize = Reader.getDieSize(value);
+                int numDice = TxtReader.getNumDice(value);
+                int dieSize = TxtReader.getDieSize(value);
                 adjusted = new Spell(spell.name(), numDice, dieSize, spell.savingThrow(), spell.effect());
             }
             case Admin.STAT_EDIT_CODE -> {
-                Stats.stat stat = Reader.mod(value);
+                Stats.stat stat = TxtReader.mod(value);
                 adjusted = new Spell(spell.name(), spell.numDice(), spell.dieSize(), stat, spell.effect());
             }
             case Admin.EFFECT_EDIT_CODE -> {
@@ -96,7 +96,7 @@ public class Spells {
             }
             lines.removeFirst();
 
-            spells.add(Reader.decodeSpell(currentRead));
+            spells.add(TxtReader.decodeSpell(currentRead));
         }
     }
 

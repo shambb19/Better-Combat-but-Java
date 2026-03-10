@@ -1,5 +1,6 @@
 package combat_menu.popup.damage;
 
+import character_info.Stats;
 import damage_implements.Weapon;
 import damage_implements.Weapons;
 import main.CombatMain;
@@ -66,9 +67,18 @@ public class WeaponPanel extends JPanel {
             if (rollInputField.getText().isEmpty()) {
                 return;
             }
-            Combatant target = (Combatant) targetBox.getSelectedItem();
-            int hitRoll = Integer.parseInt(rollInputField.getText());
+            int fieldVal = Integer.parseInt(rollInputField.getText());
+
+            Combatant attacker = CombatMain.QUEUE.getCurrentCombatant();
+            Stats attackerStats = attacker.stats();
+
             Weapon weapon = (Weapon) weaponsBox.getSelectedItem();
+            Stats.stat weaponStat = weapon.stat();
+
+            Combatant target = (Combatant) targetBox.getSelectedItem();
+
+            int hitRoll = fieldVal + attackerStats.prof() + attackerStats.mod(weaponStat);
+
             registerAttack(target, hitRoll >= target.ac(), weapon);
             root.dispose();
             CombatMain.COMBAT_MENU.update();

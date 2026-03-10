@@ -6,7 +6,7 @@ import main.CombatMain;
 import scenario_info.Battle;
 import scenario_info.Scenario;
 import util.Message;
-import util.Reader;
+import util.TxtReader;
 
 import javax.swing.*;
 import java.io.File;
@@ -14,8 +14,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 
-import static util.Reader.identifier;
-import static util.Reader.withoutIdentifier;
+import static util.TxtReader.identifier;
+import static util.TxtReader.withoutIdentifier;
 
 public class BattleReader {
 
@@ -111,14 +111,14 @@ public class BattleReader {
 
             switch (header) {
                 case "party" -> readFriendlies.add(new PartyReader(currentRead).get());
-                case "npc" -> readFriendlies.add(Reader.decodeNPC(currentRead, false));
+                case "npc" -> readFriendlies.add(TxtReader.decodeNPC(currentRead, false));
             }
         }
     }
 
     private void handleEnemies() {
         while (!enemyLines.isEmpty()) {
-            readEnemies.add(Reader.decodeNPC(nextElementWithoutHeader(enemyLines), true));
+            readEnemies.add(TxtReader.decodeNPC(nextElementWithoutHeader(enemyLines), true));
         }
     }
 

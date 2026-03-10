@@ -2,6 +2,7 @@ package util;
 
 import main.CombatMain;
 import character_info.Combatant;
+import scenario_info.Scenario;
 
 import java.util.ArrayList;
 
@@ -26,6 +27,15 @@ public class Locators {
         for (Combatant combatant : source) {
             if (combatant.name().equals(name)) {
                 return combatant;
+            }
+        }
+        return null;
+    }
+
+    public static Scenario getScenarioWithNameFrom(ArrayList<Scenario> source, String name) {
+        for (Scenario scenario : source) {
+            if (scenario.name().equals(name)) {
+                return scenario;
             }
         }
         return null;

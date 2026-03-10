@@ -3,6 +3,7 @@ package txt_menu;
 import character_info.Combatant;
 import scenario_info.Battle;
 import scenario_info.Scenario;
+import util.Locators;
 import util.Message;
 
 import javax.swing.*;
@@ -14,10 +15,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 
 import static util.Message.template;
 
 public class DownloadDocDisplayPanel extends JPanel {
+
+    private final CompletedElementsList sibling;
 
     private JTextArea display;
 
@@ -31,7 +35,9 @@ public class DownloadDocDisplayPanel extends JPanel {
     private final ArrayList<Combatant> enemies;
     private final ArrayList<Scenario> scenarios;
 
-    public DownloadDocDisplayPanel() {
+    public DownloadDocDisplayPanel(CompletedElementsList sibling) {
+        this.sibling = sibling;
+
         friendlies = new ArrayList<>();
         enemies = new ArrayList<>();
         scenarios = new ArrayList<>();
@@ -39,7 +45,9 @@ public class DownloadDocDisplayPanel extends JPanel {
         construct();
     }
 
-    public DownloadDocDisplayPanel(Battle input) {
+    public DownloadDocDisplayPanel(Battle input, CompletedElementsList sibling) {
+        this.sibling = sibling;
+
         friendlies = input.friendlies();
         enemies = input.enemies();
         scenarios = input.scenarios();
@@ -90,8 +98,9 @@ public class DownloadDocDisplayPanel extends JPanel {
     }
 
     private void addOrReplace(ArrayList<Combatant> destination, Combatant combatant) {
-        if (destination.contains(combatant)) {
-            destination.set(destination.indexOf(combatant), combatant);
+        if (sibling.addCombatant(combatant)) {
+            Combatant oldVer = Locators.getCombatantWithNameFrom(destination, combatant.name());
+            destination.set(destination.indexOf(oldVer), combatant);
         } else {
             if (combatant.isNPC()) {
                 destination.addLast(combatant);
@@ -99,14 +108,17 @@ public class DownloadDocDisplayPanel extends JPanel {
                 destination.addFirst(combatant);
             }
         }
+        destination.sort(Comparator.comparing(Combatant::name));
     }
 
     private void addOrReplaceScenario(Scenario scenario) {
-        if (scenarios.contains(scenario)) {
-            scenarios.set(scenarios.indexOf(scenario), scenario);
+        if (sibling.addScenario(scenario)) {
+            Scenario oldVer = Locators.getScenarioWithNameFrom(scenarios, scenario.name());
+            scenarios.set(scenarios.indexOf(oldVer), scenario);
         } else {
             scenarios.add(scenario);
         }
+        scenarios.sort(Comparator.comparing(Scenario::name));
     }
 
     private void download() {

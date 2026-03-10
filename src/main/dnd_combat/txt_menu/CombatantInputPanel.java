@@ -1,5 +1,6 @@
 package txt_menu;
 
+import character_info.Class5e;
 import character_info.Combatant;
 import character_info.Stats;
 import combat_menu.listener.IntegerFieldListener;
@@ -51,7 +52,7 @@ public class CombatantInputPanel extends JPanel {
 
         hpCurPanel = fieldTemplate("Current HP (Optional)", true);
         levelPanel = fieldTemplate("Level", true);
-        spellCastPanel = getSpellCastPanel();
+        spellCastPanel = getClassPanel();
         statPanel = new StatsInputPanel();
 
         weaponPanel = new ListSelectionPanel<>(Weapon.getAllAsList(), "Weapons");
@@ -99,8 +100,8 @@ public class CombatantInputPanel extends JPanel {
             }
 
             int level = Integer.parseInt(getTemplateValue(levelPanel));
-            Stats.stat spellCastMod = getSpellCastValue();
-            Stats stats = new Stats(level, spellCastMod);
+            Class5e class5e = getCharacterClass();
+            Stats stats = new Stats(class5e, level);
             statPanel.addTo(stats);
 
             ArrayList<Weapon> weapons = weaponPanel.getSelected();
@@ -142,7 +143,7 @@ public class CombatantInputPanel extends JPanel {
         ).forEach(component -> getTemplateField(component).setText(""));
 
         statPanel.reset();
-        resetSpellCastPanel();
+        resetClassPanel();
 
         weaponPanel.reset();
         spellPanel.reset();
@@ -167,7 +168,7 @@ public class CombatantInputPanel extends JPanel {
             getTemplateField(levelPanel).setText(String.valueOf(selection.level()));
 
             statPanel.setTo(selection);
-            setSpellCastPanelTo(selection);
+            setClassPanelTo(selection);
 
             weaponPanel.setTo(selection.weapons());
             spellPanel.setTo(selection.spells());
@@ -200,28 +201,28 @@ public class CombatantInputPanel extends JPanel {
     }
 
     @SuppressWarnings("unchecked")
-    private Stats.stat getSpellCastValue() {
-        return (Stats.stat) ((JComboBox<Stats.stat>) spellCastPanel.getComponent(1)).getSelectedItem();
+    private Class5e getCharacterClass() {
+        return (Class5e) ((JComboBox<Stats.stat>) spellCastPanel.getComponent(1)).getSelectedItem();
     }
 
     @SuppressWarnings("unchecked")
-    private void setSpellCastPanelTo(Combatant combatant) {
-        ((JComboBox<Stats.stat>) spellCastPanel.getComponent(1)).setSelectedItem(combatant.stats().spellMod());
+    private void setClassPanelTo(Combatant combatant) {
+        ((JComboBox<Class5e>) spellCastPanel.getComponent(1)).setSelectedItem(combatant.stats().class5e());
     }
 
     @SuppressWarnings("unchecked")
-    private void resetSpellCastPanel() {
-        ((JComboBox<Stats.stat>) spellCastPanel.getComponent(1)).setSelectedIndex(-1);
+    private void resetClassPanel() {
+        ((JComboBox<Class5e>) spellCastPanel.getComponent(1)).setSelectedIndex(-1);
     }
 
-    private JPanel getSpellCastPanel() {
+    private JPanel getClassPanel() {
         JPanel panel = new JPanel(new FlowLayout());
 
-        JLabel label = new JLabel("Spell-casting Modifier (Optional):");
+        JLabel label = new JLabel("Class:");
 
-        JComboBox<Stats.stat> statsBox = new JComboBox<>();
-        for (Stats.stat stat : Stats.stat.values()) {
-            statsBox.addItem(stat);
+        JComboBox<Class5e> statsBox = new JComboBox<>();
+        for (Class5e class5e : Class5e.values()) {
+            statsBox.addItem(class5e);
         }
         statsBox.setSelectedIndex(-1);
 

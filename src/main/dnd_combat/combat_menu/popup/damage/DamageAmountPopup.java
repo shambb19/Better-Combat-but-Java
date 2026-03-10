@@ -119,7 +119,6 @@ public class DamageAmountPopup extends JFrame {
         add(mainDamageField);
 
         if (weapon != null && !weapon.equals(Weapons.MANUAL)) {
-            add(new JLabel("+" + attacker.stats().prof() + " for Proficiency"));
             add(new JLabel("+" + attacker.stats().mod(weapon.stat()) + " from Stat Bonus"));
         }
 
@@ -201,7 +200,6 @@ public class DamageAmountPopup extends JFrame {
         }
         return mainDamage +
                 bonusDamage +
-                attacker.stats().prof() +
                 attacker.stats().mod(weapon.stat());
     }
 

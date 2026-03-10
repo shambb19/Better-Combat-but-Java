@@ -2,7 +2,7 @@ package damage_implements;
 
 import admin.Admin;
 import character_info.Stats;
-import util.Reader;
+import util.TxtReader;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -63,12 +63,12 @@ public class Weapons {
         switch (key) {
             case Admin.NAME_EDIT_CODE -> adjusted = new Weapon(value, weapon.numDice(), weapon.dieSize(), weapon.stat());
             case Admin.DAMAGE_EDIT_CODE -> {
-                int numDice = Reader.getNumDice(value);
-                int dieSize = Reader.getDieSize(value);
+                int numDice = TxtReader.getNumDice(value);
+                int dieSize = TxtReader.getDieSize(value);
                 adjusted = new Weapon(weapon.name(), numDice, dieSize, weapon.stat());
             }
             case Admin.STAT_EDIT_CODE -> {
-                Stats.stat stat = Reader.mod(value);
+                Stats.stat stat = TxtReader.mod(value);
                 adjusted = new Weapon(weapon.name(), weapon.numDice(), weapon.dieSize(), stat);
             }
         }
@@ -88,7 +88,7 @@ public class Weapons {
             }
             lines.removeFirst();
 
-            weapons.add(Reader.decodeWeapon(currentRead));
+            weapons.add(TxtReader.decodeWeapon(currentRead));
         }
     }
 

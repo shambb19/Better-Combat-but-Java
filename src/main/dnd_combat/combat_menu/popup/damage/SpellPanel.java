@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static util.Message.informAttackFail;
-import static util.Message.informHexSuccess;
 
 public class SpellPanel extends JPanel {
 
@@ -131,12 +130,13 @@ public class SpellPanel extends JPanel {
             Spell spell = (Spell) spellsBox.getSelectedItem();
             switch (activePanelType) {
                 case HIT -> {
-                    registerAttack(target, hitRoll >= target.ac(), spell);
+                    int attackVal = hitRoll + attacker.stats().spellAttackBonus();
+                    registerAttack(target, attackVal >= target.ac(), spell);
                 }
                 case SAVE -> {
                     Stats.stat saveType = spell.savingThrow();
                     int saveDC = 8 +
-                            attacker.stats().spellModVal() +
+                            attacker.stats().spellAttackBonus() +
                             attacker.stats().mod(saveType);
 
                     registerAttack(target, saveRoll < saveDC, spell);
@@ -165,11 +165,13 @@ public class SpellPanel extends JPanel {
         if (success) {
             if (spell.effect().equals(Effect.BONUS_DAMAGE)) {
                 CombatMain.QUEUE.getCurrentCombatant().putEffect(target, Effect.BONUS_DAMAGE);
-                informHexSuccess(target);
             } else {
                 new DamageAmountPopup(spell, target, false).setVisible(true);
             }
-        } else if (spell.dealsHalfDamageAnyways()) {
+            return;
+        }
+
+        if (spell.dealsHalfDamageAnyways()) {
             new DamageAmountPopup(spell, target, true).setVisible(true);
         } else {
             informAttackFail();

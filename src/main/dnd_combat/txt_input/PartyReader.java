@@ -1,5 +1,6 @@
 package txt_input;
 
+import character_info.Class5e;
 import character_info.Combatant;
 import character_info.Stats;
 import damage_implements.Spell;
@@ -9,7 +10,7 @@ import exception.UploadTextError;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import static util.Reader.*;
+import static util.TxtReader.*;
 
 public class PartyReader {
 
@@ -35,7 +36,7 @@ public class PartyReader {
         int hp = 20, hpCur = -1, ac = 10;
         Stats stats = null;
         int level = 1;
-        Stats.stat spellMod = null;
+        Class5e class5e = null;
         ArrayList<Weapon> weapons = new ArrayList<>();
         ArrayList<Spell> spells = new ArrayList<>();
 
@@ -49,8 +50,8 @@ public class PartyReader {
                 case "hpCur" -> hpCur = num(value);
                 case "ac" -> ac = num(value);
                 case "level" -> level = num(value);
-                case "spellMod" -> spellMod = mod(value);
-                case "stats" -> stats = getStats(value, level, spellMod);
+                case "class" -> class5e = Class5e.withName(value);
+                case "stats" -> stats = getStats(value, level, class5e);
                 case "weapons" -> addWeapons(weapons, value);
                 case "spells" -> addSpells(spells, value);
             }
@@ -62,8 +63,8 @@ public class PartyReader {
         return combatant;
     }
 
-    private Stats getStats(String statLine, int prof, Stats.stat spellMod) {
-        Stats stats = new Stats(prof, spellMod);
+    private Stats getStats(String statLine, int level, Class5e characterClass) {
+        Stats stats = new Stats(characterClass, level);
 
         String[] stat = statLine.split("/");
         for (String string : stat) {

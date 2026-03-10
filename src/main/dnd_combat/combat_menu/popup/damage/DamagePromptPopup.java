@@ -36,8 +36,13 @@ public class DamagePromptPopup extends JFrame {
         JTabbedPane panel = new JTabbedPane();
         panel.setTabPlacement(SwingConstants.TOP);
 
-        panel.addTab("Weapon", new WeaponPanel(getTargetComboBox(), currentCombatant, this));
-        panel.addTab("Spell", new SpellPanel(getTargetComboBox(), currentCombatant, this));
+        if (currentCombatant.hasWeapons()) {
+            panel.addTab("Weapon", new WeaponPanel(getTargetComboBox(), currentCombatant, this));
+        }
+
+        if (currentCombatant.hasSpells()) {
+            panel.addTab("Spell", new SpellPanel(getTargetComboBox(), currentCombatant, this));
+        }
 
         return panel;
     }

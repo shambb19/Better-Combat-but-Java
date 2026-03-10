@@ -54,8 +54,17 @@ public class CompletedElementsList extends JPanel {
         add(getPanel("Scenarios:", scenarioPane));
     }
 
-    public void addFriendly(Combatant combatant) {
-        friendlyPane.add(combatant);
+    /**
+     * @param combatant the completed combatant that will be added to its pane
+     * @return true if the pane found a combatant with the same name as the parameter and
+     * removed it before adding the parameter.
+     */
+    public boolean addCombatant(Combatant combatant) {
+        if (combatant.isEnemy()) {
+            return enemyPane.add(combatant);
+        } else {
+            return friendlyPane.add(combatant);
+        }
     }
 
     public ArrayList<Object> getFriendlyNPCs() {
@@ -67,10 +76,6 @@ public class CompletedElementsList extends JPanel {
         return friendlies;
     }
 
-    public void addEnemy(Combatant combatant) {
-        enemyPane.add(combatant);
-    }
-
     public ArrayList<Object> getEnemies() {
         ArrayList<Object> enemies = new ArrayList<>();
         for (int i = 0; i < enemyPane.model.getSize(); i++) {
@@ -79,8 +84,13 @@ public class CompletedElementsList extends JPanel {
         return enemies;
     }
 
-    public void addScenario(Scenario scenario) {
-        scenarioPane.add(scenario);
+    /**
+     * @param scenario the completed scenario that will be added to its pane
+     * @return true if the pane found a scenario with the same name as the parameter and
+     * removed it before adding the parameter.
+     */
+    public boolean addScenario(Scenario scenario) {
+        return scenarioPane.add(scenario);
     }
 
     public void findAndLocateCopy(Combatant copy) {
@@ -135,12 +145,15 @@ public class CompletedElementsList extends JPanel {
             setViewportView(list);
         }
 
-        public void add(T element) {
+        public boolean add(T element) {
+            boolean isDuplicate = false;
+
             list.removeListSelectionListener(listener);
 
             T existingElement = hasWithName(element);
             if (existingElement != null) {
                 model.removeElement(existingElement);
+                isDuplicate = true;
             }
 
             model.addElement(element);
@@ -150,6 +163,8 @@ public class CompletedElementsList extends JPanel {
 
             revalidate();
             repaint();
+
+            return isDuplicate;
         }
 
         public void remove(T element) {

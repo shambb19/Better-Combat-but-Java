@@ -4,6 +4,7 @@ import combat_menu.CombatMenu;
 import main.CombatMain;
 import character_info.Combatant;
 import txt_input.CampaignWriter;
+import util.Message;
 
 import javax.swing.*;
 import java.awt.*;
@@ -40,6 +41,10 @@ public class CombatEndPopup extends JFrame {
         button.putClientProperty("JButton.buttonType", "roundRect");
         button.addActionListener(e -> {
             CombatMain.BATTLE.friendlies().forEach(Combatant::levelUp);
+            String message = "As of v3.4.0, only proficiency bonuses are handled internally. " +
+                    "All other changes (hp, stats, etc.) need to be manually entered in the Campaign Creator " +
+                    "for now. If you buy Braden a Red Bull he might fix that :P";
+            Message.template(message);
             button.setEnabled(false);
             button.setText("Party Level Increased");
         });

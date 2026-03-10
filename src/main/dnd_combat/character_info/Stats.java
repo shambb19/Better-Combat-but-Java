@@ -1,12 +1,14 @@
 package character_info;
 
-import util.Reader;
+import util.TxtReader;
 
 import java.util.function.DoubleBinaryOperator;
 
 public class Stats {
 
     public enum stat {STR, DEX, CON, INT, WIS, CHA}
+
+    private int level;
 
     private int strength;
     private int dexterity;
@@ -22,38 +24,31 @@ public class Stats {
     private boolean wisProf;
     private boolean chaProf;
 
-    private final int proficiencyBonus;
-    private stat spellCastingAbilityModifier;
+    private final Class5e characterClass;
+    private int proficiencyBonus;
 
     /**
      * Stores str, dex, con, int, wis, cha stats, skill proficiency,
      * proficiency bonuses, spell casting ability modifiers, and calculates
      * them on demand.
      */
-    public Stats(int level, stat spellCastingAbilityModifier) {
-        if (level < 5) {
-            proficiencyBonus = 2;
-        } else if (level < 9) {
-            proficiencyBonus = 3;
-        } else if (level < 13) {
-            proficiencyBonus = 4;
-        } else if (level < 17) {
-            proficiencyBonus = 5;
-        } else {
-            proficiencyBonus = 6;
-        }
-        this.spellCastingAbilityModifier = spellCastingAbilityModifier;
+    public Stats(Class5e characterClass, int level) {
+        this.characterClass = characterClass;
+        this.level = level;
+
+        setProf();
     }
 
     public void manualAdjust(String code) {
         String[] codes = code.split("\\.");
 
-        if (codes[0].equals("spellMod")) {
-            spellCastingAbilityModifier = Reader.mod(codes[1]);
+        if (codes[0].equals("level")) {
+            level = Integer.parseInt(codes[1]);
+            setProf();
             return;
         }
 
-        stat stat = Reader.mod(codes[0]);
+        stat stat = TxtReader.mod(codes[0]);
         String val = codes[1];
 
         int statVal;
@@ -164,27 +159,29 @@ public class Stats {
         };
     }
 
+    public Class5e class5e() {
+        return characterClass;
+    }
+
     /**
      * @return the stat field for which the combatant has a spell casting
      * ability modifier
      */
     public stat spellMod() {
-        return spellCastingAbilityModifier;
+        return characterClass.spellMod();
     }
 
     /**
-     * @return The value of the spell casting ability modifier
+     * @return The value of the attacker's attack bonus for spells.
      */
-    public int spellModVal() {
-        return mod(spellCastingAbilityModifier);
+    public int spellAttackBonus() {
+        return mod(spellMod()) + proficiencyBonus;
     }
 
-    /**
-     * For logging only
-     * @return string version of spellMod()
-     */
-    public String spellModStr() {
-        return spellCastingAbilityModifier.name().toLowerCase();
+    // TODO finish implementing
+    public void levelUp() {
+        level++;
+        setProf();
     }
 
     /**
@@ -209,6 +206,20 @@ public class Stats {
             string.append("+");
         }
         return string.append(")/").toString();
+    }
+
+    private void setProf() {
+        if (level < 5) {
+            proficiencyBonus = 2;
+        } else if (level < 9) {
+            proficiencyBonus = 3;
+        } else if (level < 13) {
+            proficiencyBonus = 4;
+        } else if (level < 17) {
+            proficiencyBonus = 5;
+        } else {
+            proficiencyBonus = 6;
+        }
     }
 
 }

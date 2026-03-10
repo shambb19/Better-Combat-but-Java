@@ -10,7 +10,7 @@ import util.Message;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static util.Reader.*;
+import static util.TxtReader.*;
 
 public class Admin {
 
@@ -33,13 +33,16 @@ public class Admin {
     public static final String DAMAGE_EDIT_CODE = "dmg";
     public static final String EFFECT_EDIT_CODE = "effect";
 
-    // adjust.with.Frodo.ac.16
-    // adjust.with.Aragorn.stat.str.11
-    // adjust.with.Samwise.spellMod.con
-    // adjust.with.Pippin.stat.con.prof=false
-    // adjust.spell.Fireball.dmg.1d10
-    // add.spell.name=Fireball/dmg=1d6/mod=null/effect=NONE
-    // add.against.name=Orc/enemy=true/hp=20/ac=12
+    /**
+     * Accepts a text string from a JOptionPane and decodes it to make respective changes
+     * to the current combat encounter.
+     * @param request The input string. This uses several values separated by periods. This
+     *                method handles item adjusting and adding. Adjusting follows the pattern
+     *                "adjust.item_location.item_name.parameter_to_be_edited.new_value". For
+     *                example, the code to edit Frodo's armor class to 16 would be
+     *                "adjust.with.Frodo.ac.16". Alternatively, the code to change the damage
+     *                dealt by Fireball to 2d10 would be "adjust.spell.Fireball.dmg.2d10".
+     */
     public static void logAdminRequest(String request) {
         try {
             String[] codes = request.split("\\.");
