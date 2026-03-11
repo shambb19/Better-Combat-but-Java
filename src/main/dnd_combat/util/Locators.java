@@ -25,7 +25,9 @@ public class Locators {
 
     public static Combatant getCombatantWithNameFrom(ArrayList<Combatant> source, String name) {
         for (Combatant combatant : source) {
-            if (combatant.name().equals(name)) {
+            System.out.println(combatant.name().trim());
+            System.out.println(name.trim());
+            if (combatant.name().trim().equalsIgnoreCase(name.trim())) {
                 return combatant;
             }
         }

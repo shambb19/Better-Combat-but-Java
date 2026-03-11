@@ -54,7 +54,7 @@ public class ScenarioInputPanel extends JPanel {
     }
 
     private void logAndGetScenario() {
-        Scenario scenario = new Scenario(nameField.getText(), friendlyPanel.getSelected(), enemyPanel.getSelected());
+        Scenario scenario = new Scenario(nameField.getText(), friendlyPanel.getSelectedScenario(), enemyPanel.getSelectedScenario());
         root.logScenarioCompleted(scenario);
         root.setScenarioPanelEnabled(false);
     }
@@ -78,8 +78,8 @@ public class ScenarioInputPanel extends JPanel {
         friendlyPanel.updateSourceList(sibling.getFriendlyNPCs());
         enemyPanel.updateSourceList(sibling.getEnemies());
 
-        friendlyPanel.setTo(selection.with());
-        enemyPanel.setTo(selection.against());
+        friendlyPanel.setTo(selection.withListSingleOccurrence());
+        enemyPanel.setTo(selection.againstListSingleOccurrence());
     }
 
     private JPanel namePanel() {

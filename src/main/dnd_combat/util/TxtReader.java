@@ -115,6 +115,9 @@ public class TxtReader {
      * @return the maximum hp value as int (for example, "6/10" returns 10)
      */
     public static int getHp(String fullString) {
+        if (!fullString.contains("/")) {
+            return Integer.parseInt(fullString);
+        }
         return Integer.parseInt(fullString.split("/")[1]);
     }
 
@@ -123,7 +126,34 @@ public class TxtReader {
      * @return the current hp value as int (for example, "6/10" returns 6)
      */
     public static int getHpCur(String fullString) {
+        if (!fullString.contains("/")) {
+            return Integer.parseInt(fullString);
+        }
         return Integer.parseInt(fullString.split("/")[0]);
+    }
+
+    /**
+     * @param fullString A name and optional quantity value (i.e. "Orc" or "Orc_6")
+     * @return the name of the combatant (for example, "Orc_6" returns "Orc")
+     */
+    public static String getName(String fullString) {
+        if (!fullString.contains("_")) {
+            return fullString;
+        }
+        return fullString.substring(0, fullString.indexOf("_"));
+    }
+
+    /**
+     * @param fullString A name and optional quantity value (i.e. "Orc" or "Orc_6)
+     * @return the quantity of the combatant, and 1 if none is specified
+     * (for example, "Orc_6" returns 6 and "Orc" returns 1)
+     */
+    public static int getQty(String fullString) {
+        if (!fullString.contains("_")) {
+            return 1;
+        }
+        String num = fullString.substring(fullString.indexOf("_") + 1);
+        return Integer.parseInt(num);
     }
 
 }

@@ -11,6 +11,15 @@ public class NPC extends Combatant {
         this.isEnemy = isEnemy;
     }
 
+    public NPC(String name, NPC source) {
+        super(name, source.hpMax, source.armorClass);
+        this.isEnemy = source.isEnemy;
+    }
+
+    public NPC copy() {
+        return new NPC(name, hpMax, armorClass, isEnemy);
+    }
+
     public boolean isEnemy() {
         return isEnemy;
     }

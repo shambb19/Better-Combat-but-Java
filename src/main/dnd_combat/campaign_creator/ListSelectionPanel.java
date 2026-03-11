@@ -1,9 +1,17 @@
 package campaign_creator;
 
+import character_info.combatant.Combatant;
+import character_info.combatant.NPC;
+import util.Message;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Objects;
+
+import static util.Message.getWithLoopUntilInt;
+import static util.Message.template;
 
 public class ListSelectionPanel<T> extends JPanel {
 
@@ -13,8 +21,8 @@ public class ListSelectionPanel<T> extends JPanel {
     public ListSelectionPanel(ArrayList<Object> sourceList, String name) {
         setLayout(new BorderLayout());
 
-        availableList = new ImplementListPane(sourceList, this);
-        selectedList = new ImplementListPane(null, this);
+        availableList = new ImplementListPane(sourceList, this, false);
+        selectedList = new ImplementListPane(null, this, true);
 
         JLabel available = new JLabel("Available " + name + ":");
         JLabel selected = new JLabel("Selected " + name + ":");
@@ -31,6 +39,10 @@ public class ListSelectionPanel<T> extends JPanel {
         }
         list.removeIf(Objects::isNull);
         return list;
+    }
+
+    public HashMap<Combatant, Integer> getSelectedScenario() {
+        return selectedList.scenarioQtyList;
     }
 
     public void swapWithOtherList(Object swappedImplement) {
@@ -67,20 +79,34 @@ public class ListSelectionPanel<T> extends JPanel {
 
     static class ImplementListPane extends JScrollPane {
 
+        private final ListSelectionPanel root;
+
+        private final boolean isSelectedList;
+
         private final ArrayList<Object> implementList;
         private final JList<Object> list;
 
+        private final HashMap<Combatant, Integer> scenarioQtyList = new HashMap<>();
+
         @SuppressWarnings("all")
-        public ImplementListPane(ArrayList<Object> allImplements, ListSelectionPanel root) {
+        public ImplementListPane(ArrayList<Object> allImplements, ListSelectionPanel root, boolean isSelectedList) {
+            this.root = root;
+            this.isSelectedList = isSelectedList;
+
             implementList = Objects.requireNonNullElseGet(allImplements, ArrayList::new);
             list = new JList<>(implementList.toArray());
-            list.addListSelectionListener(e -> root.swapWithOtherList(list.getSelectedValue()));
+
+            list.addListSelectionListener(e -> listener());
+
             setViewportView(list);
         }
 
         public void add(Object implement) {
             if (implementList.contains(implement)) {
                 return;
+            }
+            if (implement instanceof Combatant c) {
+                scenarioQtyList.put(c, 1);
             }
             implementList.add(implement);
             refresh();
@@ -109,6 +135,28 @@ public class ListSelectionPanel<T> extends JPanel {
             list.setListData(implementList.toArray());
             revalidate();
             repaint();
+        }
+
+        private void listener() {
+            if (!isSelectedList) {
+                root.swapWithOtherList(list.getSelectedValue());
+                return;
+            }
+            if (!(list.getSelectedValue() instanceof Combatant combatant)) {
+                return;
+            }
+            if (!(combatant instanceof NPC npc)) {
+                template("Quantity of PCs is limited to 1.");
+                return;
+            }
+            int input = Message.editOrRemoveOption(npc.name());
+            if (input == 1) {
+                root.swapWithOtherList(list.getSelectedValue());
+            } else if (input == 0) {
+                int qty = getWithLoopUntilInt("Set quantity of " + npc.name() + ".", "Quantity");
+                scenarioQtyList.put(combatant, qty);
+                template("Quantity set to " + qty + ".");
+            }
         }
 
     }

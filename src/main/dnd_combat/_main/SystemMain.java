@@ -5,6 +5,7 @@ import damage_implements.Spells;
 import damage_implements.Weapons;
 
 import javax.swing.*;
+import java.io.File;
 import java.net.URL;
 import java.util.Objects;
 
@@ -62,5 +63,10 @@ public class SystemMain {
     public static void restartCombat() {
         CombatMain.kill();
         CombatMain.run();
+    }
+
+    public static void switchToCombat(File file) {
+        CreatorMain.kill();
+        CombatMain.runWith(file);
     }
 }

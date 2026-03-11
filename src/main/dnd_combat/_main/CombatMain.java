@@ -29,6 +29,14 @@ public class CombatMain {
         new FinalizeCombatantsPopup().setVisible(true);
     }
 
+    public static void runWith(File file) {
+        INPUT = file;
+
+        BATTLE = new CampaignReader(INPUT).getBattle();
+
+        new FinalizeCombatantsPopup().setVisible(true);
+    }
+
     public static void start() {
         SwingUtilities.invokeLater(()-> {
             QUEUE = new PlayerQueue(BATTLE.friendlies(), BATTLE.enemies());

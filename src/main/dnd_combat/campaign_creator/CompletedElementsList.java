@@ -11,16 +11,10 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.util.ArrayList;
-
-import static util.Message.template;
+import java.util.Arrays;
+import java.util.HashMap;
 
 public class CompletedElementsList extends JPanel {
-
-    private final TxtMenu root;
-
-    private ScrollPane<Combatant> friendlyPane;
-    private ScrollPane<Combatant> enemyPane;
-    private ScrollPane<Scenario> scenarioPane;
 
     private static final Combatant FRIENDLY_NEW = new NPC(
             "New Ally", -1, -1, false
@@ -29,8 +23,12 @@ public class CompletedElementsList extends JPanel {
             "New Enemy", -1, -1, true
     );
     private static final Scenario SCENARIO_NEW = new Scenario(
-            "New Scenario", null, null
+            "New Scenario", new HashMap<>(), new HashMap<>()
     );
+    private final TxtMenu root;
+    private ScrollPane<Combatant> friendlyPane;
+    private ScrollPane<Combatant> enemyPane;
+    private ScrollPane<Scenario> scenarioPane;
 
     public CompletedElementsList(TxtMenu root) {
         this.root = root;
@@ -97,8 +95,10 @@ public class CompletedElementsList extends JPanel {
         enemyPane.remove(copy);
     }
 
-    public boolean isNotEnoughCombatants() {
-        return friendlyPane.model.isEmpty() || enemyPane.model.isEmpty();
+    public boolean isNotEnoughForScenario() {
+        int friendlyCount = (int) Arrays.stream(friendlyPane.model.toArray()).filter(c -> c instanceof PC).count();
+
+        return enemyPane.model.isEmpty() || friendlyCount < 1;
     }
 
     private JPanel getPanel(String labelText, JScrollPane mainPanel) {
@@ -180,41 +180,36 @@ public class CompletedElementsList extends JPanel {
 
         private ListSelectionListener listener() {
             return e -> {
-                if (!e.getValueIsAdjusting()) {
-                    T selectedValue = list.getSelectedValue();
+                if (e.getValueIsAdjusting()) {
+                    return;
+                }
 
-                    boolean isNew = selectedValue.equals(NEW_OPTION);
+                T selectedValue = list.getSelectedValue();
 
-                    String name;
-                    Combatant selectedCombatant = null;
-                    Scenario selectedScenario = null;
+                if (selectedValue instanceof Scenario
+                        && parent.isNotEnoughForScenario()) {
+                    Message.template("Add more Combatants!");
+                    return;
+                }
+
+                if (selectedValue.equals(NEW_OPTION)) {
                     if (selectedValue instanceof Combatant combatant) {
-                        name = combatant.name();
-                        selectedCombatant = combatant;
-                    } else {
-                        if (parent.isNotEnoughCombatants()) {
-                            template("Add more combatants to create scenarios!");
-                            return;
-                        }
-
-                        name = ((Scenario) selectedValue).name();
-                        selectedScenario = (Scenario) selectedValue;
+                        root.editCombatant(combatant, true);
+                    } else if (selectedValue instanceof Scenario scenario) {
+                        root.editScenario(scenario, true);
                     }
+                    return;
+                }
 
-                    int route = 0;
-                    if (!isNew) {
-                        route = Message.editOrRemoveOption(name);
-                    }
+                int route = Message.editOrRemoveOption(selectedValue.toString());
 
-                    switch (route) {
-                        case 0 -> {
-                            if (selectedValue instanceof Combatant) {
-                                root.editCombatant(selectedCombatant, isNew);
-                            } else {
-                                root.editScenario(selectedScenario, isNew);
-                            }
-                        }
-                        case 1 -> remove(selectedValue);
+                if (route == 0) {
+                    remove(selectedValue);
+                } else if (route == 1) {
+                    if (selectedValue instanceof Combatant combatant) {
+                        root.editCombatant(combatant, false);
+                    } else if (selectedValue instanceof Scenario scenario) {
+                        root.editScenario(scenario, false);
                     }
                 }
             };

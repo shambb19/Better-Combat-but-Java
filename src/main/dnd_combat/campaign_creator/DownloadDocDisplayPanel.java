@@ -1,5 +1,6 @@
 package campaign_creator;
 
+import _main.SystemMain;
 import character_info.combatant.Combatant;
 import character_info.combatant.NPC;
 import scenario_info.Battle;
@@ -58,8 +59,12 @@ public class DownloadDocDisplayPanel extends JPanel {
         JButton copyButton = new JButton("Copy to Clipboard");
         copyButton.addActionListener(e -> clipboardCopy());
 
+        JButton runNowButton = new JButton("Start Combat (This Campaign)");
+        runNowButton.addActionListener(e -> SystemMain.switchToCombat(download()));
+
         sendPanel.add(downloadButton);
         sendPanel.add(copyButton);
+        sendPanel.add(runNowButton);
 
         add(host, BorderLayout.CENTER);
         add(sendPanel, BorderLayout.SOUTH);
@@ -110,14 +115,16 @@ public class DownloadDocDisplayPanel extends JPanel {
         scenarios.sort(Comparator.comparing(Scenario::name));
     }
 
-    private void download() {
+    private File download() {
         CampaignWriter writer = new CampaignWriter("New Campaign", friendlies, enemies, scenarios);
         File savedFile = writer.getFile();
 
         if (savedFile != null && savedFile.exists()) {
             template("Downloaded! Saved to: " + savedFile.getAbsolutePath());
+            return savedFile;
         } else {
             System.err.println("Failed to save the campaign file.");
+            return null;
         }
     }
 

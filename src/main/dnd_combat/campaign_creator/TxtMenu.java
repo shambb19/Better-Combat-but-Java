@@ -63,6 +63,8 @@ public class TxtMenu extends JFrame {
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setResizable(false);
         setInputPanelEnabled(false);
+
+        setVisible(true);
     }
 
     public void editCombatant(Combatant selection, boolean isNew) {

@@ -115,5 +115,4 @@ public class PC extends Combatant {
         txt.add("");
         return txt;
     }
-
 }

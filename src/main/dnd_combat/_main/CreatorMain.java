@@ -9,19 +9,29 @@ import java.net.URL;
 
 public class CreatorMain {
 
+    private static TxtMenu CREATOR_MENU;
+
     public static void run() {
-        new TxtMenu().setVisible(true);
+        CREATOR_MENU = new TxtMenu();
     }
 
     public static void runDefault() {
         URL campaign = SystemMain.class.getResource("/starter.txt");
         File file = FileUtils.toFile(campaign);
-        new TxtMenu(file).setVisible(true);
+
+        CREATOR_MENU = new TxtMenu(file);
     }
 
     public static void runWithPrompt() {
         File file = new FileGetter().getFile();
-        new TxtMenu(file).setVisible(true);
+
+        CREATOR_MENU = new TxtMenu(file);
+    }
+
+    public static void kill() {
+        if (CREATOR_MENU != null) {
+            CREATOR_MENU.dispose();
+        }
     }
 
 }

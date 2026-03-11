@@ -94,7 +94,7 @@ public class CampaignWriter {
         try (FileWriter writer = new FileWriter(file)) {
             code.forEach(line -> {
                 try {
-                    writer.write(line);
+                    writer.write(line + "\n");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

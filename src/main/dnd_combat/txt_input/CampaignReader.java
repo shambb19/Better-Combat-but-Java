@@ -1,6 +1,7 @@
 package txt_input;
 
 import character_info.combatant.Combatant;
+import character_info.combatant.PC;
 import scenario_info.Battle;
 import scenario_info.Scenario;
 import util.Locators;
@@ -10,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import static util.TxtReader.*;
 
@@ -102,8 +104,8 @@ public class CampaignReader {
             currentRead.removeFirst();
 
             String name = "name";
-            ArrayList<Combatant> with = new ArrayList<>();
-            ArrayList<Combatant> against = new ArrayList<>();
+            HashMap<Combatant, Integer> with = new HashMap<>();
+            HashMap<Combatant, Integer> against = new HashMap<>();
 
             while (!currentRead.isEmpty()) {
                 String key = key(currentRead.getFirst());
@@ -119,15 +121,23 @@ public class CampaignReader {
         }
     }
 
-    private ArrayList<Combatant> getCombatantsFromString(String list, ArrayList<Combatant> source) {
-        String[] names = list.split("/");
-        ArrayList<Combatant> combatants = new ArrayList<>();
+    private HashMap<Combatant, Integer> getCombatantsFromString(String list, ArrayList<Combatant> source) {
+        String[] names = list.split(",");
+        HashMap<Combatant, Integer> combatants = new HashMap<>();
 
-        for (String name : names) {
+        for (String str : names) {
+            String name = getName(str);
+            int qty = getQty(str);
+
             Combatant selected = Locators.getCombatantWithNameFrom(source, name);
+            if (selected instanceof PC) {
+                continue;
+            }
+
             assert selected != null;
-            combatants.add(selected);
+            combatants.put(selected, qty);
         }
+
         return combatants;
     }
 

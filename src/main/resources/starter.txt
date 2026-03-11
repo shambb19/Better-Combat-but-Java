@@ -48,4 +48,13 @@ class <= rogue
 stats <= str7,dex12,con11,int16,wis14,cha15
 weapons <= Dagger,Light Crossbow
 
+.enemy
+name <= Orc
+hp <= 20/20
+ac <= 12
+
 <Scenarios>
+
+.scenario
+name <= Test
+against <= Orc_6

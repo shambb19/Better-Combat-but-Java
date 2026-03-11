@@ -23,7 +23,7 @@ public class CombatMenu extends JFrame {
         actionPanel = new ActionPanel();
 
         add(actionPanel, BorderLayout.CENTER);
-        add(initiativeListPanel, BorderLayout.EAST);
+        add(initiativeListPanel.getScrollPane(), BorderLayout.EAST);
         add(excessInspirationBar, BorderLayout.NORTH);
 
         pack();

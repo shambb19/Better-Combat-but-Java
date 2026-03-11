@@ -20,6 +20,13 @@ public class InitiativeListPanel extends JPanel {
         addPanels(CombatMain.BATTLE.friendlies());
     }
 
+    public JScrollPane getScrollPane() {
+        JScrollPane host = new JScrollPane();
+        host.setViewportView(this);
+        host.setBorder(null);
+        return host;
+    }
+
     private void addPanels(ArrayList<Combatant> combatants) {
         for (Combatant combatant : combatants) {
             CombatantPanel panel = new CombatantPanel(combatant);
