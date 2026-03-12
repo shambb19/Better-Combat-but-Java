@@ -1,17 +1,101 @@
-Chill Touch,1d8,null,HEAL_BLOCK
-Poison Spray,1d12,con,NONE
-Shocking Grasp,1d8,null,NONE
-Ray of Sickness,2d8,null,POISON
-Thunder Wave,2d8,con,HALF_DAMAGE
-Hellish Rebuke,2d10,dex,HALF_DAMAGE
-Phantasmal Force,2d8,int,ILLUSION
-Burning Hands,4d6,dex,HALF_DAMAGE
-Hex,1d6,wis,BONUS_DAMAGE
-Scorching Ray,2d6,null,SPLIT_ATTACK
-Eldritch Blast,1d10,null,NONE
-Toll the Dead,1d8,wis,FULL_HP_OPTION
-Hunter's Mark,1d6,null,BONUS_DAMAGE
-Ray of Frost,1d8,null,NONE
-Sacred Flame,1d8,dex,NONE
-Starry Wisp,1d8,null,NONE
-Guiding Bolt,4d6,null,ADVANTAGE_SOON
+.spell
+name: Chill Touch
+dmg: 1d8
+save: null
+effect: HEAL_BLOCK
+
+.spell
+name: Poison Spray
+dmg: 1d12
+save: con
+effect: NONE
+
+.spell
+name: Shocking Grasp
+dmg: 1d8
+save: null
+effect: NONE
+
+.spell
+name: Ray of Sickness
+dmg: 2d8
+save: null
+effect: POISON
+
+.spell
+name: Thunder Wave
+dmg: 2d8
+save: con
+effect: HALF_DAMAGE
+
+.spell
+name: Hellish Rebuke
+dmg: 2d10
+save: dex
+effect: HALF_DAMAGE
+
+.spell
+name: Phantasmal Force
+dmg: 2d8
+save: int
+effect: ILLUSION
+
+.spell
+name: Burning Hands
+dmg: 4d6
+save: dex
+effect: HALF_DAMAGE
+
+.spell
+name: Hex
+dmg: 1d6
+save: wis
+effect: BONUS_DAMAGE
+
+.spell
+name: Scorching Ray
+dmg: 2d6
+save: null
+effect: SPLIT_ATTACK
+
+.spell
+name: Eldritch Blast
+dmg: 1d10
+save: null
+effect: NONE
+
+.spell
+name: Toll the Dead
+dmg: 1d8
+save: wis
+effect: FULL_HP_OPTION
+
+.spell
+name: Hunter's Mark
+dmg: 1d6
+save: null
+effect: BONUS_DAMAGE
+
+.spell
+name: Ray of Frost
+dmg: 1d8
+save: null
+effect: NONE
+
+.spell
+name: Sacred Flame
+dmg: 1d8
+save: dex
+effect: NONE
+
+.spell
+name: Starry Wisp
+dmg: 1d8
+save: null
+effect: NONE
+
+.spell
+name: Guiding Bolt
+dmg: 4d6
+save: null
+effect: ADVANTAGE_SOON

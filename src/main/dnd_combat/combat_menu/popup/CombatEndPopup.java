@@ -3,7 +3,7 @@ package combat_menu.popup;
 import _main.CombatMain;
 import character_info.combatant.PC;
 import combat_menu.CombatMenu;
-import txt_input.CampaignWriter;
+import txt_input_2.CampaignWriter;
 
 import javax.swing.*;
 import java.awt.*;

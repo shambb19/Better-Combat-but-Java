@@ -1,6 +1,6 @@
 package combat_menu.popup;
 
-import txt_input.CampaignReader;
+import txt_input_2.Txt5eReader;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -23,7 +23,8 @@ public class FileGetter {
         while (file == null) {
             int result = fileChooser.showOpenDialog(null);
             File selection = fileChooser.getSelectedFile();
-            if (result == JFileChooser.APPROVE_OPTION && new CampaignReader(selection).getBattle() != null) {
+            if //(result == JFileChooser.APPROVE_OPTION && new CampaignReader(selection).getBattle() != null) {
+            (result == JFileChooser.APPROVE_OPTION && Txt5eReader.getCode(selection) != null) {
                 file = selection;
             } else {
                 JOptionPane.showConfirmDialog(

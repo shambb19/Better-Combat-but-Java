@@ -3,11 +3,12 @@ package campaign_creator;
 import character_info.combatant.Combatant;
 import scenario_info.Battle;
 import scenario_info.Scenario;
-import txt_input.CampaignReader;
+import txt_input_2.Txt5eReader;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.util.Objects;
 
 public class TxtMenu extends JFrame {
 
@@ -35,7 +36,8 @@ public class TxtMenu extends JFrame {
     public TxtMenu(File input) {
         initialize();
 
-        Battle battle = new CampaignReader(input).getBattle();
+        Battle battle = Objects.requireNonNull(Txt5eReader.getCode(input)).getBattle();
+        //Battle battle = new CampaignReader(input).getBattle();
 
         completedList = new CompletedElementsList(battle, this);
 

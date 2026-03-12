@@ -2,9 +2,11 @@ package util;
 
 import _main.CombatMain;
 import character_info.combatant.Combatant;
+import character_info.combatant.NPC;
 import scenario_info.Scenario;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Locators {
 
@@ -23,10 +25,17 @@ public class Locators {
         }
     }
 
-    public static Combatant getCombatantWithNameFrom(ArrayList<Combatant> source, String name) {
+    public static Combatant getCombatantWithNameFrom(List<Combatant> source, String name) {
         for (Combatant combatant : source) {
-            System.out.println(combatant.name().trim());
-            System.out.println(name.trim());
+            if (combatant.name().trim().equalsIgnoreCase(name.trim())) {
+                return combatant;
+            }
+        }
+        return null;
+    }
+
+    public static Combatant getNpcWithNameFrom(List<NPC> source, String name) {
+        for (NPC combatant : source) {
             if (combatant.name().trim().equalsIgnoreCase(name.trim())) {
                 return combatant;
             }

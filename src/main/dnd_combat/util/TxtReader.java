@@ -1,12 +1,5 @@
 package util;
 
-import character_info.combatant.Combatant;
-import character_info.combatant.NPC;
-import character_info.AbilityModifier;
-import damage_implements.Effect;
-import damage_implements.Spell;
-import damage_implements.Weapon;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -35,6 +28,9 @@ public class TxtReader {
      * @return The same line without the opening and closing brackets
      */
     public static String stripped(String line) {
+        if (!line.contains("[")) {
+            return line;
+        }
         return withoutComments(line.substring(line.indexOf("[") + 1, line.indexOf("]")));
     }
 
@@ -54,72 +50,6 @@ public class TxtReader {
         }
 
         return line.trim();
-    }
-
-    /**
-     * @param params the lines of .txt code presented (i.e. name=Frodo or ac=12)
-     * @return A completed Combatant object based on the provided parameters
-     */
-    public static Combatant decodeNPC(ArrayList<String> params, boolean isEnemyTeam) {
-        String name = "name";
-        int hp = 20, ac = 10;
-        while (!params.isEmpty()) {
-            String key = key(params.getFirst());
-            String value = value(params.removeFirst());
-            switch (key) {
-                case "name" -> name = value;
-                case "hp" -> hp = getHp(value);
-                case "ac" -> ac = Integer.parseInt(value);
-            }
-        }
-        return new NPC(name, hp, ac, isEnemyTeam);
-    }
-
-    /**
-     * @param params the separated parameters of the weapon object
-     *               (for example: {"Fireball", "8d6", "dex", "HALF_DAMAGE"}) to be decoded.
-     * @return a completed Spell object based on the given parameters
-     */
-    public static Spell decodeSpell(String[] params) {
-        return new Spell(
-                params[0],
-                getNumDice(params[1]),
-                getDieSize(params[1]),
-                AbilityModifier.get(params[2]),
-                Effect.withRawName(params[3])
-        );
-    }
-
-    /**
-     * @param line the line of .txt code presented (i.e. "Fireball,8d6,dex,HALF_DAMAGE")
-     * @return a completed Spell object based on the given parameters
-     */
-    public static Spell decodeSpell(String line) {
-        String[] params = line.split(",");
-        return decodeSpell(params);
-    }
-
-    /**
-     * @param params the separated parameters of the weapon object
-     *               (for example: {"Dagger", "1d4", "both"}) to be decoded.
-     * @return a completed Weapon object based on the given parameters
-     */
-    public static Weapon decodeWeapon(String[] params) {
-        return new Weapon(
-                params[0],
-                getNumDice(params[1]),
-                getDieSize(params[1]),
-                AbilityModifier.get(params[2])
-        );
-    }
-
-    /**
-     * @param line the line of .txt code presented (i.e. "Dagger,1d4,both")
-     * @return a completed Weapon object based on the given parameters
-     */
-    public static Weapon decodeWeapon(String line) {
-        String[] params = line.split(",");
-        return decodeWeapon(params);
     }
 
     /**

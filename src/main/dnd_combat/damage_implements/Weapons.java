@@ -1,29 +1,19 @@
 package damage_implements;
 
-import org.apache.commons.io.FileUtils;
-import util.TxtReader;
+import txt_input_2.Txt5eReader;
 
-import java.io.File;
 import java.net.URL;
-import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class Weapons {
 
-    private static final ArrayList<Weapon> weapons = new ArrayList<>();
+    private static ArrayList<Weapon> weapons = new ArrayList<>();
     public static final Weapon MANUAL = new Weapon("Manual", -1, -1, null);
 
     public static void init(URL url) {
-        File file = FileUtils.toFile(url);
-        try {
-            ArrayList<String> lines = new ArrayList<>(Files.readAllLines(file.toPath()));
-
-            lines.replaceAll(String::trim);
-            lines.removeIf(String::isBlank);
-            decodeFile(lines);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        weapons = Objects.requireNonNull(Txt5eReader.getCode(url)).toList(Weapon.class);
+        weapons.add(MANUAL);
     }
 
     public static ArrayList<Weapon> get() {
@@ -32,13 +22,6 @@ public class Weapons {
 
     public static void add(Weapon weapon) {
         weapons.add(weapon);
-    }
-
-    public static void decodeFile(ArrayList<String> lines) {
-        while (!lines.isEmpty()) {
-            String line = lines.removeFirst();
-            weapons.add(TxtReader.decodeWeapon(line));
-        }
     }
 
 }

@@ -5,7 +5,7 @@ import character_info.combatant.Combatant;
 import character_info.combatant.NPC;
 import scenario_info.Battle;
 import scenario_info.Scenario;
-import txt_input.CampaignWriter;
+import txt_input_2.CampaignWriter;
 import util.Locators;
 
 import javax.swing.*;

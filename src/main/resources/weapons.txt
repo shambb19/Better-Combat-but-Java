@@ -1,39 +1,179 @@
-Club,1d4,str
-Dagger,1d4,both
-Greatclub,1d8,str
-Handaxe,1d6,str
-Javelin,1d6,str
-Light Hammer,1d4,str
-Mace,1d6,str
-Quarterstaff,1d6,str
-Sickle,1d4,str
-Spear,1d6,str
+.weapon
+name: Club
+dmg: 1d4
+stat: str
 
-Light Crossbow,1d8,dex
-Dart,1d4,both
-Shortbow,1d6,dex
-Sling,1d4,dex
+.weapon
+name: Dagger
+dmg: 1d4
+stat: both
 
-Battleaxe,1d8,str
-Flail,1d8,str
-Glaive,1d10,str
-Greataxe,1d12,str
-Greatsword,2d6,str
-Halberd,1d10,str
-Lance,1d12,str
-Longsword,1d8,str
-Maul,2d6,str
-Morningstar,1d8,str
-Pike,1d10,str
-Rapier,1d8,both
-Scimitar,1d6,both
-Shortsword,1d6,both
-Trident,1d6,str
-War Pick,1d8,str
-Warhammer,1d8,str
-Whip,1d4,both
+.weapon
+name: Greatclub
+dmg: 1d8
+stat: str
 
-Blowgun,1d1,dex
-Hand Crossbow,1d6,dex
-Heavy Crossbow,1d10,dex
-Longbow,1d8,dex
+.weapon
+name: Handaxe
+dmg: 1d6
+stat: str
+
+.weapon
+name: Javelin
+dmg: 1d6
+stat: str
+
+.weapon
+name: Light Hammer
+dmg: 1d4
+stat: str
+
+.weapon
+name: Mace
+dmg: 1d6
+stat: str
+
+.weapon
+name: Quarterstaff
+dmg: 1d6
+stat: str
+
+.weapon
+name: Sickle
+dmg: 1d4
+stat: str
+
+.weapon
+name: Spear
+dmg: 1d6
+stat: str
+
+.weapon
+name: Light Crossbow
+dmg: 1d8
+stat: dex
+
+.weapon
+name: Dart
+dmg: 1d4
+stat: both
+
+.weapon
+name: Shortbow
+dmg: 1d6
+stat: dex
+
+.weapon
+name: Sling
+dmg: 1d4
+stat: dex
+
+.weapon
+name: Battleaxe
+dmg: 1d8
+stat: str
+
+.weapon
+name: Flail
+dmg: 1d8
+stat: str
+
+.weapon
+name: Glaive
+dmg: 1d10
+stat: str
+
+.weapon
+name: Greataxe
+dmg: 1d12
+stat: str
+
+.weapon
+name: Greatsword
+dmg: 2d6
+stat: str
+
+.weapon
+name: Halberd
+dmg: 1d10
+stat: str
+
+.weapon
+name: Lance
+dmg: 1d12
+stat: str
+
+.weapon
+name: Longsword
+dmg: 1d8
+stat: str
+
+.weapon
+name: Maul
+dmg: 2d6
+stat: str
+
+.weapon
+name: Morningstar
+dmg: 1d8
+stat: str
+
+.weapon
+name: Pike
+dmg: 1d10
+stat: str
+
+.weapon
+name: Rapier
+dmg: 1d8
+stat: both
+
+.weapon
+name: Scimitar
+dmg: 1d6
+stat: both
+
+.weapon
+name: Shortsword
+dmg: 1d6
+stat: both
+
+.weapon
+name: Trident
+dmg: 1d6
+stat: str
+
+.weapon
+name: War Pick
+dmg: 1d8
+stat: str
+
+.weapon
+name: Warhammer
+dmg: 1d8
+stat: str
+
+.weapon
+name: Whip
+dmg: 1d4
+stat: both
+
+.weapon
+name: Blowgun
+dmg: 1d1
+stat: dex
+
+.weapon
+name: Hand Crossbow
+dmg: 1d6
+stat: dex
+
+.weapon
+name: Heavy Crossbow
+dmg: 1d10
+stat: dex
+
+.weapon
+name: Longbow
+dmg: 1d8
+stat: dex

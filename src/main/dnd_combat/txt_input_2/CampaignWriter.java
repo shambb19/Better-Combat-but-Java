@@ -1,4 +1,4 @@
-package txt_input;
+package txt_input_2;
 
 import _main.CombatMain;
 import character_info.combatant.Combatant;

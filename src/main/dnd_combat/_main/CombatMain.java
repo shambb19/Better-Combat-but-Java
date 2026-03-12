@@ -6,10 +6,11 @@ import scenario_info.PlayerQueue;
 import combat_menu.popup.CombatEndPopup;
 import combat_menu.popup.FileGetter;
 import combat_menu.CombatMenu;
-import txt_input.CampaignReader;
+import txt_input_2.Txt5eReader;
 
 import javax.swing.*;
 import java.io.File;
+import java.util.Objects;
 
 public class CombatMain {
 
@@ -24,7 +25,8 @@ public class CombatMain {
             INPUT = new FileGetter().getFile();
         }
 
-        BATTLE = new CampaignReader(INPUT).getBattle();
+        BATTLE = Objects.requireNonNull(Txt5eReader.getCode(INPUT)).getBattle();
+        //BATTLE = new CampaignReader(INPUT).getBattle();
 
         new FinalizeCombatantsPopup().setVisible(true);
     }
@@ -32,7 +34,8 @@ public class CombatMain {
     public static void runWith(File file) {
         INPUT = file;
 
-        BATTLE = new CampaignReader(INPUT).getBattle();
+        BATTLE = Objects.requireNonNull(Txt5eReader.getCode(INPUT)).getBattle();
+        //BATTLE = new CampaignReader(INPUT).getBattle();
 
         new FinalizeCombatantsPopup().setVisible(true);
     }

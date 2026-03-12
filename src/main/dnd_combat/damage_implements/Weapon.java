@@ -37,4 +37,5 @@ public record Weapon(String name, int numDice, int dieSize, AbilityModifier stat
     public String toString() {
         return name;
     }
+
 }

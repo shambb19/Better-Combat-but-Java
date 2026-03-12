@@ -20,6 +20,10 @@ public class NPC extends Combatant {
         return new NPC(name, hpMax, armorClass, isEnemy);
     }
 
+    public boolean isAlly() {
+        return !isEnemy;
+    }
+
     public boolean isEnemy() {
         return isEnemy;
     }

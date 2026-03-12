@@ -18,7 +18,7 @@ public class ColoredTxtDisplay extends JTextPane {
 
     private enum LineType {
         SECTION_HEADER, COMPONENT_HEADER, ENEMY_HEADER,
-        PARAMETER, KEY, EQUATOR, VALUE,
+        PARAMETER, PARAMETER_STAT, KEY, EQUATOR, VALUE,
         COMMENT, EMPTY
     }
 
@@ -58,18 +58,39 @@ public class ColoredTxtDisplay extends JTextPane {
 
         for (String line : lines) {
             LineType lineType = getLineType(line);
-            Color color = codeColors.get(lineType);
 
-            if (lineType.equals(LineType.PARAMETER)) {
-                appendParameter(line);
+            if (lineType.equals(LineType.PARAMETER_STAT)) {
+                appendToPane("stats", LineType.KEY);
+                appendToPane(": ", LineType.EQUATOR);
+                appendToPane("[", LineType.VALUE);
+
+                String[] vals = stripped(line).split(", ");
+                for (int i = 0; i < vals.length; i++) {
+                    appendParameter(vals[i], "");
+
+                    if (i != vals.length - 1) {
+                        appendToPane(", ", LineType.VALUE);
+                    }
+                }
+
+                appendToPane("]", LineType.VALUE);
+                appendToPane("\n", LineType.EMPTY);
+
                 continue;
             }
 
-            appendToPane(line + "\n", color);
+            if (lineType.equals(LineType.PARAMETER)) {
+                appendParameter(line, "\n");
+                continue;
+            }
+
+            appendToPane(line + "\n", lineType);
         }
     }
 
-    private void appendToPane(String line, Color color) {
+    private void appendToPane(String line, LineType lineType) {
+        Color color = codeColors.get(lineType);
+
         StyleContext sc = StyleContext.getDefaultStyleContext();
         AttributeSet aSet = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Foreground, color);
 
@@ -81,19 +102,21 @@ public class ColoredTxtDisplay extends JTextPane {
         replaceSelection(line);
     }
 
-    private void appendParameter(String line) {
+    private void appendParameter(String line, String end) {
         String key = key(line);
-        // FIXME print stats
         String value = value(line);
 
-        appendToPane(key, codeColors.get(LineType.KEY));
-        appendToPane(": ", codeColors.get(LineType.EQUATOR));
-        appendToPane(value + "\n", codeColors.get(LineType.VALUE));
+        appendToPane(key, LineType.KEY);
+        appendToPane(": ", LineType.EQUATOR);
+        appendToPane(value + end, LineType.VALUE);
     }
 
     private LineType getLineType(String line) {
         if (line.isBlank()) {
             return LineType.EMPTY;
+        }
+        if (line.startsWith("stats")) {
+            return LineType.PARAMETER_STAT;
         }
         return switch (line.charAt(0)) {
             case '<' -> LineType.SECTION_HEADER;
