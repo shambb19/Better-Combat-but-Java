@@ -1,7 +1,10 @@
 package character_info;
 
 import damage_implements.Weapon;
+import util.TxtReader;
 
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.function.DoubleUnaryOperator;
 
 public class Stats {
@@ -41,6 +44,20 @@ public class Stats {
             case INT -> intelligence = value;
             case WIS -> wisdom = value;
             case CHA -> charisma = value;
+        }
+    }
+
+    public void put(String line) {
+        String[] stats = TxtReader.stripped(line).split(", ");
+
+        for (String s : stats) {
+            String key = TxtReader.key(s);
+            String value = TxtReader.value(s);
+
+            AbilityModifier stat = Objects.requireNonNull(AbilityModifier.get(key));
+            int valInt = Integer.parseInt(value);
+
+            put(stat, valInt);
         }
     }
 
@@ -141,7 +158,7 @@ public class Stats {
      * @return The string for this specific stat using "stat" + "val" (i.e. str16)
      */
     private String statString(AbilityModifier stat) {
-        return stat.name().toLowerCase() + get(stat) + ", ";
+        return stat.name().toUpperCase() + ": " + get(stat) + ", ";
     }
 
     private void setProf() {

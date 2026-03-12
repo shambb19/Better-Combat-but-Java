@@ -27,7 +27,7 @@ public class TxtReader {
      * @return only the value for that line (for example, "name=Frodo" would return "Frodo")
      */
     public static String value(String line) {
-        return withoutComments(line.split(": ")[1]);
+        return line.split(": ")[1];
     }
 
     /**

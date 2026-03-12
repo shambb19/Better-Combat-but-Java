@@ -38,8 +38,9 @@ public class PartyReader {
         ArrayList<Spell> spells = new ArrayList<>();
 
         while (!lines.isEmpty()) {
-            String identifier = key(lines.getFirst());
-            String value = value(lines.removeFirst());
+            String line = lines.removeFirst();
+            String identifier = key(line);
+            String value = value(line);
 
             switch (identifier) {
                 case "name" -> name = value;
@@ -50,7 +51,7 @@ public class PartyReader {
                 case "ac" -> ac = num(value);
                 case "level" -> level = num(value);
                 case "class" -> class5e = Class5e.withName(value);
-                case "stats" -> stats = addStats(value, level, class5e);
+                case "stats" -> stats = addStats(line, level, class5e);
                 case "weapons" -> addWeapons(weapons, value);
                 case "spells" -> addSpells(spells, value);
             }
@@ -64,15 +65,7 @@ public class PartyReader {
 
     private Stats addStats(String line, int level, Class5e characterClass) {
         Stats stats = new Stats(characterClass, level);
-
-        line = stripped(line);
-        String[] stat = line.split(", ");
-        for (String string : stat) {
-            String statName = string.substring(0, 3);
-            String value = string.substring(3);
-
-            stats.put(Objects.requireNonNull(AbilityModifier.get(statName)), Integer.parseInt(value));
-        }
+        stats.put(line);
         return stats;
     }
 

@@ -6,32 +6,29 @@ hp: 35/35
 ac: 16
 level: 4
 class: cleric
-stats: [str12, dex12, con16, int11, wis19, cha6] ~test comment 1
-~test comment 2
+stats: [STR: 12, DEX: 12, CON: 16, INT: 11, WIS: 19, CHA: 6]
 weapons: [Longsword]
 spells: [Guiding Bolt, Ray of Frost, Sacred Flame, Starry Wisp]
 
 .party
 name: Braxton
-hp: 32/32 //test comment 3
+hp: 32/32
 ac: 18
 level: 4
 class: paladin
-//test comment 4
-stats: [str16, dex8, con12, int10, wis13, cha17]
+stats: [STR: 16, DEX: 8, CON: 12, INT: 10, WIS: 13, CHA: 17]
 weapons: [Javelin, Lance, Longsword, Quarterstaff]
 spells: [Toll the Dead, Hunter's Mark]		
 
 .party
 name: Belladonna
-hp: 18/30 #test comment 5
+hp: 18/30
 ac: 14
 level: 4
 class: warlock
-stats: [str11, dex13, con14, int16, wis12, cha10]
+stats: [STR: 11, DEX: 13, CON: 14, INT: 16, WIS: 12, CHA: 10]
 weapons: [Dagger]
 spells: [Chill Touch, Poison Spray, Shocking Grasp, Ray of Sickness, Thunder Wave]
-#test comment 5
 
 .party
 name: Drexen
@@ -39,7 +36,7 @@ hp: 27/27
 ac: 11
 level: 4
 class: sorcerer
-stats: [str10, dex13, con12, int9, wis11, cha14]
+stats: [STR: 10, DEX: 13, CON: 12, INT: 9, WIS: 11, CHA: 14]
 spells: [Chill Touch, Eldritch Blast, Hex, Burning Hands, Scorching Ray]
 
 .party
@@ -48,16 +45,16 @@ hp: 24/24
 ac: 14
 level: 4
 class: rogue
-stats: [str7, dex12, con11, int16, wis14, cha15]
+stats: [STR: 7, DEX: 12, CON: 11, INT: 16, WIS: 14, CHA: 15]
 weapons: [Dagger, Light Crossbow]
 
-.enemy
+.enemy ~test enemy, not intended for actual use
 name: Orc
 hp: 20/20
 ac: 12
 
 <Scenarios>
 
-.scenario
+.scenario ~test scenario, not intended for actual use
 name: Test
 against: Orc_6

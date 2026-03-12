@@ -83,6 +83,7 @@ public class ColoredTxtDisplay extends JTextPane {
 
     private void appendParameter(String line) {
         String key = key(line);
+        // FIXME print stats
         String value = value(line);
 
         appendToPane(key, codeColors.get(LineType.KEY));
