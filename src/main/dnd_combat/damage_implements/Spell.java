@@ -1,6 +1,6 @@
 package damage_implements;
 
-import character_info.Stat;
+import character_info.AbilityModifier;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -8,7 +8,7 @@ import java.util.Comparator;
 import static damage_implements.Spells.MANUAL_HIT;
 import static damage_implements.Spells.MANUAL_SAVE;
 
-public record Spell(String name, int numDice, int dieSize, Stat savingThrow, Effect effect) {
+public record Spell(String name, int numDice, int dieSize, AbilityModifier savingThrow, Effect effect) {
 
     public String getDamageString() {
         return numDice + "d" + dieSize;

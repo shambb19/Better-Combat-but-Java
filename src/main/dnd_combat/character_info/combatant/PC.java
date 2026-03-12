@@ -1,6 +1,6 @@
 package character_info.combatant;
 
-import character_info.Stat;
+import character_info.AbilityModifier;
 import character_info.Stats;
 import combat_menu.listener.DieRollListener;
 import damage_implements.Spell;
@@ -26,7 +26,7 @@ public class PC extends Combatant {
         this.spells = spells;
     }
 
-    public int mod(Stat stat) {
+    public int mod(AbilityModifier stat) {
         return stats.mod(stat);
     }
 
@@ -46,20 +46,8 @@ public class PC extends Combatant {
         return weapons;
     }
 
-    public String weaponStr() {
-        StringBuilder weaponStr = new StringBuilder("weapons <= ");
-        weapons.forEach(weapon -> weaponStr.append(weapon.name()).append(","));
-        return weaponStr.deleteCharAt(weaponStr.length() - 1).toString();
-    }
-
     public ArrayList<Spell> spells() {
         return spells;
-    }
-
-    public String spellStr() {
-        StringBuilder spellStr = new StringBuilder("spells <= ");
-        spells.forEach(spell -> spellStr.append(spell.name()).append(","));
-        return spellStr.deleteCharAt(spellStr.length() - 1).toString();
     }
 
     public Stats stats() {
@@ -98,18 +86,18 @@ public class PC extends Combatant {
     public ArrayList<String> toTxt() {
         ArrayList<String> txt = new ArrayList<>();
         txt.add(".party");
-        txt.add("name <= " + name);
-        txt.add("hp <= " + hpCurrent + "/" + hpMax);
-        txt.add("ac <= " + armorClass);
-        txt.add("level <= " + stats.level());
-        txt.add("class <= " + stats.class5e());
+        txt.add("name: " + name);
+        txt.add("hp: " + hpCurrent + "/" + hpMax);
+        txt.add("ac: " + armorClass);
+        txt.add("level: " + stats.level());
+        txt.add("class: " + stats.class5e());
         txt.add(stats.toString());
 
         if (!weapons.isEmpty()) {
-            txt.add(weaponStr());
+            txt.add("weapons: " + weapons);
         }
         if (!spells.isEmpty()) {
-            txt.add(spellStr());
+            txt.add("spells: " + spells);
         }
 
         txt.add("");

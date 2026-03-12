@@ -62,21 +62,23 @@ public class PartyReader {
         return combatant;
     }
 
-    private Stats addStats(String statLine, int level, Class5e characterClass) {
+    private Stats addStats(String line, int level, Class5e characterClass) {
         Stats stats = new Stats(characterClass, level);
 
-        String[] stat = statLine.split(",");
+        line = stripped(line);
+        String[] stat = line.split(", ");
         for (String string : stat) {
             String statName = string.substring(0, 3);
             String value = string.substring(3);
 
-            stats.put(Objects.requireNonNull(Stat.get(statName)), Integer.parseInt(value));
+            stats.put(Objects.requireNonNull(AbilityModifier.get(statName)), Integer.parseInt(value));
         }
         return stats;
     }
 
     private void addWeapons(ArrayList<Weapon> host, String line) {
-        String[] weapons = line.split(",");
+        line = stripped(line);
+        String[] weapons = line.split(", ");
         for (String weapon : weapons) {
             host.add(Weapon.get(weapon));
         }
@@ -84,12 +86,10 @@ public class PartyReader {
     }
 
     private void addSpells(ArrayList<Spell> host, String line) {
-        String[] spells = line.split(",");
+        line = stripped(line);
+        String[] spells = line.split(", ");
         for (String spell : spells) {
-            Spell newSpell = Spell.get(spell);
-            if (newSpell != null) {
-                host.add(newSpell);
-            }
+            host.add(Spell.get(spell));
         }
         host.removeIf(Objects::isNull);
     }

@@ -3,25 +3,25 @@ package character_info;
 public enum Class5e {
 
     BARBARIAN(null),
-    BARD(Stat.CHA),
-    CLERIC(Stat.WIS),
-    DRUID(Stat.WIS),
+    BARD(AbilityModifier.CHA),
+    CLERIC(AbilityModifier.WIS),
+    DRUID(AbilityModifier.WIS),
     FIGHTER(null),
     MONK(null),
-    PALADIN(Stat.CHA),
-    RANGER(Stat.WIS),
+    PALADIN(AbilityModifier.CHA),
+    RANGER(AbilityModifier.WIS),
     ROGUE(null),
-    SORCERER(Stat.CHA),
-    WARLOCK(Stat.CHA),
-    WIZARD(Stat.INT);
+    SORCERER(AbilityModifier.CHA),
+    WARLOCK(AbilityModifier.CHA),
+    WIZARD(AbilityModifier.INT);
 
-    private final Stat spellMod;
+    private final AbilityModifier spellMod;
 
-    Class5e(Stat spellMod) {
+    Class5e(AbilityModifier spellMod) {
         this.spellMod = spellMod;
     }
 
-    public Stat spellMod() {
+    public AbilityModifier spellMod() {
         return spellMod;
     }
 

@@ -1,7 +1,7 @@
 package combat_menu.popup.damage;
 
 import character_info.combatant.PC;
-import character_info.Stat;
+import character_info.AbilityModifier;
 import damage_implements.Spell;
 import damage_implements.Spells;
 import _main.CombatMain;
@@ -142,7 +142,7 @@ public class SpellPanel extends JPanel {
                     registerAttack(target, attackVal >= target.ac(), spell);
                 }
                 case SAVE -> {
-                    Stat saveType = spell.savingThrow();
+                    AbilityModifier saveType = spell.savingThrow();
                     int saveDC = attacker.saveDc();
 
                     registerAttack(target, saveRoll < saveDC, spell);

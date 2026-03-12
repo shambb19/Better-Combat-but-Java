@@ -1,13 +1,13 @@
 package character_info;
 
-public enum Stat {
+public enum AbilityModifier {
 
     STR, DEX, CON, INT, WIS, CHA;
 
-    Stat() {}
+    AbilityModifier() {}
 
-    public static Stat get(String name) {
-        for (Stat stat : values()) {
+    public static AbilityModifier get(String name) {
+        for (AbilityModifier stat : values()) {
             if (name.equalsIgnoreCase(stat.name())) {
                 return stat;
             }

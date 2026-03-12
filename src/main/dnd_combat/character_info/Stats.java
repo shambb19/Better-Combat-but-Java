@@ -33,7 +33,7 @@ public class Stats {
     /**
      * Sets the stat param to the value param.
      */
-    public void put(Stat stat, int value) {
+    public void put(AbilityModifier stat, int value) {
         switch (stat) {
             case STR -> strength = value;
             case DEX -> dexterity = value;
@@ -47,7 +47,7 @@ public class Stats {
     /**
      * @return the raw stat for the given param
      */
-    public int get(Stat stat) {
+    public int get(AbilityModifier stat) {
         return switch (stat) {
             case STR -> strength;
             case DEX -> dexterity;
@@ -70,7 +70,7 @@ public class Stats {
      * calculations, and adding proficiency bonus if present.
      */
     @SuppressWarnings("all")
-    public int mod(Stat stat) {
+    public int mod(AbilityModifier stat) {
         DoubleUnaryOperator modCalculator = x -> (x - 10) / 2;
         return (int) switch (stat) {
             case STR -> modCalculator.applyAsDouble(strength);
@@ -90,7 +90,7 @@ public class Stats {
      * @return the stat field for which the combatant has a spell casting
      * ability modifier
      */
-    public Stat spellMod() {
+    public AbilityModifier spellMod() {
         return characterClass.spellMod();
     }
 
@@ -106,8 +106,8 @@ public class Stats {
     }
 
     public int weaponAttackBonus(Weapon weapon) {
-        int str = mod(Stat.STR);
-        int dex = mod(Stat.DEX);
+        int str = mod(AbilityModifier.STR);
+        int dex = mod(AbilityModifier.DEX);
         return switch (weapon.stat()) {
             case STR -> str;
             case DEX -> dex;
@@ -130,18 +130,18 @@ public class Stats {
      */
     @Override
     public String toString() {
-        StringBuilder string = new StringBuilder("stats <= ");
-        for (Stat stat : Stat.values()) {
+        StringBuilder string = new StringBuilder("stats: [");
+        for (AbilityModifier stat : AbilityModifier.values()) {
             string.append(statString(stat));
         }
-        return string.deleteCharAt(string.length() - 1).toString();
+        return string.delete(string.length() - 2, string.length()).append("]").toString();
     }
 
     /**
      * @return The string for this specific stat using "stat" + "val" (i.e. str16)
      */
-    private String statString(Stat stat) {
-        return stat.name().toLowerCase() + get(stat) + ",";
+    private String statString(AbilityModifier stat) {
+        return stat.name().toLowerCase() + get(stat) + ", ";
     }
 
     private void setProf() {

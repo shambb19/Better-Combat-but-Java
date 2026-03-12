@@ -34,9 +34,9 @@ public class NPC extends Combatant {
         } else {
             txt.add(".npc");
         }
-        txt.add("name <= " + name);
-        txt.add("hp <= " + hpCurrent + "/" + hpMax);
-        txt.add("ac <= " + armorClass);
+        txt.add("name: " + name);
+        txt.add("hp: " + hpCurrent + "/" + hpMax);
+        txt.add("ac: " + armorClass);
         txt.add("");
         return txt;
     }

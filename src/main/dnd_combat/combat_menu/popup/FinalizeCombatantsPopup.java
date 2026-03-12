@@ -68,16 +68,19 @@ public class FinalizeCombatantsPopup extends JFrame {
         JLabel label = new JLabel(title);
         label.setFont(new Font("SansSerif", Font.BOLD, 12));
         label.setAlignmentX(Component.LEFT_ALIGNMENT);
+
         container.add(label);
     }
 
     private JPanel getHeaderPanel() {
         JPanel panel = new JPanel(new GridLayout(1, 3));
+        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+        panel.setBorder(new EmptyBorder(0, 10, 0, 10));
+
         panel.add(new JLabel("Combatant Name"));
         panel.add(new JLabel("Initiative"));
         panel.add(new JLabel("Check if Absent"));
-        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
-        panel.setBorder(new EmptyBorder(0, 10, 0, 10));
+
         return panel;
     }
 

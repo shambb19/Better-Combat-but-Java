@@ -9,14 +9,21 @@ These sections are designated with those names in brackets but do
 not need to be closed by another one.
 ```text
 <Combatants>
-~logic and such
+~combatants and such
+
+<Scenarios>
+~scenarios and such
 ```
-Each individual combatant or scenario is also headed by a code with the syntax
-```.code```.
+Each individual combatant or scenario is also headed by ```.code```, with "code"
+being different for each and being specified in those sections.
 
+Individual parameters are written as ```key <= value```.
 
-Finally, individual parameters must be written without spaces and in all
-lowercase, like ```key <= value```.
+Note that everything is case-sensitive, and whitespace is necessary between the key, <=,
+and value. I do not like this but every attempt to fix it has resulted in frankly baffling,
+so I've decided to give up for now.
+
+```
 ***
 
 ## Part 2: NPCs and Enemies
@@ -48,11 +55,8 @@ PCs have the same three parameters as NPCs as well as the following:
 4. Weapons (Optional)
 5. Spells (Optional)
 
-Level is self-explanatory, but for the others:
-
-### Class
-This is written like ```class <= bard``` with that key and the class written in
-lowercase.
+Level and Class are written in the standard ```key <= value``` format, so 
+```level <= 2``` and ```class <= bard``` as examples respectively.
 
 ### Main Field Stats
 These are written like ```stats <= str12,dex10,con16,int16,wis12,cha10```
@@ -91,15 +95,19 @@ Scenarios allow you to combine created combatants into different encounters
 that you can easily call at runtime. They require only a name, list of 
 included friendly NPCs ONLY and enemies. All party members are implicitly 
 included in all scenarios (you will have an option to mark them absent at 
-runtime), so they are not part of this. Multiples of combatants are allowed.
+runtime), so they are not part of this. 
+
+If you have a generic npc you would like to add multiple of, you can do so by
+adding ```_num``` after the NPC's name, with "num" being the total number you
+would like to add.
 
 A correct scenario will look like this:
 
 ```text
 .scenario
-name <= Korriban Duel
-with <= Kao Cen Darach,Satele Shan
-against <= Darth Malgus,Darth Vitiate,Sith Trooper,Sith Trooper
+name <= Sacking of Coruscant
+with <= Ven Zallow,Jedi_12
+against <= Darth Malgus,Shae Vizla,Sith_20
 ```
 
 ## Putting it All Together
@@ -133,6 +141,11 @@ name <= Merry Brandybuck
 hp <= 20/20
 ac <= 12
 
+.npc
+name <= Boromir
+hp <= 40/40
+ac <= 16
+
 .enemy
 name <= Orc
 hp <= 20/20
@@ -154,10 +167,10 @@ ac <= 19
 .scenario
 name <= Forest Chase
 with <= Pippin Took,Merry Brandybuck
-against <= Nazgul
+against <= Nazgul_4
 
 .scenario
 name <= Breaking of the Fellowship
-with <= Pippin Took,Merry Brandybuck
-against <= Orc,Orc,Uruk-hai
+with <= Pippin Took,Merry Brandybuck,Boromir
+against <= Orc_50,Uruk-hai
 ```

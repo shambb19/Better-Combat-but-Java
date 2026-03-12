@@ -52,14 +52,15 @@ public class CampaignReader {
         ArrayList<String> allLines;
         try {
             allLines = new ArrayList<>(Files.readAllLines(scenario.toPath()));
-            allLines.removeIf(String::isBlank);
+            allLines.replaceAll(String::trim);
+            allLines.removeIf(line -> line.startsWith("~") || line.startsWith("//") || line.startsWith("#"));
         } catch (IOException e) {
             Message.fileError(e);
             throw e;
         }
 
         while (!allLines.isEmpty()) {
-            String header = allLines.removeFirst();
+            String header = withoutComments(allLines.removeFirst());
 
             switch (header) {
                 case "<Combatants>" -> addSectionToList(allLines, combatantLines);
@@ -88,7 +89,7 @@ public class CampaignReader {
     private void handleCombatants() {
         while (!combatantLines.isEmpty()) {
             ArrayList<String> currentRead = getElement(combatantLines);
-            String header = currentRead.removeFirst();
+            String header = withoutComments(currentRead.removeFirst());
 
             switch (header) {
                 case ".party" -> readFriendlies.add(new PartyReader(currentRead).get());

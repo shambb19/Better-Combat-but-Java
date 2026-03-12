@@ -20,7 +20,7 @@ import static util.Message.template;
 
 public class DownloadDocDisplayPanel extends JPanel {
 
-    private JTextArea display;
+    private ColoredTxtDisplay display;
 
     private final ArrayList<Combatant> friendlies;
     private final ArrayList<Combatant> enemies;
@@ -48,7 +48,7 @@ public class DownloadDocDisplayPanel extends JPanel {
 
         JScrollPane host = new JScrollPane();
 
-        display = new JTextArea();
+        display = new ColoredTxtDisplay(null);
         host.setViewportView(display);
 
         JPanel sendPanel = new JPanel(new FlowLayout());
@@ -84,7 +84,7 @@ public class DownloadDocDisplayPanel extends JPanel {
     }
 
     private void setText() {
-        display.setText(displayTextAsString());
+        display.setLines(displayTextAsList());
         display.setCaretPosition(0);
     }
 
@@ -135,10 +135,14 @@ public class DownloadDocDisplayPanel extends JPanel {
         template("Copied!");
     }
 
+    private ArrayList<String> displayTextAsList() {
+        CampaignWriter writer = new CampaignWriter(friendlies, enemies, scenarios);
+        return writer.getCode();
+    }
+
     private String displayTextAsString() {
         StringBuilder string = new StringBuilder();
-        CampaignWriter writer = new CampaignWriter(friendlies, enemies, scenarios);
-        writer.getCode().forEach(line -> string.append(line).append("\n"));
+        displayTextAsList().forEach(line -> string.append(line).append("\n"));
         return string.toString();
     }
 

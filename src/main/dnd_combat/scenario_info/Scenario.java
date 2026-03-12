@@ -55,12 +55,12 @@ public record Scenario(String name, HashMap<Combatant, Integer> with, HashMap<Co
     public ArrayList<String> toTxt() {
         ArrayList<String> txt = new ArrayList<>();
         txt.add(".scenario");
-        txt.add("name <= " + name);
+        txt.add("name: " + name);
 
         if (!with.isEmpty()) {
-            txt.add(getLineFor("with <= ", with));
+            txt.add(getLineFor("with: ", with));
         }
-        txt.add(getLineFor("against <= ", against));
+        txt.add(getLineFor("against: ", against));
 
         txt.add("");
         return txt;

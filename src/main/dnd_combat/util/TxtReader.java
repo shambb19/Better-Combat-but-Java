@@ -2,14 +2,59 @@ package util;
 
 import character_info.combatant.Combatant;
 import character_info.combatant.NPC;
-import character_info.Stat;
+import character_info.AbilityModifier;
 import damage_implements.Effect;
 import damage_implements.Spell;
 import damage_implements.Weapon;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class TxtReader {
+
+    /**
+     * @param line any line of .txt code (name=Frodo, level=6, effect=NONE, etc.)
+     * @return only the identifier for that line without the '=' (for example,
+     * "name=Frodo" would return "Frodo")
+     */
+    public static String key(String line) {
+        return line.split(": ")[0];
+    }
+
+    /**
+     * @param line any line of .txt code (name=Frodo, level=6, effect=NONE, etc.)
+     * @return only the value for that line (for example, "name=Frodo" would return "Frodo")
+     */
+    public static String value(String line) {
+        return withoutComments(line.split(": ")[1]);
+    }
+
+    /**
+     * @param line The line of .txt code for weapons, spells, or stats
+     * @return The same line without the opening and closing brackets
+     */
+    public static String stripped(String line) {
+        return withoutComments(line.substring(line.indexOf("[") + 1, line.indexOf("]")));
+    }
+
+    /**
+     * @param line Any line of .txt code
+     * @return The same line without comments (using the keys "//", "~", and "#")
+     */
+    public static String withoutComments(String line) {
+        ArrayList<Integer> commentIndexes = new ArrayList<>(List.of(
+                line.indexOf("//"), line.indexOf("~"), line.indexOf("#")
+        ));
+        commentIndexes.removeIf(index -> index < 0);
+
+        if (!commentIndexes.isEmpty()) {
+            int stopIdx = Collections.min(commentIndexes);
+            return line.substring(0, stopIdx).trim();
+        }
+
+        return line.trim();
+    }
 
     /**
      * @param params the lines of .txt code presented (i.e. name=Frodo or ac=12)
@@ -40,7 +85,7 @@ public class TxtReader {
                 params[0],
                 getNumDice(params[1]),
                 getDieSize(params[1]),
-                Stat.get(params[2]),
+                AbilityModifier.get(params[2]),
                 Effect.withRawName(params[3])
         );
     }
@@ -61,10 +106,10 @@ public class TxtReader {
      */
     public static Weapon decodeWeapon(String[] params) {
         return new Weapon(
-            params[0],
-            getNumDice(params[1]),
-            getDieSize(params[1]),
-            Stat.get(params[2])
+                params[0],
+                getNumDice(params[1]),
+                getDieSize(params[1]),
+                AbilityModifier.get(params[2])
         );
     }
 
@@ -75,23 +120,6 @@ public class TxtReader {
     public static Weapon decodeWeapon(String line) {
         String[] params = line.split(",");
         return decodeWeapon(params);
-    }
-
-    /**
-     * @param line any line of .txt code (name=Frodo, level=6, effect=NONE, etc.)
-     * @return only the identifier for that line without the '=' (for example,
-     * "name=Frodo" would return "Frodo")
-     */
-    public static String key(String line) {
-        return line.split(" <= ")[0];
-    }
-
-    /**
-     * @param line any line of .txt code (name=Frodo, level=6, effect=NONE, etc.)
-     * @return only the value for that line (for example, "name=Frodo" would return "Frodo")
-     */
-    public static String value(String line) {
-        return line.split(" <= ")[1];
     }
 
     /**

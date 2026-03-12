@@ -1,7 +1,7 @@
 package campaign_creator;
 
 import character_info.combatant.PC;
-import character_info.Stat;
+import character_info.AbilityModifier;
 import character_info.Stats;
 import combat_menu.listener.IntegerFieldListener;
 
@@ -11,18 +11,18 @@ import java.util.Map;
 
 public class StatsInputPanel extends JPanel {
 
-    private final Map<JPanel, Stat> statMap;
+    private final Map<JPanel, AbilityModifier> statMap;
 
     public StatsInputPanel() {
         setLayout(new GridLayout(0, 6));
 
         statMap = Map.of(
-                fieldTemplate("STR"), Stat.STR,
-                fieldTemplate("DEX"), Stat.DEX,
-                fieldTemplate("CON"), Stat.CON,
-                fieldTemplate("INT"), Stat.INT,
-                fieldTemplate("WIS"), Stat.WIS,
-                fieldTemplate("CHA"), Stat.CHA
+                fieldTemplate("STR"), AbilityModifier.STR,
+                fieldTemplate("DEX"), AbilityModifier.DEX,
+                fieldTemplate("CON"), AbilityModifier.CON,
+                fieldTemplate("INT"), AbilityModifier.INT,
+                fieldTemplate("WIS"), AbilityModifier.WIS,
+                fieldTemplate("CHA"), AbilityModifier.CHA
         );
 
         statMap.forEach((panel, stat) -> add(panel));
@@ -64,7 +64,7 @@ public class StatsInputPanel extends JPanel {
         Stats stats = combatant.stats();
 
         for (JPanel panel : statMap.keySet()) {
-            Stat stat = statMap.get(panel);
+            AbilityModifier stat = statMap.get(panel);
 
             templateTextField(panel).setText(String.valueOf(stats.get(stat)));
         }
