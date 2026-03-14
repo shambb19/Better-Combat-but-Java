@@ -15,14 +15,14 @@ import static util.Message.template;
 
 public class ListSelectionPanel<T> extends JPanel {
 
-    private final ImplementListPane availableList;
-    private final ImplementListPane selectedList;
+    private final ImplementListPane<T> availableList;
+    private final ImplementListPane<T> selectedList;
 
-    public ListSelectionPanel(ArrayList<Object> sourceList, String name) {
+    public ListSelectionPanel(ArrayList<T> sourceList, String name) {
         setLayout(new BorderLayout());
 
-        availableList = new ImplementListPane(sourceList, this, false);
-        selectedList = new ImplementListPane(null, this, true);
+        availableList = new ImplementListPane<>(sourceList, this, false);
+        selectedList = new ImplementListPane<>(null, this, true);
 
         JLabel available = new JLabel("Available " + name + ":");
         JLabel selected = new JLabel("Selected " + name + ":");
@@ -31,12 +31,8 @@ public class ListSelectionPanel<T> extends JPanel {
         add(horizontalPanelWith(availableList, selectedList));
     }
 
-    @SuppressWarnings("unchecked")
     public ArrayList<T> getSelected() {
-        ArrayList<T> list = new ArrayList<>();
-        for (Object item : selectedList.getList()) {
-            list.add((T) item);
-        }
+        ArrayList<T> list = new ArrayList<>(selectedList.getList());
         list.removeIf(Objects::isNull);
         return list;
     }
@@ -45,7 +41,7 @@ public class ListSelectionPanel<T> extends JPanel {
         return selectedList.scenarioQtyList;
     }
 
-    public void swapWithOtherList(Object swappedImplement) {
+    public void swapWithOtherList(T swappedImplement) {
         if (availableList.contains(swappedImplement)) {
             availableList.remove(swappedImplement);
             selectedList.add(swappedImplement);
@@ -72,36 +68,36 @@ public class ListSelectionPanel<T> extends JPanel {
         });
     }
 
-    public void updateSourceList(ArrayList<Object> newSource) {
+    public void updateSourceList(ArrayList<T> newSource) {
         reset();
         availableList.updateSourceList(newSource);
     }
 
-    static class ImplementListPane extends JScrollPane {
+    static class ImplementListPane<T> extends JScrollPane {
 
-        private final ListSelectionPanel root;
+        private final ListSelectionPanel<T> root;
 
         private final boolean isSelectedList;
 
-        private final ArrayList<Object> implementList;
-        private final JList<Object> list;
+        private final ArrayList<T> implementList;
+        private final JList<T> list;
 
         private final HashMap<Combatant, Integer> scenarioQtyList = new HashMap<>();
 
         @SuppressWarnings("all")
-        public ImplementListPane(ArrayList<Object> allImplements, ListSelectionPanel root, boolean isSelectedList) {
+        public ImplementListPane(ArrayList<T> allImplements, ListSelectionPanel root, boolean isSelectedList) {
             this.root = root;
             this.isSelectedList = isSelectedList;
 
             implementList = Objects.requireNonNullElseGet(allImplements, ArrayList::new);
-            list = new JList<>(implementList.toArray());
+            list = new JList<>((T[]) implementList.toArray());
 
             list.addListSelectionListener(e -> listener());
 
             setViewportView(list);
         }
 
-        public void add(Object implement) {
+        public void add(T implement) {
             if (implementList.contains(implement)) {
                 return;
             }
@@ -112,27 +108,29 @@ public class ListSelectionPanel<T> extends JPanel {
             refresh();
         }
 
-        public void remove(Object implement) {
+        public void remove(T implement) {
             implementList.remove(implement);
             refresh();
         }
 
-        public void updateSourceList(ArrayList<Object> newList) {
+        @SuppressWarnings("unchecked")
+        public void updateSourceList(ArrayList<T> newList) {
             implementList.clear();
             implementList.addAll(newList);
-            list.setListData(implementList.toArray());
+            list.setListData((T[]) implementList.toArray());
         }
 
-        public boolean contains(Object o) {
+        public boolean contains(T o) {
             return implementList.contains(o);
         }
 
-        public ArrayList<Object> getList() {
+        public ArrayList<T> getList() {
             return implementList;
         }
 
+        @SuppressWarnings("unchecked")
         private void refresh() {
-            list.setListData(implementList.toArray());
+            list.setListData((T[]) implementList.toArray());
             revalidate();
             repaint();
         }

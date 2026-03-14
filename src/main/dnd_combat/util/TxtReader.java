@@ -7,20 +7,24 @@ import java.util.List;
 public class TxtReader {
 
     /**
-     * @param line any line of .txt code (name=Frodo, level=6, effect=NONE, etc.)
+     * @param line any line of .txt code (name: Frodo, level: 6, effect: NONE, etc.)
      * @return only the identifier for that line without the '=' (for example,
-     * "name=Frodo" would return "Frodo")
+     * "name: Frodo" would return "Frodo")
      */
     public static String key(String line) {
-        return line.split(": ")[0];
+        return line.split(": ")[0].trim();
     }
 
     /**
-     * @param line any line of .txt code (name=Frodo, level=6, effect=NONE, etc.)
-     * @return only the value for that line (for example, "name=Frodo" would return "Frodo")
+     * @param line any line of .txt code (name: Frodo, level: 6, effect: NONE, etc.)
+     * @return only the value for that line (for example, "name: Frodo" would return "Frodo")
      */
     public static String value(String line) {
-        return line.split(": ")[1];
+        if (line.indexOf(": ") != line.lastIndexOf(": ")) {
+            return line.substring(line.indexOf(": ") + 2).trim();
+        }
+
+        return line.split(": ")[1].trim();
     }
 
     /**

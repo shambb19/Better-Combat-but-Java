@@ -1,4 +1,4 @@
-package txt_input_2;
+package txt_input;
 
 import _main.CombatMain;
 import character_info.combatant.Combatant;
@@ -13,10 +13,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 
 public class CampaignWriter {
-
-    private static final String COMBATANT_HEADER = "<Combatants>";
-    private static final String SCENARIO_HEADER = "<Scenarios>";
-    private static final String LINE = "";
 
     private final ArrayList<Combatant> friendlySource;
     private final ArrayList<Combatant> enemySource;
@@ -58,9 +54,31 @@ public class CampaignWriter {
         scenarioSource = scenarios;
     }
 
+
+    public ArrayList<String> getCode() {
+        code = new ArrayList<>();
+        writeCombatants();
+        writeScenarios();
+        return code;
+    }
+
+    public File getFile() {
+        try (FileWriter writer = new FileWriter(file)) {
+            getCode().forEach(line -> {
+                try {
+                    writer.write(line + "\n");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+            return file;
+        } catch (IOException e) {
+            Message.throwFileDownloadError(null, e);
+            return null;
+        }
+    }
+
     private void writeCombatants() {
-        code.add(COMBATANT_HEADER);
-        code.add(LINE);
         friendlySource.forEach(c -> {
             if (c instanceof PC || c.lifeStatus().isAlive()) {
                 code.addAll(c.toTxt());
@@ -74,36 +92,7 @@ public class CampaignWriter {
     }
 
     private void writeScenarios() {
-        code.add(SCENARIO_HEADER);
-        code.add(LINE);
         scenarioSource.forEach(scenario -> code.addAll(scenario.toTxt()));
-    }
-
-    public ArrayList<String> getCode() {
-        code = new ArrayList<>();
-        writeCombatants();
-        writeScenarios();
-        return code;
-    }
-
-    public File getFile() {
-        code = new ArrayList<>();
-        writeCombatants();
-        writeScenarios();
-
-        try (FileWriter writer = new FileWriter(file)) {
-            code.forEach(line -> {
-                try {
-                    writer.write(line + "\n");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-            return file;
-        } catch (IOException e) {
-            Message.throwFileDownloadError(null, e);
-            return null;
-        }
     }
 
 }

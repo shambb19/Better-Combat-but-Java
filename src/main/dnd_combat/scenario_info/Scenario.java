@@ -68,14 +68,15 @@ public record Scenario(String name, HashMap<Combatant, Integer> with, HashMap<Co
 
     private String getLineFor(String key, HashMap<Combatant, Integer> source) {
         StringBuilder txt = new StringBuilder(key);
+        txt.append("[");
         source.forEach((combatant, num) -> {
             txt.append(combatant.name());
             if (num > 1) {
                 txt.append("_").append(num);
             }
-            txt.append(",");
+            txt.append(", ");
         });
-        return txt.deleteCharAt(txt.length() - 1).toString();
+        return txt.delete(txt.length() - 2, txt.length()).append("]").toString();
     }
 
     @Override

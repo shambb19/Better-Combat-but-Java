@@ -27,7 +27,7 @@ public class DealtEffectsList {
      * Logs the effect param as dealt to the target param.
      */
     public void put(Combatant target, Effect effect) {
-        if (effect == null) {
+        if (effect == null || effect.equals(Effect.NONE)) {
             return;
         }
         switch (effect) {

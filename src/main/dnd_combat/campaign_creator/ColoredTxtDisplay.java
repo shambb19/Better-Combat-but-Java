@@ -17,15 +17,16 @@ import static util.TxtReader.*;
 public class ColoredTxtDisplay extends JTextPane {
 
     private enum LineType {
-        SECTION_HEADER, COMPONENT_HEADER, ENEMY_HEADER,
+        PARTY_HEADER, NPC_HEADER, ENEMY_HEADER, SCENARIO_HEADER,
         PARAMETER, PARAMETER_STAT, KEY, EQUATOR, VALUE,
         COMMENT, EMPTY
     }
 
     private static final Map<LineType, Color> codeColors = Map.of(
-            LineType.SECTION_HEADER, new Color(255, 209, 106),
-            LineType.COMPONENT_HEADER, new Color(106, 188, 255),
-            LineType.ENEMY_HEADER, new Color(255, 84, 197),
+            LineType.PARTY_HEADER, new Color(106, 188, 255),
+            LineType.NPC_HEADER, new Color(137, 80, 245),
+            LineType.ENEMY_HEADER, new Color(245, 64, 146),
+            LineType.SCENARIO_HEADER, new Color(255, 237, 122),
             LineType.PARAMETER, Color.BLACK,
             LineType.KEY, new Color(122, 255, 106),
             LineType.EQUATOR, new Color(247, 155, 255),
@@ -118,16 +119,14 @@ public class ColoredTxtDisplay extends JTextPane {
         if (line.startsWith("stats")) {
             return LineType.PARAMETER_STAT;
         }
-        return switch (line.charAt(0)) {
-            case '<' -> LineType.SECTION_HEADER;
-            case '.' -> {
-                if (line.startsWith(".enemy")) {
-                    yield LineType.ENEMY_HEADER;
-                } else {
-                    yield LineType.COMPONENT_HEADER;
-                }
-            }
-            case '/', '#', '~' -> LineType.COMMENT;
+        if (line.startsWith("//") || line.startsWith("~") || line.startsWith("#")) {
+            return LineType.COMMENT;
+        }
+        return switch (line) {
+            case ".party" -> LineType.PARTY_HEADER;
+            case ".npc" -> LineType.NPC_HEADER;
+            case ".enemy" -> LineType.ENEMY_HEADER;
+            case ".scenario" -> LineType.SCENARIO_HEADER;
             default -> LineType.PARAMETER;
         };
     }

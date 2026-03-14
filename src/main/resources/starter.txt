@@ -46,11 +46,12 @@ class: rogue
 stats: [STR: 7, DEX: 12, CON: 11, INT: 16, WIS: 14, CHA: 15]
 weapons: [Dagger, Light Crossbow]
 
-.enemy ~test enemy, not intended for actual use
+ ~test enemy, not intended for actual use
+.enemy
 name: Orc
 hp: 20/20
 ac: 12
 
 .scenario ~test scenario, not intended for actual use
 name: Test
-against: Orc_6
+against: [Orc_6]

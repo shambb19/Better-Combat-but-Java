@@ -1,13 +1,13 @@
 package combat_menu.popup.damage;
 
-import damage_implements.Spell;
-import damage_implements.Weapon;
-import damage_implements.Weapons;
 import _main.CombatMain;
 import character_info.combatant.Combatant;
-import damage_implements.Effect;
 import combat_menu.listener.DieRollListener;
 import combat_menu.listener.IntegerFieldListener;
+import damage_implements.Effect;
+import damage_implements.Implement;
+import damage_implements.Spell;
+import damage_implements.Weapon;
 import util.Message;
 
 import javax.swing.*;
@@ -20,65 +20,34 @@ import static util.Message.informIllusion;
 public class DamageAmountPopup extends JFrame {
 
     private final boolean isManual;
-    private boolean isHalfDamage = false;
+    private final boolean isHalfDamage;
     private final Combatant target;
-    private Weapon weapon;
-    private Spell spell;
-    private Combatant attacker;
-    private JTextField mainDamageField;
-    private JCheckBox otherBonusDamageCheck;
-    private JTextField otherBonusDamageField;
-    private JButton okButton;
+    private final Implement implement;
+    private final Combatant attacker;
+    private final JTextField mainDamageField;
+    private final JCheckBox otherBonusDamageCheck;
+    private final JTextField otherBonusDamageField;
+    private final JButton okButton;
 
-    /**
-     * Creates a popup to prompt damage dealt by a weapon.
-     * @param weapon the weapon used
-     * @param target the targeted combatant
-     */
-    public DamageAmountPopup(Weapon weapon, Combatant target) {
-        this.weapon = weapon;
-        isManual = weapon.isManual();
-        this.target = target;
-        construct();
+    public static void run(Implement implement, Combatant target) {
+        new DamageAmountPopup(implement, target).setVisible(true);
     }
 
-    /**
-     * Creates a popup to prompt damage dealt by a spell.
-     * @param spell the spell used
-     * @param target the targeted combatant
-     * @param isHalfDamage true if the spell has the effect HALF_DAMAGE
-     */
-    public DamageAmountPopup(Spell spell, Combatant target, boolean isHalfDamage) {
-        this.spell = spell;
-        isManual = spell.isManual();
+    private DamageAmountPopup(Implement implement, Combatant target) {
+        this.implement = implement;
         this.target = target;
-        this.isHalfDamage = isHalfDamage;
-        construct();
-    }
-
-    /**
-     * Separated constructor to avoid code redundancy.
-     */
-    private void construct() {
         attacker = CombatMain.QUEUE.getCurrentCombatant();
+        isManual = implement.isManual();
+        isHalfDamage = implement.isHalfDamage();
 
         setTitle("Damage Amount");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setLayout(new GridLayout(0, 1));
         setAlwaysOnTop(true);
 
-        String damageString;
-        int numDice;
-        int dieSize;
-        if (weapon != null) {
-            damageString = weapon.getDamageString();
-            numDice = weapon.numDice();
-            dieSize = weapon.dieSize();
-        } else {
-            damageString = spell.getDamageString();
-            numDice = spell.numDice();
-            dieSize = spell.dieSize();
-        }
+        String damageString = implement.damageString();
+        int numDice = implement.numDice();
+        int dieSize = implement.dieSize();
 
         mainDamageField = new JTextField();
         mainDamageField.putClientProperty("JComponent.roundRect", true);
@@ -95,9 +64,6 @@ public class DamageAmountPopup extends JFrame {
             }
         });
 
-        otherBonusDamageCheck = new JCheckBox("Other Bonus Damage?");
-        otherBonusDamageCheck.addActionListener(e -> otherBonusDamageField.setEnabled(otherBonusDamageCheck.isSelected()));
-
         otherBonusDamageField = new JTextField();
         otherBonusDamageField.putClientProperty("JComponent.roundRect", true);
         otherBonusDamageField.addKeyListener(new IntegerFieldListener());
@@ -110,34 +76,24 @@ public class DamageAmountPopup extends JFrame {
         });
         otherBonusDamageField.setEnabled(false);
 
-        okButton = getOkButton();
+        otherBonusDamageCheck = new JCheckBox("Other Bonus Damage?");
+        otherBonusDamageCheck.addActionListener(e -> otherBonusDamageField.setEnabled(otherBonusDamageCheck.isSelected()));
 
-        if (isManual) {
-            add(new JLabel("Enter Damage"));
-        } else {
-            add(new JLabel("Enter " + damageString + " damage_implements"));
-        }
+        okButton = new JButton("Deal Damage");
+        okButton.putClientProperty("JButton.buttonType", "roundRect");
+        okButton.addActionListener(e -> logAndFinish());
+
+        add(new JLabel("Enter " + damageString + " Damage"));
         add(mainDamageField);
 
-        if (weapon != null && !weapon.equals(Weapons.MANUAL)) {
-            add(new JLabel("+" + attacker.mod(weapon.stat()) + " from Stat Bonus"));
+        if (implement instanceof Weapon && !isManual) {
+            add(new JLabel("+" + attacker.mod(implement.stat()) + " from Stat Bonus"));
         }
-
         if (isHalfDamage) {
             add(new JLabel("Damage halved because attack failed (enter full value anyways)."));
         }
         if (target.isHexedBy(attacker)) {
             add(new JLabel("+1d6 from Hex (enter below)"));
-        }
-
-        if (!isManual) {
-            if (!target.isHexedBy(attacker)) {
-                add(otherBonusDamageCheck);
-                add(otherBonusDamageField);
-            } else {
-                add(otherBonusDamageField);
-                otherBonusDamageField.setEnabled(true);
-            }
         }
 
         add(okButton);
@@ -146,36 +102,31 @@ public class DamageAmountPopup extends JFrame {
         setLocationRelativeTo(CombatMain.COMBAT_MENU);
     }
 
-    /**
-     * Ok Button handles the dealing of damage and the logging of any
-     * effects associated with the spell (if one was used in the attack,
-     * as well as updating the menu accordingly).
-     * @return the completed ok button
-     */
-    private JButton getOkButton() {
-        JButton button = new JButton("Deal Damage");
-        button.putClientProperty("JButton.buttonType", "roundRect");
-        button.addActionListener(e -> {
-            if (calculateTotal() == 0) {
-                return;
+    private void logAndFinish() {
+        if (mainDamageField.getText().isEmpty()) {
+            return;
+        }
+        if (calculateTotal() == 0) {
+            return;
+        }
+        target.damage(calculateTotal());
+
+        if (implement instanceof Spell spell) {
+            Effect effect = spell.effect();
+            attacker.putEffect(target, effect);
+
+            if (effect.equals(Effect.ILLUSION)) {
+                informIllusion(target);
+            } else if (effect.equals(Effect.ADVANTAGE_SOON)) {
+                String message = "Roll with advantage if you attack " + target +
+                        " again this turn. You will lose the bonus otherwise!";
+                Message.template(message);
             }
-            target.damage(calculateTotal());
-            if (spell != null) {
-                attacker.putEffect(target, spell.effect());
-                if (spell.effect().equals(Effect.ILLUSION)) {
-                    informIllusion(target);
-                }
-                if (spell.effect().equals(Effect.ADVANTAGE_SOON)) {
-                    String message = "Roll with advantage if you attack " + target +
-                            " again this turn. You will lose the bonus otherwise!";
-                    Message.template(message);
-                }
-            }
-            CombatMain.COMBAT_MENU.update();
-            CombatMain.checkWinConditions();
-            dispose();
-        });
-        return button;
+        }
+
+        CombatMain.COMBAT_MENU.update();
+        CombatMain.checkWinConditions();
+        dispose();
     }
 
     /**
@@ -185,28 +136,22 @@ public class DamageAmountPopup extends JFrame {
      * if the attacker has the HALF_DAMAGE de-buff.
      */
     private int calculateTotal() {
-        int mainDamage = 0;
-        if (!mainDamageField.getText().isEmpty()) {
-            mainDamage = Integer.parseInt(mainDamageField.getText());
-        }
-        int bonusDamage = 0;
+        int damage = Integer.parseInt(mainDamageField.getText());
+
         if (otherBonusDamageField.isEnabled() && !otherBonusDamageField.getText().isEmpty()) {
-            bonusDamage = Integer.parseInt(otherBonusDamageField.getText());
+            damage += Integer.parseInt(otherBonusDamageField.getText());
         }
         if (isManual) {
-            return mainDamage;
+            return damage;
+        }
+        if (isHalfDamage) {
+            damage /= 2;
+        }
+        if (implement instanceof Weapon) {
+            damage += attacker.mod(implement.stat());
         }
 
-        if (spell != null) {
-            int total = mainDamage + bonusDamage;
-            if (isHalfDamage) {
-                return total / 2;
-            }
-            return total;
-        }
-        return mainDamage +
-                bonusDamage +
-                attacker.mod(weapon.stat());
+        return damage;
     }
 
     /**

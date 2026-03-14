@@ -1,5 +1,8 @@
-package txt_input_2;
+package txt_input;
 
+import damage_implements.DamageImplements;
+import damage_implements.Spell;
+import damage_implements.Weapon;
 import org.apache.commons.io.FileUtils;
 import util.Message;
 
@@ -11,7 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static txt_input_2.Decoder.*;
+import static txt_input.Decoder.*;
+import static util.TxtReader.withoutComments;
 
 public class Txt5eReader {
 
@@ -39,23 +43,23 @@ public class Txt5eReader {
     public static Txt5e getCode(ArrayList<String> lines) {
         ArrayList<String>[] items = getItems(lines);
         ArrayList<Object> objects = new ArrayList<>();
+
+        ArrayList<ArrayList<String>> party = new ArrayList<>();
         ArrayList<ArrayList<String>> scenarios = new ArrayList<>();
 
         for (ArrayList<String> item : items) {
-            objects.add(switch (item.getFirst()) {
-                case ".party" -> pc(item);
-                case ".npc" -> npc(item, false);
-                case ".enemy" -> npc(item, true);
-                case ".weapon" -> weapon(item);
-                case ".spell" -> spell(item);
-                case ".scenario" -> {
-                    scenarios.add(item);
-                    yield null;
-                }
-                default -> null;
-            });
+            switch (withoutComments(item.getFirst())) {
+                case ".weapon" -> DamageImplements.add(Objects.requireNonNull(implement(item, Weapon.class)));
+                case ".spell" -> DamageImplements.add(Objects.requireNonNull(implement(item, Spell.class)));
+                case ".party" -> party.add(item);
+                case ".npc" -> objects.add(npc(item, false));
+                case ".enemy" -> objects.add(npc(item, true));
+                case ".scenario" -> scenarios.add(item);
+            }
         }
-        scenarios.forEach(scenario -> objects.add(scenario(scenario, objects)));
+
+        party.forEach(item -> objects.add(pc(item)));
+        scenarios.forEach(item -> objects.add(scenario(item, objects)));
 
         objects.removeIf(Objects::isNull);
         return new Txt5e(objects);

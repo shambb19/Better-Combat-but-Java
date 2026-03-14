@@ -1,101 +1,101 @@
 .spell
 name: Chill Touch
 dmg: 1d8
-save: null
+stat: none
 effect: HEAL_BLOCK
 
 .spell
 name: Poison Spray
 dmg: 1d12
-save: con
+stat: con
 effect: NONE
 
 .spell
 name: Shocking Grasp
 dmg: 1d8
-save: null
+stat: none
 effect: NONE
 
 .spell
 name: Ray of Sickness
 dmg: 2d8
-save: null
+stat: none
 effect: POISON
 
 .spell
 name: Thunder Wave
 dmg: 2d8
-save: con
+stat: con
 effect: HALF_DAMAGE
 
 .spell
 name: Hellish Rebuke
 dmg: 2d10
-save: dex
+stat: dex
 effect: HALF_DAMAGE
 
 .spell
 name: Phantasmal Force
 dmg: 2d8
-save: int
+stat: int
 effect: ILLUSION
 
 .spell
 name: Burning Hands
 dmg: 4d6
-save: dex
+stat: dex
 effect: HALF_DAMAGE
 
 .spell
 name: Hex
 dmg: 1d6
-save: wis
+stat: wis
 effect: BONUS_DAMAGE
 
 .spell
 name: Scorching Ray
 dmg: 2d6
-save: null
+stat: none
 effect: SPLIT_ATTACK
 
 .spell
 name: Eldritch Blast
 dmg: 1d10
-save: null
+stat: none
 effect: NONE
 
 .spell
 name: Toll the Dead
 dmg: 1d8
-save: wis
+stat: wis
 effect: FULL_HP_OPTION
 
 .spell
 name: Hunter's Mark
 dmg: 1d6
-save: null
+stat: none
 effect: BONUS_DAMAGE
 
 .spell
 name: Ray of Frost
 dmg: 1d8
-save: null
+stat: none
 effect: NONE
 
 .spell
 name: Sacred Flame
 dmg: 1d8
-save: dex
+stat: dex
 effect: NONE
 
 .spell
 name: Starry Wisp
 dmg: 1d8
-save: null
+stat: none
 effect: NONE
 
 .spell
 name: Guiding Bolt
 dmg: 4d6
-save: null
+stat: none
 effect: ADVANTAGE_SOON

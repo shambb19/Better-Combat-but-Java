@@ -1,9 +1,9 @@
 package util;
 
 import _main.CombatMain;
+import campaign_creator.TxtMenu;
 import character_info.combatant.Combatant;
 import combat_menu.CombatMenu;
-import campaign_creator.TxtMenu;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -86,7 +86,6 @@ public class Message {
         }
         return value;
     }
-
     public static int editOrRemoveOption(String name) {
         int result = JOptionPane.showOptionDialog(
                 null,

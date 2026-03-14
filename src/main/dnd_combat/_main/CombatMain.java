@@ -1,12 +1,12 @@
 package _main;
 
+import combat_menu.CombatMenu;
+import combat_menu.popup.CombatEndPopup;
+import combat_menu.popup.FileGetter;
 import combat_menu.popup.FinalizeCombatantsPopup;
 import scenario_info.Battle;
 import scenario_info.PlayerQueue;
-import combat_menu.popup.CombatEndPopup;
-import combat_menu.popup.FileGetter;
-import combat_menu.CombatMenu;
-import txt_input_2.Txt5eReader;
+import txt_input.Txt5eReader;
 
 import javax.swing.*;
 import java.io.File;
@@ -22,22 +22,20 @@ public class CombatMain {
 
     public static void run() {
         if (INPUT == null) {
-            INPUT = new FileGetter().getFile();
+            INPUT = FileGetter.getFile();
         }
 
         BATTLE = Objects.requireNonNull(Txt5eReader.getCode(INPUT)).getBattle();
-        //BATTLE = new CampaignReader(INPUT).getBattle();
 
-        new FinalizeCombatantsPopup().setVisible(true);
+        FinalizeCombatantsPopup.run();
     }
 
     public static void runWith(File file) {
         INPUT = file;
 
         BATTLE = Objects.requireNonNull(Txt5eReader.getCode(INPUT)).getBattle();
-        //BATTLE = new CampaignReader(INPUT).getBattle();
 
-        new FinalizeCombatantsPopup().setVisible(true);
+        FinalizeCombatantsPopup.run();
     }
 
     public static void start() {
@@ -56,7 +54,7 @@ public class CombatMain {
             return;
         }
         boolean isVictory = BATTLE.areAllEnemiesDefeated();
-        new CombatEndPopup(isVictory).setVisible(true);
+        CombatEndPopup.run(isVictory);
     }
 
     public static void kill() {

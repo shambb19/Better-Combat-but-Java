@@ -1,35 +1,37 @@
 package combat_menu.popup.damage;
 
-import character_info.combatant.PC;
-import damage_implements.Weapon;
-import damage_implements.Weapons;
 import _main.CombatMain;
 import character_info.combatant.Combatant;
+import character_info.combatant.PC;
 import combat_menu.listener.DieRollListener;
+import damage_implements.Weapon;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 
+import static damage_implements.DamageImplements.MANUAL_WEAPON;
 import static util.Message.informAttackFail;
 
 public class WeaponPanel extends JPanel {
 
     private final JFrame root;
 
+    private final Combatant attacker;
     private final ArrayList<Weapon> weapons;
 
     private final JComboBox<Combatant> targetBox;
     private final JComboBox<Weapon> weaponsBox;
     private final JTextField rollInputField;
 
-    public WeaponPanel(JComboBox<Combatant> targetBox, Combatant currentCombatant, JFrame root) {
+    public WeaponPanel(JComboBox<Combatant> targetBox, JFrame root) {
         this.root = root;
 
-        if (currentCombatant instanceof PC pc) {
-            weapons = pc.weapons();
-        } else {
-            weapons = new ArrayList<>();
+        attacker = CombatMain.QUEUE.getCurrentCombatant();
+
+        weapons = new ArrayList<>();
+        if (attacker instanceof PC pc) {
+            weapons.addAll(pc.weapons());
         }
 
         this.targetBox = targetBox;
@@ -40,8 +42,13 @@ public class WeaponPanel extends JPanel {
             hitString += " (With Disadvantage)";
         }
         hitString += ":";
+
         rollInputField = new JTextField();
         rollInputField.addKeyListener(new DieRollListener(1, 20, rollInputField));
+
+        JButton okButton = new JButton("Confirm");
+        okButton.putClientProperty("JButton.buttonType", "roundRect");
+        okButton.addActionListener(e -> logAndContinue());
 
         setLayout(new GridLayout(0, 1));
 
@@ -51,43 +58,35 @@ public class WeaponPanel extends JPanel {
         add(weaponsBox);
         add(new JLabel(hitString));
         add(rollInputField);
-        add(getOkButton());
+        add(okButton);
     }
 
     private JComboBox<Weapon> getWeaponComboBox() {
         JComboBox<Weapon> box = new JComboBox<>();
         box.putClientProperty("JComponent.roundRect", true);
         weapons.forEach(box::addItem);
-        box.addItem(Weapons.MANUAL);
+        box.addItem(MANUAL_WEAPON);
         return box;
     }
 
-    /**
-     * Button includes logic for compiling relevant hit rolls and armor classes before
-     * passing them to the registerAttack method.
-     * @return the completed ok button
-     */
-    @SuppressWarnings("all")
-    private JButton getOkButton() {
-        JButton button = new JButton("Confirm");
-        button.putClientProperty("JButton.buttonType", "roundRect");
-        button.addActionListener(e -> {
-            if (rollInputField.getText().isEmpty()) {
-                return;
-            }
-            int fieldVal = Integer.parseInt(rollInputField.getText());
+    private void logAndContinue() {
+        Weapon weapon = (Weapon) weaponsBox.getSelectedItem();
+        Combatant target = (Combatant) targetBox.getSelectedItem();
 
-            Combatant attacker = CombatMain.QUEUE.getCurrentCombatant();
-            Weapon weapon = (Weapon) weaponsBox.getSelectedItem();
-            Combatant target = (Combatant) targetBox.getSelectedItem();
+        if (weapon == null || target == null) {
+            return;
+        }
 
-            int hitRoll = fieldVal + attacker.attackBonus(weapon);
+        if (rollInputField.getText().isEmpty()) {
+            return;
+        }
+        int fieldVal = Integer.parseInt(rollInputField.getText());
 
-            registerAttack(target, hitRoll >= target.ac(), weapon);
-            root.dispose();
-            CombatMain.COMBAT_MENU.update();
-        });
-        return button;
+        int hitRoll = fieldVal + attacker.attackBonus(weapon);
+
+        registerAttack(target, hitRoll >= target.ac(), weapon);
+        root.dispose();
+        CombatMain.COMBAT_MENU.update();
     }
 
     /**
@@ -100,7 +99,7 @@ public class WeaponPanel extends JPanel {
      */
     private void registerAttack(Combatant target, boolean success, Weapon weapon) {
         if (success) {
-            new DamageAmountPopup(weapon, target).setVisible(true);
+            DamageAmountPopup.run(weapon, target);
         } else {
             informAttackFail();
         }

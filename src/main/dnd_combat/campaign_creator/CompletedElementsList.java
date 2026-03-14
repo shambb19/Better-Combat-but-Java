@@ -25,6 +25,7 @@ public class CompletedElementsList extends JPanel {
     private static final Scenario SCENARIO_NEW = new Scenario(
             "New Scenario", new HashMap<>(), new HashMap<>()
     );
+
     private final TxtMenu root;
     private ScrollPane<Combatant> friendlyPane;
     private ScrollPane<Combatant> enemyPane;
@@ -66,8 +67,8 @@ public class CompletedElementsList extends JPanel {
         }
     }
 
-    public ArrayList<Object> getFriendlyNPCs() {
-        ArrayList<Object> friendlies = new ArrayList<>();
+    public ArrayList<Combatant> getFriendlyNPCs() {
+        ArrayList<Combatant> friendlies = new ArrayList<>();
         for (int i = 0; i < friendlyPane.model.getSize(); i++) {
             friendlies.add(friendlyPane.model.elementAt(i));
         }
@@ -75,8 +76,8 @@ public class CompletedElementsList extends JPanel {
         return friendlies;
     }
 
-    public ArrayList<Object> getEnemies() {
-        ArrayList<Object> enemies = new ArrayList<>();
+    public ArrayList<Combatant> getEnemies() {
+        ArrayList<Combatant> enemies = new ArrayList<>();
         for (int i = 0; i < enemyPane.model.getSize(); i++) {
             enemies.add(enemyPane.model.elementAt(i));
         }
@@ -183,8 +184,12 @@ public class CompletedElementsList extends JPanel {
                 if (e.getValueIsAdjusting()) {
                     return;
                 }
+                if (list.getSelectedValue() == null) {
+                    return;
+                }
 
                 T selectedValue = list.getSelectedValue();
+                list.clearSelection();
 
                 if (selectedValue instanceof Scenario
                         && parent.isNotEnoughForScenario()) {
@@ -192,11 +197,12 @@ public class CompletedElementsList extends JPanel {
                     return;
                 }
 
-                if (selectedValue.equals(NEW_OPTION)) {
-                    if (selectedValue instanceof Combatant combatant) {
-                        root.editCombatant(combatant, true);
-                    } else if (selectedValue instanceof Scenario scenario) {
-                        root.editScenario(scenario, true);
+                if (selectedValue.hashCode() == NEW_OPTION.hashCode()) {
+                    switch (selectedValue) {
+                        case Combatant c -> root.editCombatant(c, true);
+                        case Scenario s -> root.editScenario(s, true);
+                        default -> {
+                        }
                     }
                     return;
                 }
@@ -204,13 +210,14 @@ public class CompletedElementsList extends JPanel {
                 int route = Message.editOrRemoveOption(selectedValue.toString());
 
                 if (route == 0) {
-                    remove(selectedValue);
-                } else if (route == 1) {
-                    if (selectedValue instanceof Combatant combatant) {
-                        root.editCombatant(combatant, false);
-                    } else if (selectedValue instanceof Scenario scenario) {
-                        root.editScenario(scenario, false);
+                    switch (selectedValue) {
+                        case Combatant c -> root.editCombatant(c, false);
+                        case Scenario s -> root.editScenario(s, false);
+                        default -> {
+                        }
                     }
+                } else if (route == 1) {
+                    remove(selectedValue);
                 }
             };
         }
@@ -218,18 +225,16 @@ public class CompletedElementsList extends JPanel {
         private T hasWithName(T newElement) {
             for (int i = 0; i < model.getSize(); i++) {
                 T element = model.getElementAt(i);
+                String elementName = element.toString();
 
-                if (newElement instanceof Combatant newCombatant) {
-                    String elementName = ((Combatant) element).name();
-
-                    if (elementName.equals(newCombatant.name())) {
+                switch (newElement) {
+                    case Combatant c when elementName.equals(c.name()) -> {
                         return model.getElementAt(i);
                     }
-                } else if (newElement instanceof Scenario newScenario) {
-                    String elementName = ((Scenario) element).name();
-
-                    if (elementName.equals(newScenario.name())) {
+                    case Scenario s when elementName.equals(s.name()) -> {
                         return model.getElementAt(i);
+                    }
+                    default -> {
                     }
                 }
             }

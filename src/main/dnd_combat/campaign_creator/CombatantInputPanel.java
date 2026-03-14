@@ -1,10 +1,12 @@
 package campaign_creator;
 
-import character_info.*;
+import character_info.Class5e;
+import character_info.Stats;
 import character_info.combatant.Combatant;
 import character_info.combatant.NPC;
 import character_info.combatant.PC;
 import combat_menu.listener.IntegerFieldListener;
+import damage_implements.DamageImplements;
 import damage_implements.Spell;
 import damage_implements.Weapon;
 
@@ -46,8 +48,8 @@ public class CombatantInputPanel extends JPanel {
         classBox.setSelectedIndex(-1);
 
         statPanel = new StatsInputPanel();
-        weaponPanel = new ListSelectionPanel<>(Weapon.getAllAsList(), "Weapons");
-        spellPanel = new ListSelectionPanel<>(Spell.getAllAsList(), "Spells");
+        weaponPanel = new ListSelectionPanel<>(DamageImplements.toList(Weapon.class), "Weapons");
+        spellPanel = new ListSelectionPanel<>(DamageImplements.toList(Spell.class), "Spells");
 
         JPanel headerPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();

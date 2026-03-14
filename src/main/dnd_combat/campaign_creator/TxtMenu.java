@@ -3,7 +3,7 @@ package campaign_creator;
 import character_info.combatant.Combatant;
 import scenario_info.Battle;
 import scenario_info.Scenario;
-import txt_input_2.Txt5eReader;
+import txt_input.Txt5eReader;
 
 import javax.swing.*;
 import java.awt.*;
@@ -53,7 +53,6 @@ public class TxtMenu extends JFrame {
         setTitle(TITLE);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
-        setJMenuBar(new TextMenuBar());
     }
 
     private void construct() {

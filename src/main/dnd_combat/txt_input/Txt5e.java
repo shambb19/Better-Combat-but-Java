@@ -1,4 +1,4 @@
-package txt_input_2;
+package txt_input;
 
 import character_info.combatant.Combatant;
 import character_info.combatant.NPC;

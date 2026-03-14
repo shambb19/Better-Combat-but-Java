@@ -1,7 +1,7 @@
 package combat_menu.popup;
 
-import character_info.combatant.Combatant;
 import _main.CombatMain;
+import character_info.combatant.Combatant;
 import character_info.combatant.NPC;
 import character_info.combatant.PC;
 import scenario_info.Scenario;
@@ -21,7 +21,11 @@ public class FinalizeCombatantsPopup extends JFrame {
     private final JPanel partyContainer = new JPanel(new GridLayout(0, 1, 0, 5));
     private final JPanel dynamicContainer = new JPanel(new GridLayout(0, 1, 0, 5));
 
-    public FinalizeCombatantsPopup() {
+    public static void run() {
+        new FinalizeCombatantsPopup().setVisible(true);
+    }
+
+    private FinalizeCombatantsPopup() {
         setTitle("Finalize Combat Information");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setAlwaysOnTop(true);
@@ -49,12 +53,12 @@ public class FinalizeCombatantsPopup extends JFrame {
         scrollPane.getVerticalScrollBar().setUnitIncrement(16); // Smoother scrolling
         add(scrollPane, BorderLayout.CENTER);
 
-        JButton confirmBtn = new JButton("Begin Encounter");
-        confirmBtn.setFont(new Font("SansSerif", Font.BOLD, 14));
-        confirmBtn.addActionListener(e -> logAndBegin());
+        JButton confirmButton = new JButton("Begin Encounter");
+        confirmButton.setFont(new Font("SansSerif", Font.BOLD, 14));
+        confirmButton.addActionListener(e -> logAndBegin());
 
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        footer.add(confirmBtn);
+        footer.add(confirmButton);
         add(footer, BorderLayout.SOUTH);
 
         initializeParty();

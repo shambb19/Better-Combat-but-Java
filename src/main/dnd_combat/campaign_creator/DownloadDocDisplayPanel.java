@@ -2,10 +2,9 @@ package campaign_creator;
 
 import _main.SystemMain;
 import character_info.combatant.Combatant;
-import character_info.combatant.NPC;
 import scenario_info.Battle;
 import scenario_info.Scenario;
-import txt_input_2.CampaignWriter;
+import txt_input.CampaignWriter;
 import util.Locators;
 
 import javax.swing.*;
@@ -71,14 +70,11 @@ public class DownloadDocDisplayPanel extends JPanel {
     }
 
     public void addElement(Object selection) {
-        if (selection instanceof Combatant combatant) {
-            if (combatant.isEnemy()) {
-                addOrReplace(enemies, combatant);
-            } else {
-                addOrReplace(friendlies, combatant);
+        switch (selection) {
+            case Combatant c -> addOrReplace(c);
+            case Scenario s -> addOrReplace(s);
+            default -> {
             }
-        } else if (selection instanceof Scenario scenario) {
-            addOrReplaceScenario(scenario);
         }
         setText();
     }
@@ -88,31 +84,25 @@ public class DownloadDocDisplayPanel extends JPanel {
         display.setCaretPosition(0);
     }
 
-    private void addOrReplace(ArrayList<Combatant> destination, Combatant combatant) {
-        Combatant oldVer = Locators.getCombatantWithNameFrom(destination, combatant.name());
+    @SuppressWarnings("unchecked")
+    private void addOrReplace(Object obj) {
+        ArrayList destination = switch (obj) {
+            case Combatant c when c.isEnemy() -> enemies;
+            case Combatant c when !c.isEnemy() -> friendlies;
+            case Scenario ignored -> scenarios;
+            default -> throw new IllegalArgumentException("Unexpected class parameter: need Combatant or Scenario");
+        };
+
+        Object oldVer = Locators.getWithNameFromDirectory(destination, obj);
 
         if (oldVer != null && destination.contains(oldVer)) {
-            destination.set(destination.indexOf(oldVer), combatant);
+            int idx = destination.indexOf(oldVer);
+            destination.set(idx, obj);
         } else {
-            if (combatant instanceof NPC) {
-                destination.addLast(combatant);
-            } else {
-                destination.addFirst(combatant);
-            }
+            destination.add(obj);
         }
 
-        destination.sort(Comparator.comparing(Combatant::name));
-    }
-
-    private void addOrReplaceScenario(Scenario scenario) {
-        Scenario oldVer = Locators.getScenarioWithNameFrom(scenarios, scenario.name());
-
-        if (oldVer != null && scenarios.contains(oldVer)) {
-            scenarios.set(scenarios.indexOf(oldVer), scenario);
-        } else {
-            scenarios.add(scenario);
-        }
-        scenarios.sort(Comparator.comparing(Scenario::name));
+        destination.sort(Comparator.comparing(Object::toString));
     }
 
     private File download() {

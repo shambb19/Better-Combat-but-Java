@@ -1,10 +1,9 @@
 package character_info;
 
 import damage_implements.Weapon;
+import util.Locators;
 import util.TxtReader;
 
-import java.util.Arrays;
-import java.util.Objects;
 import java.util.function.DoubleUnaryOperator;
 
 public class Stats {
@@ -54,9 +53,10 @@ public class Stats {
             String key = TxtReader.key(s);
             String value = TxtReader.value(s);
 
-            AbilityModifier stat = Objects.requireNonNull(AbilityModifier.get(key));
+            AbilityModifier stat = Locators.enumNameSearch(key, AbilityModifier.class);
             int valInt = Integer.parseInt(value);
 
+            assert stat != null;
             put(stat, valInt);
         }
     }

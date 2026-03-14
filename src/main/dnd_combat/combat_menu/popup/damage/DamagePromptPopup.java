@@ -11,15 +11,12 @@ import java.util.ArrayList;
 public class DamagePromptPopup extends JFrame {
 
     private final ArrayList<Combatant> targetList;
-    private final Combatant currentCombatant;
 
-    /**
-     * Creates the damage prompt popup, including a tab for
-     * spell input and one for weapon input.
-     */
-    public DamagePromptPopup() {
-        currentCombatant = CombatMain.QUEUE.getCurrentCombatant();
+    public static void run() {
+        new DamagePromptPopup().setVisible(true);
+    }
 
+    private DamagePromptPopup() {
         setTitle("Enter Attack Information");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setLayout(new GridLayout(0, 1));
@@ -36,8 +33,8 @@ public class DamagePromptPopup extends JFrame {
         JTabbedPane panel = new JTabbedPane();
         panel.setTabPlacement(SwingConstants.TOP);
 
-        panel.addTab("Weapon", new WeaponPanel(getTargetComboBox(), currentCombatant, this));
-        panel.addTab("Spell", new SpellPanel(getTargetComboBox(), currentCombatant, this));
+        panel.addTab("Weapon", new WeaponPanel(getTargetComboBox(), this));
+        panel.addTab("Spell", new SpellPanel(getTargetComboBox(), this));
 
         return panel;
     }

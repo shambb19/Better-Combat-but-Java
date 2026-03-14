@@ -15,23 +15,9 @@ public enum Effect {
 
     Effect() {}
 
-    public static Effect withRawName(String rawName) {
-        for (Effect effect : values()) {
-            if (effect.name().equals(rawName)) {
-                return effect;
-            }
-        }
-        return null;
-    }
-
-    public static String getRawNamesString() {
-        StringBuilder str = new StringBuilder("Effects (enter exact): ");
-
-        for (Effect effect : values()) {
-            str.append(effect.name()).append(", ");
-        }
-
-        return str.toString();
+    @Override
+    public String toString() {
+        return name().toLowerCase();
     }
 
 }

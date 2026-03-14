@@ -1,10 +1,10 @@
 package combat_menu;
 
 import _main.CombatMain;
-import scenario_info.PlayerQueue;
 import character_info.combatant.Combatant;
-import combat_menu.popup.damage.DamagePromptPopup;
 import combat_menu.popup.HealPromptPopup;
+import combat_menu.popup.damage.DamagePromptPopup;
+import scenario_info.PlayerQueue;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,8 +19,6 @@ public class ActionPanel extends JPanel {
     private final JProgressBar currentCombatantHealthBar;
     private final JButton healButton;
     private final JButton inspirationButton;
-
-    private enum icons {ATTACK, HEAL, INSPIRATION, END_TURN}
     Map<icons, String> buttonPics = Map.of(
             icons.ATTACK, "/attack-button.png",
             icons.HEAL, "/heal-button.png",
@@ -39,12 +37,12 @@ public class ActionPanel extends JPanel {
         copyHealthBar(queue.getCurrentCombatant().getHealthBar());
 
         JButton attackButton = new JButton();
-        attackButton.addActionListener(e -> new DamagePromptPopup().setVisible(true));
+        attackButton.addActionListener(e -> DamagePromptPopup.run());
         attackButton.setToolTipText("Attack");
         setIcon(attackButton, icons.ATTACK);
 
         healButton = new JButton();
-        healButton.addActionListener(e -> new HealPromptPopup().setVisible(true));
+        healButton.addActionListener(e -> HealPromptPopup.run());
         healButton.setToolTipText("Heal");
         setIcon(healButton, icons.HEAL);
 
@@ -53,34 +51,36 @@ public class ActionPanel extends JPanel {
         inspirationButton.setToolTipText("Use Inspiration");
         setIcon(inspirationButton, icons.INSPIRATION);
 
+        JButton endTurnButton = new JButton();
+        endTurnButton.addActionListener(e -> endTurn());
+        endTurnButton.setToolTipText("End Turn");
+        setIcon(endTurnButton, icons.END_TURN);
+
         add(turnInformation);
         add(currentCombatantHealthBar);
         add(attackButton);
         add(healButton);
         add(inspirationButton);
-        add(getEndTurnButton());
+        add(endTurnButton);
 
         updateTurnInformation();
     }
 
-    private JButton getEndTurnButton() {
-        JButton endTurnButton = new JButton();
-        setIcon(endTurnButton, icons.END_TURN);
-        endTurnButton.setToolTipText("End Turn");
-
-        endTurnButton.addActionListener(e -> {
-            Combatant newCurrentCombatant = queue.endTurnAndGetNext();
-            updateTurnInformation();
-
-            if (!newCurrentCombatant.lifeStatus().isConscious()) {
-                int deathSaveThrow = promptValueFromRoll("Death Save",20);
-                newCurrentCombatant.lifeStatus().rollDeathSave(deathSaveThrow);
+    private static int promptValueFromRoll(String rollMeaning, int dieSize) {
+        int collectedValue = -1;
+        while (collectedValue < 0 || collectedValue > dieSize) {
+            try {
+                String input = JOptionPane.showInputDialog(
+                        CombatMain.COMBAT_MENU,
+                        "Enter " + "1d" + dieSize + " roll for " + rollMeaning + ".",
+                        "Better Combat but Java",
+                        JOptionPane.QUESTION_MESSAGE
+                );
+                collectedValue = Integer.parseInt(input);
+            } catch (Exception ignored) {
             }
-
-            CombatMain.COMBAT_MENU.update();
-        });
-
-        return endTurnButton;
+        }
+        return collectedValue;
     }
 
     private void useInspiration() {
@@ -88,7 +88,7 @@ public class ActionPanel extends JPanel {
         updateTurnInformation();
 
         if (isExcessInspiration) {
-            int excessInspirationRoll = promptValueFromRoll("Inspiration",4);
+            int excessInspirationRoll = promptValueFromRoll("Inspiration", 4);
             CombatMain.COMBAT_MENU.logInspiration(excessInspirationRoll);
         }
     }
@@ -105,6 +105,18 @@ public class ActionPanel extends JPanel {
         }
 
         turnInformation.setEditable(false);
+    }
+
+    private void endTurn() {
+        Combatant newCurrentCombatant = queue.endTurnAndGetNext();
+        updateTurnInformation();
+
+        if (!newCurrentCombatant.lifeStatus().isConscious()) {
+            int deathSaveThrow = promptValueFromRoll("Death Save", 20);
+            newCurrentCombatant.lifeStatus().rollDeathSave(deathSaveThrow);
+        }
+
+        CombatMain.COMBAT_MENU.update();
     }
 
     public void copyHealthBar(JProgressBar mimic) {
@@ -129,19 +141,5 @@ public class ActionPanel extends JPanel {
         button.setIcon(new ImageIcon(resized));
     }
 
-    private static int promptValueFromRoll(String rollMeaning, int dieSize) {
-        int collectedValue = -1;
-        while (collectedValue < 0 || collectedValue > dieSize) {
-            try {
-                String input = JOptionPane.showInputDialog(
-                        CombatMain.COMBAT_MENU,
-                        "Enter " + "1d" + dieSize + " roll for " + rollMeaning + ".",
-                        "Better Combat but Java",
-                        JOptionPane.QUESTION_MESSAGE
-                );
-                collectedValue = Integer.parseInt(input);
-            } catch (Exception ignored) {}
-        }
-        return collectedValue;
-    }
+    private enum icons {ATTACK, HEAL, INSPIRATION, END_TURN}
 }

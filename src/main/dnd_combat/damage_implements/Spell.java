@@ -2,16 +2,20 @@ package damage_implements;
 
 import character_info.AbilityModifier;
 
-import java.util.ArrayList;
-import java.util.Comparator;
+import static damage_implements.DamageImplements.MANUAL_HIT;
+import static damage_implements.DamageImplements.MANUAL_SAVE;
 
-import static damage_implements.Spells.MANUAL_HIT;
-import static damage_implements.Spells.MANUAL_SAVE;
+public class Spell extends Implement {
 
-public record Spell(String name, int numDice, int dieSize, AbilityModifier savingThrow, Effect effect) {
+    private final Effect effect;
 
-    public String getDamageString() {
-        return numDice + "d" + dieSize;
+    public Spell(String name, int numDice, int dieSize, AbilityModifier savingThrow, Effect effect) {
+        super(name, numDice, dieSize, savingThrow);
+
+        if (effect == null) {
+            effect = Effect.NONE;
+        }
+        this.effect = effect;
     }
 
     public boolean isManual() {
@@ -19,36 +23,15 @@ public record Spell(String name, int numDice, int dieSize, AbilityModifier savin
     }
 
     public boolean hasSave() {
-        return savingThrow != null;
+        return stat != null;
     }
 
     public boolean dealsHalfDamageAnyways() {
-        if (effect == null) {
-            return false;
-        }
         return effect.equals(Effect.HALF_DAMAGE);
     }
 
-    public static Spell get(String nameString) {
-        for (Spell spell : Spells.get()) {
-            if (nameString.equals(spell.name)) {
-                return spell;
-            }
-        }
-        return null;
-    }
-
-    public static ArrayList<Object> getAllAsList() {
-        ArrayList<Spell> list = Spells.get();
-        list.sort(Comparator.comparing(spell -> spell.name));
-        list.remove(MANUAL_HIT);
-        list.remove(MANUAL_SAVE);
-        return new ArrayList<>(list);
-    }
-
-    @Override
-    public String toString() {
-        return name;
+    public Effect effect() {
+        return effect;
     }
 
 }

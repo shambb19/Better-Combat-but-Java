@@ -1,10 +1,10 @@
-package txt_input_2;
+package txt_input;
 
 public enum Key {
 
     NAME, HP, AC, LEVEL, CLASS, STATS, WEAPONS, SPELLS,
-    DMG, STAT,
-    SAVE_TYPE, EFFECT;
+    WITH, AGAINST,
+    DMG, STAT, EFFECT;
 
     private final String keyName;
 

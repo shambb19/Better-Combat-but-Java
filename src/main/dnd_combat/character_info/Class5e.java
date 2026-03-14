@@ -25,15 +25,6 @@ public enum Class5e {
         return spellMod;
     }
 
-    public static Class5e withName(String name) {
-        for (Class5e class5e : values()) {
-            if (name.equalsIgnoreCase(class5e.name())) {
-                return class5e;
-            }
-        }
-        return null;
-    }
-
     @Override
     public String toString() {
         String first = name().substring(0, 1);

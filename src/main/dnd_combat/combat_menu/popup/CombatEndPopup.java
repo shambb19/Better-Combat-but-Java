@@ -3,7 +3,7 @@ package combat_menu.popup;
 import _main.CombatMain;
 import character_info.combatant.PC;
 import combat_menu.CombatMenu;
-import txt_input_2.CampaignWriter;
+import txt_input.CampaignWriter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,7 +19,11 @@ public class CombatEndPopup extends JFrame {
     private static final String lossMessage = "You have been defeated. You were " + CombatMain.BATTLE.percentToVictory() + " of the way to victory.";
     private static final String lossTitle = "Defeat";
 
-    public CombatEndPopup(boolean isVictory) {
+    public static void run(boolean isVictory) {
+        new CombatEndPopup(isVictory).setVisible(true);
+    }
+
+    private CombatEndPopup(boolean isVictory) {
         setTitle(isVictory ? victoryTitle : lossTitle);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setLayout(new GridLayout(0, 1));

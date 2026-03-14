@@ -2,8 +2,6 @@ package util;
 
 import _main.CombatMain;
 import character_info.combatant.Combatant;
-import character_info.combatant.NPC;
-import scenario_info.Scenario;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,42 +9,31 @@ import java.util.List;
 public class Locators {
 
     public static ArrayList<Combatant> getTargetList(boolean isForDamage) {
-        if (CombatMain.QUEUE.getCurrentCombatant().isEnemy()) {
-            if (isForDamage) {
-                return CombatMain.BATTLE.friendlies();
-            } else {
-                return CombatMain.BATTLE.enemies();
-            }
-        }
-        if (isForDamage) {
-            return CombatMain.BATTLE.enemies();
-        } else {
+        boolean isEnemy = CombatMain.QUEUE.getCurrentCombatant().isEnemy();
+        if (isEnemy == isForDamage) {
             return CombatMain.BATTLE.friendlies();
         }
+        return CombatMain.BATTLE.enemies();
     }
 
-    public static Combatant getCombatantWithNameFrom(List<Combatant> source, String name) {
-        for (Combatant combatant : source) {
-            if (combatant.name().trim().equalsIgnoreCase(name.trim())) {
-                return combatant;
+    public static <T> T getWithNameFromDirectory(List<T> source, Object obj) {
+        String name = obj.toString().trim();
+        for (T t : source) {
+            if (t.toString().trim().equals(name)) {
+                return t;
             }
         }
         return null;
     }
 
-    public static Combatant getNpcWithNameFrom(List<NPC> source, String name) {
-        for (NPC combatant : source) {
-            if (combatant.name().trim().equalsIgnoreCase(name.trim())) {
-                return combatant;
-            }
+    public static <T extends Enum<T>> T enumNameSearch(String name, Class<T> enumClass) {
+        if (name == null) {
+            return null;
         }
-        return null;
-    }
-
-    public static Scenario getScenarioWithNameFrom(ArrayList<Scenario> source, String name) {
-        for (Scenario scenario : source) {
-            if (scenario.name().equals(name)) {
-                return scenario;
+        for (T t : enumClass.getEnumConstants()) {
+            String tStr = t.toString().trim();
+            if (tStr.equalsIgnoreCase(name.trim())) {
+                return t;
             }
         }
         return null;

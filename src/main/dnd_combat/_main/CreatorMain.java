@@ -1,8 +1,8 @@
 package _main;
 
+import campaign_creator.TxtMenu;
 import combat_menu.popup.FileGetter;
 import org.apache.commons.io.FileUtils;
-import campaign_creator.TxtMenu;
 
 import java.io.File;
 import java.net.URL;
@@ -23,9 +23,7 @@ public class CreatorMain {
     }
 
     public static void runWithPrompt() {
-        File file = new FileGetter().getFile();
-
-        CREATOR_MENU = new TxtMenu(file);
+        CREATOR_MENU = new TxtMenu(FileGetter.getFile());
     }
 
     public static void kill() {

@@ -1,8 +1,7 @@
 package _main;
 
 import com.formdev.flatlaf.intellijthemes.FlatSpacegrayIJTheme;
-import damage_implements.Spells;
-import damage_implements.Weapons;
+import damage_implements.DamageImplements;
 
 import javax.swing.*;
 import java.io.File;
@@ -26,12 +25,8 @@ public class SystemMain {
     public static void main(String[] args) {
         FlatSpacegrayIJTheme.setup();
 
-        if (WEAPON_RES != null) {
-            Weapons.init(WEAPON_RES);
-        }
-        if (SPELL_RES != null) {
-            Spells.init(SPELL_RES);
-        }
+        DamageImplements.init(WEAPON_RES);
+        DamageImplements.init(SPELL_RES);
 
         SwingUtilities.invokeLater(SystemMain::promptRunMode);
     }

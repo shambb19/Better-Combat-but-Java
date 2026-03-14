@@ -1,12 +1,9 @@
 package combat_menu.popup.damage;
 
-import character_info.combatant.PC;
-import character_info.AbilityModifier;
-import damage_implements.Spell;
-import damage_implements.Spells;
 import _main.CombatMain;
 import character_info.combatant.Combatant;
-import damage_implements.Effect;
+import character_info.combatant.PC;
+import damage_implements.Spell;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,6 +11,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import static damage_implements.DamageImplements.MANUAL_HIT;
+import static damage_implements.DamageImplements.MANUAL_SAVE;
 import static util.Message.informAttackFail;
 
 public class SpellPanel extends JPanel {
@@ -34,23 +33,26 @@ public class SpellPanel extends JPanel {
     private int saveRoll;
     private int hitRoll;
 
-    public SpellPanel(JComboBox<Combatant> targetBox, Combatant currentCombatant, JFrame root) {
+    public SpellPanel(JComboBox<Combatant> targetBox, JFrame root) {
         this.root = root;
 
-        this.attacker = currentCombatant;
+        this.attacker = CombatMain.QUEUE.getCurrentCombatant();
 
+        spells = new ArrayList<>();
         if (attacker instanceof PC pc) {
-            spells = pc.spells();
-        } else {
-            spells = new ArrayList<>();
+            spells.addAll(pc.spells());
         }
+
+        this.targetBox = targetBox;
+        spellsBox = getSpellBox();
 
         putComponent(spellPanel.HIT, "Roll to Hit:");
         putComponent(spellPanel.SAVE, "Opponent Save Roll:");
         putManualSaveComponent();
 
-        this.targetBox = targetBox;
-        spellsBox = getSpellBox();
+        JButton okButton = new JButton("Confirm");
+        okButton.putClientProperty("JButton.buttonType", "roundRect");
+        okButton.addActionListener(e -> logAndContinue());
 
         setLayout(new GridLayout(0, 1));
 
@@ -59,15 +61,15 @@ public class SpellPanel extends JPanel {
         add(new JLabel("Select a Spell:"));
         add(spellsBox);
         add(variablePanel);
-        add(getOkButton());
+        add(okButton);
     }
 
     private JComboBox<Spell> getSpellBox() {
         JComboBox<Spell> box = new JComboBox<>();
         box.putClientProperty("JComponent.roundRect", "true");
         spells.forEach(box::addItem);
-        box.addItem(Spells.MANUAL_HIT);
-        box.addItem(Spells.MANUAL_SAVE);
+        box.addItem(MANUAL_HIT);
+        box.addItem(MANUAL_SAVE);
         box.addActionListener(e -> logSpellChange(box));
 
         logSpellChange(box);
@@ -87,7 +89,7 @@ public class SpellPanel extends JPanel {
     private void logSpellChange(JComboBox<Spell> box) {
         variablePanel.removeAll();
         Spell selected = (Spell) box.getSelectedItem();
-        if (selected.equals(Spells.MANUAL_SAVE)) {
+        if (selected.equals(MANUAL_SAVE)) {
             variablePanel.add(attackComponents.get(spellPanel.MANUAL_SAVE));
             activePanelType = spellPanel.MANUAL_SAVE;
         } else if (selected.hasSave()) {
@@ -124,38 +126,26 @@ public class SpellPanel extends JPanel {
         attackComponents.put(spellPanel.MANUAL_SAVE, new JCheckBox("Attack Succeeds?"));
     }
 
-    /**
-     * Button includes logic for compiling all information necessary to determine
-     * attack success and then passing it to the registerAttack method.
-     * @return the completed ok button
-     */
-    @SuppressWarnings("all")
-    private JButton getOkButton() {
-        JButton button = new JButton("Confirm");
-        button.putClientProperty("JButton.buttonType", "roundRect");
-        button.addActionListener(e -> {
-            Combatant target = (Combatant) targetBox.getSelectedItem();
-            Spell spell = (Spell) spellsBox.getSelectedItem();
-            switch (activePanelType) {
-                case HIT -> {
-                    int attackVal = hitRoll + attacker.spellAttackBonus();
-                    registerAttack(target, attackVal >= target.ac(), spell);
-                }
-                case SAVE -> {
-                    AbilityModifier saveType = spell.savingThrow();
-                    int saveDC = attacker.saveDc();
+    private void logAndContinue() {
+        Combatant target = (Combatant) targetBox.getSelectedItem();
+        Spell spell = (Spell) spellsBox.getSelectedItem();
 
-                    registerAttack(target, saveRoll < saveDC, spell);
-                }
-                case MANUAL_SAVE -> {
-                    boolean succeeds = ((JCheckBox) attackComponents.get(spellPanel.MANUAL_SAVE)).isSelected();
-                    registerAttack(target, succeeds, spell);
-                }
+        if (target == null || spell == null) {
+            return;
+        }
+
+        boolean successCondition = switch (activePanelType) {
+            case HIT -> {
+                int attackVal = hitRoll + attacker.spellAttackBonus();
+                yield attackVal >= target.ac();
             }
-            root.dispose();
-            CombatMain.COMBAT_MENU.update();
-        });
-        return button;
+            case SAVE -> saveRoll < attacker.saveDc();
+            case MANUAL_SAVE -> ((JCheckBox) attackComponents.get(activePanelType)).isSelected();
+        };
+
+        registerAttack(target, successCondition, spell);
+        root.dispose();
+        CombatMain.COMBAT_MENU.update();
     }
 
     /**
@@ -168,17 +158,8 @@ public class SpellPanel extends JPanel {
      * @param spell the spell used
      */
     private void registerAttack(Combatant target, boolean success, Spell spell) {
-        if (success) {
-            if (spell.effect().equals(Effect.BONUS_DAMAGE)) {
-                CombatMain.QUEUE.getCurrentCombatant().putEffect(target, Effect.BONUS_DAMAGE);
-            } else {
-                new DamageAmountPopup(spell, target, false).setVisible(true);
-            }
-            return;
-        }
-
-        if (spell.dealsHalfDamageAnyways()) {
-            new DamageAmountPopup(spell, target, true).setVisible(true);
+        if (success || spell.dealsHalfDamageAnyways()) {
+            DamageAmountPopup.run(spell, target);
         } else {
             informAttackFail();
         }
