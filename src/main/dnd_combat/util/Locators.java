@@ -1,14 +1,13 @@
 package util;
 
-import _main.CombatMain;
+import __main.CombatMain;
 import character_info.combatant.Combatant;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Locators {
 
-    public static ArrayList<Combatant> getTargetList(boolean isForDamage) {
+    public static List<Combatant> getTargetList(boolean isForDamage) {
         boolean isEnemy = CombatMain.QUEUE.getCurrentCombatant().isEnemy();
         if (isEnemy == isForDamage) {
             return CombatMain.BATTLE.friendlies();

@@ -1,31 +1,27 @@
 package combat_menu.popup;
 
-import _main.CombatMain;
+import __main.CombatMain;
 import character_info.combatant.Combatant;
 import combat_menu.listener.IntegerFieldListener;
 import util.Locators;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
+import java.util.List;
 
-public class HealPromptPopup extends JFrame {
+public class CombatantHealPopup extends JFrame {
 
     private final JComboBox<Combatant> targetComboBox;
     private final JTextField healAmountInputField;
     private final JCheckBox fullHealButton;
 
-    public static void run() {
-        new HealPromptPopup().setVisible(true);
-    }
-
-    private HealPromptPopup() {
+    private CombatantHealPopup() {
         setTitle("Enter Heal Information");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setLayout(new GridLayout(0, 1));
         setAlwaysOnTop(true);
 
-        ArrayList<Combatant> targetList = Locators.getTargetList(false);
+        List<Combatant> targetList = Locators.getTargetList(false);
 
         targetComboBox = new JComboBox<>();
         targetComboBox.putClientProperty("JComponent.roundRect", true);
@@ -39,39 +35,42 @@ public class HealPromptPopup extends JFrame {
         fullHealButton.putClientProperty("JButton.buttonType", "roundRect");
         fullHealButton.addActionListener(e -> healAmountInputField.setEnabled(!fullHealButton.isSelected()));
 
+        JButton okButton = new JButton("Heal");
+        okButton.putClientProperty("JButton.buttonType", "roundRect");
+        okButton.addActionListener(e -> logAndClose());
+
         add(new JLabel("Select Heal Target"));
         add(targetComboBox);
         add(new JLabel("Enter Heal Amount"));
         add(healAmountInputField);
         add(fullHealButton);
-        add(getOkButton());
+        add(okButton);
 
         pack();
         setLocationRelativeTo(CombatMain.COMBAT_MENU);
     }
 
-    private JButton getOkButton() {
-        JButton button = new JButton("Heal");
-        button.putClientProperty("JButton.buttonType", "roundRect");
-        button.addActionListener(e -> {
-            Combatant target = (Combatant) targetComboBox.getSelectedItem();
+    public static void run() {
+        new CombatantHealPopup().setVisible(true);
+    }
 
-            if (target == null) {
-                return;
-            }
+    private void logAndClose() {
+        Combatant target = (Combatant) targetComboBox.getSelectedItem();
 
-            int healAmount;
-            if (fullHealButton.isSelected()) {
-                healAmount = target.maxHp();
-            } else {
-                healAmount = Integer.parseInt(healAmountInputField.getText());
-            }
+        if (target == null) {
+            return;
+        }
+
+        if (fullHealButton.isSelected()) {
+            target.healFull();
+        } else {
+            int healAmount = Integer.parseInt(healAmountInputField.getText());
             target.heal(healAmount);
+        }
 
-            CombatMain.COMBAT_MENU.update();
-            dispose();
-        });
-        return button;
+        CombatMain.COMBAT_MENU.update();
+        dispose();
     }
 
 }
+

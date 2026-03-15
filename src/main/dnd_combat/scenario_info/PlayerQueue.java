@@ -1,10 +1,11 @@
 package scenario_info;
 
+import __main.CombatMain;
 import character_info.combatant.Combatant;
-import _main.CombatMain;
 import util.Message;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class PlayerQueue {
 
@@ -17,7 +18,7 @@ public class PlayerQueue {
      * @param friendlies list of friendly combatants
      * @param enemies list of enemy combatants
      */
-    public PlayerQueue(ArrayList<Combatant> friendlies, ArrayList<Combatant> enemies) {
+    public PlayerQueue(List<Combatant> friendlies, List<Combatant> enemies) {
         sortList(friendlies);
         sortList(enemies);
 
@@ -71,7 +72,7 @@ public class PlayerQueue {
      * Sorts the provided list by initiative descending
      * @param combatants unsorted list
      */
-    private void sortList(ArrayList<Combatant> combatants) {
+    private void sortList(List<Combatant> combatants) {
         combatants.sort((o1, o2) -> -1 * Integer.compare(o1.getInitiative(), o2.getInitiative()));
     }
 

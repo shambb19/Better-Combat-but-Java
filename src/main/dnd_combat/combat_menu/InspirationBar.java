@@ -1,6 +1,6 @@
 package combat_menu;
 
-import _main.CombatMain;
+import __main.CombatMain;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,7 +22,6 @@ public class InspirationBar extends JPanel {
 
         add(new JLabel("Excess Inspiration 1d4 Points"));
         add(inspirationProgressBar);
-        add(new JLabel(""));
     }
 
     public void logInspirationRolls(int d4Roll) {

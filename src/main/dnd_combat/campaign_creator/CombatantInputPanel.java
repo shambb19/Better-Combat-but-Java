@@ -1,12 +1,12 @@
 package campaign_creator;
 
+import _global_list.DamageImplements;
 import character_info.Class5e;
 import character_info.Stats;
 import character_info.combatant.Combatant;
 import character_info.combatant.NPC;
 import character_info.combatant.PC;
 import combat_menu.listener.IntegerFieldListener;
-import damage_implements.DamageImplements;
 import damage_implements.Spell;
 import damage_implements.Weapon;
 

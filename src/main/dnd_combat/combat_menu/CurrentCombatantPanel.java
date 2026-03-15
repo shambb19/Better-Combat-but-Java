@@ -1,9 +1,9 @@
 package combat_menu;
 
-import _main.CombatMain;
+import __main.CombatMain;
 import character_info.combatant.Combatant;
-import combat_menu.popup.HealPromptPopup;
-import combat_menu.popup.damage.DamagePromptPopup;
+import combat_menu.popup.CombatantHealPopup;
+import combat_menu.popup.damage.AttackPopup;
 import scenario_info.PlayerQueue;
 
 import javax.swing.*;
@@ -11,7 +11,7 @@ import java.awt.*;
 import java.util.Map;
 import java.util.Objects;
 
-public class ActionPanel extends JPanel {
+public class CurrentCombatantPanel extends JPanel {
 
     private final PlayerQueue queue;
 
@@ -26,7 +26,7 @@ public class ActionPanel extends JPanel {
             icons.END_TURN, "/end-turn-button.png"
     );
 
-    public ActionPanel() {
+    public CurrentCombatantPanel() {
         queue = CombatMain.QUEUE;
 
         setLayout(new GridLayout(0, 1));
@@ -37,12 +37,12 @@ public class ActionPanel extends JPanel {
         copyHealthBar(queue.getCurrentCombatant().getHealthBar());
 
         JButton attackButton = new JButton();
-        attackButton.addActionListener(e -> DamagePromptPopup.run());
+        attackButton.addActionListener(e -> AttackPopup.run());
         attackButton.setToolTipText("Attack");
         setIcon(attackButton, icons.ATTACK);
 
         healButton = new JButton();
-        healButton.addActionListener(e -> HealPromptPopup.run());
+        healButton.addActionListener(e -> CombatantHealPopup.run());
         healButton.setToolTipText("Heal");
         setIcon(healButton, icons.HEAL);
 

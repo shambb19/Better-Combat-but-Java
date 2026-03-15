@@ -1,7 +1,7 @@
-package _main;
+package __main;
 
+import _global_list.DamageImplements;
 import com.formdev.flatlaf.intellijthemes.FlatSpacegrayIJTheme;
-import damage_implements.DamageImplements;
 
 import javax.swing.*;
 import java.io.File;

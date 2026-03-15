@@ -1,17 +1,18 @@
 package combat_menu;
 
-import _main.CombatMain;
+import __main.CombatMain;
 import character_info.combatant.Combatant;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.List;
 
-public class InitiativeListPanel extends JPanel {
+public class CombatantListPanel extends JPanel {
 
     private final ArrayList<CombatantPanel> combatantPanels = new ArrayList<>();
 
-    public InitiativeListPanel() {
+    public CombatantListPanel() {
         setLayout(new GridLayout(0, 1));
 
         add(new JLabel("Belligerent Enemies"));
@@ -27,7 +28,7 @@ public class InitiativeListPanel extends JPanel {
         return host;
     }
 
-    private void addPanels(ArrayList<Combatant> combatants) {
+    private void addPanels(List<Combatant> combatants) {
         for (Combatant combatant : combatants) {
             CombatantPanel panel = new CombatantPanel(combatant);
             combatantPanels.add(panel);

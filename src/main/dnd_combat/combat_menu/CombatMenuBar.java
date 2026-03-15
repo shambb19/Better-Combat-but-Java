@@ -1,7 +1,7 @@
 package combat_menu;
 
-import _main.CombatMain;
-import _main.SystemMain;
+import __main.CombatMain;
+import __main.SystemMain;
 
 import javax.swing.*;
 

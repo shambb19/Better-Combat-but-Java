@@ -1,6 +1,6 @@
 package util;
 
-import _main.CombatMain;
+import __main.CombatMain;
 import campaign_creator.TxtMenu;
 import character_info.combatant.Combatant;
 import combat_menu.CombatMenu;

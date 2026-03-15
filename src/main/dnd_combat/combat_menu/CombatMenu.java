@@ -1,6 +1,6 @@
 package combat_menu;
 
-import _main.CombatMain;
+import __main.CombatMain;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,19 +10,19 @@ public class CombatMenu extends JFrame {
     public static final String TITLE = "Combat";
 
     private final InspirationBar excessInspirationBar;
-    private final InitiativeListPanel initiativeListPanel;
-    private final ActionPanel actionPanel;
+    private final CombatantListPanel initiativeListPanel;
+    private final CurrentCombatantPanel currentCombatantPanel;
 
     public CombatMenu() {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
         setJMenuBar(new CombatMenuBar(this));
 
-        initiativeListPanel = new InitiativeListPanel();
+        initiativeListPanel = new CombatantListPanel();
         excessInspirationBar = new InspirationBar();
-        actionPanel = new ActionPanel();
+        currentCombatantPanel = new CurrentCombatantPanel();
 
-        add(actionPanel, BorderLayout.CENTER);
+        add(currentCombatantPanel, BorderLayout.CENTER);
         add(initiativeListPanel.getScrollPane(), BorderLayout.EAST);
         add(excessInspirationBar, BorderLayout.NORTH);
 
@@ -36,9 +36,9 @@ public class CombatMenu extends JFrame {
 
     public void update() {
         initiativeListPanel.refresh();
-        actionPanel.updateTurnInformation();
-        actionPanel.copyHealthBar(CombatMain.QUEUE.getCurrentCombatant().getHealthBar());
-        actionPanel.getHealButton().setEnabled(CombatMain.QUEUE.getCurrentCombatant().canHeal());
+        currentCombatantPanel.updateTurnInformation();
+        currentCombatantPanel.copyHealthBar(CombatMain.QUEUE.getCurrentCombatant().getHealthBar());
+        currentCombatantPanel.getHealButton().setEnabled(CombatMain.QUEUE.getCurrentCombatant().canHeal());
 
         CombatMain.checkWinConditions();
     }

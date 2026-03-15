@@ -10,15 +10,16 @@ import util.Message;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.List;
 
 public class PC extends Combatant {
 
     private final Stats stats;
-    private final ArrayList<Weapon> weapons;
-    private final ArrayList<Spell> spells;
+    private final List<Weapon> weapons;
+    private final List<Spell> spells;
 
     public PC(String name, int hpMax, int armorClass,
-              Stats stats, ArrayList<Weapon> weapons, ArrayList<Spell> spells
+              Stats stats, List<Weapon> weapons, List<Spell> spells
     ) {
         super(name, hpMax, armorClass);
         this.stats = stats;
@@ -42,11 +43,11 @@ public class PC extends Combatant {
         return stats.saveDc();
     }
 
-    public ArrayList<Weapon> weapons() {
+    public List<Weapon> weapons() {
         return weapons;
     }
 
-    public ArrayList<Spell> spells() {
+    public List<Spell> spells() {
         return spells;
     }
 

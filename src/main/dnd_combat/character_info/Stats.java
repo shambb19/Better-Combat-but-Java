@@ -6,6 +6,8 @@ import util.TxtReader;
 
 import java.util.function.DoubleUnaryOperator;
 
+import static util.TxtReader.listTextAsArray;
+
 public class Stats {
 
     private int level;
@@ -47,7 +49,7 @@ public class Stats {
     }
 
     public void put(String line) {
-        String[] stats = TxtReader.stripped(line).split(", ");
+        String[] stats = listTextAsArray(line);
 
         for (String s : stats) {
             String key = TxtReader.key(s);

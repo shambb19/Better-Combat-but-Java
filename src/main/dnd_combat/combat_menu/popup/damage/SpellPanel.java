@@ -1,6 +1,6 @@
 package combat_menu.popup.damage;
 
-import _main.CombatMain;
+import __main.CombatMain;
 import character_info.combatant.Combatant;
 import character_info.combatant.PC;
 import damage_implements.Spell;
@@ -11,8 +11,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import static damage_implements.DamageImplements.MANUAL_HIT;
-import static damage_implements.DamageImplements.MANUAL_SAVE;
+import static _global_list.DamageImplements.MANUAL_HIT;
+import static _global_list.DamageImplements.MANUAL_SAVE;
 import static util.Message.informAttackFail;
 
 public class SpellPanel extends JPanel {
@@ -29,11 +29,13 @@ public class SpellPanel extends JPanel {
     private spellPanel activePanelType;
     private final JPanel variablePanel = new JPanel(new GridLayout(0, 1));
     private final Map<spellPanel, JComponent> attackComponents = new HashMap<>();
+    private final Map<JComponent, JTextField> attackComponentInputFields = new HashMap<>();
 
-    private int saveRoll;
-    private int hitRoll;
+    public static SpellPanel get(JComboBox<Combatant> targetBox, JFrame root) {
+        return new SpellPanel(targetBox, root);
+    }
 
-    public SpellPanel(JComboBox<Combatant> targetBox, JFrame root) {
+    private SpellPanel(JComboBox<Combatant> targetBox, JFrame root) {
         this.root = root;
 
         this.attacker = CombatMain.QUEUE.getCurrentCombatant();
@@ -43,12 +45,12 @@ public class SpellPanel extends JPanel {
             spells.addAll(pc.spells());
         }
 
-        this.targetBox = targetBox;
-        spellsBox = getSpellBox();
-
         putComponent(spellPanel.HIT, "Roll to Hit:");
         putComponent(spellPanel.SAVE, "Opponent Save Roll:");
         putManualSaveComponent();
+
+        this.targetBox = targetBox;
+        spellsBox = getSpellBox();
 
         JButton okButton = new JButton("Confirm");
         okButton.putClientProperty("JButton.buttonType", "roundRect");
@@ -97,8 +99,11 @@ public class SpellPanel extends JPanel {
             activePanelType = spellPanel.SAVE;
         } else {
             variablePanel.add(attackComponents.get(spellPanel.HIT));
-            activePanelType = spellPanel.MANUAL_SAVE.HIT;
+            activePanelType = spellPanel.HIT;
         }
+
+        variablePanel.revalidate();
+        variablePanel.repaint();
     }
 
     /**
@@ -109,16 +114,13 @@ public class SpellPanel extends JPanel {
 
         JTextField field = new JTextField();
         field.putClientProperty("JComponent.roundRect", true);
-        field.addActionListener(e -> {
-            switch (spellPanel) {
-                case SAVE -> saveRoll = Integer.parseInt(field.getText());
-                case HIT -> hitRoll = Integer.parseInt(field.getText());
-            }
-        });
 
         panel.add(new JLabel(labelText));
         panel.add(field);
+
         attackComponents.put(spellPanel, panel);
+        attackComponentInputFields.put(panel, field);
+
         root.pack();
     }
 
@@ -134,14 +136,22 @@ public class SpellPanel extends JPanel {
             return;
         }
 
-        boolean successCondition = switch (activePanelType) {
-            case HIT -> {
-                int attackVal = hitRoll + attacker.spellAttackBonus();
-                yield attackVal >= target.ac();
+        JComponent activePanel = attackComponents.get(activePanelType);
+
+        boolean successCondition;
+        if (activePanelType.equals(spellPanel.MANUAL_SAVE)) {
+            successCondition = ((JCheckBox) attackComponents.get(activePanelType)).isSelected();
+        } else {
+            JTextField activeField = attackComponentInputFields.get(activePanel);
+            int roll = Integer.parseInt(activeField.getText());
+
+            if (activePanelType.equals(spellPanel.HIT)) {
+                int attackVal = roll + attacker.spellAttackBonus();
+                successCondition = attackVal >= target.ac();
+            } else {
+                successCondition = roll < attacker.saveDc();
             }
-            case SAVE -> saveRoll < attacker.saveDc();
-            case MANUAL_SAVE -> ((JCheckBox) attackComponents.get(activePanelType)).isSelected();
-        };
+        }
 
         registerAttack(target, successCondition, spell);
         root.dispose();
@@ -159,7 +169,7 @@ public class SpellPanel extends JPanel {
      */
     private void registerAttack(Combatant target, boolean success, Spell spell) {
         if (success || spell.dealsHalfDamageAnyways()) {
-            DamageAmountPopup.run(spell, target);
+            DamageInputPopup.run(spell, target);
         } else {
             informAttackFail();
         }

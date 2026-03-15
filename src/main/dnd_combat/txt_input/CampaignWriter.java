@@ -1,6 +1,7 @@
 package txt_input;
 
-import _main.CombatMain;
+import _global_list.Combatants;
+import _global_list.Scenarios;
 import character_info.combatant.Combatant;
 import character_info.combatant.PC;
 import scenario_info.Scenario;
@@ -11,12 +12,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 
 public class CampaignWriter {
 
-    private final ArrayList<Combatant> friendlySource;
-    private final ArrayList<Combatant> enemySource;
-    private final ArrayList<Scenario> scenarioSource;
+    private final List<Combatant> friendlySource;
+    private final List<Combatant> enemySource;
+    private final List<Scenario> scenarioSource;
 
     private final File file;
     private ArrayList<String> code;
@@ -28,13 +30,13 @@ public class CampaignWriter {
                 "campaign post encounter " + LocalDate.now() + " " + numRand + ".txt"
         );
 
-        friendlySource = CombatMain.BATTLE.friendliesOriginal();
-        enemySource = CombatMain.BATTLE.enemiesOriginal();
-        scenarioSource = CombatMain.BATTLE.scenarios();
+        friendlySource = Combatants.toList().stream().filter(combatant -> !combatant.isEnemy()).toList();
+        enemySource = Combatants.toList().stream().filter(Combatant::isEnemy).toList();
+        scenarioSource = Scenarios.toList();
     }
 
     public CampaignWriter(String fileTitle,
-                          ArrayList<Combatant> friendlies, ArrayList<Combatant> enemies, ArrayList<Scenario> scenarios) {
+                          List<Combatant> friendlies, List<Combatant> enemies, List<Scenario> scenarios) {
         int numRand = (int) (Math.random()*1000);
         file = new File(
                 new File(System.getProperty("user.home"), "Downloads"),
@@ -46,7 +48,7 @@ public class CampaignWriter {
         scenarioSource = scenarios;
     }
 
-    public CampaignWriter(ArrayList<Combatant> friendlies, ArrayList<Combatant> enemies, ArrayList<Scenario> scenarios) {
+    public CampaignWriter(List<Combatant> friendlies, List<Combatant> enemies, List<Scenario> scenarios) {
         file = null;
 
         friendlySource = friendlies;

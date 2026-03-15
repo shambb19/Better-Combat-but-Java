@@ -2,7 +2,7 @@ package damage_implements;
 
 import character_info.AbilityModifier;
 
-import static damage_implements.DamageImplements.MANUAL_WEAPON;
+import static _global_list.DamageImplements.MANUAL_WEAPON;
 
 public class Weapon extends Implement {
 

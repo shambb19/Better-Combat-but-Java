@@ -1,22 +1,22 @@
 package combat_menu.popup.damage;
 
-import _main.CombatMain;
+import __main.CombatMain;
 import character_info.combatant.Combatant;
 import util.Locators;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
+import java.util.List;
 
-public class DamagePromptPopup extends JFrame {
+public class AttackPopup extends JFrame {
 
-    private final ArrayList<Combatant> targetList;
+    private final List<Combatant> targetList;
 
     public static void run() {
-        new DamagePromptPopup().setVisible(true);
+        new AttackPopup().setVisible(true);
     }
 
-    private DamagePromptPopup() {
+    private AttackPopup() {
         setTitle("Enter Attack Information");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setLayout(new GridLayout(0, 1));
@@ -33,8 +33,8 @@ public class DamagePromptPopup extends JFrame {
         JTabbedPane panel = new JTabbedPane();
         panel.setTabPlacement(SwingConstants.TOP);
 
-        panel.addTab("Weapon", new WeaponPanel(getTargetComboBox(), this));
-        panel.addTab("Spell", new SpellPanel(getTargetComboBox(), this));
+        panel.addTab("Weapon", WeaponPanel.get(getTargetComboBox(), this));
+        panel.addTab("Spell", SpellPanel.get(getTargetComboBox(), this));
 
         return panel;
     }

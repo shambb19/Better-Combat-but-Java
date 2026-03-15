@@ -8,6 +8,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 
 import static util.Message.getWithLoopUntilInt;
@@ -59,7 +60,7 @@ public class ListSelectionPanel<T> extends JPanel {
         }
     }
 
-    public void setTo(ArrayList<T> selectedList) {
+    public void setTo(List<T> selectedList) {
         reset();
         selectedList.forEach(item -> {
             if (availableList.contains(item)) {

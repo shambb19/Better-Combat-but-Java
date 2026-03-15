@@ -1,8 +1,8 @@
 package character_info.combatant;
 
+import character_info.AbilityModifier;
 import character_info.DealtEffectsList;
 import character_info.LifeStatus;
-import character_info.AbilityModifier;
 import combat_menu.listener.DieRollListener;
 import damage_implements.Effect;
 import damage_implements.Weapon;
@@ -62,6 +62,10 @@ public class Combatant {
      */
     public void heal(int healthRegained) {
         hpCurrent = Math.min(hpMax, hpCurrent + healthRegained);
+    }
+
+    public void healFull() {
+        hpCurrent = hpMax;
     }
 
     public int hp() {

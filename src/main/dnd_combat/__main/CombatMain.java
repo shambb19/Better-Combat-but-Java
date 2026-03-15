@@ -1,16 +1,16 @@
-package _main;
+package __main;
 
+import _global_list.Combatants;
+import _global_list.Scenarios;
 import combat_menu.CombatMenu;
 import combat_menu.popup.CombatEndPopup;
+import combat_menu.popup.EncounterFinalizationPopup;
 import combat_menu.popup.FileGetter;
-import combat_menu.popup.FinalizeCombatantsPopup;
 import scenario_info.Battle;
 import scenario_info.PlayerQueue;
-import txt_input.Txt5eReader;
 
 import javax.swing.*;
 import java.io.File;
-import java.util.Objects;
 
 public class CombatMain {
 
@@ -24,18 +24,19 @@ public class CombatMain {
         if (INPUT == null) {
             INPUT = FileGetter.getFile();
         }
-
-        BATTLE = Objects.requireNonNull(Txt5eReader.getCode(INPUT)).getBattle();
-
-        FinalizeCombatantsPopup.run();
+        completeSetup();
     }
 
     public static void runWith(File file) {
         INPUT = file;
+        completeSetup();
+    }
 
-        BATTLE = Objects.requireNonNull(Txt5eReader.getCode(INPUT)).getBattle();
-
-        FinalizeCombatantsPopup.run();
+    private static void completeSetup() {
+        Combatants.init(INPUT);
+        Scenarios.init(INPUT);
+        BATTLE = Combatants.toBattle();
+        EncounterFinalizationPopup.run();
     }
 
     public static void start() {

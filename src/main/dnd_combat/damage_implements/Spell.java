@@ -2,8 +2,8 @@ package damage_implements;
 
 import character_info.AbilityModifier;
 
-import static damage_implements.DamageImplements.MANUAL_HIT;
-import static damage_implements.DamageImplements.MANUAL_SAVE;
+import static _global_list.DamageImplements.MANUAL_HIT;
+import static _global_list.DamageImplements.MANUAL_SAVE;
 
 public class Spell extends Implement {
 

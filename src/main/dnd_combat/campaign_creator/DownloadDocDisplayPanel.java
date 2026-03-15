@@ -1,6 +1,6 @@
 package campaign_creator;
 
-import _main.SystemMain;
+import __main.SystemMain;
 import character_info.combatant.Combatant;
 import scenario_info.Battle;
 import scenario_info.Scenario;
@@ -14,6 +14,7 @@ import java.awt.datatransfer.StringSelection;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 import static util.Message.template;
 
@@ -21,9 +22,9 @@ public class DownloadDocDisplayPanel extends JPanel {
 
     private ColoredTxtDisplay display;
 
-    private final ArrayList<Combatant> friendlies;
-    private final ArrayList<Combatant> enemies;
-    private final ArrayList<Scenario> scenarios;
+    private final List<Combatant> friendlies;
+    private final List<Combatant> enemies;
+    private final List<Scenario> scenarios;
 
     public DownloadDocDisplayPanel() {
         friendlies = new ArrayList<>();
@@ -86,11 +87,11 @@ public class DownloadDocDisplayPanel extends JPanel {
 
     @SuppressWarnings("unchecked")
     private void addOrReplace(Object obj) {
-        ArrayList destination = switch (obj) {
+        List destination = switch (obj) {
             case Combatant c when c.isEnemy() -> enemies;
             case Combatant c when !c.isEnemy() -> friendlies;
             case Scenario ignored -> scenarios;
-            default -> throw new IllegalArgumentException("Unexpected class parameter: need Combatant or Scenario");
+            default -> throw new IllegalArgumentException("unexpected class parameter: need Combatant or Scenario");
         };
 
         Object oldVer = Locators.getWithNameFromDirectory(destination, obj);

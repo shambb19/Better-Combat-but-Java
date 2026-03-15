@@ -65,7 +65,7 @@ public class ColoredTxtDisplay extends JTextPane {
                 appendToPane(": ", LineType.EQUATOR);
                 appendToPane("[", LineType.VALUE);
 
-                String[] vals = stripped(line).split(", ");
+                String[] vals = listTextAsArray(line);
                 for (int i = 0; i < vals.length; i++) {
                     appendParameter(vals[i], "");
 

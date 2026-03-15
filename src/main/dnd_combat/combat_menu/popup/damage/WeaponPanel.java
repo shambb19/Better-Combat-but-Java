@@ -1,6 +1,6 @@
 package combat_menu.popup.damage;
 
-import _main.CombatMain;
+import __main.CombatMain;
 import character_info.combatant.Combatant;
 import character_info.combatant.PC;
 import combat_menu.listener.DieRollListener;
@@ -10,7 +10,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 
-import static damage_implements.DamageImplements.MANUAL_WEAPON;
+import static _global_list.DamageImplements.MANUAL_WEAPON;
 import static util.Message.informAttackFail;
 
 public class WeaponPanel extends JPanel {
@@ -24,7 +24,11 @@ public class WeaponPanel extends JPanel {
     private final JComboBox<Weapon> weaponsBox;
     private final JTextField rollInputField;
 
-    public WeaponPanel(JComboBox<Combatant> targetBox, JFrame root) {
+    public static WeaponPanel get(JComboBox<Combatant> targetBox, JFrame root) {
+        return new WeaponPanel(targetBox, root);
+    }
+
+    private WeaponPanel(JComboBox<Combatant> targetBox, JFrame root) {
         this.root = root;
 
         attacker = CombatMain.QUEUE.getCurrentCombatant();
@@ -99,7 +103,7 @@ public class WeaponPanel extends JPanel {
      */
     private void registerAttack(Combatant target, boolean success, Weapon weapon) {
         if (success) {
-            DamageAmountPopup.run(weapon, target);
+            DamageInputPopup.run(weapon, target);
         } else {
             informAttackFail();
         }

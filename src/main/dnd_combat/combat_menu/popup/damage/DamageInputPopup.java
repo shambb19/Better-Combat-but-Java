@@ -1,6 +1,6 @@
 package combat_menu.popup.damage;
 
-import _main.CombatMain;
+import __main.CombatMain;
 import character_info.combatant.Combatant;
 import combat_menu.listener.DieRollListener;
 import combat_menu.listener.IntegerFieldListener;
@@ -17,7 +17,7 @@ import java.awt.event.KeyEvent;
 
 import static util.Message.informIllusion;
 
-public class DamageAmountPopup extends JFrame {
+public class DamageInputPopup extends JFrame {
 
     private final boolean isManual;
     private final boolean isHalfDamage;
@@ -30,10 +30,10 @@ public class DamageAmountPopup extends JFrame {
     private final JButton okButton;
 
     public static void run(Implement implement, Combatant target) {
-        new DamageAmountPopup(implement, target).setVisible(true);
+        new DamageInputPopup(implement, target).setVisible(true);
     }
 
-    private DamageAmountPopup(Implement implement, Combatant target) {
+    private DamageInputPopup(Implement implement, Combatant target) {
         this.implement = implement;
         this.target = target;
         attacker = CombatMain.QUEUE.getCurrentCombatant();

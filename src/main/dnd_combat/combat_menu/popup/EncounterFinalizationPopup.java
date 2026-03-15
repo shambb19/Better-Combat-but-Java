@@ -1,6 +1,7 @@
 package combat_menu.popup;
 
-import _main.CombatMain;
+import __main.CombatMain;
+import _global_list.Combatants;
 import character_info.combatant.Combatant;
 import character_info.combatant.NPC;
 import character_info.combatant.PC;
@@ -13,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class FinalizeCombatantsPopup extends JFrame {
+public class EncounterFinalizationPopup extends JFrame {
 
     private final Map<Combatant, JPanel> combatantPanelMap = new HashMap<>();
     private final JComboBox<Scenario> scenarioBox = new JComboBox<>();
@@ -21,11 +22,7 @@ public class FinalizeCombatantsPopup extends JFrame {
     private final JPanel partyContainer = new JPanel(new GridLayout(0, 1, 0, 5));
     private final JPanel dynamicContainer = new JPanel(new GridLayout(0, 1, 0, 5));
 
-    public static void run() {
-        new FinalizeCombatantsPopup().setVisible(true);
-    }
-
-    private FinalizeCombatantsPopup() {
+    private EncounterFinalizationPopup() {
         setTitle("Finalize Combat Information");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setAlwaysOnTop(true);
@@ -49,12 +46,10 @@ public class FinalizeCombatantsPopup extends JFrame {
         scrollContent.add(dynamicContainer);
 
         JScrollPane scrollPane = new JScrollPane(scrollContent);
-        scrollPane.setPreferredSize(new Dimension(500, 600)); // Constraint size
-        scrollPane.getVerticalScrollBar().setUnitIncrement(16); // Smoother scrolling
+        scrollPane.setPreferredSize(new Dimension(500, 600));
         add(scrollPane, BorderLayout.CENTER);
 
         JButton confirmButton = new JButton("Begin Encounter");
-        confirmButton.setFont(new Font("SansSerif", Font.BOLD, 14));
         confirmButton.addActionListener(e -> logAndBegin());
 
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -68,9 +63,12 @@ public class FinalizeCombatantsPopup extends JFrame {
         setLocationRelativeTo(null);
     }
 
+    public static void run() {
+        new EncounterFinalizationPopup().setVisible(true);
+    }
+
     private void addSectionHeader(JPanel container, String title) {
         JLabel label = new JLabel(title);
-        label.setFont(new Font("SansSerif", Font.BOLD, 12));
         label.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         container.add(label);
@@ -91,7 +89,7 @@ public class FinalizeCombatantsPopup extends JFrame {
     private JComboBox<Scenario> setupScenarioBox() {
         CombatMain.BATTLE.scenarios().forEach(scenarioBox::addItem);
 
-        Scenario all = new Scenario("Full Roster (All)", CombatMain.BATTLE.mapFriendlies(), CombatMain.BATTLE.mapEnemies());
+        Scenario all = Combatants.toScenario();
         scenarioBox.addItem(all);
         scenarioBox.setSelectedItem(all);
 
@@ -160,14 +158,14 @@ public class FinalizeCombatantsPopup extends JFrame {
         CombatMain.BATTLE.enemies().clear();
 
         combatantPanelMap.forEach((combatant, panel) -> {
-            if (!isAbsent(panel)) {
-                combatant.setInitiative(getInitiative(panel));
-
-                if (combatant.isEnemy()) {
-                    CombatMain.BATTLE.enemies().add(combatant);
-                } else {
-                    CombatMain.BATTLE.friendlies().add(combatant);
-                }
+            if (isAbsent(panel)) {
+                return;
+            }
+            combatant.setInitiative(getInitiative(panel));
+            if (combatant.isEnemy()) {
+                CombatMain.BATTLE.enemies().add(combatant);
+            } else {
+                CombatMain.BATTLE.friendlies().add(combatant);
             }
         });
 

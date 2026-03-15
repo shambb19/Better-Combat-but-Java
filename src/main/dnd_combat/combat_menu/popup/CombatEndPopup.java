@@ -1,6 +1,6 @@
 package combat_menu.popup;
 
-import _main.CombatMain;
+import __main.CombatMain;
 import character_info.combatant.PC;
 import combat_menu.CombatMenu;
 import txt_input.CampaignWriter;

@@ -1,4 +1,4 @@
-package _main;
+package __main;
 
 import campaign_creator.TxtMenu;
 import combat_menu.popup.FileGetter;

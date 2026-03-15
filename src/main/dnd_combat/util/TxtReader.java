@@ -28,14 +28,20 @@ public class TxtReader {
     }
 
     /**
-     * @param line The line of .txt code for weapons, spells, or stats
-     * @return The same line without the opening and closing brackets
+     * @param line A line of .txt code with the precondition that the value for its
+     *             key is a list (weapons, spells, stats, scenarios, etc.)
+     * @return A list of the elements of the line (with regex ", ") and with brackets
+     * removed (for example, "[Frodo, Samwise, Aragorn]" returns
+     * ["Frodo", "Samwise", "Aragorn"])
      */
-    public static String stripped(String line) {
+    public static String[] listTextAsArray(String line) {
+        String str;
         if (!line.contains("[")) {
-            return line;
+            str = line;
+        } else {
+            str = line.substring(line.indexOf("[") + 1, line.indexOf("]"));
         }
-        return withoutComments(line.substring(line.indexOf("[") + 1, line.indexOf("]")));
+        return withoutComments(str).split(", ");
     }
 
     /**

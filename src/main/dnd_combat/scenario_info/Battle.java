@@ -1,35 +1,33 @@
 package scenario_info;
 
+import _global_list.Combatants;
+import _global_list.Scenarios;
 import character_info.combatant.Combatant;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
 
-public record Battle(ArrayList<Combatant> friendlies, ArrayList<Combatant> friendliesOriginal,
-                     ArrayList<Combatant> enemies, ArrayList<Combatant> enemiesOriginal,
-                     ArrayList<Scenario> scenarios) {
+public record Battle(List<Combatant> friendlies, List<Combatant> enemies, ArrayList<Scenario> scenarios) {
 
-    public HashMap<Combatant, Integer> mapFriendlies() {
-        return toMap(friendliesOriginal);
-    }
+    public Battle create() {
+        var combatantsByAllegiance = Combatants.toList().stream()
+                .collect(Collectors.partitioningBy(Combatant::isEnemy));
 
-    public HashMap<Combatant, Integer> mapEnemies() {
-        return toMap(enemiesOriginal);
-    }
-
-    public HashMap<Combatant, Integer> toMap(ArrayList<Combatant> source) {
-        HashMap<Combatant, Integer> map = new HashMap<>();
-        source.forEach(combatant -> map.put(combatant, 1));
-        return map;
+        return new Battle(
+                combatantsByAllegiance.get(false),
+                combatantsByAllegiance.get(true),
+                Scenarios.toList()
+        );
     }
 
     public void reset() {
         friendlies.clear();
-        friendlies.addAll(friendliesOriginal);
+        friendlies.addAll(create().friendlies);
 
         enemies.clear();
-        enemies.addAll(enemiesOriginal);
+        enemies.addAll(create().enemies);
     }
 
     public boolean areAllEnemiesDefeated() {

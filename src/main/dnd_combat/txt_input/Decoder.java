@@ -1,51 +1,42 @@
 package txt_input;
 
+import _global_list.Combatants;
+import _global_list.DamageImplements;
 import character_info.AbilityModifier;
 import character_info.Class5e;
 import character_info.Stats;
 import character_info.combatant.Combatant;
 import character_info.combatant.NPC;
 import character_info.combatant.PC;
-import damage_implements.DamageImplements;
 import damage_implements.Effect;
 import damage_implements.Spell;
 import damage_implements.Weapon;
 import scenario_info.Scenario;
 import util.Locators;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import static txt_input.Key.*;
 import static util.TxtReader.*;
 
 public class Decoder {
 
-    public static PC pc(ArrayList<String> params) {
-        HashMap<String, String> map = toMap(params);
+    public static PC pc(List<String> params) {
+        EnumMap<Key, Object> map = toMap(params);
 
-        String name = map.get("name");
-        int hp = getHp(map.get("hp"));
-        int hpCur = getHpCur(map.get("hp"));
-        int ac = Integer.parseInt(map.get("ac"));
-        int level = Integer.parseInt(map.get("level"));
-        Class5e class5e = Locators.enumNameSearch(map.get("class"), Class5e.class);
+        String name = (String) map.get(NAME);
+        int hp = getHp((String) map.get(HP));
+        int hpCur = getHpCur((String) map.get(HP));
+        int ac = (int) map.get(AC);
+        int level = (int) map.get(LEVEL);
+        Class5e class5e = (Class5e) map.get(CLASS);
 
         Stats stats = new Stats(class5e, level);
-        stats.put(map.get("stats"));
+        stats.put((String) map.get(STATS));
 
-        ArrayList<Weapon> weapons = new ArrayList<>();
-        String weaponsVal = map.get("weapons");
-        if (weaponsVal != null) {
-            weapons = damageImplements(weaponsVal, Weapon.class);
-        }
-
-        ArrayList<Spell> spells = new ArrayList<>();
-        String spellsVal = map.get("spells");
-        if (spellsVal != null) {
-            spells = damageImplements(spellsVal, Spell.class);
-        }
+        List<Weapon> weapons = damageImplements((String) map.get(WEAPONS), Weapon.class);
+        List<Spell> spells = damageImplements((String) map.get(SPELLS), Spell.class);
 
         PC pc = new PC(name, hp, ac, stats, weapons, spells);
         pc.setHealth(hpCur);
@@ -53,57 +44,61 @@ public class Decoder {
         return pc;
     }
 
-    public static NPC npc(ArrayList<String> params, boolean isEnemyTeam) {
-        HashMap<String, String> map = toMap(params);
+    public static NPC npc(List<String> params) {
+        return npc(params, false);
+    }
 
-        String name = map.get("name");
-        int hp = getHp(map.get("hp"));
-        int ac = Integer.parseInt(map.get("ac"));
+    public static NPC enemy(List<String> params) {
+        return npc(params, true);
+    }
+
+    private static NPC npc(List<String> params, boolean isEnemyTeam) {
+        EnumMap<Key, Object> map = toMap(params);
+
+        String name = (String) map.get(NAME);
+        int hp = getHp((String) map.get(HP));
+        int ac = (int) map.get(AC);
 
         return new NPC(name, hp, ac, isEnemyTeam);
     }
 
-    public static Scenario scenario(ArrayList<String> params, ArrayList<Object> readItems) {
-        HashMap<String, String> map = toMap(params);
+    public static Scenario scenario(List<String> params) {
+        EnumMap<Key, Object> map = toMap(params);
 
-        List<NPC> readFriendlies = readItems.stream()
+        String name = (String) map.get(NAME);
+
+        var npcsByAllegiance = Combatants.toList().stream()
                 .filter(NPC.class::isInstance)
                 .map(NPC.class::cast)
-                .filter(NPC::isAlly)
-                .toList();
+                .collect(Collectors.partitioningBy(NPC::isAlly));
 
-        List<NPC> readEnemies = readItems.stream()
-                .filter(NPC.class::isInstance)
-                .map(NPC.class::cast)
-                .filter(NPC::isEnemy)
-                .toList();
+        List<NPC> allies = npcsByAllegiance.get(true);
+        List<NPC> enemies = npcsByAllegiance.get(false);
 
-        String name = map.get("name");
-
-        HashMap<Combatant, Integer> with = new HashMap<>();
-        String withVal = map.get("with");
-        if (withVal != null) {
-            with = getCombatantsFromString(withVal, readFriendlies);
-        }
-
-        HashMap<Combatant, Integer> against = new HashMap<>();
-        String againstVal = map.get("against");
-        if (againstVal != null) {
-            against = getCombatantsFromString(againstVal, readEnemies);
-        }
+        var with = getCombatantsFromString((String) map.get(WITH), allies);
+        var against = getCombatantsFromString((String) map.get(AGAINST), enemies);
 
         return new Scenario(name, with, against);
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T> T implement(ArrayList<String> params, Class<T> type) {
-        HashMap<String, String> map = toMap(params);
+    public static Weapon weapon(List<String> params) {
+        return implement(params, Weapon.class);
+    }
 
-        String name = map.get("name");
-        int numDice = getNumDice(map.get("dmg"));
-        int dieSize = getDieSize(map.get("dmg"));
-        AbilityModifier stat = Locators.enumNameSearch(map.get("stat"), AbilityModifier.class);
-        Effect effect = Locators.enumNameSearch(map.get("effect"), Effect.class);
+    public static Spell spell(List<String> params) {
+        return implement(params, Spell.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T implement(List<String> params, Class<T> type) {
+        EnumMap<Key, Object> map = toMap(params);
+
+        String name = (String) map.get(NAME);
+        int numDice = getNumDice((String) map.get(DMG));
+        int dieSize = getDieSize((String) map.get(DMG));
+
+        AbilityModifier stat = (AbilityModifier) map.get(STAT);
+        Effect effect = (Effect) map.get(EFFECT);
 
         if (type.isAssignableFrom(Weapon.class)) {
             return (T) new Weapon(name, numDice, dieSize, stat);
@@ -113,29 +108,36 @@ public class Decoder {
         return null;
     }
 
-    private static HashMap<String, String> toMap(ArrayList<String> params) {
-        params.removeFirst();
+    private static EnumMap<Key, Object> toMap(List<String> params) {
 
-        HashMap<String, String> map = new HashMap<>();
+        EnumMap<Key, Object> map = new EnumMap<>(Key.class);
 
-        while (!params.isEmpty()) {
-            String key = key(params.getFirst());
-            String value = value(params.removeFirst());
-            map.put(key, value);
-        }
+        params.stream()
+                .skip(1)
+                .forEach(param -> {
+                    Key key = Key.get(param);
+
+                    if (key != null) {
+                        map.put(key, Key.value(param));
+                    }
+                });
+
         return map;
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T> ArrayList<T> damageImplements(String value, Class<T> type) {
+    private static <T> List<T> damageImplements(String value, Class<T> type) {
+        if (value == null) {
+            return new ArrayList<>();
+        }
+
         ArrayList<T> list = new ArrayList<>();
-        String[] arr = stripped(value).split(", ");
+        String[] arr = listTextAsArray(value);
 
         for (String name : arr) {
-            if (type.isAssignableFrom(Weapon.class)) {
-                list.add((T) DamageImplements.get(name, Weapon.class));
-            } else if (type.isAssignableFrom(Spell.class)) {
-                list.add((T) DamageImplements.get(name, Spell.class));
+            T obj = DamageImplements.get(name, type);
+
+            if (obj != null) {
+                list.add(obj);
             }
         }
 
@@ -144,8 +146,13 @@ public class Decoder {
     }
 
     private static HashMap<Combatant, Integer> getCombatantsFromString(String list, List<NPC> source) {
-        String[] names = stripped(list).split(", ");
         HashMap<Combatant, Integer> combatants = new HashMap<>();
+
+        if (list == null) {
+            return combatants;
+        }
+
+        String[] names = listTextAsArray(list);
 
         for (String str : names) {
             String name = getName(str);
