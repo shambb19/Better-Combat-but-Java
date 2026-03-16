@@ -1,8 +1,8 @@
 package _global_list;
 
 import character_info.combatant.Combatant;
-import scenario_info.Battle;
-import scenario_info.Scenario;
+import encounter_info.Battle;
+import encounter_info.Scenario;
 import txt_input.Reader5e;
 import util.Message;
 

@@ -3,6 +3,8 @@ package util;
 import __main.CombatMain;
 import character_info.combatant.Combatant;
 
+import javax.swing.*;
+import java.awt.*;
 import java.util.List;
 
 public class Locators {
@@ -33,6 +35,18 @@ public class Locators {
             String tStr = t.toString().trim();
             if (tStr.equalsIgnoreCase(name.trim())) {
                 return t;
+            }
+        }
+        return null;
+    }
+
+    public static Component componentFromCardLayoutWithKey(JPanel cardPanel, String key) {
+        for (Component component : cardPanel.getComponents()) {
+            if (component.getName() == null) {
+                continue;
+            }
+            if (component.getName().equalsIgnoreCase(key)) {
+                return component;
             }
         }
         return null;

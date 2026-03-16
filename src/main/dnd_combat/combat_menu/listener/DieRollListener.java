@@ -8,7 +8,7 @@ public class DieRollListener extends IntegerFieldListener {
 
     private final int numDice;
     private final int dieSize;
-    private final JTextField root;
+    private final JComponent root;
 
     /**
      * Attaches an expected number and size of dice to the root JTextField param. Limits the
@@ -16,20 +16,8 @@ public class DieRollListener extends IntegerFieldListener {
      * a field associated with a 2d6 roll would be limited to integers on [2, 12].
      * @param root the root JTextField
      */
-    public DieRollListener(int numDice, int dieSize, JTextField root) {
+    public DieRollListener(int numDice, int dieSize, JComponent root) {
         this.numDice = numDice;
-        this.dieSize = dieSize;
-        this.root = root;
-    }
-
-    /**
-     * Attaches an expected size of die (assuming 1 die) to the root JTextField param. Limits the
-     * entries to the field to integers on the range [1, size_die]. For example,
-     * a field associated with a d20 would be limited to integers on [1, 20].
-     * @param root the root JTextField
-     */
-    public DieRollListener(int dieSize, JTextField root) {
-        numDice = 1;
         this.dieSize = dieSize;
         this.root = root;
     }
@@ -43,26 +31,21 @@ public class DieRollListener extends IntegerFieldListener {
     @Override
     public void keyTyped(KeyEvent e) {
         super.keyTyped(e);
-        if (root.getText().isEmpty()) {
-            return;
+
+        int value;
+        switch (root) {
+            case JTextField f when f.getText().isEmpty() -> {
+                return;
+            }
+            case JTextField f -> value = Integer.parseInt(f.getText());
+            case JSpinner s -> value = (int) s.getValue();
+            default -> value = 0;
         }
-        int value = Integer.parseInt(root.getText());
+
         if (value > numDice * dieSize || value < numDice) {
             root.putClientProperty("JComponent.outline", "error");
         } else {
             root.putClientProperty("JComponent.outline", Color.GREEN);
         }
-    }
-
-    /**
-     * Changes the border color to red if the field is empty.
-     * @param e the event to be processed
-     */
-    @Override
-    public void keyReleased(KeyEvent e) {
-        if (root.getText().isEmpty()) {
-            root.putClientProperty("JComponent.outline", "error");
-        }
-        keyTyped(e);
     }
 }

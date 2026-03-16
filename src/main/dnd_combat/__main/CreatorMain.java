@@ -1,6 +1,6 @@
 package __main;
 
-import campaign_creator.TxtMenu;
+import campaign_creator_menu.TxtMenu;
 import combat_menu.popup.FileGetter;
 import org.apache.commons.io.FileUtils;
 

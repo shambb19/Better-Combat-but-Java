@@ -11,7 +11,7 @@ import character_info.combatant.PC;
 import damage_implements.Effect;
 import damage_implements.Spell;
 import damage_implements.Weapon;
-import scenario_info.Scenario;
+import encounter_info.Scenario;
 import util.Locators;
 
 import java.util.*;

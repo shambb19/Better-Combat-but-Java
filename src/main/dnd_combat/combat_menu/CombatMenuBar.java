@@ -7,7 +7,11 @@ import javax.swing.*;
 
 public class CombatMenuBar extends JMenuBar {
 
-    public CombatMenuBar(CombatMenu root) {
+    public static CombatMenuBar newInstance(CombatMenu root) {
+        return new CombatMenuBar(root);
+    }
+
+    private CombatMenuBar(CombatMenu root) {
         JMenuItem end = new JMenuItem("End Encounter");
         end.addActionListener(e -> {
             int result = JOptionPane.showConfirmDialog(

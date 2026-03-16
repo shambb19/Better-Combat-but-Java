@@ -1,10 +1,12 @@
-package combat_menu.popup.damage;
+package combat_menu.popup.action_panel;
 
 import __main.CombatMain;
 import character_info.combatant.Combatant;
 import character_info.combatant.PC;
 import combat_menu.listener.DieRollListener;
 import damage_implements.Weapon;
+import format.ColorStyle;
+import format.SwingStyles;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,7 +17,7 @@ import static util.Message.informAttackFail;
 
 public class WeaponPanel extends JPanel {
 
-    private final JFrame root;
+    private final ActionPanel root;
 
     private final Combatant attacker;
     private final ArrayList<Weapon> weapons;
@@ -23,12 +25,13 @@ public class WeaponPanel extends JPanel {
     private final JComboBox<Combatant> targetBox;
     private final JComboBox<Weapon> weaponsBox;
     private final JTextField rollInputField;
+    private final DieRollListener listener;
 
-    public static WeaponPanel get(JComboBox<Combatant> targetBox, JFrame root) {
+    public static WeaponPanel newInstance(JComboBox<Combatant> targetBox, ActionPanel root) {
         return new WeaponPanel(targetBox, root);
     }
 
-    private WeaponPanel(JComboBox<Combatant> targetBox, JFrame root) {
+    private WeaponPanel(JComboBox<Combatant> targetBox, ActionPanel root) {
         this.root = root;
 
         attacker = CombatMain.QUEUE.getCurrentCombatant();
@@ -48,11 +51,17 @@ public class WeaponPanel extends JPanel {
         hitString += ":";
 
         rollInputField = new JTextField();
-        rollInputField.addKeyListener(new DieRollListener(1, 20, rollInputField));
+        listener = new DieRollListener(1, 20, rollInputField);
+        rollInputField.addKeyListener(listener);
 
-        JButton okButton = new JButton("Confirm");
-        okButton.putClientProperty("JButton.buttonType", "roundRect");
-        okButton.addActionListener(e -> logAndContinue());
+        JButton okButton = new JButton("Attack");
+        okButton.setBackground(ColorStyle.DARKER_RED.getColor());
+
+        JPanel okCancelPanel = SwingStyles.getConfirmCancelPanel(
+                okButton,
+                e -> logAndContinue(),
+                e -> root.returnToButtons()
+        );
 
         setLayout(new GridLayout(0, 1));
 
@@ -62,14 +71,14 @@ public class WeaponPanel extends JPanel {
         add(weaponsBox);
         add(new JLabel(hitString));
         add(rollInputField);
-        add(okButton);
+        add(okCancelPanel);
     }
 
     private JComboBox<Weapon> getWeaponComboBox() {
         JComboBox<Weapon> box = new JComboBox<>();
-        box.putClientProperty("JComponent.roundRect", true);
         weapons.forEach(box::addItem);
         box.addItem(MANUAL_WEAPON);
+        box.setSelectedIndex(-1);
         return box;
     }
 
@@ -89,7 +98,7 @@ public class WeaponPanel extends JPanel {
         int hitRoll = fieldVal + attacker.attackBonus(weapon);
 
         registerAttack(target, hitRoll >= target.ac(), weapon);
-        root.dispose();
+        root.returnToButtons();
         CombatMain.COMBAT_MENU.update();
     }
 
@@ -103,10 +112,18 @@ public class WeaponPanel extends JPanel {
      */
     private void registerAttack(Combatant target, boolean success, Weapon weapon) {
         if (success) {
-            DamageInputPopup.run(weapon, target);
+            SwingUtilities.invokeLater(() -> root.promptDamageAmount(weapon, target));
         } else {
             informAttackFail();
         }
+    }
+
+    public void reset() {
+        targetBox.setSelectedIndex(-1);
+        weaponsBox.setSelectedIndex(-1);
+        rollInputField.setText("");
+        rollInputField.removeKeyListener(listener);
+        rollInputField.addKeyListener(listener);
     }
 
 }

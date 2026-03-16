@@ -1,13 +1,15 @@
-package campaign_creator;
+package campaign_creator_menu;
 
 import character_info.combatant.Combatant;
 import character_info.combatant.NPC;
 import character_info.combatant.PC;
-import scenario_info.Battle;
-import scenario_info.Scenario;
+import encounter_info.Battle;
+import encounter_info.Scenario;
+import format.SwingStyles;
 import util.Message;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.util.ArrayList;
@@ -46,6 +48,7 @@ public class CompletedElementsList extends JPanel {
 
     private void construct() {
         setLayout(new GridLayout(0, 3));
+        SwingStyles.addLabeledBorder(this, "Completed Elements");
 
         friendlyPane = new ScrollPane<>(FRIENDLY_NEW, root, this);
         enemyPane = new ScrollPane<>(ENEMY_NEW, root, this);
@@ -107,7 +110,7 @@ public class CompletedElementsList extends JPanel {
 
         JButton label = new JButton(labelText);
         label.setEnabled(false);
-        label.setBorder(null);
+        label.setBorder(new EmptyBorder(4, 4, 4, 4));
         label.putClientProperty("FlatLaf.style", "font: $h1.regular.font");
 
         panel.add(label, BorderLayout.NORTH);
@@ -138,6 +141,7 @@ public class CompletedElementsList extends JPanel {
 
             list = new JList<>(model);
             list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            list.setBorder(new EmptyBorder(4, 4, 4, 4));
 
             listener = listener();
             list.addListSelectionListener(listener);

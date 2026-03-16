@@ -1,6 +1,6 @@
 package combat_menu.listener;
 
-import campaign_creator.ColoredTxtDisplay;
+import campaign_creator_menu.ColoredTxtDisplay;
 
 import javax.swing.*;
 import java.awt.event.KeyAdapter;
@@ -37,8 +37,4 @@ public class FieldEditListener extends KeyAdapter {
         SwingUtilities.invokeLater(root::addLines);
     }
 
-    // Call this when the window/app closes to prevent memory leaks
-    public void cleanup() {
-        scheduler.shutdownNow();
-    }
 }

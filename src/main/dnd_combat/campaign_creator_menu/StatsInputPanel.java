@@ -1,8 +1,8 @@
-package campaign_creator;
+package campaign_creator_menu;
 
-import character_info.combatant.PC;
 import character_info.AbilityModifier;
 import character_info.Stats;
+import character_info.combatant.PC;
 import combat_menu.listener.IntegerFieldListener;
 
 import javax.swing.*;

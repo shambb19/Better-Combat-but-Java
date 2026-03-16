@@ -2,23 +2,29 @@ package combat_menu;
 
 import __main.CombatMain;
 import character_info.combatant.Combatant;
+import format.SwingStyles;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CombatantListPanel extends JPanel {
+public class EncounterListPanel extends JPanel {
 
     private final ArrayList<CombatantPanel> combatantPanels = new ArrayList<>();
 
-    public CombatantListPanel() {
-        setLayout(new GridLayout(0, 1));
+    public static EncounterListPanel newInstance() {
+        return new EncounterListPanel();
+    }
 
-        add(new JLabel("Belligerent Enemies"));
-        addPanels(CombatMain.BATTLE.enemies());
-        add(new JLabel("Party and Allies"));
-        addPanels(CombatMain.BATTLE.friendlies());
+    private EncounterListPanel() {
+        setLayout(new GridLayout(0, 1));
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        setBorder(new EmptyBorder(10, 10, 10, 10));
+
+        addPanel("Belligerent Enemies", CombatMain.BATTLE.enemies());
+        addPanel("Party and Allies", CombatMain.BATTLE.friendlies());
     }
 
     public JScrollPane getScrollPane() {
@@ -28,13 +34,17 @@ public class CombatantListPanel extends JPanel {
         return host;
     }
 
-    private void addPanels(List<Combatant> combatants) {
-        for (Combatant combatant : combatants) {
-            CombatantPanel panel = new CombatantPanel(combatant);
-            combatantPanels.add(panel);
-            add(panel);
-        }
-        updateActiveCombatant();
+    private void addPanel(String label, List<Combatant> source) {
+        JPanel panel = new JPanel(new GridLayout(0, 1));
+        SwingStyles.addLabeledBorder(panel, label);
+
+        source.forEach(combatant -> {
+            CombatantPanel combatantPanel = new CombatantPanel(combatant);
+            combatantPanels.add(combatantPanel);
+            panel.add(combatantPanel);
+        });
+
+        add(panel);
     }
 
     public void refresh() {

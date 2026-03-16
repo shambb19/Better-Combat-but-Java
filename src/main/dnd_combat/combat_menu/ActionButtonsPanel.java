@@ -2,68 +2,78 @@ package combat_menu;
 
 import __main.CombatMain;
 import character_info.combatant.Combatant;
-import combat_menu.popup.CombatantHealPopup;
-import combat_menu.popup.damage.AttackPopup;
-import scenario_info.PlayerQueue;
+import combat_menu.popup.action_panel.ActionPanel;
+import encounter_info.PlayerQueue;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.Map;
 import java.util.Objects;
 
-public class CurrentCombatantPanel extends JPanel {
+public class ActionButtonsPanel extends JPanel {
 
     private final PlayerQueue queue;
 
-    private final JTextArea turnInformation = new JTextArea();
-    private final JProgressBar currentCombatantHealthBar;
     private final JButton healButton;
     private final JButton inspirationButton;
-    Map<icons, String> buttonPics = Map.of(
+
+    private static final Map<icons, String> buttonPics = Map.of(
             icons.ATTACK, "/attack-button.png",
             icons.HEAL, "/heal-button.png",
             icons.INSPIRATION, "/inspiration-button.png",
             icons.END_TURN, "/end-turn-button.png"
     );
 
-    public CurrentCombatantPanel() {
+    public static ActionButtonsPanel newInstance(ActionPanel root) {
+        return new ActionButtonsPanel(root);
+    }
+
+    private ActionButtonsPanel(ActionPanel root) {
         queue = CombatMain.QUEUE;
 
-        setLayout(new GridLayout(0, 1));
-
-        currentCombatantHealthBar = new JProgressBar();
-        currentCombatantHealthBar.setStringPainted(true);
-        currentCombatantHealthBar.setMinimum(0);
-        copyHealthBar(queue.getCurrentCombatant().getHealthBar());
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        setBorder(new EmptyBorder(10, 10, 10, 10));
 
         JButton attackButton = new JButton();
-        attackButton.addActionListener(e -> AttackPopup.run());
+        attackButton.addActionListener(e -> root.switchTo(ActionPanel.ATTACK_OPTION));
         attackButton.setToolTipText("Attack");
+        attackButton.putClientProperty("JButton.buttonType", "toolBarButton");
         setIcon(attackButton, icons.ATTACK);
 
         healButton = new JButton();
-        healButton.addActionListener(e -> CombatantHealPopup.run());
+        healButton.addActionListener(e -> root.switchTo(ActionPanel.HEAL_OPTION));
         healButton.setToolTipText("Heal");
+        healButton.putClientProperty("JButton.buttonType", "toolBarButton");
         setIcon(healButton, icons.HEAL);
 
         inspirationButton = new JButton();
         inspirationButton.addActionListener(e -> useInspiration());
         inspirationButton.setToolTipText("Use Inspiration");
+        inspirationButton.putClientProperty("JButton.buttonType", "toolBarButton");
         setIcon(inspirationButton, icons.INSPIRATION);
 
         JButton endTurnButton = new JButton();
         endTurnButton.addActionListener(e -> endTurn());
         endTurnButton.setToolTipText("End Turn");
+        endTurnButton.putClientProperty("JButton.buttonType", "toolBarButton");
         setIcon(endTurnButton, icons.END_TURN);
 
-        add(turnInformation);
-        add(currentCombatantHealthBar);
-        add(attackButton);
-        add(healButton);
-        add(inspirationButton);
-        add(endTurnButton);
+        addPanel(attackButton, healButton, inspirationButton, endTurnButton);
 
         updateTurnInformation();
+    }
+
+    private void addPanel(JComponent... comps) {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
+        for (JComponent comp : comps) {
+            panel.add(comp);
+            comp.setAlignmentX(Component.CENTER_ALIGNMENT);
+        }
+
+        add(panel);
     }
 
     private static int promptValueFromRoll(String rollMeaning, int dieSize) {
@@ -93,20 +103,6 @@ public class CurrentCombatantPanel extends JPanel {
         }
     }
 
-    public void updateTurnInformation() {
-        turnInformation.setText(queue.getCurrentCombatant().actionList());
-
-        if (queue.getCurrentCombatant().isEnemy()) {
-            turnInformation.setForeground(new Color(122, 160, 245));
-            inspirationButton.setEnabled(false);
-        } else {
-            turnInformation.setForeground(Color.WHITE);
-            inspirationButton.setEnabled(true);
-        }
-
-        turnInformation.setEditable(false);
-    }
-
     private void endTurn() {
         Combatant newCurrentCombatant = queue.endTurnAndGetNext();
         updateTurnInformation();
@@ -119,19 +115,9 @@ public class CurrentCombatantPanel extends JPanel {
         CombatMain.COMBAT_MENU.update();
     }
 
-    public void copyHealthBar(JProgressBar mimic) {
-        currentCombatantHealthBar.setString(mimic.getString());
-        currentCombatantHealthBar.setMaximum(mimic.getMaximum());
-        currentCombatantHealthBar.setForeground(mimic.getForeground());
-        if (queue.getCurrentCombatant().isEnemy()) {
-            currentCombatantHealthBar.setValue(currentCombatantHealthBar.getMaximum());
-        } else {
-            currentCombatantHealthBar.setValue(mimic.getValue());
-        }
-    }
-
-    public JButton getHealButton() {
-        return healButton;
+    public void updateTurnInformation() {
+        inspirationButton.setEnabled(!queue.getCurrentCombatant().isEnemy());
+        healButton.setEnabled(queue.getCurrentCombatant().canHeal());
     }
 
     private void setIcon(JButton button, icons name) {

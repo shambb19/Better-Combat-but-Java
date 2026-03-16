@@ -1,4 +1,4 @@
-package scenario_info;
+package encounter_info;
 
 import __main.CombatMain;
 import character_info.combatant.Combatant;

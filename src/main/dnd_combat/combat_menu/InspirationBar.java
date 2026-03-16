@@ -12,7 +12,11 @@ public class InspirationBar extends JPanel {
 
     private final InspirationProgressBar inspirationProgressBar;
 
-    public InspirationBar() {
+    public static InspirationBar newInstance() {
+        return new InspirationBar();
+    }
+
+    private InspirationBar() {
         inspirationRolls = 0;
         numCompletions = 0;
 
@@ -20,8 +24,11 @@ public class InspirationBar extends JPanel {
 
         inspirationProgressBar = new InspirationProgressBar();
 
-        add(new JLabel("Excess Inspiration 1d4 Points"));
+        JLabel label = new JLabel("Excess Inspiration 1d4 Points");
+        label.setHorizontalAlignment(SwingConstants.CENTER);
+
         add(inspirationProgressBar);
+        add(label);
     }
 
     public void logInspirationRolls(int d4Roll) {

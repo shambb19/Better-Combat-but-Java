@@ -6,8 +6,8 @@ import combat_menu.CombatMenu;
 import combat_menu.popup.CombatEndPopup;
 import combat_menu.popup.EncounterFinalizationPopup;
 import combat_menu.popup.FileGetter;
-import scenario_info.Battle;
-import scenario_info.PlayerQueue;
+import encounter_info.Battle;
+import encounter_info.PlayerQueue;
 
 import javax.swing.*;
 import java.io.File;

@@ -1,8 +1,9 @@
-package campaign_creator;
+package campaign_creator_menu;
 
 import character_info.combatant.Combatant;
 import character_info.combatant.PC;
-import scenario_info.Scenario;
+import encounter_info.Scenario;
+import format.SwingStyles;
 
 import javax.swing.*;
 import java.awt.*;
@@ -36,7 +37,7 @@ public class ScenarioInputPanel extends JPanel {
         enemyPanel = new ListSelectionPanel<>(sibling.getEnemies(), "Enemies");
 
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        SwingStyles.addLabeledBorder(this, "Scenario Input");
 
         JTextArea label = new JTextArea(labelText);
         label.setLineWrap(true);

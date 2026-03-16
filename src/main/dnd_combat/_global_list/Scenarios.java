@@ -1,6 +1,6 @@
 package _global_list;
 
-import scenario_info.Scenario;
+import encounter_info.Scenario;
 import txt_input.Reader5e;
 
 import java.io.File;

@@ -1,9 +1,10 @@
-package campaign_creator;
+package campaign_creator_menu;
 
 import __main.SystemMain;
 import character_info.combatant.Combatant;
-import scenario_info.Battle;
-import scenario_info.Scenario;
+import encounter_info.Battle;
+import encounter_info.Scenario;
+import format.SwingStyles;
 import txt_input.CampaignWriter;
 import util.Locators;
 
@@ -45,6 +46,7 @@ public class DownloadDocDisplayPanel extends JPanel {
 
     private void construct() {
         setLayout(new BorderLayout());
+        SwingStyles.addLabeledBorder(this, "Completed Campaign Code Preview");
 
         JScrollPane host = new JScrollPane();
 

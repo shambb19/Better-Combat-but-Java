@@ -4,7 +4,7 @@ import _global_list.Combatants;
 import _global_list.Scenarios;
 import character_info.combatant.Combatant;
 import character_info.combatant.PC;
-import scenario_info.Scenario;
+import encounter_info.Scenario;
 import util.Message;
 
 import java.io.File;

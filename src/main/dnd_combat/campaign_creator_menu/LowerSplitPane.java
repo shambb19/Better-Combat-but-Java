@@ -1,4 +1,4 @@
-package campaign_creator;
+package campaign_creator_menu;
 
 import javax.swing.*;
 import java.awt.*;

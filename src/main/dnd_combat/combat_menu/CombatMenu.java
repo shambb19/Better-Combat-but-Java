@@ -1,8 +1,10 @@
 package combat_menu;
 
 import __main.CombatMain;
+import combat_menu.popup.action_panel.ActionPanel;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 public class CombatMenu extends JFrame {
@@ -10,22 +12,23 @@ public class CombatMenu extends JFrame {
     public static final String TITLE = "Combat";
 
     private final InspirationBar excessInspirationBar;
-    private final CombatantListPanel initiativeListPanel;
-    private final CurrentCombatantPanel currentCombatantPanel;
+    private final EncounterListPanel initiativeListPanel;
+    private final ActionPanel actionPanel;
 
     public CombatMenu() {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
-        setJMenuBar(new CombatMenuBar(this));
+        setJMenuBar(CombatMenuBar.newInstance(this));
 
-        initiativeListPanel = new CombatantListPanel();
-        excessInspirationBar = new InspirationBar();
-        currentCombatantPanel = new CurrentCombatantPanel();
+        initiativeListPanel = EncounterListPanel.newInstance();
+        excessInspirationBar = InspirationBar.newInstance();
+        actionPanel = ActionPanel.newInstance();
 
-        add(currentCombatantPanel, BorderLayout.CENTER);
+        add(actionPanel, BorderLayout.CENTER);
         add(initiativeListPanel.getScrollPane(), BorderLayout.EAST);
-        add(excessInspirationBar, BorderLayout.NORTH);
+        add(excessInspirationBar, BorderLayout.SOUTH);
 
+        ((JPanel) getContentPane()).setBorder(new EmptyBorder(10, 10, 10, 10));
         pack();
         setLocationRelativeTo(null);
     }
@@ -36,9 +39,8 @@ public class CombatMenu extends JFrame {
 
     public void update() {
         initiativeListPanel.refresh();
-        currentCombatantPanel.updateTurnInformation();
-        currentCombatantPanel.copyHealthBar(CombatMain.QUEUE.getCurrentCombatant().getHealthBar());
-        currentCombatantPanel.getHealButton().setEnabled(CombatMain.QUEUE.getCurrentCombatant().canHeal());
+        actionPanel.updateTurnInformation();
+        actionPanel.copyHealthBar(CombatMain.QUEUE.getCurrentCombatant().getHealthBar());
 
         CombatMain.checkWinConditions();
     }

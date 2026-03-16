@@ -1,9 +1,12 @@
-package combat_menu.popup.damage;
+package combat_menu.popup.action_panel;
 
 import __main.CombatMain;
 import character_info.combatant.Combatant;
 import character_info.combatant.PC;
+import combat_menu.listener.DieRollListener;
 import damage_implements.Spell;
+import format.ColorStyle;
+import format.SwingStyles;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,7 +20,7 @@ import static util.Message.informAttackFail;
 
 public class SpellPanel extends JPanel {
 
-    private final JFrame root;
+    private final ActionPanel root;
 
     private final Combatant attacker;
     private final ArrayList<Spell> spells;
@@ -31,11 +34,11 @@ public class SpellPanel extends JPanel {
     private final Map<spellPanel, JComponent> attackComponents = new HashMap<>();
     private final Map<JComponent, JTextField> attackComponentInputFields = new HashMap<>();
 
-    public static SpellPanel get(JComboBox<Combatant> targetBox, JFrame root) {
+    public static SpellPanel newInstance(JComboBox<Combatant> targetBox, ActionPanel root) {
         return new SpellPanel(targetBox, root);
     }
 
-    private SpellPanel(JComboBox<Combatant> targetBox, JFrame root) {
+    private SpellPanel(JComboBox<Combatant> targetBox, ActionPanel root) {
         this.root = root;
 
         this.attacker = CombatMain.QUEUE.getCurrentCombatant();
@@ -53,8 +56,13 @@ public class SpellPanel extends JPanel {
         spellsBox = getSpellBox();
 
         JButton okButton = new JButton("Confirm");
-        okButton.putClientProperty("JButton.buttonType", "roundRect");
-        okButton.addActionListener(e -> logAndContinue());
+        okButton.setBackground(ColorStyle.DARKER_RED.getColor());
+
+        JPanel okCancelPanel = SwingStyles.getConfirmCancelPanel(
+                okButton,
+                e -> logAndContinue(),
+                e -> root.returnToButtons()
+        );
 
         setLayout(new GridLayout(0, 1));
 
@@ -63,18 +71,16 @@ public class SpellPanel extends JPanel {
         add(new JLabel("Select a Spell:"));
         add(spellsBox);
         add(variablePanel);
-        add(okButton);
+        add(okCancelPanel);
     }
 
     private JComboBox<Spell> getSpellBox() {
         JComboBox<Spell> box = new JComboBox<>();
-        box.putClientProperty("JComponent.roundRect", "true");
         spells.forEach(box::addItem);
         box.addItem(MANUAL_HIT);
         box.addItem(MANUAL_SAVE);
         box.addActionListener(e -> logSpellChange(box));
 
-        logSpellChange(box);
         return box;
     }
 
@@ -91,6 +97,10 @@ public class SpellPanel extends JPanel {
     private void logSpellChange(JComboBox<Spell> box) {
         variablePanel.removeAll();
         Spell selected = (Spell) box.getSelectedItem();
+        if (selected == null) {
+            return;
+        }
+
         if (selected.equals(MANUAL_SAVE)) {
             variablePanel.add(attackComponents.get(spellPanel.MANUAL_SAVE));
             activePanelType = spellPanel.MANUAL_SAVE;
@@ -113,15 +123,13 @@ public class SpellPanel extends JPanel {
         JPanel panel = new JPanel(new FlowLayout());
 
         JTextField field = new JTextField();
-        field.putClientProperty("JComponent.roundRect", true);
+        field.addKeyListener(new DieRollListener(1, 20, field));
 
         panel.add(new JLabel(labelText));
         panel.add(field);
 
         attackComponents.put(spellPanel, panel);
         attackComponentInputFields.put(panel, field);
-
-        root.pack();
     }
 
     private void putManualSaveComponent() {
@@ -154,7 +162,7 @@ public class SpellPanel extends JPanel {
         }
 
         registerAttack(target, successCondition, spell);
-        root.dispose();
+        root.returnToButtons();
         CombatMain.COMBAT_MENU.update();
     }
 
@@ -169,10 +177,16 @@ public class SpellPanel extends JPanel {
      */
     private void registerAttack(Combatant target, boolean success, Spell spell) {
         if (success || spell.dealsHalfDamageAnyways()) {
-            DamageInputPopup.run(spell, target);
+            SwingUtilities.invokeLater(() -> root.promptDamageAmount(spell, target));
         } else {
             informAttackFail();
         }
+    }
+
+    public void reset() {
+        targetBox.setSelectedIndex(-1);
+        spellsBox.setSelectedIndex(-1);
+        attackComponentInputFields.forEach((comp, field) -> field.setText(""));
     }
 
 }

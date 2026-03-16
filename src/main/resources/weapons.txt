@@ -6,7 +6,7 @@ stat: str
 .weapon
 name: Dagger
 dmg: 1d4
-stat: both
+stat: option
 
 .weapon
 name: Greatclub
@@ -56,7 +56,7 @@ stat: dex
 .weapon
 name: Dart
 dmg: 1d4
-stat: both
+stat: option
 
 .weapon
 name: Shortbow
@@ -126,17 +126,17 @@ stat: str
 .weapon
 name: Rapier
 dmg: 1d8
-stat: both
+stat: option
 
 .weapon
 name: Scimitar
 dmg: 1d6
-stat: both
+stat: option
 
 .weapon
 name: Shortsword
 dmg: 1d6
-stat: both
+stat: option
 
 .weapon
 name: Trident
@@ -156,7 +156,7 @@ stat: str
 .weapon
 name: Whip
 dmg: 1d4
-stat: both
+stat: option
 
 .weapon
 name: Blowgun

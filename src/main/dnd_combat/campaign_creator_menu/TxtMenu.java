@@ -1,12 +1,13 @@
-package campaign_creator;
+package campaign_creator_menu;
 
 import _global_list.Combatants;
 import _global_list.Scenarios;
 import character_info.combatant.Combatant;
-import scenario_info.Battle;
-import scenario_info.Scenario;
+import encounter_info.Battle;
+import encounter_info.Scenario;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.io.File;
 
@@ -61,6 +62,7 @@ public class TxtMenu extends JFrame {
         add(splitPane, BorderLayout.CENTER);
 
         pack();
+        ((JPanel) getContentPane()).setBorder(new EmptyBorder(10, 10, 10, 10));
         setLocationRelativeTo(null);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setResizable(false);

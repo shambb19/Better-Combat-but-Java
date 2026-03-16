@@ -1,4 +1,4 @@
-package scenario_info;
+package encounter_info;
 
 import _global_list.Combatants;
 import _global_list.Scenarios;

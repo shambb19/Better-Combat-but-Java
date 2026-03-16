@@ -127,10 +127,11 @@ public class Stats {
     public int weaponAttackBonus(Weapon weapon) {
         int str = mod(AbilityModifier.STR);
         int dex = mod(AbilityModifier.DEX);
+
         return switch (weapon.stat()) {
             case STR -> str;
             case DEX -> dex;
-            default -> Math.max(str, dex);
+            case null, default -> Math.max(str, dex);
         };
     }
 

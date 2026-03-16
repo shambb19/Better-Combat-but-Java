@@ -1,4 +1,4 @@
-package campaign_creator;
+package campaign_creator_menu;
 
 import _global_list.DamageImplements;
 import character_info.Class5e;
@@ -9,6 +9,7 @@ import character_info.combatant.PC;
 import combat_menu.listener.IntegerFieldListener;
 import damage_implements.Spell;
 import damage_implements.Weapon;
+import format.SwingStyles;
 
 import javax.swing.*;
 import java.awt.*;
@@ -37,6 +38,7 @@ public class CombatantInputPanel extends JPanel {
     public CombatantInputPanel(TxtMenu root) {
         this.root = root;
         setLayout(new BorderLayout(5, 5));
+        SwingStyles.addLabeledBorder(this, "Combatant Input");
 
         isNpcBox = new JCheckBox("NPC?");
         isNpcBox.addActionListener(e -> toggleNpc(isNpcBox.isSelected()));

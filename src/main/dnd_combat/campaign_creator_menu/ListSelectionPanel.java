@@ -1,4 +1,4 @@
-package campaign_creator;
+package campaign_creator_menu;
 
 import character_info.combatant.Combatant;
 import character_info.combatant.NPC;
