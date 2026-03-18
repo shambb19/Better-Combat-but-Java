@@ -1,4 +1,4 @@
-package combat_menu.popup.action_panel;
+package combat_menu.action_panel;
 
 import character_info.combatant.Combatant;
 import util.Locators;

@@ -1,4 +1,4 @@
-package combat_menu.popup.action_panel;
+package combat_menu.action_panel;
 
 import __main.CombatMain;
 import character_info.combatant.Combatant;
@@ -34,7 +34,7 @@ public class WeaponPanel extends JPanel {
     private WeaponPanel(JComboBox<Combatant> targetBox, ActionPanel root) {
         this.root = root;
 
-        attacker = CombatMain.QUEUE.getCurrentCombatant();
+        attacker = CombatMain.getCurrentCombatant();
 
         weapons = new ArrayList<>();
         if (attacker instanceof PC pc) {
@@ -45,7 +45,7 @@ public class WeaponPanel extends JPanel {
         weaponsBox = getWeaponComboBox();
 
         String hitString = "Roll to Hit";
-        if (CombatMain.QUEUE.getCurrentCombatant().isPoisoned()) {
+        if (CombatMain.getCurrentCombatant().isPoisoned()) {
             hitString += " (With Disadvantage)";
         }
         hitString += ":";
@@ -99,7 +99,7 @@ public class WeaponPanel extends JPanel {
 
         registerAttack(target, hitRoll >= target.ac(), weapon);
         root.returnToButtons();
-        CombatMain.COMBAT_MENU.update();
+        CombatMain.logAction();
     }
 
     /**

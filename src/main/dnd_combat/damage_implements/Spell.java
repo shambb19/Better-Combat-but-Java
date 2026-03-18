@@ -1,9 +1,14 @@
 package damage_implements;
 
 import character_info.AbilityModifier;
+import txt_input.Key;
+import util.TxtReader;
+
+import java.util.EnumMap;
 
 import static _global_list.DamageImplements.MANUAL_HIT;
 import static _global_list.DamageImplements.MANUAL_SAVE;
+import static txt_input.Key.*;
 
 public class Spell extends Implement {
 
@@ -16,6 +21,21 @@ public class Spell extends Implement {
             effect = Effect.NONE;
         }
         this.effect = effect;
+    }
+
+    public Spell(EnumMap<Key, Object> values) {
+        super(
+                (String) values.get(NAME),
+                TxtReader.getNumDice((String) values.get(DMG)),
+                TxtReader.getDieSize((String) values.get(DMG)),
+                (AbilityModifier) values.get(STAT)
+        );
+
+        Effect effectTemp = (Effect) values.get(EFFECT);
+        if (effectTemp == null) {
+            effectTemp = Effect.NONE;
+        }
+        this.effect = effectTemp;
     }
 
     public boolean isManual() {

@@ -16,7 +16,7 @@ public class CombatEndPopup extends JFrame {
     private static final String victoryMessage = "Victory! You have won this combat.";
     private static final String victoryTitle = "Victory";
 
-    private static final String lossMessage = "You have been defeated. You were " + CombatMain.BATTLE.percentToVictory() + " of the way to victory.";
+    private static final String lossMessage = "You have been defeated. You were " + CombatMain.getBattle().percentToVictory() + " of the way to victory.";
     private static final String lossTitle = "Defeat";
 
     public static void run(boolean isVictory) {
@@ -33,68 +33,75 @@ public class CombatEndPopup extends JFrame {
         add(new JLabel("Options:"));
         add(partyLevelUpButton());
         add(downloadUpdatedPartyTxtButton());
-        add(exitButton());
+        add(quitButton());
 
         pack();
-        setLocationRelativeTo(CombatMain.COMBAT_MENU);
+        setLocationRelativeTo(CombatMain.getMenu());
     }
 
     public JButton partyLevelUpButton() {
         JButton button = new JButton("Level Up the Party");
         button.putClientProperty("JButton.buttonType", "roundRect");
-        button.addActionListener(e -> {
-            CombatMain.BATTLE.friendlies().forEach(friendly -> {
-                if (friendly instanceof PC pc) {
-                    pc.levelUp();
-                }
-            });
-            String message = "As of v3.4.0, only proficiency bonuses are handled internally. " +
-                    "All other changes (hp, stats, etc.) need to be manually entered in the Campaign Creator " +
-                    "for now. If you buy Braden a Red Bull he might fix that :P";
-            template(message);
+        button.addActionListener(e -> levelUp(button));
 
-            button.setEnabled(false);
-            button.setText("Party Level Increased");
-        });
         return button;
     }
 
     public JButton downloadUpdatedPartyTxtButton() {
         JButton button = new JButton("Download Updated .txt File");
         button.putClientProperty("JButton.buttonType", "roundRect");
-        button.addActionListener(e -> {
-            setVisible(false);
-            JFileChooser fileChooser = new JFileChooser(new CampaignWriter().getFile());
-            int result = fileChooser.showSaveDialog(CombatMain.COMBAT_MENU);
-            if (result == JFileChooser.APPROVE_OPTION) {
-                String message = "Downloaded to the Downloads folder! Note that all dead NPCs and unconscious enemies " +
-                        "have been removed from the campaign. If this is a mistake, you can manually edit the old file to match " +
-                        "the conditions after this encounter, or you can re-add them in the Campaign Creator.";
-                template(message);
-
-                button.setText("Re-download .txt File");
-                setVisible(true);
-            }
-        });
+        button.addActionListener(e -> download(button));
         return button;
     }
 
-    public JButton exitButton() {
+    public JButton quitButton() {
         JButton button = new JButton("Quit Program");
         button.putClientProperty("JButton.buttonType", "roundRect");
-        button.addActionListener(e -> {
-            if (confirmIf("quit") == JOptionPane.OK_OPTION) {
-                JOptionPane.showMessageDialog(
-                        CombatMain.COMBAT_MENU,
-                        "Goodbye! Thanks for playing :)",
-                        CombatMenu.TITLE,
-                        JOptionPane.INFORMATION_MESSAGE
-                );
-                dispose();
-                System.exit(0);
+        button.addActionListener(e -> quit());
+        return button;
+    }
+
+    private void levelUp(JButton button) {
+        CombatMain.getFriendlies().forEach(friendly -> {
+            if (friendly instanceof PC pc) {
+                pc.levelUp();
             }
         });
-        return button;
+        String message = "As of v3.4.0, only proficiency bonuses are handled internally. " +
+                "All other changes (hp, stats, etc.) need to be manually entered in the Campaign Creator " +
+                "for now. If you buy Braden a Red Bull he might fix that :P";
+        template(message);
+
+        button.setEnabled(false);
+        button.setText("Party Level Increased");
+    }
+
+    private void download(JButton button) {
+        setVisible(false);
+        JFileChooser fileChooser = new JFileChooser(new CampaignWriter().getFile());
+        int result = fileChooser.showSaveDialog(CombatMain.getMenu());
+        if (result == JFileChooser.APPROVE_OPTION) {
+            String message = "Downloaded to the Downloads folder! Note that all dead NPCs and unconscious enemies " +
+                    "have been removed from the campaign. If this is a mistake, you can manually edit the old file to match " +
+                    "the conditions after this encounter, or you can re-add them in the Campaign Creator.";
+            template(message);
+
+            button.setText("Re-download .txt File");
+        }
+        setVisible(true);
+    }
+
+    public void quit() {
+        if (confirmIf("quit") == JOptionPane.OK_OPTION) {
+            JOptionPane.showMessageDialog(
+                    CombatMain.getMenu(),
+                    "Goodbye! Thanks for playing :)",
+                    CombatMenu.TITLE,
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+            dispose();
+            System.exit(0);
+        }
     }
 
 }

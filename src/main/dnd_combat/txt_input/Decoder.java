@@ -2,13 +2,12 @@ package txt_input;
 
 import _global_list.Combatants;
 import _global_list.DamageImplements;
-import character_info.AbilityModifier;
 import character_info.Class5e;
 import character_info.Stats;
 import character_info.combatant.Combatant;
 import character_info.combatant.NPC;
 import character_info.combatant.PC;
-import damage_implements.Effect;
+import damage_implements.Implement;
 import damage_implements.Spell;
 import damage_implements.Weapon;
 import encounter_info.Scenario;
@@ -25,23 +24,15 @@ public class Decoder {
     public static PC pc(List<String> params) {
         EnumMap<Key, Object> map = toMap(params);
 
-        String name = (String) map.get(NAME);
-        int hp = getHp((String) map.get(HP));
-        int hpCur = getHpCur((String) map.get(HP));
-        int ac = (int) map.get(AC);
         int level = (int) map.get(LEVEL);
         Class5e class5e = (Class5e) map.get(CLASS);
 
         Stats stats = new Stats(class5e, level);
         stats.put((String) map.get(STATS));
 
-        List<Weapon> weapons = damageImplements((String) map.get(WEAPONS), Weapon.class);
-        List<Spell> spells = damageImplements((String) map.get(SPELLS), Spell.class);
+        map.put(STATS, stats);
 
-        PC pc = new PC(name, hp, ac, stats, weapons, spells);
-        pc.setHealth(hpCur);
-
-        return pc;
+        return new PC(map);
     }
 
     public static NPC npc(List<String> params) {
@@ -54,12 +45,7 @@ public class Decoder {
 
     private static NPC npc(List<String> params, boolean isEnemyTeam) {
         EnumMap<Key, Object> map = toMap(params);
-
-        String name = (String) map.get(NAME);
-        int hp = getHp((String) map.get(HP));
-        int ac = (int) map.get(AC);
-
-        return new NPC(name, hp, ac, isEnemyTeam);
+        return new NPC(map, isEnemyTeam);
     }
 
     public static Scenario scenario(List<String> params) {
@@ -93,22 +79,15 @@ public class Decoder {
     private static <T> T implement(List<String> params, Class<T> type) {
         EnumMap<Key, Object> map = toMap(params);
 
-        String name = (String) map.get(NAME);
-        int numDice = getNumDice((String) map.get(DMG));
-        int dieSize = getDieSize((String) map.get(DMG));
-
-        AbilityModifier stat = (AbilityModifier) map.get(STAT);
-        Effect effect = (Effect) map.get(EFFECT);
-
         if (type.isAssignableFrom(Weapon.class)) {
-            return (T) new Weapon(name, numDice, dieSize, stat);
+            return (T) new Weapon(map);
         } else if (type.isAssignableFrom(Spell.class)) {
-            return (T) new Spell(name, numDice, dieSize, stat, effect);
+            return (T) new Spell(map);
         }
         return null;
     }
 
-    private static EnumMap<Key, Object> toMap(List<String> params) {
+    static EnumMap<Key, Object> toMap(List<String> params) {
 
         EnumMap<Key, Object> map = new EnumMap<>(Key.class);
 
@@ -125,7 +104,15 @@ public class Decoder {
         return map;
     }
 
-    private static <T> List<T> damageImplements(String value, Class<T> type) {
+    public static List<Weapon> weapons(String value) {
+        return damageImplements(value, Weapon.class);
+    }
+
+    public static List<Spell> spells(String value) {
+        return damageImplements(value, Spell.class);
+    }
+
+    public static <T extends Implement> List<T> damageImplements(String value, Class<T> type) {
         if (value == null) {
             return new ArrayList<>();
         }

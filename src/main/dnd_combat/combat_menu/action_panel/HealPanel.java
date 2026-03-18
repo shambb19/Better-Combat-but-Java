@@ -1,4 +1,4 @@
-package combat_menu.popup.action_panel;
+package combat_menu.action_panel;
 
 import __main.CombatMain;
 import character_info.combatant.Combatant;
@@ -115,7 +115,7 @@ public class HealPanel extends JPanel {
             int healAmount = healthSlider.getValue() - target.hp();
             target.heal(healAmount);
 
-            CombatMain.COMBAT_MENU.update();
+            CombatMain.logAction();
             root.returnToButtons();
         } catch (NullPointerException ignored) {
         }

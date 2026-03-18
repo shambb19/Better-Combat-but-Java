@@ -4,20 +4,20 @@ import __main.CombatMain;
 
 public class LifeStatus {
 
-    private boolean isConscious;
-    private boolean isAlive;
+    public enum Status {ALIVE, UNCONSCIOUS, DEAD}
 
-    private int successes;
-    private int fails;
+    private Status thisStatus;
+
+    private int deathSuccesses;
+    private int deathFails;
 
     /**
      * Logs consciousness, life, and death saving throws of the root combatant.
      */
     public LifeStatus() {
-        isConscious = true;
-        isAlive = true;
-        successes = 0;
-        fails = 0;
+        thisStatus = Status.ALIVE;
+        deathSuccesses = 0;
+        deathFails = 0;
     }
 
     /**
@@ -30,48 +30,39 @@ public class LifeStatus {
             throw new IndexOutOfBoundsException();
         }
         if (d20Roll > 10) {
-            successes++;
+            deathSuccesses++;
         } else {
-            fails++;
+            deathFails++;
         }
-        updateLifeStatus();
+
+        if (deathSuccesses == 3) {
+            thisStatus = Status.ALIVE;
+        } else if (deathFails == 3) {
+            thisStatus = Status.DEAD;
+        }
+
+        CombatMain.logAction();
     }
 
-    public int getSuccesses() {
-        return successes;
-    }
-
-    public int getFails() {
-        return fails;
+    public Status status() {
+        return thisStatus;
     }
 
     public boolean isConscious() {
-        return isConscious;
+        return thisStatus.equals(Status.ALIVE);
     }
 
     public void setUnconscious() {
-        isConscious = false;
+        thisStatus = Status.UNCONSCIOUS;
     }
 
     public boolean isAlive() {
-        return isAlive;
+        return !thisStatus.equals(Status.DEAD);
     }
 
-    /**
-     * Returns player to consciousness or death on 3 respective death successes
-     * or fails, then updates the menu (easier than locating the specific combatant's
-     * health bar).
-     */
-    private void updateLifeStatus() {
-        if (!isAlive || isConscious) {
-            return;
-        }
-        if (successes == 3) {
-            isConscious = true;
-        } else if (fails == 3) {
-            isAlive = false;
-        }
-        CombatMain.COMBAT_MENU.update();
+    @Override
+    public String toString() {
+        return String.format("Defeated (%d-%d)", deathSuccesses, deathFails);
     }
 
 }

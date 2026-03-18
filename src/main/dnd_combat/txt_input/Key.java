@@ -17,7 +17,9 @@ public enum Key {
     AC(Integer::parseInt),
     LEVEL(Integer::parseInt),
     CLASS(value -> enumNameSearch(value, Class5e.class)),
-    STATS, WEAPONS, SPELLS,
+    STATS,
+    WEAPONS(Decoder::weapons),
+    SPELLS(Decoder::spells),
 
     WITH, AGAINST,
 

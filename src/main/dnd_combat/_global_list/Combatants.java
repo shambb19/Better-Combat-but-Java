@@ -3,47 +3,31 @@ package _global_list;
 import character_info.combatant.Combatant;
 import encounter_info.Battle;
 import encounter_info.Scenario;
-import txt_input.Reader5e;
-import util.Message;
 
 import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class Combatants {
+public class Combatants extends GlobalList<Combatant> {
 
-    private static final ArrayList<Combatant> COMBATANTS = new ArrayList<>();
+    private static final Combatants INSTANCE = new Combatants();
 
-    public static void init(URL url) {
-        List<Combatant> inputs = Reader5e.getInstancesFromCode(url, Combatant.class);
-        COMBATANTS.addAll(inputs);
+    private Combatants() {
     }
 
     public static void init(File file) {
-        try {
-            init(file.toURI().toURL());
-        } catch (MalformedURLException e) {
-            Message.fileError(e);
-        }
+        INSTANCE.init(file, Combatant.class);
     }
 
     public static Combatant get(String name) {
-        for (Combatant combatant : COMBATANTS) {
-            String combatantName = combatant.name().trim();
-            if (name.equalsIgnoreCase(combatantName)) {
-                return combatant;
-            }
-        }
-        return null;
+        return INSTANCE.getItem(name, Combatant.class);
     }
 
     public static ArrayList<Combatant> toList() {
-        return new ArrayList<>(COMBATANTS);
+        return INSTANCE.castToList(Combatant.class);
     }
 
     public static Scenario toScenario() {
@@ -65,11 +49,11 @@ public class Combatants {
     }
 
     public static void add(Combatant obj) {
-        COMBATANTS.add(obj);
+        INSTANCE.addItem(obj);
     }
 
     private static Map<Boolean, List<Combatant>> partitionedList() {
-        return COMBATANTS.stream()
+        return INSTANCE.list.stream()
                 .collect(Collectors.partitioningBy(Combatant::isEnemy));
     }
 

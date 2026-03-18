@@ -10,11 +10,11 @@ import java.util.List;
 public class Locators {
 
     public static List<Combatant> getTargetList(boolean isForDamage) {
-        boolean isEnemy = CombatMain.QUEUE.getCurrentCombatant().isEnemy();
+        boolean isEnemy = CombatMain.getCurrentCombatant().isEnemy();
         if (isEnemy == isForDamage) {
-            return CombatMain.BATTLE.friendlies();
+            return CombatMain.getFriendlies();
         }
-        return CombatMain.BATTLE.enemies();
+        return CombatMain.getEnemies();
     }
 
     public static <T> T getWithNameFromDirectory(List<T> source, Object obj) {

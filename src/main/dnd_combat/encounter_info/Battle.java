@@ -30,17 +30,16 @@ public record Battle(List<Combatant> friendlies, List<Combatant> enemies, ArrayL
         enemies.addAll(create().enemies);
     }
 
-    public boolean areAllEnemiesDefeated() {
-        for (Combatant combatant : enemies()) {
-            if (combatant.lifeStatus().isConscious()) {
-                return false;
-            }
-        }
-        return true;
+    public boolean isEncounterOver() {
+        return isTeamDefeated(friendlies) || isTeamDefeated(enemies);
     }
 
-    public boolean areAllFriendliesDefeated() {
-        for (Combatant combatant : friendlies()) {
+    public boolean isVictory() {
+        return isTeamDefeated(enemies);
+    }
+
+    public boolean isTeamDefeated(List<Combatant> source) {
+        for (Combatant combatant : source) {
             if (combatant.lifeStatus().isConscious()) {
                 return false;
             }

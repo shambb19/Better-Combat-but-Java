@@ -1,7 +1,6 @@
 package combat_menu;
 
-import __main.CombatMain;
-import combat_menu.popup.action_panel.ActionPanel;
+import combat_menu.action_panel.ActionPanel;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -18,7 +17,7 @@ public class CombatMenu extends JFrame {
     public CombatMenu() {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
-        setJMenuBar(CombatMenuBar.newInstance(this));
+        setJMenuBar(CombatMenuBar.newInstance());
 
         initiativeListPanel = EncounterListPanel.newInstance();
         excessInspirationBar = InspirationBar.newInstance();
@@ -40,9 +39,6 @@ public class CombatMenu extends JFrame {
     public void update() {
         initiativeListPanel.refresh();
         actionPanel.updateTurnInformation();
-        actionPanel.copyHealthBar(CombatMain.QUEUE.getCurrentCombatant().getHealthBar());
-
-        CombatMain.checkWinConditions();
     }
 
 }

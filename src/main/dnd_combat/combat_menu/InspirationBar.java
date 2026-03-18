@@ -52,7 +52,7 @@ public class InspirationBar extends JPanel {
             setString(inspirationRolls + " (" + numCompletions + ")");
             if (getValue() == getMaximum()) {
                 JOptionPane.showMessageDialog(
-                        CombatMain.COMBAT_MENU,
+                        CombatMain.getMenu(),
                         "10 inspiration points have been rolled. Take appropriate action.",
                         CombatMenu.TITLE,
                         JOptionPane.WARNING_MESSAGE

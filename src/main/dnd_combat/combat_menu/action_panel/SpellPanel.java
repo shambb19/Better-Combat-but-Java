@@ -1,4 +1,4 @@
-package combat_menu.popup.action_panel;
+package combat_menu.action_panel;
 
 import __main.CombatMain;
 import character_info.combatant.Combatant;
@@ -41,7 +41,7 @@ public class SpellPanel extends JPanel {
     private SpellPanel(JComboBox<Combatant> targetBox, ActionPanel root) {
         this.root = root;
 
-        this.attacker = CombatMain.QUEUE.getCurrentCombatant();
+        this.attacker = CombatMain.getCurrentCombatant();
 
         spells = new ArrayList<>();
         if (attacker instanceof PC pc) {
@@ -163,7 +163,7 @@ public class SpellPanel extends JPanel {
 
         registerAttack(target, successCondition, spell);
         root.returnToButtons();
-        CombatMain.COMBAT_MENU.update();
+        CombatMain.logAction();
     }
 
     /**

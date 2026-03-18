@@ -38,8 +38,9 @@ public class SwingStyles {
         switch (comp) {
             case JSpinner spinner -> {
                 JSpinner.DefaultEditor editor = (JSpinner.DefaultEditor) spinner.getEditor();
-                editor.addFocusListener(onFocus);
-                editor.addMouseListener(onClick);
+                JTextField field = editor.getTextField();
+                field.addFocusListener(onFocus);
+                field.addMouseListener(onClick);
             }
             case JTextField field -> {
                 field.addFocusListener(onFocus);

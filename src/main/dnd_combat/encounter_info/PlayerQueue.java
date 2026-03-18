@@ -39,10 +39,8 @@ public class PlayerQueue {
      * Sets and returns the next combatant able to take an action, ranked by initiative. The entire enemy roster will have a turn
      * in between each allied player (as per Cath's combat system). Unconscious combatants are prompted for a death save roll and
      * otherwise skipped. The method also ends any status effects applied by the new current combatant.
-     * @return the current combatant (after the method run); or, the next combatant able to take an action after
-     * the current combatant (before method run).
      */
-    public Combatant endTurnAndGetNext() {
+    public void endCurrentTurn() {
         if (currentCombatant.isEnemy()) {
             if (enemies.isTurnOver()) {
                 currentCombatant = friendlies.getNext();
@@ -56,12 +54,11 @@ public class PlayerQueue {
         if (!currentCombatant.lifeStatus().isConscious()) {
             int saveRoll = Message.getDeathSaveRoll();
             currentCombatant.lifeStatus().rollDeathSave(saveRoll);
-            endTurnAndGetNext();
+            endCurrentTurn();
         }
 
         currentCombatant.endDealtEffects();
-        CombatMain.COMBAT_MENU.update();
-        return currentCombatant;
+        CombatMain.logAction();
     }
 
     public Combatant getCurrentCombatant() {

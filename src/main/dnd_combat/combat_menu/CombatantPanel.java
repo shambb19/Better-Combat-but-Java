@@ -41,31 +41,13 @@ public class CombatantPanel extends JPanel {
     }
 
     public void update() {
+        int barValue = thisCombatant.hp();
         if (thisCombatant.isEnemy() && thisCombatant.lifeStatus().isConscious()) {
-            healthBar.setValue(thisCombatant.maxHp());
-            healthBar.setForeground(new Color(122, 160, 245));
-            healthBar.setString("?");
-            return;
+            barValue = thisCombatant.maxHp();
         }
-        if (!thisCombatant.lifeStatus().isAlive()) {
-            healthBar.setValue(0);
-            healthBar.setString("Dead :((");
-            return;
-        }
-        if (!thisCombatant.lifeStatus().isConscious()) {
-            healthBar.setValue(0);
-            int successes = thisCombatant.lifeStatus().getSuccesses();
-            int fails = thisCombatant.lifeStatus().getFails();
-            String healthBarString = "Defeated (" + successes + "-" + fails + ")";
-            healthBar.setString(healthBarString);
-            return;
-        }
-        if (thisCombatant.hp() == 0) {
-            healthBar.setValue(0);
-            healthBar.setString("Alive but down for the count");
-        }
-        healthBar.setString(thisCombatant.getHealthString());
-        healthBar.setValue(thisCombatant.hp());
+
+        healthBar.setValue(barValue);
+        healthBar.setString(thisCombatant.getHealthBarString());
         healthBar.setForeground(thisCombatant.getHealthBarColor());
         healthBar.repaint();
     }

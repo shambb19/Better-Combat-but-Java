@@ -1,8 +1,7 @@
-package combat_menu.popup.action_panel;
+package combat_menu.action_panel;
 
 import __main.CombatMain;
 import character_info.combatant.Combatant;
-import combat_menu.ActionButtonsPanel;
 import damage_implements.Implement;
 import encounter_info.PlayerQueue;
 import format.SwingStyles;
@@ -27,13 +26,14 @@ public class ActionPanel extends JPanel {
     public static final String ATTACK_OPTION = "ATTACK_OPTION";
     public static final String DAMAGE_AMOUNT_OPTION = "DAMAGE_AMOUNT_OPTION";
     public static final String HEAL_OPTION = "HEAL_OPTION";
+    public static final String INSPIRATION_OPTION = "INSPIRATION_OPTION";
 
     public static ActionPanel newInstance() {
         return new ActionPanel();
     }
 
     private ActionPanel() {
-        queue = CombatMain.QUEUE;
+        queue = CombatMain.getQueue();
 
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -54,9 +54,8 @@ public class ActionPanel extends JPanel {
 
         currentCombatantHealthBar = new JProgressBar();
         currentCombatantHealthBar.setStringPainted(true);
-        currentCombatantHealthBar.setMinimum(0);
         currentCombatantHealthBar.setBorder(new EmptyBorder(10, 10, 10, 10));
-        copyHealthBar(queue.getCurrentCombatant().getHealthBar());
+        copyHealthBarToCurrent();
 
         currentCombatantPanel.add(turnInformation);
         currentCombatantPanel.add(currentCombatantHealthBar);
@@ -66,14 +65,17 @@ public class ActionPanel extends JPanel {
         buttonsPanel = ActionButtonsPanel.newInstance(this);
         JPanel attackPanel = AttackPanel.newInstance(this);
         JPanel healPanel = HealPanel.newInstance(this);
+        JPanel inspirationPanel = InspirationPanel.newInstance(this);
 
         buttonsPanel.setName(ACTION_BUTTONS);
         attackPanel.setName(ATTACK_OPTION);
         healPanel.setName(HEAL_OPTION);
+        inspirationPanel.setName(INSPIRATION_OPTION);
 
         cardPanel.add(buttonsPanel, ACTION_BUTTONS);
         cardPanel.add(attackPanel, ATTACK_OPTION);
         cardPanel.add(healPanel, HEAL_OPTION);
+        cardPanel.add(inspirationPanel, INSPIRATION_OPTION);
 
         add(currentCombatantPanel);
         add(cardPanel);
@@ -116,12 +118,18 @@ public class ActionPanel extends JPanel {
 
         turnInformation.setEditable(false);
         buttonsPanel.updateTurnInformation();
+
+        copyHealthBarToCurrent();
     }
 
-    public void copyHealthBar(JProgressBar mimic) {
+    private void copyHealthBarToCurrent() {
+        JProgressBar mimic = queue.getCurrentCombatant().getHealthBar();
+
         currentCombatantHealthBar.setString(mimic.getString());
+        currentCombatantHealthBar.setMinimum(mimic.getMinimum());
         currentCombatantHealthBar.setMaximum(mimic.getMaximum());
         currentCombatantHealthBar.setForeground(mimic.getForeground());
+
         if (queue.getCurrentCombatant().isEnemy()) {
             currentCombatantHealthBar.setValue(currentCombatantHealthBar.getMaximum());
         } else {

@@ -1,6 +1,12 @@
 package character_info.combatant;
 
+import txt_input.Key;
+import util.TxtReader;
+
 import java.util.ArrayList;
+import java.util.EnumMap;
+
+import static txt_input.Key.*;
 
 public class NPC extends Combatant {
 
@@ -8,6 +14,15 @@ public class NPC extends Combatant {
 
     public NPC(String name, int hpMax, int armorClass, boolean isEnemy) {
         super(name, hpMax, armorClass);
+        this.isEnemy = isEnemy;
+    }
+
+    public NPC(EnumMap<Key, Object> values, boolean isEnemy) {
+        super(
+                (String) values.get(NAME),
+                TxtReader.getHp((String) values.get(HP)),
+                (int) values.get(AC)
+        );
         this.isEnemy = isEnemy;
     }
 

@@ -3,9 +3,9 @@ package character_info.combatant;
 import character_info.AbilityModifier;
 import character_info.DealtEffectsList;
 import character_info.LifeStatus;
-import combat_menu.listener.DieRollListener;
 import damage_implements.Effect;
 import damage_implements.Weapon;
+import format.ColorStyle;
 
 import javax.swing.*;
 import java.awt.*;
@@ -64,10 +64,6 @@ public class Combatant {
         hpCurrent = Math.min(hpMax, hpCurrent + healthRegained);
     }
 
-    public void healFull() {
-        hpCurrent = hpMax;
-    }
-
     public int hp() {
         return hpCurrent;
     }
@@ -88,6 +84,10 @@ public class Combatant {
             return Color.BLACK;
         }
 
+        if (isEnemy()) {
+            return ColorStyle.ENEMY.getColor();
+        }
+
         if (getHealthPercent() > 0.6) {
             return Color.GREEN;
         } else if (getHealthPercent() > 0.25) {
@@ -97,11 +97,19 @@ public class Combatant {
         }
     }
 
-    /**
-     * @return a string of the current and max hp's as an unsimplified fraction
-     */
-    public String getHealthString() {
-        return hpCurrent + "/" + hpMax;
+    public String getHealthBarString() {
+        return switch (lifeStatus.status()) {
+            case ALIVE -> {
+                if (hpCurrent == 0) {
+                    yield "Alive but down for the count";
+                } else if (isEnemy()) {
+                    yield "?";
+                }
+                yield String.format("%d/%d", hpCurrent, hpMax);
+            }
+            case UNCONSCIOUS -> lifeStatus.toString();
+            case DEAD -> "Dead :((";
+        };
     }
 
     public void setHealth(int newHealth) {
@@ -193,24 +201,6 @@ public class Combatant {
 
     public void setHexedBy(Combatant hexer) {
         hexedByList.add(hexer);
-    }
-
-    public JPanel getCombatantPanel() {
-        JPanel panel = new JPanel(new GridLayout(0, 3));
-
-        JLabel label = new JLabel(name);
-
-        JTextField initiativeField = new JTextField();
-        initiativeField.addKeyListener(new DieRollListener(1, 20, initiativeField));
-
-        JCheckBox absentBox = new JCheckBox();
-        absentBox.addActionListener(e -> initiativeField.setEnabled(!absentBox.isSelected()));
-
-        panel.add(label);
-        panel.add(initiativeField);
-        panel.add(new JLabel());
-
-        return panel;
     }
 
     @Override

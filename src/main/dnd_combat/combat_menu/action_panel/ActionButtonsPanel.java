@@ -1,8 +1,6 @@
-package combat_menu;
+package combat_menu.action_panel;
 
 import __main.CombatMain;
-import character_info.combatant.Combatant;
-import combat_menu.popup.action_panel.ActionPanel;
 import encounter_info.PlayerQueue;
 
 import javax.swing.*;
@@ -30,7 +28,7 @@ public class ActionButtonsPanel extends JPanel {
     }
 
     private ActionButtonsPanel(ActionPanel root) {
-        queue = CombatMain.QUEUE;
+        queue = CombatMain.getQueue();
 
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -48,13 +46,23 @@ public class ActionButtonsPanel extends JPanel {
         setIcon(healButton, icons.HEAL);
 
         inspirationButton = new JButton();
-        inspirationButton.addActionListener(e -> useInspiration());
+        inspirationButton.addActionListener(e -> {
+            boolean isExcess = queue.getCurrentCombatant().useInspirationAndCheckExcess();
+            if (isExcess) {
+                root.switchTo(ActionPanel.INSPIRATION_OPTION);
+            }
+            CombatMain.logAction();
+        });
         inspirationButton.setToolTipText("Use Inspiration");
         inspirationButton.putClientProperty("JButton.buttonType", "toolBarButton");
         setIcon(inspirationButton, icons.INSPIRATION);
 
         JButton endTurnButton = new JButton();
-        endTurnButton.addActionListener(e -> endTurn());
+        endTurnButton.addActionListener(e -> {
+            queue.endCurrentTurn();
+            updateTurnInformation();
+            CombatMain.logAction();
+        });
         endTurnButton.setToolTipText("End Turn");
         endTurnButton.putClientProperty("JButton.buttonType", "toolBarButton");
         setIcon(endTurnButton, icons.END_TURN);
@@ -74,45 +82,6 @@ public class ActionButtonsPanel extends JPanel {
         }
 
         add(panel);
-    }
-
-    private static int promptValueFromRoll(String rollMeaning, int dieSize) {
-        int collectedValue = -1;
-        while (collectedValue < 0 || collectedValue > dieSize) {
-            try {
-                String input = JOptionPane.showInputDialog(
-                        CombatMain.COMBAT_MENU,
-                        "Enter " + "1d" + dieSize + " roll for " + rollMeaning + ".",
-                        "Better Combat but Java",
-                        JOptionPane.QUESTION_MESSAGE
-                );
-                collectedValue = Integer.parseInt(input);
-            } catch (Exception ignored) {
-            }
-        }
-        return collectedValue;
-    }
-
-    private void useInspiration() {
-        boolean isExcessInspiration = queue.getCurrentCombatant().useInspirationAndCheckExcess();
-        updateTurnInformation();
-
-        if (isExcessInspiration) {
-            int excessInspirationRoll = promptValueFromRoll("Inspiration", 4);
-            CombatMain.COMBAT_MENU.logInspiration(excessInspirationRoll);
-        }
-    }
-
-    private void endTurn() {
-        Combatant newCurrentCombatant = queue.endTurnAndGetNext();
-        updateTurnInformation();
-
-        if (!newCurrentCombatant.lifeStatus().isConscious()) {
-            int deathSaveThrow = promptValueFromRoll("Death Save", 20);
-            newCurrentCombatant.lifeStatus().rollDeathSave(deathSaveThrow);
-        }
-
-        CombatMain.COMBAT_MENU.update();
     }
 
     public void updateTurnInformation() {

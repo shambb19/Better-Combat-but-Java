@@ -1,6 +1,5 @@
 package character_info;
 
-import damage_implements.Weapon;
 import util.Locators;
 import util.TxtReader;
 
@@ -10,16 +9,10 @@ import static util.TxtReader.listTextAsArray;
 
 public class Stats {
 
-    private int level;
-
-    private int strength;
-    private int dexterity;
-    private int constitution;
-    private int intelligence;
-    private int wisdom;
-    private int charisma;
-
     private final Class5e characterClass;
+    private int level;
+    private int strength, dexterity, constitution,
+            intelligence, wisdom, charisma;
     private int proficiencyBonus;
 
     /**
@@ -74,6 +67,7 @@ public class Stats {
             case INT -> intelligence;
             case WIS -> wisdom;
             case CHA -> charisma;
+            case OPTION -> Math.max(strength, dexterity);
         };
     }
 
@@ -88,17 +82,17 @@ public class Stats {
      * @return the modifier for the stat param using the (stat - 10)/2 rounded down
      * calculations, and adding proficiency bonus if present.
      */
-    @SuppressWarnings("all")
     public int mod(AbilityModifier stat) {
         DoubleUnaryOperator modCalculator = x -> (x - 10) / 2;
-        return (int) switch (stat) {
-            case STR -> modCalculator.applyAsDouble(strength);
-            case DEX -> modCalculator.applyAsDouble(dexterity);
-            case CON -> modCalculator.applyAsDouble(constitution);
-            case INT -> modCalculator.applyAsDouble(intelligence);
-            case WIS -> modCalculator.applyAsDouble(wisdom);
-            case CHA -> modCalculator.applyAsDouble(charisma);
-        };
+
+        if (stat.equals(AbilityModifier.OPTION)) {
+            return (int) Math.max(
+                    modCalculator.applyAsDouble(strength),
+                    modCalculator.applyAsDouble(dexterity)
+            );
+        }
+
+        return (int) modCalculator.applyAsDouble(get(stat));
     }
 
     public Class5e class5e() {
@@ -106,43 +100,24 @@ public class Stats {
     }
 
     /**
-     * @return the stat field for which the combatant has a spell casting
-     * ability modifier
-     */
-    public AbilityModifier spellMod() {
-        return characterClass.spellMod();
-    }
-
-    /**
      * @return The value of the attacker's attack bonus for spells.
      */
     public int spellAttackBonus() {
-        return mod(spellMod()) + proficiencyBonus;
+        return mod(characterClass.spellMod()) + proficiencyBonus;
     }
 
     public int saveDc() {
-        return 8 + mod(spellMod()) + proficiencyBonus;
-    }
-
-    public int weaponAttackBonus(Weapon weapon) {
-        int str = mod(AbilityModifier.STR);
-        int dex = mod(AbilityModifier.DEX);
-
-        return switch (weapon.stat()) {
-            case STR -> str;
-            case DEX -> dex;
-            case null, default -> Math.max(str, dex);
-        };
+        return 8 + mod(characterClass.spellMod()) + proficiencyBonus;
     }
 
     public int level() {
         return level;
     }
 
-    // TODO finish implementing
-    public void levelUp() {
+    public int levelUp() {
         level++;
         setProf();
+        return class5e().hpIncrement();
     }
 
     /**
@@ -158,24 +133,14 @@ public class Stats {
     }
 
     /**
-     * @return The string for this specific stat using "stat" + "val" (i.e. str16)
+     * @return The string for this specific stat using "STAT: val" (i.e. STR: 16)
      */
     private String statString(AbilityModifier stat) {
         return stat.name().toUpperCase() + ": " + get(stat) + ", ";
     }
 
     private void setProf() {
-        if (level < 5) {
-            proficiencyBonus = 2;
-        } else if (level < 9) {
-            proficiencyBonus = 3;
-        } else if (level < 13) {
-            proficiencyBonus = 4;
-        } else if (level < 17) {
-            proficiencyBonus = 5;
-        } else {
-            proficiencyBonus = 6;
-        }
+        proficiencyBonus = (level - 1) / 4 + 2;
     }
 
 }

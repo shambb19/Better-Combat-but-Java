@@ -23,8 +23,8 @@ public class EncounterListPanel extends JPanel {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        addPanel("Belligerent Enemies", CombatMain.BATTLE.enemies());
-        addPanel("Party and Allies", CombatMain.BATTLE.friendlies());
+        addPanel("Belligerent Enemies", CombatMain.getEnemies());
+        addPanel("Party and Allies", CombatMain.getFriendlies());
     }
 
     public JScrollPane getScrollPane() {
@@ -54,7 +54,7 @@ public class EncounterListPanel extends JPanel {
     }
 
     public void updateActiveCombatant() {
-        Combatant currentCombatant = CombatMain.QUEUE.getCurrentCombatant();
+        Combatant currentCombatant = CombatMain.getCurrentCombatant();
 
         for (CombatantPanel panel : combatantPanels) {
             if (panel.getThisCombatant().name().equals(currentCombatant.name())) {

@@ -109,7 +109,7 @@ public class EncounterFinalizationPopup extends JFrame {
     }
 
     private JComboBox<Scenario> setupScenarioBox() {
-        CombatMain.BATTLE.scenarios().forEach(scenarioBox::addItem);
+        CombatMain.getBattle().scenarios().forEach(scenarioBox::addItem);
         Scenario all = Combatants.toScenario();
         scenarioBox.addItem(all);
         scenarioBox.setSelectedItem(all);
@@ -118,7 +118,7 @@ public class EncounterFinalizationPopup extends JFrame {
     }
 
     private void initializeParty() {
-        CombatMain.BATTLE.friendlies().stream()
+        CombatMain.getFriendlies().stream()
                 .filter(c -> c instanceof PC)
                 .forEach(pc -> {
                     CombatantCard card = new CombatantCard(pc, ColorStyle.PARTY.getColor());
@@ -155,8 +155,8 @@ public class EncounterFinalizationPopup extends JFrame {
     }
 
     private void logAndBegin() {
-        CombatMain.BATTLE.friendlies().clear();
-        CombatMain.BATTLE.enemies().clear();
+        CombatMain.getFriendlies().clear();
+        CombatMain.getEnemies().clear();
 
         for (CombatantCard card : activeCards) {
             if (card.isAbsent()) {
@@ -164,8 +164,9 @@ public class EncounterFinalizationPopup extends JFrame {
             }
             Combatant c = card.combatant;
             c.setInitiative(card.getInitiative());
-            if (c.isEnemy()) CombatMain.BATTLE.enemies().add(c);
-            else CombatMain.BATTLE.friendlies().add(c);
+            if (c.isEnemy()) {
+                CombatMain.getEnemies().add(c);
+            } else CombatMain.getFriendlies().add(c);
         }
 
         dispose();
@@ -173,6 +174,7 @@ public class EncounterFinalizationPopup extends JFrame {
     }
 
     private static class CombatantCard extends JPanel {
+
         private final Combatant combatant;
         private final JSpinner spinner;
         private final JCheckBox absentCheck;
@@ -197,7 +199,7 @@ public class EncounterFinalizationPopup extends JFrame {
             JPanel controls = new JPanel(new GridLayout(1, 0));
             controls.setOpaque(false);
 
-            spinner = new JSpinner(new SpinnerNumberModel(1, 1, 20, 1));
+            spinner = new JSpinner(new SpinnerNumberModel(10, 1, 20, 1));
             spinner.setPreferredSize(new Dimension(60, 28));
             SwingStyles.setHighlightsOnFocus(spinner);
 

@@ -2,15 +2,17 @@ package character_info.combatant;
 
 import character_info.AbilityModifier;
 import character_info.Stats;
-import combat_menu.listener.DieRollListener;
 import damage_implements.Spell;
 import damage_implements.Weapon;
-import util.Message;
+import txt_input.Key;
+import util.TxtReader;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Objects;
+
+import static txt_input.Key.*;
 
 public class PC extends Combatant {
 
@@ -27,12 +29,29 @@ public class PC extends Combatant {
         this.spells = spells;
     }
 
+    @SuppressWarnings("unchecked")
+    public PC(EnumMap<Key, Object> values) {
+        super(
+                (String) values.get(NAME),
+                TxtReader.getHp((String) values.get(HP)),
+                (int) values.get(AC)
+        );
+        this.hpCurrent = TxtReader.getHpCur((String) values.get(HP));
+        this.stats = (Stats) values.get(STATS);
+
+        List<Weapon> weaponTemp = (List<Weapon>) values.get(WEAPONS);
+        this.weapons = Objects.requireNonNullElseGet(weaponTemp, ArrayList::new);
+
+        List<Spell> spellTemp = (List<Spell>) values.get(SPELLS);
+        this.spells = Objects.requireNonNullElseGet(spellTemp, ArrayList::new);
+    }
+
     public int mod(AbilityModifier stat) {
         return stats.mod(stat);
     }
 
     public int attackBonus(Weapon weapon) {
-        return stats.prof() + stats.weaponAttackBonus(weapon);
+        return stats.prof() + stats.mod(weapon.stat());
     }
 
     public int spellAttackBonus() {
@@ -56,29 +75,8 @@ public class PC extends Combatant {
     }
 
     public void levelUp() {
-        hpMax = Message.getWithLoopUntilInt(
-                name + "'s health increase after level up?",
-                "We love level ups!"
-        );
-        stats.levelUp();
-    }
-
-    public JPanel getCombatantPanel() {
-        JPanel panel = new JPanel(new GridLayout(0, 3));
-
-        JLabel label = new JLabel(name);
-
-        JTextField initiativeField = new JTextField();
-        initiativeField.addKeyListener(new DieRollListener(1, 20, initiativeField));
-
-        JCheckBox absentBox = new JCheckBox();
-        absentBox.addActionListener(e -> initiativeField.setEnabled(!absentBox.isSelected()));
-
-        panel.add(label);
-        panel.add(initiativeField);
-        panel.add(absentBox);
-
-        return panel;
+        int hpIncrement = stats.levelUp();
+        hpMax += hpIncrement;
     }
 
     /**

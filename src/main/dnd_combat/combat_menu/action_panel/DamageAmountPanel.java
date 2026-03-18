@@ -1,4 +1,4 @@
-package combat_menu.popup.action_panel;
+package combat_menu.action_panel;
 
 import __main.CombatMain;
 import character_info.combatant.Combatant;
@@ -42,8 +42,7 @@ public class DamageAmountPanel extends JPanel {
 
         this.implement = implement;
         this.target = target;
-        this.attacker = CombatMain.QUEUE.getCurrentCombatant();
-
+        this.attacker = CombatMain.getCurrentCombatant();
         setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
@@ -166,8 +165,6 @@ public class DamageAmountPanel extends JPanel {
 
             updateUIState();
         });
-
-        okButton.addActionListener(e -> logAndFinish());
     }
 
     private int calculateTotal() {
@@ -235,8 +232,7 @@ public class DamageAmountPanel extends JPanel {
             }
         }
 
-        CombatMain.COMBAT_MENU.update();
-        CombatMain.checkWinConditions();
+        CombatMain.logAction();
 
         root.returnToButtons();
     }

@@ -1,37 +1,31 @@
 package _global_list;
 
 import encounter_info.Scenario;
-import txt_input.Reader5e;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
 
-public class Scenarios {
+public class Scenarios extends GlobalList<Scenario> {
 
-    private static final ArrayList<Scenario> SCENARIOS = new ArrayList<>();
+    private static final Scenarios INSTANCE = new Scenarios();
+
+    private Scenarios() {
+    }
 
     public static void init(File file) {
-        List<Scenario> inputs = Reader5e.getInstancesFromCode(file, Scenario.class);
-        SCENARIOS.addAll(inputs);
+        INSTANCE.init(file, Scenario.class);
     }
 
     public static Scenario get(String name) {
-        for (Scenario combatant : SCENARIOS) {
-            String combatantName = combatant.name().trim();
-            if (name.equalsIgnoreCase(combatantName)) {
-                return combatant;
-            }
-        }
-        return null;
+        return INSTANCE.getItem(name, Scenario.class);
     }
 
     public static ArrayList<Scenario> toList() {
-        return new ArrayList<>(SCENARIOS);
+        return INSTANCE.castToList(Scenario.class);
     }
 
     public static void add(Scenario obj) {
-        SCENARIOS.add(obj);
+        INSTANCE.addItem(obj);
     }
 
 }
