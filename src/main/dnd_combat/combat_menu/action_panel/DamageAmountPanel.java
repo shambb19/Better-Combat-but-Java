@@ -1,6 +1,7 @@
 package combat_menu.action_panel;
 
-import __main.CombatMain;
+import __main.EncounterInfo;
+import __main.Main;
 import character_info.combatant.Combatant;
 import combat_menu.listener.DieRollListener;
 import combat_menu.listener.IntegerFieldListener;
@@ -42,7 +43,7 @@ public class DamageAmountPanel extends JPanel {
 
         this.implement = implement;
         this.target = target;
-        this.attacker = CombatMain.getCurrentCombatant();
+        this.attacker = EncounterInfo.getCurrentCombatant();
         setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
@@ -57,13 +58,12 @@ public class DamageAmountPanel extends JPanel {
                 e -> root.returnToButtons()
         );
 
-        add(damagePanel);
-        add(Box.createVerticalStrut(10));
-        add(bonusPanel);
-        add(Box.createVerticalStrut(10));
-        add(summaryPanel);
-        add(Box.createVerticalStrut(15));
-        add(okCancelPanel);
+        SwingStyles.addComponents(this,
+                damagePanel, Box.createVerticalStrut(10),
+                bonusPanel, Box.createVerticalStrut(10),
+                summaryPanel, Box.createVerticalStrut(15),
+                okCancelPanel
+        );
 
         setupListeners();
         updateUIState();
@@ -232,7 +232,7 @@ public class DamageAmountPanel extends JPanel {
             }
         }
 
-        CombatMain.logAction();
+        Main.logAction();
 
         root.returnToButtons();
     }

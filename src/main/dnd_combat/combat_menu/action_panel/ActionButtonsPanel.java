@@ -1,7 +1,9 @@
 package combat_menu.action_panel;
 
-import __main.CombatMain;
+import __main.EncounterInfo;
+import __main.Main;
 import encounter_info.PlayerQueue;
+import format.SwingStyles;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -28,7 +30,7 @@ public class ActionButtonsPanel extends JPanel {
     }
 
     private ActionButtonsPanel(ActionPanel root) {
-        queue = CombatMain.getQueue();
+        queue = EncounterInfo.getQueue();
 
         setLayout(new GridLayout(2, 2, 10, 10));
         setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -51,7 +53,7 @@ public class ActionButtonsPanel extends JPanel {
             if (isExcess) {
                 root.switchTo(ActionPanel.INSPIRATION_OPTION);
             }
-            CombatMain.logAction();
+            Main.logAction();
         });
         inspirationButton.setToolTipText("Use Inspiration");
         inspirationButton.putClientProperty("JButton.buttonType", "toolBarButton");
@@ -61,16 +63,14 @@ public class ActionButtonsPanel extends JPanel {
         endTurnButton.addActionListener(e -> {
             queue.endCurrentTurn();
             updateTurnInformation();
-            CombatMain.logAction();
+            Main.logAction();
         });
         endTurnButton.setToolTipText("End Turn");
         endTurnButton.putClientProperty("JButton.buttonType", "toolBarButton");
         setIcon(endTurnButton, icons.END_TURN);
 
-        add(attackButton);
-        add(healButton);
-        add(inspirationButton);
-        add(endTurnButton);
+        SwingStyles.addComponents(this,
+                attackButton, healButton, inspirationButton, endTurnButton);
 
         updateTurnInformation();
     }

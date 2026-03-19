@@ -6,8 +6,13 @@ import character_info.LifeStatus;
 import damage_implements.Effect;
 import damage_implements.Weapon;
 import format.ColorStyle;
+import format.SwingStyles;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.MatteBorder;
 import java.awt.*;
 import java.util.ArrayList;
 
@@ -33,10 +38,6 @@ public class Combatant {
 
         hpCurrent = hpMax;
         inspiration = 0;
-    }
-
-    public int inspiration() {
-        return inspiration;
     }
 
     /**
@@ -106,10 +107,6 @@ public class Combatant {
 
     public void setHealth(int newHealth) {
         hpCurrent = newHealth;
-    }
-
-    public JProgressBar getHealthBar() {
-        return healthBar;
     }
 
     public void setHealthBar(JProgressBar healthBar) {
@@ -195,9 +192,87 @@ public class Combatant {
         hexedByList.add(hexer);
     }
 
+    public JPanel getEffectListPanel() {
+        JPanel panel = new JPanel(new FlowLayout());
+
+        if (isPoisoned) {
+            JLabel poisoned = new JLabel("\uD83D\uDC80");
+            poisoned.putClientProperty("FlatLaf.style", "font: $h2.font");
+            panel.add(poisoned);
+        }
+        if (!hexedByList.isEmpty()) {
+            JLabel hexed = new JLabel("\uD83C\uDF00");
+            hexed.putClientProperty("FlatLaf.style", "font: $h2.font");
+            panel.add(hexed);
+        }
+
+        panel.setVisible(panel.getComponents().length > 0);
+        panel.setBorder(new EmptyBorder(4, 4, 4, 4));
+
+        return panel;
+    }
+
+    @NotNull
+    private JLabel getOptionLabel() {
+        JLabel optionLabel = new JLabel();
+        optionLabel.putClientProperty("FlatLaf.style", "font: $h2.font");
+        optionLabel.setBorder(new EmptyBorder(4, 4, 4, 4));
+
+        optionLabel.setText("Inspirations Used: " + inspiration + "/2");
+        if (!lifeStatus.isConscious()) {
+            optionLabel.setText("Not in Fighting Condition");
+            optionLabel.setForeground(ColorStyle.ORANGE_ISH_RED.getColor());
+        } else if (inspiration > 2) {
+            optionLabel.setForeground(ColorStyle.ORANGE_ISH_RED.getColor());
+        }
+
+        optionLabel.setVisible(!isEnemy());
+        return optionLabel;
+    }
+
     @Override
     public String toString() {
         return name;
+    }
+
+    public JPanel toPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
+        Color accentColor = switch (this) {
+            case PC ignored -> ColorStyle.PARTY.getColor();
+            case NPC npc when npc.isEnemy() -> ColorStyle.ENEMY.getColor();
+            default -> ColorStyle.NPC.getColor();
+        };
+        panel.setBorder(new CompoundBorder(
+                new MatteBorder(0, 5, 0, 0, accentColor),
+                new EmptyBorder(10, 15, 10, 15)
+        ));
+
+        JLabel nameLabel = new JLabel(name);
+        nameLabel.putClientProperty("FlatLaf.style", "font: $h1.font");
+        nameLabel.setBorder(new EmptyBorder(10, 10, 10, 10));
+
+        JLabel initiativeLabel = new JLabel("Initiative: " + initiative);
+        initiativeLabel.putClientProperty("FlatLaf.style", "font: $h2.font");
+        initiativeLabel.setBorder(new EmptyBorder(4, 4, 4, 4));
+
+        JLabel optionLabel = getOptionLabel();
+
+        JPanel effectList = getEffectListPanel();
+
+        JProgressBar healthBarCopy = SwingStyles.cloneComponent(healthBar);
+        assert healthBarCopy != null;
+        healthBarCopy.setStringPainted(false);
+        healthBarCopy.setBorder(new EmptyBorder(10, 10, 10, 10));
+
+        panel.add(nameLabel);
+        panel.add(initiativeLabel);
+        panel.add(optionLabel);
+        panel.add(effectList);
+        panel.add(healthBarCopy);
+
+        return panel;
     }
 
     public ArrayList<String> toTxt() {

@@ -3,27 +3,26 @@ package _global_list;
 import txt_input.Reader5e;
 import util.Message;
 
-import java.io.File;
-import java.net.MalformedURLException;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class GlobalList<T> {
 
     protected final ArrayList<T> list = new ArrayList<>();
 
     protected void init(URL url, Class<T> type) {
-        List<T> inputs = Reader5e.getInstancesFromCode(url, type);
-        list.addAll(inputs);
-    }
-
-    protected void init(File file, Class<T> type) {
         try {
-            URL url = file.toURI().toURL();
-            init(url, type);
-        } catch (MalformedURLException e) {
+            List<T> inputs = Reader5e.getInstancesFromCode(url, type);
+            list.addAll(inputs);
+        } catch (IOException e) {
             Message.fileError(e);
+            Logger.getAnonymousLogger().log(
+                    Level.SEVERE, "init in GlobalList: could not add elements", e
+            );
         }
     }
 

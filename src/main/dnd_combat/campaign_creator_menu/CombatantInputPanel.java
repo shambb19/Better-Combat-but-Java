@@ -14,6 +14,8 @@ import format.SwingStyles;
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class CombatantInputPanel extends JPanel {
 
@@ -134,7 +136,9 @@ public class CombatantInputPanel extends JPanel {
             resetAndClose();
         } catch (Exception error) {
             JOptionPane.showMessageDialog(root, "Error: " + error.getMessage(), TxtMenu.TITLE, JOptionPane.ERROR_MESSAGE);
-            error.printStackTrace();
+            Logger.getAnonymousLogger().log(
+                    Level.SEVERE, "logAndGetCombatant in CombatantInputPanel: error parsing fields", error
+            );
         }
     }
 

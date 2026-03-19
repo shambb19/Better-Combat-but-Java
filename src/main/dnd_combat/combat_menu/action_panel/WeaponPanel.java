@@ -1,6 +1,7 @@
 package combat_menu.action_panel;
 
-import __main.CombatMain;
+import __main.EncounterInfo;
+import __main.Main;
 import character_info.combatant.Combatant;
 import character_info.combatant.PC;
 import combat_menu.listener.DieRollListener;
@@ -34,7 +35,7 @@ public class WeaponPanel extends JPanel {
     private WeaponPanel(JComboBox<Combatant> targetBox, ActionPanel root) {
         this.root = root;
 
-        attacker = CombatMain.getCurrentCombatant();
+        attacker = EncounterInfo.getCurrentCombatant();
 
         weapons = new ArrayList<>();
         if (attacker instanceof PC pc) {
@@ -45,7 +46,7 @@ public class WeaponPanel extends JPanel {
         weaponsBox = getWeaponComboBox();
 
         String hitString = "Roll to Hit";
-        if (CombatMain.getCurrentCombatant().isPoisoned()) {
+        if (EncounterInfo.getCurrentCombatant().isPoisoned()) {
             hitString += " (With Disadvantage)";
         }
         hitString += ":";
@@ -65,13 +66,11 @@ public class WeaponPanel extends JPanel {
 
         setLayout(new GridLayout(0, 1));
 
-        add(new JLabel("Select a Target:"));
-        add(targetBox);
-        add(new JLabel("Select a Weapon:"));
-        add(weaponsBox);
-        add(new JLabel(hitString));
-        add(rollInputField);
-        add(okCancelPanel);
+        SwingStyles.addComponents(this,
+                new JLabel("Select a Target:"), targetBox,
+                new JLabel("Select a Weapon:"), weaponsBox,
+                new JLabel(hitString), rollInputField, okCancelPanel
+        );
     }
 
     private JComboBox<Weapon> getWeaponComboBox() {
@@ -89,17 +88,16 @@ public class WeaponPanel extends JPanel {
         if (weapon == null || target == null) {
             return;
         }
-
         if (rollInputField.getText().isEmpty()) {
             return;
         }
-        int fieldVal = Integer.parseInt(rollInputField.getText());
 
+        int fieldVal = Integer.parseInt(rollInputField.getText());
         int hitRoll = fieldVal + attacker.attackBonus(weapon);
 
         registerAttack(target, hitRoll >= target.ac(), weapon);
         root.returnToButtons();
-        CombatMain.logAction();
+        Main.logAction();
     }
 
     /**

@@ -1,8 +1,10 @@
 package combat_menu.popup;
 
-import __main.CombatMain;
+import __main.EncounterInfo;
+import __main.Main;
 import character_info.combatant.PC;
 import combat_menu.CombatMenu;
+import format.SwingStyles;
 import txt_input.CampaignWriter;
 
 import javax.swing.*;
@@ -17,7 +19,7 @@ public class CombatEndPopup extends JFrame {
     private static final String victoryMessage = "Victory! You have won this combat.";
     private static final String victoryTitle = "Victory";
 
-    private static final String lossMessage = "You have been defeated. You were " + CombatMain.getBattle().percentToVictory() + " of the way to victory.";
+    private static final String lossMessage = "You have been defeated. You were " + EncounterInfo.getBattle().percentToVictory() + " of the way to victory.";
     private static final String lossTitle = "Defeat";
 
     public static void run(boolean isVictory) {
@@ -29,15 +31,14 @@ public class CombatEndPopup extends JFrame {
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setLayout(new GridLayout(0, 1));
 
-        add(new JLabel(isVictory ? victoryMessage : lossMessage));
-        add(new JSeparator());
-        add(new JLabel("Options:"));
-        add(partyLevelUpButton());
-        add(downloadUpdatedPartyTxtButton());
-        add(quitButton());
+        SwingStyles.addComponents(this,
+                new JLabel(isVictory ? victoryMessage : lossMessage), new JSeparator(),
+                new JLabel("Options:"),
+                partyLevelUpButton(), downloadUpdatedPartyTxtButton(), quitButton()
+        );
 
         pack();
-        setLocationRelativeTo(CombatMain.getMenu());
+        setLocationRelativeTo(Main.getMenu());
     }
 
     public JButton partyLevelUpButton() {
@@ -63,7 +64,7 @@ public class CombatEndPopup extends JFrame {
     }
 
     private void levelUp(JButton button) {
-        CombatMain.getFriendlies().forEach(friendly -> {
+        EncounterInfo.getFriendlies().forEach(friendly -> {
             if (friendly instanceof PC pc) {
                 pc.levelUp();
             }
@@ -78,7 +79,7 @@ public class CombatEndPopup extends JFrame {
     }
 
     private void download() {
-        URL savedFile = new CampaignWriter().getFile();
+        URL savedFile = new CampaignWriter().getURL();
 
         if (savedFile != null) {
             template("Successfully saved to Downloads");
@@ -90,7 +91,7 @@ public class CombatEndPopup extends JFrame {
     public void quit() {
         if (confirmIf("quit") == JOptionPane.OK_OPTION) {
             JOptionPane.showMessageDialog(
-                    CombatMain.getMenu(),
+                    Main.getMenu(),
                     "Goodbye! Thanks for playing :)",
                     CombatMenu.TITLE,
                     JOptionPane.INFORMATION_MESSAGE

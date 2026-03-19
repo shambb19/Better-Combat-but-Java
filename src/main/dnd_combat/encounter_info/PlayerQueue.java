@@ -1,6 +1,6 @@
 package encounter_info;
 
-import __main.CombatMain;
+import __main.Main;
 import character_info.combatant.Combatant;
 import util.Message;
 
@@ -58,7 +58,7 @@ public class PlayerQueue {
         }
 
         currentCombatant.endDealtEffects();
-        CombatMain.logAction();
+        Main.logAction();
     }
 
     public Combatant getCurrentCombatant() {

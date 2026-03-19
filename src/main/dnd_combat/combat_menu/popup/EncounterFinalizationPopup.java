@@ -1,6 +1,7 @@
 package combat_menu.popup;
 
-import __main.CombatMain;
+import __main.EncounterInfo;
+import __main.Main;
 import _global_list.Combatants;
 import character_info.combatant.Combatant;
 import character_info.combatant.NPC;
@@ -109,7 +110,7 @@ public class EncounterFinalizationPopup extends JFrame {
     }
 
     private JComboBox<Scenario> setupScenarioBox() {
-        CombatMain.getBattle().scenarios().forEach(scenarioBox::addItem);
+        EncounterInfo.getBattle().scenarios().forEach(scenarioBox::addItem);
         Scenario all = Combatants.toScenario();
         scenarioBox.addItem(all);
         scenarioBox.setSelectedItem(all);
@@ -118,7 +119,7 @@ public class EncounterFinalizationPopup extends JFrame {
     }
 
     private void initializeParty() {
-        CombatMain.getFriendlies().stream()
+        EncounterInfo.getFriendlies().stream()
                 .filter(c -> c instanceof PC)
                 .forEach(pc -> {
                     CombatantCard card = new CombatantCard(pc, ColorStyle.PARTY.getColor());
@@ -155,8 +156,8 @@ public class EncounterFinalizationPopup extends JFrame {
     }
 
     private void logAndBegin() {
-        CombatMain.getFriendlies().clear();
-        CombatMain.getEnemies().clear();
+        EncounterInfo.getFriendlies().clear();
+        EncounterInfo.getEnemies().clear();
 
         for (CombatantCard card : activeCards) {
             if (card.isAbsent()) {
@@ -165,12 +166,12 @@ public class EncounterFinalizationPopup extends JFrame {
             Combatant c = card.combatant;
             c.setInitiative(card.getInitiative());
             if (c.isEnemy()) {
-                CombatMain.getEnemies().add(c);
-            } else CombatMain.getFriendlies().add(c);
+                EncounterInfo.getEnemies().add(c);
+            } else EncounterInfo.getFriendlies().add(c);
         }
 
         dispose();
-        CombatMain.start();
+        Main.finalizeCombat();
     }
 
     private static class CombatantCard extends JPanel {

@@ -1,5 +1,6 @@
 package combat_menu.action_panel;
 
+import __main.EncounterInfo;
 import character_info.combatant.Combatant;
 import damage_implements.Implement;
 import util.Locators;
@@ -10,7 +11,7 @@ import java.awt.*;
 
 public class ActionPanel extends JPanel {
 
-    private final TurnInformationPanel turnInformation;
+    private final JPanel turnInformation;
 
     private final JPanel cardPanel;
     private final CardLayout cardLayout = new CardLayout();
@@ -35,7 +36,8 @@ public class ActionPanel extends JPanel {
         gbc.gridx = 0;
         gbc.fill = GridBagConstraints.BOTH;
 
-        turnInformation = TurnInformationPanel.newInstance();
+        turnInformation = new JPanel();
+        turnInformation.setLayout(new BoxLayout(turnInformation, BoxLayout.Y_AXIS));
         gbc.gridy = 0;
         gbc.weightx = 1.0;
         gbc.weighty = 0.3;
@@ -90,7 +92,8 @@ public class ActionPanel extends JPanel {
     }
 
     public void updateTurnInformation() {
-        turnInformation.update();
+        turnInformation.removeAll();
+        turnInformation.add(EncounterInfo.getCurrentCombatant().toPanel());
         buttonsPanel.updateTurnInformation();
     }
 }

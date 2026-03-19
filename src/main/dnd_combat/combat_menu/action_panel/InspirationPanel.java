@@ -1,6 +1,6 @@
 package combat_menu.action_panel;
 
-import __main.CombatMain;
+import __main.Main;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -39,7 +39,7 @@ public class InspirationPanel extends JPanel {
     }
 
     private void logRoll(int roll) {
-        CombatMain.getMenu().logInspiration(roll);
+        Main.getMenu().logInspiration(roll);
         root.returnToButtons();
     }
 

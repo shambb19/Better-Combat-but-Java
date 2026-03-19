@@ -1,6 +1,6 @@
 package campaign_creator_menu;
 
-import __main.SystemMain;
+import __main.Main;
 import character_info.combatant.Combatant;
 import encounter_info.Battle;
 import encounter_info.Scenario;
@@ -54,11 +54,10 @@ public class DownloadDocDisplayPanel extends JPanel {
         copyButton.addActionListener(e -> clipboardCopy());
 
         JButton runNowButton = new JButton("Start Combat (This Campaign)");
-        runNowButton.addActionListener(e -> SystemMain.switchToCombat(download()));
+        runNowButton.addActionListener(e -> Main.switchToCombat(download()));
 
-        sendPanel.add(downloadButton);
-        sendPanel.add(copyButton);
-        sendPanel.add(runNowButton);
+        SwingStyles.addComponents(sendPanel,
+                downloadButton, copyButton, runNowButton);
 
         add(host, BorderLayout.CENTER);
         add(sendPanel, BorderLayout.SOUTH);
@@ -102,7 +101,7 @@ public class DownloadDocDisplayPanel extends JPanel {
 
     private URL download() {
         CampaignWriter writer = new CampaignWriter("New Campaign", friendlies, enemies, scenarios);
-        URL savedFile = writer.getFile();
+        URL savedFile = writer.getURL();
 
         if (savedFile != null) {
             template("Successfully saved to Downloads");

@@ -1,6 +1,6 @@
 package combat_menu.action_panel;
 
-import __main.CombatMain;
+import __main.Main;
 import character_info.combatant.Combatant;
 import character_info.combatant.NPC;
 import format.ColorStyle;
@@ -60,9 +60,8 @@ public class HealPanel extends JPanel {
                 e -> root.returnToButtons()
         );
 
-        add(targetComboBox);
-        add(createActionCenter());
-        add(confirmCancelPanel);
+        SwingStyles.addComponents(this,
+                targetComboBox, createActionCenter(), confirmCancelPanel);
     }
 
     private JPanel createActionCenter() {
@@ -75,9 +74,9 @@ public class HealPanel extends JPanel {
 
         JPanel sliderContainer = new JPanel();
         sliderContainer.setLayout(new BoxLayout(sliderContainer, BoxLayout.Y_AXIS));
-        sliderContainer.add(healthBar);
-        sliderContainer.add(Box.createVerticalStrut(10));
-        sliderContainer.add(healthSlider);
+
+        SwingStyles.addComponents(sliderContainer,
+                header, Box.createVerticalStrut(10), healthSlider);
 
         center.add(header);
         center.add(sliderContainer);
@@ -121,7 +120,7 @@ public class HealPanel extends JPanel {
             if (target != null) {
                 int healAmount = healthSlider.getValue() - target.hp();
                 target.heal(healAmount);
-                CombatMain.logAction();
+                Main.logAction();
                 root.returnToButtons();
             }
         } catch (Exception ignored) {

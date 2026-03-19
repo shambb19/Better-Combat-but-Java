@@ -1,6 +1,7 @@
 package combat_menu.action_panel;
 
-import __main.CombatMain;
+import __main.EncounterInfo;
+import __main.Main;
 import character_info.combatant.Combatant;
 import character_info.combatant.PC;
 import combat_menu.listener.DieRollListener;
@@ -41,7 +42,7 @@ public class SpellPanel extends JPanel {
     private SpellPanel(JComboBox<Combatant> targetBox, ActionPanel root) {
         this.root = root;
 
-        this.attacker = CombatMain.getCurrentCombatant();
+        this.attacker = EncounterInfo.getCurrentCombatant();
 
         spells = new ArrayList<>();
         if (attacker instanceof PC pc) {
@@ -66,12 +67,11 @@ public class SpellPanel extends JPanel {
 
         setLayout(new GridLayout(0, 1));
 
-        add(new JLabel("Select a Target:"));
-        add(targetBox);
-        add(new JLabel("Select a Spell:"));
-        add(spellsBox);
-        add(variablePanel);
-        add(okCancelPanel);
+        SwingStyles.addComponents(this,
+                new JLabel("Select a Target"), targetBox,
+                new JLabel("Select a Spell"), spellsBox,
+                variablePanel, okCancelPanel
+        );
     }
 
     private JComboBox<Spell> getSpellBox() {
@@ -163,7 +163,7 @@ public class SpellPanel extends JPanel {
 
         registerAttack(target, successCondition, spell);
         root.returnToButtons();
-        CombatMain.logAction();
+        Main.logAction();
     }
 
     /**

@@ -20,9 +20,9 @@ import java.util.List;
 
 public class UploadMain extends JDialog {
 
-    private static final int PADDING = 20;
     private static final String INSTRUCTIONS = "Select a file from the options below. " +
             "The native file includes starter code for the Kyreun Campaign and an example Orc scenario.";
+    public static final ImageIcon ICON = getScaledIcon();
 
     private JButton combatButton, creatorButton;
     private JPanel displayPanel;
@@ -31,7 +31,7 @@ public class UploadMain extends JDialog {
     private ColoredTxtDisplay codeDisplay;
     private JTextArea fallbackDisplay;
 
-    private URL currentFile;
+    private URL currentFile = null;
 
     public static void showNewInstance() {
         SwingUtilities.invokeLater(() -> new UploadMain().setVisible(true));
@@ -51,36 +51,79 @@ public class UploadMain extends JDialog {
     }
 
     private void initActionPanel() {
-        JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBorder(new EmptyBorder(PADDING, PADDING, PADDING, PADDING));
+        JPanel actionPanel = new JPanel(new GridBagLayout());
+        actionPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
+
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridx = 0;
+        gbc.gridy = 0;
         gbc.weightx = 1.0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.NORTH;
+        gbc.insets = new Insets(5, 0, 5, 0);
 
-        JTextPane instr = new JTextPane();
-        instr.setText(INSTRUCTIONS);
-        instr.setEditable(false);
-        instr.setBackground(null);
-        instr.setFont(new Font("SansSerif", Font.ITALIC, 12));
-        panel.add(instr, gbc);
+        JLabel logoLabel = new JLabel(ICON);
+        actionPanel.add(logoLabel, gbc);
 
-        panel.add(createSectionLabel("UPLOAD OPTIONS"), gbc);
-        panel.add(SwingStyles.simpleButton("New Campaign", e -> logNewInput(null)), gbc);
-        panel.add(SwingStyles.simpleButton("Upload Existing (.txt)", e -> logNewInput(FileGetter.getUrl())), gbc);
-        panel.add(SwingStyles.simpleButton("Load Kyreun Starter", e -> logNewInput(getClass().getResource("/starter.txt"))), gbc);
+        gbc.gridy++;
+        JTextPane instructionPanel = new JTextPane();
+        instructionPanel.setText(INSTRUCTIONS);
+        instructionPanel.setEditable(false);
+        instructionPanel.setBackground(null);
+        actionPanel.add(instructionPanel, gbc);
 
-        panel.add(createSectionLabel("RUN MODE"), gbc);
-        combatButton = SwingStyles.simpleButton("Start Combat Encounter", e -> CombatMain.runWith(currentFile));
-        creatorButton = SwingStyles.simpleButton("Open Campaign Creator", e -> CreatorMain.run(currentFile));
+        gbc.gridy++;
+        JPanel uploadPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
-        panel.add(combatButton, gbc);
-        panel.add(creatorButton, gbc);
+        uploadPanel.add(new JLabel("Upload Options: "));
 
+        uploadPanel.add(SwingStyles.simpleButton(
+                "New Campaign",
+                e -> logNewInput(null))
+        );
+        uploadPanel.add(SwingStyles.simpleButton(
+                "Upload Existing (.txt)",
+                e -> logNewInput(FileGetter.getUrl()))
+        );
+        uploadPanel.add(SwingStyles.simpleButton(
+                "Load Kyreun Starter",
+                e -> logNewInput(getClass().getResource("/starter.txt")))
+        );
+        actionPanel.add(uploadPanel, gbc);
+
+        gbc.gridy++;
+        JPanel runPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+
+        runPanel.add(new JLabel("Run Mode Options: "));
+
+        combatButton = SwingStyles.simpleButton(
+                "Start Combat Encounter",
+                e -> {
+                    Main.runCombatEncounter(currentFile);
+                    dispose();
+                }
+        );
+        combatButton.setEnabled(false);
+
+        creatorButton = SwingStyles.simpleButton(
+                "Open Campaign Creator",
+                e -> {
+                    Main.runCampaignCreator(currentFile);
+                    dispose();
+                }
+        );
+        creatorButton.setEnabled(false);
+
+        runPanel.add(combatButton);
+        runPanel.add(creatorButton);
+
+        actionPanel.add(runPanel, gbc);
+
+        gbc.gridy++;
         gbc.weighty = 1.0;
-        panel.add(new Box.Filler(new Dimension(0, 0), new Dimension(0, 0), new Dimension(0, 1000)), gbc);
+        actionPanel.add(Box.createVerticalGlue(), gbc);
 
-        add(panel);
+        add(actionPanel);
     }
 
     private void initDisplayPanel() {
@@ -128,7 +171,7 @@ public class UploadMain extends JDialog {
             } else {
                 fallbackDisplay.setText(String.join("\n", lines));
                 scrollPane.setViewportView(fallbackDisplay);
-                header.setText("✘ Syntax Error: Check Formatting");
+                header.setText("✘ Syntax Error(s): Ensure Formatting Matches Current Version (see README.md)");
             }
         } catch (IOException e) {
             Message.fileError(e);
@@ -138,7 +181,6 @@ public class UploadMain extends JDialog {
     private void updateUIState(boolean compiles) {
         Color highlight = compiles ? ColorStyle.PARTY.getColor() : ColorStyle.ORANGE_ISH_RED.getColor();
         updateBorder(highlight);
-
         combatButton.setEnabled(compiles);
         creatorButton.setEnabled(compiles);
     }
@@ -157,11 +199,15 @@ public class UploadMain extends JDialog {
         ));
     }
 
-    private JLabel createSectionLabel(String text) {
-        JLabel label = new JLabel(text);
-        label.setFont(new Font("SansSerif", Font.BOLD, 10));
-        label.setForeground(Color.GRAY);
-        label.setBorder(new EmptyBorder(20, 0, 5, 0));
-        return label;
+    private static ImageIcon getScaledIcon() {
+        URL imgUrl = Main.class.getResource("/logo.png");
+        if (imgUrl == null) return null;
+
+        ImageIcon originalIcon = new ImageIcon(imgUrl);
+        int width = (int) (originalIcon.getIconWidth() * 0.5);
+        int height = (int) (originalIcon.getIconHeight() * 0.5);
+
+        Image scaledImage = originalIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+        return new ImageIcon(scaledImage);
     }
 }

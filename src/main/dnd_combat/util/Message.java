@@ -1,6 +1,7 @@
 package util;
 
-import __main.CombatMain;
+import __main.EncounterInfo;
+import __main.Main;
 import campaign_creator_menu.TxtMenu;
 import character_info.combatant.Combatant;
 import combat_menu.CombatMenu;
@@ -14,12 +15,12 @@ public class Message {
         int roll = -1;
         boolean isFirstTry = true;
         while (roll < 0) {
-            String text = "Roll Death Save for " + CombatMain.getCurrentCombatant().name() + ".";
+            String text = "Roll Death Save for " + EncounterInfo.getCurrentCombatant().name() + ".";
             if (!isFirstTry) {
                 text = "Please enter an integer. " + text;
             }
             String result = JOptionPane.showInputDialog(
-                    CombatMain.getMenu(),
+                    Main.getMenu(),
                     text,
                     CombatMenu.TITLE,
                     JOptionPane.QUESTION_MESSAGE
@@ -33,7 +34,7 @@ public class Message {
 
     public static void informAttackFail() {
         JOptionPane.showMessageDialog(
-                CombatMain.getMenu(),
+                Main.getMenu(),
                 "The attack does not hit.",
                 CombatMenu.TITLE,
                 JOptionPane.INFORMATION_MESSAGE
@@ -42,10 +43,10 @@ public class Message {
 
     public static void informHexSuccess(Combatant target) {
         JOptionPane.showMessageDialog(
-                CombatMain.getMenu(),
+                Main.getMenu(),
                 target.name() + " has been successfully hexed. " +
                         "They will now receive 1d6 additional damage from " +
-                        CombatMain.getCurrentCombatant().name() + ".",
+                        EncounterInfo.getCurrentCombatant().name() + ".",
                 CombatMenu.TITLE,
                 JOptionPane.INFORMATION_MESSAGE
         );
@@ -53,7 +54,7 @@ public class Message {
 
     public static void informIllusion(Combatant target) {
         JOptionPane.showMessageDialog(
-                CombatMain.getMenu(),
+                Main.getMenu(),
                 target.name() + " is now under the illusion of your choice. " +
                         "Remember that or something, idk.",
                 CombatMenu.TITLE,
@@ -63,7 +64,7 @@ public class Message {
 
     public static int confirmIf(String reason) {
         return JOptionPane.showConfirmDialog(
-                CombatMain.getMenu(),
+                Main.getMenu(),
                 "Are you sure you would like to " + reason + "?",
                 CombatMenu.TITLE,
                 JOptionPane.OK_CANCEL_OPTION,

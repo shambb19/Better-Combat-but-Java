@@ -1,33 +1,54 @@
 package __main;
 
 import _global_list.Combatants;
+import _global_list.DamageImplements;
 import _global_list.Scenarios;
-import character_info.combatant.Combatant;
+import campaign_creator_menu.TxtMenu;
+import com.formdev.flatlaf.intellijthemes.FlatSpacegrayIJTheme;
 import combat_menu.CombatMenu;
 import combat_menu.popup.CombatEndPopup;
 import combat_menu.popup.EncounterFinalizationPopup;
 import combat_menu.popup.FileGetter;
-import encounter_info.Battle;
-import encounter_info.PlayerQueue;
 
 import javax.swing.*;
 import java.net.URL;
-import java.util.List;
 import java.util.Objects;
 
-public class CombatMain {
+public class Main {
+
+    public static final URL WEAPON_RES = Main.class.getResource("/weapons.txt");
+    public static final URL SPELL_RES = Main.class.getResource("/spells.txt");
+
+    private static TxtMenu CREATOR_MENU;
 
     private static CombatMenu COMBAT_MENU;
     private static URL INPUT;
-    private static Battle BATTLE;
-    private static PlayerQueue QUEUE;
 
-    public static void run() {
+    public static void main(String[] args) {
+        FlatSpacegrayIJTheme.setup();
+
+        DamageImplements.init(WEAPON_RES);
+        DamageImplements.init(SPELL_RES);
+
+        SwingUtilities.invokeLater(UploadMain::showNewInstance);
+    }
+
+    public static void restartCombat() {
+        COMBAT_MENU.dispose();
         INPUT = Objects.requireNonNullElse(INPUT, FileGetter.getUrl());
         completeSetup();
     }
 
-    public static void runWith(URL file) {
+    public static void switchToCombat(URL file) {
+        CREATOR_MENU.dispose();
+        runCombatEncounter(file);
+    }
+
+    public static void runCampaignCreator(URL url) {
+        CREATOR_MENU = TxtMenu.newInstance(url);
+    }
+
+    public static void runCombatEncounter(URL file) {
         INPUT = file;
         completeSetup();
     }
@@ -35,13 +56,13 @@ public class CombatMain {
     private static void completeSetup() {
         Combatants.init(INPUT);
         Scenarios.init(INPUT);
-        BATTLE = Combatants.toBattle();
+        EncounterInfo.init(Combatants.toBattle());
         EncounterFinalizationPopup.run();
     }
 
-    public static void start() {
+    public static void finalizeCombat() {
         SwingUtilities.invokeLater(()-> {
-            QUEUE = new PlayerQueue(BATTLE.friendlies(), BATTLE.enemies());
+            EncounterInfo.confirmQueueFinalized();
             COMBAT_MENU = new CombatMenu();
             COMBAT_MENU.setVisible(true);
             logAction();
@@ -57,38 +78,13 @@ public class CombatMain {
      * Opens a CombatEndPopup if one of the teams has been completely defeated.
      */
     public static void checkCombatOver() {
-        if (BATTLE.isEncounterOver()) {
-            boolean isVictory = BATTLE.isVictory();
+        if (EncounterInfo.getBattle().isEncounterOver()) {
+            boolean isVictory = EncounterInfo.getBattle().isVictory();
             CombatEndPopup.run(isVictory);
         }
-    }
-
-    public static void kill() {
-        COMBAT_MENU.dispose();
     }
 
     public static CombatMenu getMenu() {
         return COMBAT_MENU;
     }
-
-    public static Battle getBattle() {
-        return BATTLE;
-    }
-
-    public static List<Combatant> getFriendlies() {
-        return BATTLE.friendlies();
-    }
-
-    public static List<Combatant> getEnemies() {
-        return BATTLE.enemies();
-    }
-
-    public static PlayerQueue getQueue() {
-        return QUEUE;
-    }
-
-    public static Combatant getCurrentCombatant() {
-        return QUEUE.getCurrentCombatant();
-    }
-
 }

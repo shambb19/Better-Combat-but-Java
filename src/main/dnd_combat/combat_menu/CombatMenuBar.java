@@ -1,7 +1,7 @@
 package combat_menu;
 
-import __main.CombatMain;
-import __main.SystemMain;
+import __main.EncounterInfo;
+import __main.Main;
 import util.Message;
 
 import javax.swing.*;
@@ -17,8 +17,8 @@ public class CombatMenuBar extends JMenuBar {
         end.addActionListener(e -> {
             int result = Message.confirmIf("end this combat");
             if (result == JOptionPane.YES_OPTION) {
-                CombatMain.getBattle().reset();
-                SystemMain.restartCombat();
+                EncounterInfo.getBattle().reset();
+                Main.restartCombat();
             }
         });
 

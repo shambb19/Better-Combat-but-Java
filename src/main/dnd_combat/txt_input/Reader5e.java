@@ -14,28 +14,18 @@ import static util.TxtReader.withoutComments;
 
 public class Reader5e {
 
-    public static <T> List<T> getInstancesFromCode(URL url, Class<T> instanceType) {
-        try {
-            return getInstancesFromCode(FileUtils.toFile(url), instanceType);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+    public static <T> List<T> getInstancesFromCode(URL url, Class<T> instanceType) throws IOException {
+        return getInstancesFromCode(FileUtils.toFile(url), instanceType);
     }
 
-    public static <T> List<T> getInstancesFromCode(File file, Class<T> instanceType) {
-        try {
-            List<String> lines = Files.readAllLines(file.toPath());
-            List<Object> code = getCode(lines);
+    public static <T> List<T> getInstancesFromCode(File file, Class<T> instanceType) throws IOException {
+        List<String> lines = Files.readAllLines(file.toPath());
+        List<Object> code = getCode(lines);
 
-            return code.stream()
-                    .filter(obj -> instanceType.isAssignableFrom(obj.getClass()))
-                    .map(instanceType::cast)
-                    .toList();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
+        return code.stream()
+                .filter(obj -> instanceType.isAssignableFrom(obj.getClass()))
+                .map(instanceType::cast)
+                .toList();
     }
 
     public static List<Object> getCode(List<String> lines) {

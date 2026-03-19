@@ -14,6 +14,8 @@ import java.net.URL;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class CampaignWriter {
 
@@ -65,13 +67,15 @@ public class CampaignWriter {
         return code;
     }
 
-    public URL getFile() {
+    public URL getURL() {
         try (FileWriter writer = new FileWriter(file)) {
             getCode().forEach(line -> {
                 try {
                     writer.write(line + "\n");
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Logger.getAnonymousLogger().log(
+                            Level.SEVERE, "getURL in CampaignWriter: would not write to File", e
+                    );
                 }
             });
             return file.toURI().toURL();

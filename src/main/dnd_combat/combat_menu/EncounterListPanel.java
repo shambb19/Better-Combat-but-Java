@@ -1,6 +1,6 @@
 package combat_menu;
 
-import __main.CombatMain;
+import __main.EncounterInfo;
 import character_info.combatant.Combatant;
 import format.SwingStyles;
 
@@ -23,8 +23,8 @@ public class EncounterListPanel extends JPanel {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        addPanel("Belligerent Enemies", CombatMain.getEnemies());
-        addPanel("Party and Allies", CombatMain.getFriendlies());
+        addPanel("Belligerent Enemies", EncounterInfo.getEnemies());
+        addPanel("Party and Allies", EncounterInfo.getFriendlies());
     }
 
     public JScrollPane getScrollPane() {
@@ -54,7 +54,7 @@ public class EncounterListPanel extends JPanel {
     }
 
     public void updateActiveCombatant() {
-        Combatant currentCombatant = CombatMain.getCurrentCombatant();
+        Combatant currentCombatant = EncounterInfo.getCurrentCombatant();
 
         for (CombatantPanel panel : combatantPanels) {
             if (panel.getThisCombatant().name().equals(currentCombatant.name())) {

@@ -1,6 +1,6 @@
 package character_info;
 
-import __main.CombatMain;
+import __main.Main;
 
 public class LifeStatus {
 
@@ -41,7 +41,7 @@ public class LifeStatus {
             thisStatus = Status.DEAD;
         }
 
-        CombatMain.logAction();
+        Main.logAction();
     }
 
     public Status status() {

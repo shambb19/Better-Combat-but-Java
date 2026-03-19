@@ -4,6 +4,12 @@ import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class SwingStyles {
 
@@ -72,6 +78,32 @@ public class SwingStyles {
         button.putClientProperty("JButton.buttonType", "roundRect");
         button.addActionListener(listener);
         return button;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends JComponent> T cloneComponent(T c) {
+        try {
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            ObjectOutputStream outputStream = new ObjectOutputStream(output);
+            outputStream.writeObject(c);
+            outputStream.flush();
+
+            ByteArrayInputStream input = new ByteArrayInputStream(output.toByteArray());
+            ObjectInputStream inputStream = new ObjectInputStream(input);
+
+            return (T) inputStream.readObject();
+        } catch (Exception e) {
+            Logger.getAnonymousLogger().log(
+                    Level.SEVERE, "cloneComponent in SwingStyles: could not copy component"
+            );
+            return null;
+        }
+    }
+
+    public static void addComponents(Container host, Component... components) {
+        for (Component component : components) {
+            host.add(component);
+        }
     }
 
 }

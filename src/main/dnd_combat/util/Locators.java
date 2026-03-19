@@ -1,6 +1,6 @@
 package util;
 
-import __main.CombatMain;
+import __main.EncounterInfo;
 import character_info.combatant.Combatant;
 
 import javax.swing.*;
@@ -10,11 +10,11 @@ import java.util.List;
 public class Locators {
 
     public static List<Combatant> getTargetList(boolean isForDamage) {
-        boolean isEnemy = CombatMain.getCurrentCombatant().isEnemy();
+        boolean isEnemy = EncounterInfo.getCurrentCombatant().isEnemy();
         if (isEnemy == isForDamage) {
-            return CombatMain.getFriendlies();
+            return EncounterInfo.getFriendlies();
         }
-        return CombatMain.getEnemies();
+        return EncounterInfo.getEnemies();
     }
 
     public static <T> T getWithNameFromDirectory(List<T> source, Object obj) {

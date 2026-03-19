@@ -33,11 +33,6 @@ public class CompletedElementsList extends JPanel {
     private ScrollPane<Combatant> enemyPane;
     private ScrollPane<Scenario> scenarioPane;
 
-    public CompletedElementsList(TxtMenu root) {
-        this.root = root;
-        construct();
-    }
-
     public CompletedElementsList(Battle input, TxtMenu root) {
         this.root = root;
         construct();
