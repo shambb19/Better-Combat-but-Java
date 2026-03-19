@@ -28,7 +28,7 @@ public class PlayerQueue {
         this.enemies = new TeamQueue();
         this.enemies.addAll(enemies);
 
-        if (friendlies.getFirst().getInitiative() >= enemies.getFirst().getInitiative()) {
+        if (friendlies.getFirst().initiative() >= enemies.getFirst().initiative()) {
             currentCombatant = this.friendlies.getNext();
         } else {
             currentCombatant = this.enemies.getNext();
@@ -70,7 +70,7 @@ public class PlayerQueue {
      * @param combatants unsorted list
      */
     private void sortList(List<Combatant> combatants) {
-        combatants.sort((o1, o2) -> -1 * Integer.compare(o1.getInitiative(), o2.getInitiative()));
+        combatants.sort((o1, o2) -> -1 * Integer.compare(o1.initiative(), o2.initiative()));
     }
 
     static class TeamQueue extends ArrayList<Combatant> {

@@ -11,23 +11,23 @@ import encounter_info.Battle;
 import encounter_info.PlayerQueue;
 
 import javax.swing.*;
-import java.io.File;
+import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 
 public class CombatMain {
 
     private static CombatMenu COMBAT_MENU;
-    private static File INPUT;
+    private static URL INPUT;
     private static Battle BATTLE;
     private static PlayerQueue QUEUE;
 
     public static void run() {
-        INPUT = Objects.requireNonNullElse(INPUT, FileGetter.getFile());
+        INPUT = Objects.requireNonNullElse(INPUT, FileGetter.getUrl());
         completeSetup();
     }
 
-    public static void runWith(File file) {
+    public static void runWith(URL file) {
         INPUT = file;
         completeSetup();
     }
@@ -44,6 +44,7 @@ public class CombatMain {
             QUEUE = new PlayerQueue(BATTLE.friendlies(), BATTLE.enemies());
             COMBAT_MENU = new CombatMenu();
             COMBAT_MENU.setVisible(true);
+            logAction();
         });
     }
 

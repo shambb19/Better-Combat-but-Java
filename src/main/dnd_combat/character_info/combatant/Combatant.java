@@ -35,6 +35,10 @@ public class Combatant {
         inspiration = 0;
     }
 
+    public int inspiration() {
+        return inspiration;
+    }
+
     /**
      * Increments the number of inspirations used
      *
@@ -72,10 +76,6 @@ public class Combatant {
         return hpMax;
     }
 
-    public double getHealthPercent() {
-        return (double) hpCurrent / hpMax;
-    }
-
     /**
      * @return black if combatant is unconscious, green for safe hp, yellow for low hp, red for critical hp
      */
@@ -83,18 +83,10 @@ public class Combatant {
         if (!lifeStatus.isConscious()) {
             return Color.BLACK;
         }
-
         if (isEnemy()) {
             return ColorStyle.ENEMY.getColor();
         }
-
-        if (getHealthPercent() > 0.6) {
-            return Color.GREEN;
-        } else if (getHealthPercent() > 0.25) {
-            return Color.YELLOW;
-        } else {
-            return Color.RED;
-        }
+        return ColorStyle.getPercentColor(hpCurrent, hpMax);
     }
 
     public String getHealthBarString() {
@@ -124,7 +116,7 @@ public class Combatant {
         this.healthBar = healthBar;
     }
 
-    public int getInitiative() {
+    public int initiative() {
         return initiative;
     }
 
@@ -206,25 +198,6 @@ public class Combatant {
     @Override
     public String toString() {
         return name;
-    }
-
-    /**
-     * @return the string used to display the combatant's stats in the ActionPanel JPanel.
-     */
-    public String actionList() {
-        StringBuilder toString = new StringBuilder(name + "\n");
-        toString.append("Initiative: ").append(initiative).append("\n")
-                .append("Inspirations Used: ").append(inspiration).append("/2\n");
-
-        if (isPoisoned) {
-            toString.append("Poisoned\n");
-        }
-        if (isHealBlocked) {
-            toString.append("Healing Disabled\n");
-        }
-        hexedByList.forEach(hexer -> toString.append("Hexed by ").append(hexer.name()));
-
-        return toString.toString();
     }
 
     public ArrayList<String> toTxt() {

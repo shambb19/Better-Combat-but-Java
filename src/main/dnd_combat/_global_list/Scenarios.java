@@ -2,7 +2,7 @@ package _global_list;
 
 import encounter_info.Scenario;
 
-import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 
 public class Scenarios extends GlobalList<Scenario> {
@@ -12,7 +12,7 @@ public class Scenarios extends GlobalList<Scenario> {
     private Scenarios() {
     }
 
-    public static void init(File file) {
+    public static void init(URL file) {
         INSTANCE.init(file, Scenario.class);
     }
 

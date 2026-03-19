@@ -1,10 +1,10 @@
 package combat_menu.popup;
 
-import txt_input.Reader5e;
-
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class FileGetter {
 
@@ -12,6 +12,14 @@ public class FileGetter {
 
     public static File getFile() {
         return new FileGetter().file;
+    }
+
+    public static URL getUrl() {
+        try {
+            return new FileGetter().file.toURI().toURL();
+        } catch (MalformedURLException ignored) {
+            return null;
+        }
     }
 
     private FileGetter() {
@@ -24,21 +32,11 @@ public class FileGetter {
                 "text"
         ));
 
-        while (file == null) {
-            int result = fileChooser.showOpenDialog(null);
-            File selection = fileChooser.getSelectedFile();
+        int result = fileChooser.showOpenDialog(null);
+        File selection = fileChooser.getSelectedFile();
 
-            if (result == JFileChooser.APPROVE_OPTION && Reader5e.fileCompiles(selection)) {
-                file = selection;
-            } else {
-                JOptionPane.showConfirmDialog(
-                        null,
-                        "Could not read selected .txt file.",
-                        "Better Combat but Java",
-                        JOptionPane.DEFAULT_OPTION,
-                        JOptionPane.ERROR_MESSAGE
-                );
-            }
+        if (result == JFileChooser.APPROVE_OPTION) {
+            file = selection;
         }
     }
 

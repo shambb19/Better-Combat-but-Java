@@ -1,10 +1,7 @@
 package combat_menu.action_panel;
 
-import __main.CombatMain;
 import character_info.combatant.Combatant;
 import damage_implements.Implement;
-import encounter_info.PlayerQueue;
-import format.SwingStyles;
 import util.Locators;
 
 import javax.swing.*;
@@ -13,10 +10,7 @@ import java.awt.*;
 
 public class ActionPanel extends JPanel {
 
-    private final PlayerQueue queue;
-
-    private final JTextArea turnInformation;
-    private final JProgressBar currentCombatantHealthBar;
+    private final TurnInformationPanel turnInformation;
 
     private final JPanel cardPanel;
     private final CardLayout cardLayout = new CardLayout();
@@ -33,35 +27,21 @@ public class ActionPanel extends JPanel {
     }
 
     private ActionPanel() {
-        queue = CombatMain.getQueue();
-
-        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        setLayout(new GridBagLayout());
         setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        JPanel currentCombatantPanel = new JPanel();
-        currentCombatantPanel.setLayout(new BoxLayout(currentCombatantPanel, BoxLayout.Y_AXIS));
-        SwingStyles.addLabeledBorder(currentCombatantPanel, "Current Combatant");
+        GridBagConstraints gbc = new GridBagConstraints();
 
-        turnInformation = new JTextArea();
-        turnInformation.setOpaque(false);
-        turnInformation.setBackground(new Color(0, 0, 0, 0));
-        turnInformation.setLineWrap(true);
-        turnInformation.setWrapStyleWord(true);
+        gbc.gridx = 0;
+        gbc.fill = GridBagConstraints.BOTH;
 
-        JScrollPane scrollPane = new JScrollPane(turnInformation);
-        scrollPane.setBorder(null);
-        currentCombatantPanel.add(scrollPane);
-
-        currentCombatantHealthBar = new JProgressBar();
-        currentCombatantHealthBar.setStringPainted(true);
-        currentCombatantHealthBar.setBorder(new EmptyBorder(10, 10, 10, 10));
-        copyHealthBarToCurrent();
-
-        currentCombatantPanel.add(turnInformation);
-        currentCombatantPanel.add(currentCombatantHealthBar);
+        turnInformation = TurnInformationPanel.newInstance();
+        gbc.gridy = 0;
+        gbc.weightx = 1.0;
+        gbc.weighty = 0.3;
+        add(turnInformation, gbc);
 
         cardPanel = new JPanel(cardLayout);
-
         buttonsPanel = ActionButtonsPanel.newInstance(this);
         JPanel attackPanel = AttackPanel.newInstance(this);
         JPanel healPanel = HealPanel.newInstance(this);
@@ -77,8 +57,10 @@ public class ActionPanel extends JPanel {
         cardPanel.add(healPanel, HEAL_OPTION);
         cardPanel.add(inspirationPanel, INSPIRATION_OPTION);
 
-        add(currentCombatantPanel);
-        add(cardPanel);
+        gbc.gridy = 1;
+        gbc.weighty = 0.7;
+        gbc.insets = new Insets(10, 0, 0, 0);
+        add(cardPanel, gbc);
 
         updateTurnInformation();
     }
@@ -108,33 +90,7 @@ public class ActionPanel extends JPanel {
     }
 
     public void updateTurnInformation() {
-        turnInformation.setText(queue.getCurrentCombatant().actionList());
-
-        if (queue.getCurrentCombatant().isEnemy()) {
-            turnInformation.setForeground(new Color(122, 160, 245));
-        } else {
-            turnInformation.setForeground(UIManager.getColor("Label.foreground"));
-        }
-
-        turnInformation.setEditable(false);
+        turnInformation.update();
         buttonsPanel.updateTurnInformation();
-
-        copyHealthBarToCurrent();
     }
-
-    private void copyHealthBarToCurrent() {
-        JProgressBar mimic = queue.getCurrentCombatant().getHealthBar();
-
-        currentCombatantHealthBar.setString(mimic.getString());
-        currentCombatantHealthBar.setMinimum(mimic.getMinimum());
-        currentCombatantHealthBar.setMaximum(mimic.getMaximum());
-        currentCombatantHealthBar.setForeground(mimic.getForeground());
-
-        if (queue.getCurrentCombatant().isEnemy()) {
-            currentCombatantHealthBar.setValue(currentCombatantHealthBar.getMaximum());
-        } else {
-            currentCombatantHealthBar.setValue(mimic.getValue());
-        }
-    }
-
 }

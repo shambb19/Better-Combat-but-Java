@@ -7,6 +7,7 @@ import txt_input.CampaignWriter;
 
 import javax.swing.*;
 import java.awt.*;
+import java.net.URL;
 
 import static util.Message.confirmIf;
 import static util.Message.template;
@@ -50,7 +51,7 @@ public class CombatEndPopup extends JFrame {
     public JButton downloadUpdatedPartyTxtButton() {
         JButton button = new JButton("Download Updated .txt File");
         button.putClientProperty("JButton.buttonType", "roundRect");
-        button.addActionListener(e -> download(button));
+        button.addActionListener(e -> download());
         return button;
     }
 
@@ -76,19 +77,14 @@ public class CombatEndPopup extends JFrame {
         button.setText("Party Level Increased");
     }
 
-    private void download(JButton button) {
-        setVisible(false);
-        JFileChooser fileChooser = new JFileChooser(new CampaignWriter().getFile());
-        int result = fileChooser.showSaveDialog(CombatMain.getMenu());
-        if (result == JFileChooser.APPROVE_OPTION) {
-            String message = "Downloaded to the Downloads folder! Note that all dead NPCs and unconscious enemies " +
-                    "have been removed from the campaign. If this is a mistake, you can manually edit the old file to match " +
-                    "the conditions after this encounter, or you can re-add them in the Campaign Creator.";
-            template(message);
+    private void download() {
+        URL savedFile = new CampaignWriter().getFile();
 
-            button.setText("Re-download .txt File");
+        if (savedFile != null) {
+            template("Successfully saved to Downloads");
+        } else {
+            System.err.println("Failed to save the campaign file.");
         }
-        setVisible(true);
     }
 
     public void quit() {

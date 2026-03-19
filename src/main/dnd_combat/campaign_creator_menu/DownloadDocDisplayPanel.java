@@ -12,7 +12,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
-import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -26,14 +26,6 @@ public class DownloadDocDisplayPanel extends JPanel {
     private final List<Combatant> friendlies;
     private final List<Combatant> enemies;
     private final List<Scenario> scenarios;
-
-    public DownloadDocDisplayPanel() {
-        friendlies = new ArrayList<>();
-        enemies = new ArrayList<>();
-        scenarios = new ArrayList<>();
-
-        construct();
-    }
 
     public DownloadDocDisplayPanel(Battle input) {
         friendlies = input.friendlies();
@@ -108,12 +100,12 @@ public class DownloadDocDisplayPanel extends JPanel {
         destination.sort(Comparator.comparing(Object::toString));
     }
 
-    private File download() {
+    private URL download() {
         CampaignWriter writer = new CampaignWriter("New Campaign", friendlies, enemies, scenarios);
-        File savedFile = writer.getFile();
+        URL savedFile = writer.getFile();
 
-        if (savedFile != null && savedFile.exists()) {
-            template("Downloaded! Saved to: " + savedFile.getAbsolutePath());
+        if (savedFile != null) {
+            template("Successfully saved to Downloads");
             return savedFile;
         } else {
             System.err.println("Failed to save the campaign file.");

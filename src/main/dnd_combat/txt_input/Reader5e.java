@@ -75,10 +75,13 @@ public class Reader5e {
         return linesRaw.toArray(arr);
     }
 
-    public static boolean fileCompiles(File file) {
+    public static boolean fileCompiles(URL file) {
+        if (file == null) {
+            return false;
+        }
+
         try {
-            List<String> lines = Files.readAllLines(file.toPath());
-            getCode(lines);
+            getInstancesFromCode(file, Object.class);
             return true;
         } catch (Exception ignored) {
             return false;

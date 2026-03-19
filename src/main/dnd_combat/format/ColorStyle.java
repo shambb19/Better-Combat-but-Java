@@ -18,6 +18,8 @@ public enum ColorStyle {
     COMMENT(Color.GRAY),
     EMPTY(Color.BLACK),
 
+    FLATLAF_TEXT_DEFAULT(new Color(167, 173, 186)),
+
     DARKER_GREEN(new Color(15, 68, 38)),
     GREEN_APPLE(new Color(172, 255, 36)),
     DARKER_RED(new Color(150, 0, 0)),
@@ -31,6 +33,17 @@ public enum ColorStyle {
 
     public Color getColor() {
         return color;
+    }
+
+    public static Color getPercentColor(int val, int max) {
+        double percent = (double) val / max;
+        if (percent > 0.6) {
+            return GREEN_APPLE.getColor();
+        } else if (percent > 0.25) {
+            return Color.YELLOW;
+        } else {
+            return ORANGE_ISH_RED.getColor();
+        }
     }
 
 }

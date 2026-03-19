@@ -2,6 +2,7 @@ package campaign_creator_menu;
 
 import combat_menu.listener.FieldEditListener;
 import format.ColorStyle;
+import util.TxtReader;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -11,13 +12,14 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.List;
 
 import static format.ColorStyle.*;
 import static util.TxtReader.*;
 
 public class ColoredTxtDisplay extends JTextPane {
 
-    private ArrayList<String> lines;
+    private List<String> lines;
 
     public ColoredTxtDisplay(ArrayList<String> lines) {
         this.lines = lines;
@@ -31,7 +33,8 @@ public class ColoredTxtDisplay extends JTextPane {
         }
     }
 
-    public void setLines(ArrayList<String> lines) {
+    public void setLines(List<String> lines) {
+        lines.replaceAll(TxtReader::withoutComments);
         this.lines = lines;
         addLines();
     }

@@ -9,7 +9,6 @@ import util.Locators;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.TitledBorder;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 import java.awt.*;
@@ -19,13 +18,11 @@ import java.util.Vector;
 public class HealPanel extends JPanel {
 
     private final ActionPanel root;
-
     private static final NPC DEFAULT_SELECTION = new NPC("Select a Combatant", 0, 0, false);
 
     private final JComboBox<Combatant> targetComboBox;
-    private final JLabel minLabel;
-    private final JLabel maxLabel;
     private final JSlider healthSlider;
+    private final JProgressBar healthBar;
     private final JButton okButton;
 
     public static HealPanel newInstance(ActionPanel root) {
@@ -36,50 +33,109 @@ public class HealPanel extends JPanel {
         this.root = root;
 
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        setBorder(new EmptyBorder(40, 10, 40, 10));
+        setBorder(new EmptyBorder(15, 15, 15, 15));
         addAncestorListener(resetOnSelection());
 
         targetComboBox = new JComboBox<>(new Vector<>(getEligibleCombatants()));
         setupComboBoxAppearance();
-        targetComboBox.addActionListener(e -> logComboBoxChange());
+        targetComboBox.addActionListener(e -> handleSelectionChange());
 
-        minLabel = new JLabel("--");
-        minLabel.setForeground(ColorStyle.ORANGE_ISH_RED.getColor());
+        healthBar = new JProgressBar(SwingConstants.HORIZONTAL);
+        healthBar.setStringPainted(true);
+        healthBar.setPreferredSize(new Dimension(0, 25));
+        healthBar.setFont(new Font("SansSerif", Font.BOLD, 12));
 
-        maxLabel = new JLabel("--");
-        maxLabel.setForeground(ColorStyle.GREEN_APPLE.getColor());
-
-        healthSlider = new JSlider(0, 0, 0);
+        healthSlider = new JSlider(0, 100, 0);
         healthSlider.setEnabled(false);
-        healthSlider.setMajorTickSpacing(1);
-        healthSlider.setSnapToTicks(true);
-        healthSlider.addChangeListener(e -> logSliderUpdate());
+        healthSlider.addChangeListener(e -> updateHealPreview());
 
         okButton = new JButton("Select a Combatant");
-        okButton.setBackground(ColorStyle.DARKER_GREEN.getColor());
+        okButton.setBackground(ColorStyle.GREEN_APPLE.getColor());
         okButton.setForeground(Color.BLACK);
         okButton.setEnabled(false);
 
         JPanel confirmCancelPanel = SwingStyles.getConfirmCancelPanel(
                 okButton,
-                e -> logAndClose(),
+                e -> logAndContinue(),
                 e -> root.returnToButtons()
         );
 
-        add(new JLabel("Select Target:"));
         add(targetComboBox);
-        add(getSliderPanel());
+        add(createActionCenter());
         add(confirmCancelPanel);
+    }
+
+    private JPanel createActionCenter() {
+        JPanel center = new JPanel();
+        center.setLayout(new BoxLayout(center, BoxLayout.Y_AXIS));
+
+        JLabel header = new JLabel("Drag to Change Heal Amount");
+        header.setForeground(Color.GRAY);
+        header.setBorder(new EmptyBorder(0, 5, 0, 0));
+
+        JPanel sliderContainer = new JPanel();
+        sliderContainer.setLayout(new BoxLayout(sliderContainer, BoxLayout.Y_AXIS));
+        sliderContainer.add(healthBar);
+        sliderContainer.add(Box.createVerticalStrut(10));
+        sliderContainer.add(healthSlider);
+
+        center.add(header);
+        center.add(sliderContainer);
+        return center;
+    }
+
+    private void updateHealPreview() {
+        Combatant target = (Combatant) targetComboBox.getSelectedItem();
+        if (target == null) return;
+
+        int projectedHp = healthSlider.getValue();
+        int healAmount = projectedHp - target.hp();
+
+        healthBar.setValue(projectedHp);
+        healthBar.setString(String.format("%d / %d (+%d HP)", projectedHp, target.maxHp(), healAmount));
+
+        healthBar.setForeground(ColorStyle.getPercentColor(projectedHp, target.maxHp()));
+
+        okButton.setText("Heal " + target.name() + " for " + healAmount + " HP");
+    }
+
+    private void handleSelectionChange() {
+        Combatant selected = (Combatant) targetComboBox.getSelectedItem();
+        if (selected == null || selected == DEFAULT_SELECTION) return;
+
+        healthBar.setMinimum(0);
+        healthBar.setMaximum(selected.maxHp());
+
+        healthSlider.setEnabled(true);
+        healthSlider.setMinimum(selected.hp());
+        healthSlider.setMaximum(selected.maxHp());
+        healthSlider.setValue(selected.hp());
+
+        okButton.setEnabled(true);
+        updateHealPreview();
+    }
+
+    private void logAndContinue() {
+        try {
+            Combatant target = (Combatant) targetComboBox.getSelectedItem();
+            if (target != null) {
+                int healAmount = healthSlider.getValue() - target.hp();
+                target.heal(healAmount);
+                CombatMain.logAction();
+                root.returnToButtons();
+            }
+        } catch (Exception ignored) {
+        }
     }
 
     private void setupComboBoxAppearance() {
         targetComboBox.setRenderer(new DefaultListCellRenderer() {
             @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                if (value instanceof Combatant c) {
+            public Component getListCellRendererComponent(JList<?> list, Object val, int i, boolean isSel, boolean cellFocus) {
+                super.getListCellRendererComponent(list, val, i, isSel, cellFocus);
+                if (val instanceof Combatant c) {
                     setText(String.format("%s (%d/%d HP)", c.name(), c.hp(), c.maxHp()));
-                } else if (value == null) {
+                } else {
                     setText("Choose a combatant...");
                 }
                 return this;
@@ -88,105 +144,29 @@ public class HealPanel extends JPanel {
         targetComboBox.setSelectedIndex(-1);
     }
 
-    private JPanel getSliderPanel() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
-        panel.setBorder(BorderFactory.createCompoundBorder(
-                new EmptyBorder(10, 10, 10, 10),
-                new TitledBorder(
-                        BorderFactory.createEtchedBorder(),
-                        "Drag to Change Heal Amount",
-                        TitledBorder.LEFT,
-                        TitledBorder.TOP
-                )
-        ));
-
-        panel.add(minLabel);
-        panel.add(healthSlider);
-        panel.add(maxLabel);
-        return panel;
-    }
-
-    private void logAndClose() {
-        try {
-            Combatant target = (Combatant) targetComboBox.getSelectedItem();
-            assert target != null;
-
-            int healAmount = healthSlider.getValue() - target.hp();
-            target.heal(healAmount);
-
-            CombatMain.logAction();
-            root.returnToButtons();
-        } catch (NullPointerException ignored) {
-        }
-    }
-
-    private void logSliderUpdate() {
-        Combatant target = (Combatant) targetComboBox.getSelectedItem();
-        if (target == null) {
-            return;
-        }
-
-        int healAmount = healthSlider.getValue() - target.hp();
-        okButton.setText("Heal " + target.name() + " for " + healAmount + " hp");
-    }
-
-    private void logComboBoxChange() {
-        Combatant selected = (Combatant) targetComboBox.getSelectedItem();
-
-        if (selected == null || selected == DEFAULT_SELECTION) {
-            return;
-        }
-
-        int hp = selected.hp();
-        int hpMax = selected.maxHp();
-
-        healthSlider.setEnabled(true);
-        healthSlider.setMinimum(hp);
-        healthSlider.setMaximum(hpMax);
-        healthSlider.setValue(hp + 1);
-
-        minLabel.setText(hp + " (Current)");
-        maxLabel.setText(hpMax + " (Max)");
-
-        okButton.setEnabled(true);
-
-        logSliderUpdate();
-    }
-
     private List<Combatant> getEligibleCombatants() {
-        List<Combatant> allOnTeam = Locators.getTargetList(false);
-
-        return allOnTeam.stream()
-                .filter(combatant -> {
-                    if (combatant == DEFAULT_SELECTION) {
-                        return true;
-                    }
-                    return combatant.hp() < combatant.maxHp();
-                })
+        return Locators.getTargetList(false).stream()
+                .filter(c -> c == DEFAULT_SELECTION || c.hp() < c.maxHp())
                 .toList();
     }
 
     private AncestorListener resetOnSelection() {
         return new AncestorListener() {
             @Override
-            public void ancestorAdded(AncestorEvent event) {
+            public void ancestorAdded(AncestorEvent e) {
                 targetComboBox.setSelectedIndex(-1);
-                minLabel.setText("--");
-                maxLabel.setText("--");
-                healthSlider.setValue(0);
                 healthSlider.setEnabled(false);
+                healthBar.setValue(0);
+                healthBar.setString("");
                 okButton.setText("Select a Combatant");
+                okButton.setEnabled(false);
             }
 
-            @Override
-            public void ancestorRemoved(AncestorEvent event) {
+            public void ancestorRemoved(AncestorEvent e) {
             }
 
-            @Override
-            public void ancestorMoved(AncestorEvent event) {
+            public void ancestorMoved(AncestorEvent e) {
             }
         };
     }
-
 }

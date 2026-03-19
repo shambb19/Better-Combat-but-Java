@@ -10,6 +10,7 @@ import util.Message;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URL;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,7 +65,7 @@ public class CampaignWriter {
         return code;
     }
 
-    public File getFile() {
+    public URL getFile() {
         try (FileWriter writer = new FileWriter(file)) {
             getCode().forEach(line -> {
                 try {
@@ -73,7 +74,7 @@ public class CampaignWriter {
                     e.printStackTrace();
                 }
             });
-            return file;
+            return file.toURI().toURL();
         } catch (IOException e) {
             Message.throwFileDownloadError(null, e);
             return null;

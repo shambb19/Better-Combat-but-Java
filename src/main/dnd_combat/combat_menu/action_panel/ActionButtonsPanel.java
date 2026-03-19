@@ -30,7 +30,7 @@ public class ActionButtonsPanel extends JPanel {
     private ActionButtonsPanel(ActionPanel root) {
         queue = CombatMain.getQueue();
 
-        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        setLayout(new GridLayout(2, 2, 10, 10));
         setBorder(new EmptyBorder(10, 10, 10, 10));
 
         JButton attackButton = new JButton();
@@ -67,21 +67,12 @@ public class ActionButtonsPanel extends JPanel {
         endTurnButton.putClientProperty("JButton.buttonType", "toolBarButton");
         setIcon(endTurnButton, icons.END_TURN);
 
-        addPanel(attackButton, healButton, inspirationButton, endTurnButton);
+        add(attackButton);
+        add(healButton);
+        add(inspirationButton);
+        add(endTurnButton);
 
         updateTurnInformation();
-    }
-
-    private void addPanel(JComponent... comps) {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-
-        for (JComponent comp : comps) {
-            panel.add(comp);
-            comp.setAlignmentX(Component.CENTER_ALIGNMENT);
-        }
-
-        add(panel);
     }
 
     public void updateTurnInformation() {

@@ -9,7 +9,7 @@ import encounter_info.Scenario;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.io.File;
+import java.net.URL;
 
 public class TxtMenu extends JFrame {
 
@@ -22,19 +22,11 @@ public class TxtMenu extends JFrame {
     private final ScenarioInputPanel scenarioPanel;
     private final DownloadDocDisplayPanel displayPanel;
 
-    public TxtMenu() {
-        initialize();
-
-        completedList = new CompletedElementsList(this);
-
-        inputPanel = new CombatantInputPanel(this);
-        scenarioPanel = new ScenarioInputPanel(completedList, this);
-        displayPanel = new DownloadDocDisplayPanel();
-        splitPane = new LowerSplitPane(inputPanel, scenarioPanel, displayPanel);
-        construct();
+    public static TxtMenu newInstance(URL input) {
+        return new TxtMenu(input);
     }
 
-    public TxtMenu(File input) {
+    private TxtMenu(URL input) {
         initialize();
 
         Combatants.init(input);

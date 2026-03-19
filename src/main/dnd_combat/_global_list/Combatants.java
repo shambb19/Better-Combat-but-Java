@@ -4,7 +4,7 @@ import character_info.combatant.Combatant;
 import encounter_info.Battle;
 import encounter_info.Scenario;
 
-import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,7 +18,7 @@ public class Combatants extends GlobalList<Combatant> {
     private Combatants() {
     }
 
-    public static void init(File file) {
+    public static void init(URL file) {
         INSTANCE.init(file, Combatant.class);
     }
 

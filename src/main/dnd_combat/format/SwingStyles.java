@@ -67,4 +67,11 @@ public class SwingStyles {
         return panel;
     }
 
+    public static JButton simpleButton(String name, ActionListener listener) {
+        JButton button = new JButton(name);
+        button.putClientProperty("JButton.buttonType", "roundRect");
+        button.addActionListener(listener);
+        return button;
+    }
+
 }

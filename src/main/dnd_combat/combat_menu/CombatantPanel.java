@@ -19,7 +19,7 @@ public class CombatantPanel extends JPanel {
         setLayout(new BorderLayout());
 
         setBorder(new EmptyBorder(8, 8, 8, 8));
-        setBackground(UIManager.getColor("LayeredPane.background"));
+        //setBackground(UIManager.getColor("LayeredPane.background"));
 
         nameLabel = new JLabel(thisCombatant.name());
         nameLabel.putClientProperty("JComponent.roundRect", true);
