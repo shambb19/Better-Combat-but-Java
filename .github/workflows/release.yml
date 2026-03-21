@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*' # This triggers the script whenever you push a tag like v1.0
 
+permissions:
+  contents: write
+
 jobs:
   qodana:
     runs-on: ubuntu-latest
