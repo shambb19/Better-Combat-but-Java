@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 
 public class CombatantInputPanel extends JPanel {
 
-    private final TxtMenu root;
+    private final CampaignCreatorMenu root;
 
     private final JCheckBox isNpcBox;
     private final JCheckBox isEnemyBox;
@@ -37,14 +37,20 @@ public class CombatantInputPanel extends JPanel {
 
     private final JPanel listSplitPane;
 
-    public CombatantInputPanel(TxtMenu root) {
+    public CombatantInputPanel(CampaignCreatorMenu root) {
         this.root = root;
         setLayout(new BorderLayout(5, 5));
         SwingStyles.addLabeledBorder(this, "Combatant Input");
 
         isNpcBox = new JCheckBox("NPC?");
-        isNpcBox.addActionListener(e -> toggleNpc(isNpcBox.isSelected()));
+        isNpcBox.addChangeListener(e -> toggleNpc(isNpcBox.isSelected()));
+
         isEnemyBox = new JCheckBox("Enemy?");
+        isEnemyBox.addChangeListener(e -> {
+            if (isEnemyBox.isSelected()) {
+                isNpcBox.setSelected(true);
+            }
+        });
 
         List.of(
                 maxHpField, acField, curHpField, levelField
@@ -135,7 +141,7 @@ public class CombatantInputPanel extends JPanel {
             root.logCombatantCompleted(combatant);
             resetAndClose();
         } catch (Exception error) {
-            JOptionPane.showMessageDialog(root, "Error: " + error.getMessage(), TxtMenu.TITLE, JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(root, "Error: " + error.getMessage(), CampaignCreatorMenu.TITLE, JOptionPane.ERROR_MESSAGE);
             Logger.getAnonymousLogger().log(
                     Level.SEVERE, "logAndGetCombatant in CombatantInputPanel: error parsing fields", error
             );

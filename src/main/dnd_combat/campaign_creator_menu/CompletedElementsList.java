@@ -28,12 +28,12 @@ public class CompletedElementsList extends JPanel {
             "New Scenario", new HashMap<>(), new HashMap<>()
     );
 
-    private final TxtMenu root;
+    private final CampaignCreatorMenu root;
     private ScrollPane<Combatant> friendlyPane;
     private ScrollPane<Combatant> enemyPane;
     private ScrollPane<Scenario> scenarioPane;
 
-    public CompletedElementsList(Battle input, TxtMenu root) {
+    public CompletedElementsList(Battle input, CampaignCreatorMenu root) {
         this.root = root;
         construct();
 
@@ -116,7 +116,7 @@ public class CompletedElementsList extends JPanel {
 
     static class ScrollPane<T> extends JScrollPane {
 
-        private final TxtMenu root;
+        private final CampaignCreatorMenu root;
         private final CompletedElementsList parent;
 
         private final T NEW_OPTION;
@@ -125,7 +125,7 @@ public class CompletedElementsList extends JPanel {
         private final DefaultListModel<T> model;
         private final ListSelectionListener listener;
 
-        public ScrollPane(T newOption, TxtMenu root, CompletedElementsList parent) {
+        public ScrollPane(T newOption, CampaignCreatorMenu root, CompletedElementsList parent) {
             this.root = root;
             this.parent = parent;
 

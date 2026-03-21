@@ -7,6 +7,7 @@ import encounter_info.Scenario;
 import format.SwingStyles;
 import txt_input.CampaignWriter;
 import util.Locators;
+import util.Message;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,11 +22,10 @@ import static util.Message.template;
 
 public class DownloadDocDisplayPanel extends JPanel {
 
-    private ColoredTxtDisplay display;
-
     private final List<Combatant> friendlies;
     private final List<Combatant> enemies;
     private final List<Scenario> scenarios;
+    private ColoredTxtDisplay display;
 
     public DownloadDocDisplayPanel(Battle input) {
         friendlies = input.friendlies();
@@ -80,7 +80,7 @@ public class DownloadDocDisplayPanel extends JPanel {
 
     @SuppressWarnings("unchecked")
     private void addOrReplace(Object obj) {
-        List destination = switch (obj) {
+        var destination = switch (obj) {
             case Combatant c when c.isEnemy() -> enemies;
             case Combatant c when !c.isEnemy() -> friendlies;
             case Scenario ignored -> scenarios;
@@ -90,19 +90,31 @@ public class DownloadDocDisplayPanel extends JPanel {
         Object oldVer = Locators.getWithNameFromDirectory(destination, obj);
 
         if (oldVer != null && destination.contains(oldVer)) {
+            int confirmOption = Message.question("Another item has been found with the same name. " +
+                    "Would you still like to add this? " +
+                    "Doing so will overwrite the existing item.");
+            if (confirmOption == JOptionPane.NO_OPTION) {
+                return;
+            }
+
             int idx = destination.indexOf(oldVer);
-            destination.set(idx, obj);
+            ((List<Object>) destination).set(idx, obj);
         } else {
-            destination.add(obj);
+            ((List<Object>) destination).add(obj);
         }
 
         destination.sort(Comparator.comparing(Object::toString));
     }
 
     private URL download() {
-        CampaignWriter writer = new CampaignWriter("New Campaign", friendlies, enemies, scenarios);
-        URL savedFile = writer.getURL();
+        CampaignWriter writer = new CampaignWriter(friendlies, enemies, scenarios);
 
+        int choice = Message.question("Would you like to download this campaign?");
+        if (choice == JOptionPane.NO_OPTION) {
+            return writer.getUrl("file_param", false);
+        }
+
+        URL savedFile = writer.getUrl("Campaign File", true);
         if (savedFile != null) {
             template("Successfully saved to Downloads");
             return savedFile;

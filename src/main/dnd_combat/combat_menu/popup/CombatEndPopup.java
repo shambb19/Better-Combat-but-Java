@@ -14,7 +14,7 @@ import java.net.URL;
 import static util.Message.confirmIf;
 import static util.Message.template;
 
-public class CombatEndPopup extends JFrame {
+public class CombatEndPopup extends JDialog {
 
     private static final String victoryMessage = "Victory! You have won this combat.";
     private static final String victoryTitle = "Victory";
@@ -28,8 +28,11 @@ public class CombatEndPopup extends JFrame {
 
     private CombatEndPopup(boolean isVictory) {
         setTitle(isVictory ? victoryTitle : lossTitle);
+        setModal(false);
+        setAlwaysOnTop(true);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setLayout(new GridLayout(0, 1));
+        setIconImage(Main.getImage());
 
         SwingStyles.addComponents(this,
                 new JLabel(isVictory ? victoryMessage : lossMessage), new JSeparator(),
@@ -79,7 +82,7 @@ public class CombatEndPopup extends JFrame {
     }
 
     private void download() {
-        URL savedFile = new CampaignWriter().getURL();
+        URL savedFile = new CampaignWriter().getUrl("Campaign Post Encounter", true);
 
         if (savedFile != null) {
             template("Successfully saved to Downloads");

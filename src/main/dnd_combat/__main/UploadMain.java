@@ -22,7 +22,6 @@ public class UploadMain extends JDialog {
 
     private static final String INSTRUCTIONS = "Select a file from the options below. " +
             "The native file includes starter code for the Kyreun Campaign and an example Orc scenario.";
-    public static final ImageIcon ICON = getScaledIcon();
 
     private JButton combatButton, creatorButton;
     private JPanel displayPanel;
@@ -39,9 +38,12 @@ public class UploadMain extends JDialog {
 
     private UploadMain() {
         setTitle("Campaign File Selection");
+        setModal(false);
+        setAlwaysOnTop(true);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setMinimumSize(new Dimension(900, 500));
         setLayout(new GridLayout(1, 2));
+        setIconImage(Main.getImage());
 
         initActionPanel();
         initDisplayPanel();
@@ -62,7 +64,7 @@ public class UploadMain extends JDialog {
         gbc.anchor = GridBagConstraints.NORTH;
         gbc.insets = new Insets(5, 0, 5, 0);
 
-        JLabel logoLabel = new JLabel(ICON);
+        JLabel logoLabel = new JLabel(Main.getIcon());
         actionPanel.add(logoLabel, gbc);
 
         gbc.gridy++;
@@ -83,7 +85,11 @@ public class UploadMain extends JDialog {
         );
         uploadPanel.add(SwingStyles.simpleButton(
                 "Upload Existing (.txt)",
-                e -> logNewInput(FileGetter.getUrl()))
+                e -> {
+                    setVisible(false);
+                    logNewInput(FileGetter.getUrl());
+                    setVisible(true);
+                })
         );
         uploadPanel.add(SwingStyles.simpleButton(
                 "Load Kyreun Starter",
@@ -166,10 +172,12 @@ public class UploadMain extends JDialog {
 
             if (compiles) {
                 codeDisplay.setLines(lines);
+                codeDisplay.setCaretPosition(0);
                 scrollPane.setViewportView(codeDisplay);
                 header.setText("✔ Valid Configuration Found");
             } else {
                 fallbackDisplay.setText(String.join("\n", lines));
+                fallbackDisplay.setCaretPosition(0);
                 scrollPane.setViewportView(fallbackDisplay);
                 header.setText("✘ Syntax Error(s): Ensure Formatting Matches Current Version (see README.md)");
             }
@@ -182,7 +190,7 @@ public class UploadMain extends JDialog {
         Color highlight = compiles ? ColorStyle.PARTY.getColor() : ColorStyle.ORANGE_ISH_RED.getColor();
         updateBorder(highlight);
         combatButton.setEnabled(compiles);
-        creatorButton.setEnabled(compiles);
+        creatorButton.setEnabled(true);
     }
 
     private void resetDisplay() {
@@ -190,6 +198,7 @@ public class UploadMain extends JDialog {
         scrollPane.setViewportView(new JLabel("New Campaign File will be generated.", SwingConstants.CENTER));
         updateBorder(ColorStyle.NPC.getColor());
         combatButton.setEnabled(false);
+        creatorButton.setEnabled(true);
     }
 
     private void updateBorder(Color accent) {
@@ -199,15 +208,5 @@ public class UploadMain extends JDialog {
         ));
     }
 
-    private static ImageIcon getScaledIcon() {
-        URL imgUrl = Main.class.getResource("/logo.png");
-        if (imgUrl == null) return null;
 
-        ImageIcon originalIcon = new ImageIcon(imgUrl);
-        int width = (int) (originalIcon.getIconWidth() * 0.5);
-        int height = (int) (originalIcon.getIconHeight() * 0.5);
-
-        Image scaledImage = originalIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
-        return new ImageIcon(scaledImage);
-    }
 }

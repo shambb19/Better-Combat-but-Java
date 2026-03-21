@@ -29,6 +29,7 @@ public class EncounterListPanel extends JPanel {
 
     public JScrollPane getScrollPane() {
         JScrollPane host = new JScrollPane();
+        host.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         host.setViewportView(this);
         host.setBorder(null);
         return host;

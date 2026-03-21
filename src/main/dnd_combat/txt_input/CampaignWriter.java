@@ -23,37 +23,16 @@ public class CampaignWriter {
     private final List<Combatant> enemySource;
     private final List<Scenario> scenarioSource;
 
-    private final File file;
     private ArrayList<String> code;
 
     public CampaignWriter() {
-        int numRand = (int) (Math.random()*1000);
-        file = new File(
-                new File(System.getProperty("user.home"), "Downloads"),
-                "campaign post encounter " + LocalDate.now() + " " + numRand + ".txt"
-        );
 
         friendlySource = Combatants.toList().stream().filter(combatant -> !combatant.isEnemy()).toList();
         enemySource = Combatants.toList().stream().filter(Combatant::isEnemy).toList();
         scenarioSource = Scenarios.toList();
     }
 
-    public CampaignWriter(String fileTitle,
-                          List<Combatant> friendlies, List<Combatant> enemies, List<Scenario> scenarios) {
-        int numRand = (int) (Math.random()*1000);
-        file = new File(
-                new File(System.getProperty("user.home"), "Downloads"),
-                fileTitle + " " + LocalDate.now() + " " + numRand + ".txt"
-        );
-
-        friendlySource = friendlies;
-        enemySource = enemies;
-        scenarioSource = scenarios;
-    }
-
     public CampaignWriter(List<Combatant> friendlies, List<Combatant> enemies, List<Scenario> scenarios) {
-        file = null;
-
         friendlySource = friendlies;
         enemySource = enemies;
         scenarioSource = scenarios;
@@ -67,20 +46,41 @@ public class CampaignWriter {
         return code;
     }
 
-    public URL getURL() {
-        try (FileWriter writer = new FileWriter(file)) {
-            getCode().forEach(line -> {
-                try {
-                    writer.write(line + "\n");
-                } catch (IOException e) {
-                    Logger.getAnonymousLogger().log(
-                            Level.SEVERE, "getURL in CampaignWriter: would not write to File", e
-                    );
-                }
-            });
-            return file.toURI().toURL();
+    public URL getUrl(String fileName, boolean sendToDownloads) {
+        try {
+            File file;
+            if (sendToDownloads) {
+                int numRand = (int) (Math.random() * 1000);
+                file = new File(
+                        new File(System.getProperty("user.home"), "Downloads"),
+                        fileName + LocalDate.now() + " " + numRand + ".txt"
+                );
+            } else {
+                file = File.createTempFile("campaignParam", ".txt");
+                file.deleteOnExit();
+            }
+
+            try (FileWriter writer = new FileWriter(file)) {
+                getCode().forEach(line -> {
+                    try {
+                        writer.write(line + "\n");
+                    } catch (IOException e) {
+                        Logger.getAnonymousLogger().log(
+                                Level.SEVERE, "getURL in CampaignWriter: would not write to File", e
+                        );
+                    }
+                });
+                return file.toURI().toURL();
+            } catch (IOException e) {
+                Message.throwFileDownloadError(null, e);
+                return null;
+            }
+
         } catch (IOException e) {
             Message.throwFileDownloadError(null, e);
+            Logger.getAnonymousLogger().log(
+                    Level.SEVERE, "getUrl in CampaignWriter: could not create or save file"
+            );
             return null;
         }
     }

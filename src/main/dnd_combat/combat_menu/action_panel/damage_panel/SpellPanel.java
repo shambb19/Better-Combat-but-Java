@@ -1,9 +1,10 @@
-package combat_menu.action_panel;
+package combat_menu.action_panel.damage_panel;
 
 import __main.EncounterInfo;
 import __main.Main;
 import character_info.combatant.Combatant;
 import character_info.combatant.PC;
+import combat_menu.action_panel.ActionPanel;
 import combat_menu.listener.DieRollListener;
 import damage_implements.Spell;
 import format.ColorStyle;
@@ -181,12 +182,6 @@ public class SpellPanel extends JPanel {
         } else {
             informAttackFail();
         }
-    }
-
-    public void reset() {
-        targetBox.setSelectedIndex(-1);
-        spellsBox.setSelectedIndex(-1);
-        attackComponentInputFields.forEach((comp, field) -> field.setText(""));
     }
 
 }

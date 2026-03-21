@@ -2,6 +2,8 @@ package combat_menu.action_panel;
 
 import __main.EncounterInfo;
 import character_info.combatant.Combatant;
+import combat_menu.action_panel.damage_panel.AttackPanel;
+import combat_menu.action_panel.damage_panel.DamageAmountPanel;
 import damage_implements.Implement;
 import util.Locators;
 
@@ -94,6 +96,9 @@ public class ActionPanel extends JPanel {
     public void updateTurnInformation() {
         turnInformation.removeAll();
         turnInformation.add(EncounterInfo.getCurrentCombatant().toPanel());
+        turnInformation.revalidate();
+        turnInformation.repaint();
+
         buttonsPanel.updateTurnInformation();
     }
 }

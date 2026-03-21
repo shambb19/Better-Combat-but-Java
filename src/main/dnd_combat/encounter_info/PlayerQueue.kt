@@ -1,92 +1,84 @@
-package encounter_info;
+package encounter_info
 
-import __main.Main;
-import character_info.combatant.Combatant;
-import util.Message;
+import __main.Main
+import character_info.combatant.Combatant
+import util.Message
 
-import java.util.ArrayList;
-import java.util.List;
+class PlayerQueue(
+    private val friendlies: List<Combatant>,
+    private val enemies: List<Combatant>
+) {
 
-public class PlayerQueue {
+    private var friendlyIndex: Int = 0
+    private var enemyIndex: Int = -1
 
-    private final TeamQueue friendlies;
-    private final TeamQueue enemies;
-    private Combatant currentCombatant;
+    var currentCombatant: Combatant? = null
+        private set
 
-    /**
-     * Sorts the friendly and enemy lists and begins the queue with the highest initiative combatant.
-     * @param friendlies list of friendly combatants
-     * @param enemies list of enemy combatants
-     */
-    public PlayerQueue(List<Combatant> friendlies, List<Combatant> enemies) {
-        sortList(friendlies);
-        sortList(enemies);
+    init {
+        sortList(friendlies)
+        sortList(enemies)
 
-        this.friendlies = new TeamQueue();
-        this.friendlies.addAll(friendlies);
-
-        this.enemies = new TeamQueue();
-        this.enemies.addAll(enemies);
-
-        if (friendlies.getFirst().initiative() >= enemies.getFirst().initiative()) {
-            currentCombatant = this.friendlies.getNext();
-        } else {
-            currentCombatant = this.enemies.getNext();
+        if (friendlies.isNotEmpty()) {
+            currentCombatant = friendlies[friendlyIndex]
+        } else if (enemies.isNotEmpty()) {
+            enemyIndex = 0
+            currentCombatant = enemies[enemyIndex]
         }
     }
 
-    /**
-     * Sets and returns the next combatant able to take an action, ranked by initiative. The entire enemy roster will have a turn
-     * in between each allied player (as per Cath's combat system). Unconscious combatants are prompted for a death save roll and
-     * otherwise skipped. The method also ends any status effects applied by the new current combatant.
-     */
-    public void endCurrentTurn() {
-        if (currentCombatant.isEnemy()) {
-            if (enemies.isTurnOver()) {
-                currentCombatant = friendlies.getNext();
+    fun endCurrentTurn() {
+        if (friendlies.isEmpty() && enemies.isEmpty()) return
+
+        if (enemyIndex == -1) {
+            if (enemies.isNotEmpty()) {
+                enemyIndex = 0
+                currentCombatant = enemies[enemyIndex]
             } else {
-                currentCombatant = enemies.getNext();
+                incrementFriendly()
             }
         } else {
-            currentCombatant = enemies.getNext();
-        }
-
-        if (!currentCombatant.lifeStatus().isConscious()) {
-            int saveRoll = Message.getDeathSaveRoll();
-            currentCombatant.lifeStatus().rollDeathSave(saveRoll);
-            endCurrentTurn();
-        }
-
-        currentCombatant.endDealtEffects();
-        Main.logAction();
-    }
-
-    public Combatant getCurrentCombatant() {
-        return currentCombatant;
-    }
-
-    /**
-     * Sorts the provided list by initiative descending
-     * @param combatants unsorted list
-     */
-    private void sortList(List<Combatant> combatants) {
-        combatants.sort((o1, o2) -> -1 * Integer.compare(o1.initiative(), o2.initiative()));
-    }
-
-    static class TeamQueue extends ArrayList<Combatant> {
-
-        private int currentIndex = -1;
-
-        public Combatant getNext() {
-            if (currentIndex == size() - 1) {
-                currentIndex = -1;
+            enemyIndex++
+            if (enemyIndex < enemies.size) {
+                currentCombatant = enemies[enemyIndex]
+            } else {
+                enemyIndex = -1
+                incrementFriendly()
             }
-            return get(++currentIndex);
         }
 
-        public boolean isTurnOver() {
-            return currentIndex == size() - 1;
-        }
+        processTurnStart()
     }
 
+    private fun incrementFriendly() {
+        friendlyIndex++
+        if (friendlyIndex >= friendlies.size) {
+            friendlyIndex = 0
+        }
+        currentCombatant = friendlies[friendlyIndex]
+    }
+
+    private fun processTurnStart() {
+        val combatant = currentCombatant ?: return
+
+        combatant.endDealtEffects()
+
+        if (!combatant.lifeStatus().isConscious) {
+            if (combatant.lifeStatus().isAlive) {
+                val saveRoll = Message.getDeathSaveRoll()
+                combatant.lifeStatus().rollDeathSave(saveRoll)
+            }
+
+            endCurrentTurn()
+            return
+        }
+
+        Main.logAction()
+    }
+
+    private fun sortList(combatants: List<Combatant>) {
+        (combatants as? MutableList<Combatant>)?.sortWith(
+            compareByDescending<Combatant> { it.initiative() }.thenBy { it.name() }
+        )
+    }
 }

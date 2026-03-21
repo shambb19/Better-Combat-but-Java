@@ -13,6 +13,7 @@ public class Scenarios extends GlobalList<Scenario> {
     }
 
     public static void init(URL file) {
+        INSTANCE.list.clear();
         INSTANCE.init(file, Scenario.class);
     }
 

@@ -1,5 +1,6 @@
 package campaign_creator_menu;
 
+import __main.Main;
 import _global_list.Combatants;
 import _global_list.Scenarios;
 import character_info.combatant.Combatant;
@@ -11,7 +12,7 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.net.URL;
 
-public class TxtMenu extends JFrame {
+public class CampaignCreatorMenu extends JFrame {
 
     public static final String TITLE = "Campaign Creator";
 
@@ -22,11 +23,11 @@ public class TxtMenu extends JFrame {
     private final ScenarioInputPanel scenarioPanel;
     private final DownloadDocDisplayPanel displayPanel;
 
-    public static TxtMenu newInstance(URL input) {
-        return new TxtMenu(input);
+    public static CampaignCreatorMenu newInstance(URL input) {
+        return new CampaignCreatorMenu(input);
     }
 
-    private TxtMenu(URL input) {
+    private CampaignCreatorMenu(URL input) {
         initialize();
 
         Combatants.init(input);
@@ -47,6 +48,7 @@ public class TxtMenu extends JFrame {
         setTitle(TITLE);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
+        setIconImage(Main.getImage());
     }
 
     private void construct() {

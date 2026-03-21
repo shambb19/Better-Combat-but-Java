@@ -46,6 +46,16 @@ class: rogue
 stats: [STR: 7, DEX: 12, CON: 11, INT: 16, WIS: 14, CHA: 15]
 weapons: [Dagger, Light Crossbow]
 
+.party
+name: Ezekiel
+hp: 26/26
+ac: 13
+level: 4
+class: wizard
+stats: [STR: 8, DEX: 16, CON: 14, INT: 17, WIS: 10, CHA: 10]
+weapons: [Dagger, Fist]
+spells: [Shocking Grasp, Scorching Ray]
+
  ~test enemy, not intended for actual use
 .enemy
 name: Orc

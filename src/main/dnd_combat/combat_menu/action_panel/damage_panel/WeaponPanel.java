@@ -1,9 +1,10 @@
-package combat_menu.action_panel;
+package combat_menu.action_panel.damage_panel;
 
 import __main.EncounterInfo;
 import __main.Main;
 import character_info.combatant.Combatant;
 import character_info.combatant.PC;
+import combat_menu.action_panel.ActionPanel;
 import combat_menu.listener.DieRollListener;
 import damage_implements.Weapon;
 import format.ColorStyle;
@@ -26,7 +27,6 @@ public class WeaponPanel extends JPanel {
     private final JComboBox<Combatant> targetBox;
     private final JComboBox<Weapon> weaponsBox;
     private final JTextField rollInputField;
-    private final DieRollListener listener;
 
     public static WeaponPanel newInstance(JComboBox<Combatant> targetBox, ActionPanel root) {
         return new WeaponPanel(targetBox, root);
@@ -52,8 +52,7 @@ public class WeaponPanel extends JPanel {
         hitString += ":";
 
         rollInputField = new JTextField();
-        listener = new DieRollListener(1, 20, rollInputField);
-        rollInputField.addKeyListener(listener);
+        rollInputField.addKeyListener(new DieRollListener(1, 20, rollInputField));
 
         JButton okButton = new JButton("Attack");
         okButton.setBackground(ColorStyle.DARKER_RED.getColor());
@@ -114,14 +113,6 @@ public class WeaponPanel extends JPanel {
         } else {
             informAttackFail();
         }
-    }
-
-    public void reset() {
-        targetBox.setSelectedIndex(-1);
-        weaponsBox.setSelectedIndex(-1);
-        rollInputField.setText("");
-        rollInputField.removeKeyListener(listener);
-        rollInputField.addKeyListener(listener);
     }
 
 }

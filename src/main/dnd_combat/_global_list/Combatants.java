@@ -19,6 +19,7 @@ public class Combatants extends GlobalList<Combatant> {
     }
 
     public static void init(URL file) {
+        INSTANCE.list.clear();
         INSTANCE.init(file, Combatant.class);
     }
 

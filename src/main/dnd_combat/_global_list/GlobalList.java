@@ -15,6 +15,9 @@ public class GlobalList<T> {
     protected final ArrayList<T> list = new ArrayList<>();
 
     protected void init(URL url, Class<T> type) {
+        if (url == null) {
+            return;
+        }
         try {
             List<T> inputs = Reader5e.getInstancesFromCode(url, type);
             list.addAll(inputs);

@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 public class ScenarioInputPanel extends JPanel {
 
-    private final TxtMenu root;
+    private final CampaignCreatorMenu root;
     private final CompletedElementsList sibling;
 
     private final JTextField nameField = new JTextField();
@@ -26,7 +26,7 @@ public class ScenarioInputPanel extends JPanel {
             "(say, a bunch of Orcs), click on their name and then select \"Edit\" when prompted. To remove a " +
             "combatant from an encounter, select \"Remove\" in the same prompt.";
 
-    public ScenarioInputPanel(CompletedElementsList sibling, TxtMenu root) {
+    public ScenarioInputPanel(CompletedElementsList sibling, CampaignCreatorMenu root) {
         this.root = root;
         this.sibling = sibling;
 

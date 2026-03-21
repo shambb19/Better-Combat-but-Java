@@ -2,6 +2,7 @@ package combat_menu.action_panel;
 
 import __main.EncounterInfo;
 import __main.Main;
+import character_info.combatant.Combatant;
 import encounter_info.PlayerQueue;
 import format.SwingStyles;
 
@@ -49,7 +50,7 @@ public class ActionButtonsPanel extends JPanel {
 
         inspirationButton = new JButton();
         inspirationButton.addActionListener(e -> {
-            boolean isExcess = queue.getCurrentCombatant().useInspirationAndCheckExcess();
+            boolean isExcess = EncounterInfo.getCurrentCombatant().useInspirationAndCheckExcess();
             if (isExcess) {
                 root.switchTo(ActionPanel.INSPIRATION_OPTION);
             }
@@ -76,8 +77,9 @@ public class ActionButtonsPanel extends JPanel {
     }
 
     public void updateTurnInformation() {
-        inspirationButton.setEnabled(!queue.getCurrentCombatant().isEnemy());
-        healButton.setEnabled(queue.getCurrentCombatant().canHeal());
+        Combatant currentCombatant = EncounterInfo.getCurrentCombatant();
+        inspirationButton.setEnabled(!currentCombatant.isEnemy());
+        healButton.setEnabled(currentCombatant.canHeal());
     }
 
     private void setIcon(JButton button, icons name) {

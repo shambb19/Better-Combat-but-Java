@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class EncounterFinalizationPopup extends JFrame {
+public class EncounterFinalizationPopup extends JDialog {
 
     private final List<CombatantCard> activeCards = new ArrayList<>();
     private final JComboBox<Scenario> scenarioBox = new JComboBox<>();
@@ -30,8 +30,11 @@ public class EncounterFinalizationPopup extends JFrame {
 
     private EncounterFinalizationPopup() {
         setTitle("Finalize Combat Information");
+        setModal(false);
+        setAlwaysOnTop(true);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setAlwaysOnTop(true);
+        setIconImage(Main.getImage());
 
         setupVerticalContainer(partyContainer);
         setupVerticalContainer(dynamicContainer);

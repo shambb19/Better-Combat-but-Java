@@ -1,5 +1,6 @@
 package combat_menu;
 
+import __main.Main;
 import combat_menu.action_panel.ActionPanel;
 
 import javax.swing.*;
@@ -14,9 +15,14 @@ public class CombatMenu extends JFrame {
     private final EncounterListPanel initiativeListPanel;
     private final ActionPanel actionPanel;
 
-    public CombatMenu() {
+    public static CombatMenu newInstance() {
+        return new CombatMenu();
+    }
+
+    private CombatMenu() {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
+        setIconImage(Main.getImage());
         setJMenuBar(CombatMenuBar.newInstance());
 
         initiativeListPanel = EncounterListPanel.newInstance();

@@ -2,7 +2,7 @@ package util;
 
 import __main.EncounterInfo;
 import __main.Main;
-import campaign_creator_menu.TxtMenu;
+import campaign_creator_menu.CampaignCreatorMenu;
 import character_info.combatant.Combatant;
 import combat_menu.CombatMenu;
 
@@ -91,7 +91,7 @@ public class Message {
         int result = JOptionPane.showOptionDialog(
                 null,
                 "What would you like to do with " + name + "?",
-                TxtMenu.TITLE,
+                CampaignCreatorMenu.TITLE,
                 JOptionPane.DEFAULT_OPTION,
                 JOptionPane.QUESTION_MESSAGE,
                 null,
@@ -138,7 +138,7 @@ public class Message {
         return JOptionPane.showConfirmDialog(
                 null,
                 text,
-                TxtMenu.TITLE,
+                CampaignCreatorMenu.TITLE,
                 JOptionPane.YES_NO_OPTION
         );
     }
