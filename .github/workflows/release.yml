@@ -42,7 +42,7 @@ jobs:
           --input target/ `
           --name "DndCombat" `
           --main-jar "0-1.0-SNAPSHOT-jar-with-dependencies.jar" `
-          --main-class YOUR_MAIN_CLASS_HERE `
+          --main-class __main.Main `
           --type exe `
           --dest dist/
 
