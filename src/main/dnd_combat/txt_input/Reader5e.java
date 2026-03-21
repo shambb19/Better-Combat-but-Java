@@ -1,31 +1,32 @@
 package txt_input;
 
-import org.apache.commons.io.FileUtils;
-
-import java.io.File;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URL;
-import java.nio.file.Files;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static util.TxtReader.withoutComments;
 
 public class Reader5e {
 
     public static <T> List<T> getInstancesFromCode(URL url, Class<T> instanceType) throws IOException {
-        return getInstancesFromCode(FileUtils.toFile(url), instanceType);
-    }
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(url.openStream(), StandardCharsets.UTF_8))) {
 
-    public static <T> List<T> getInstancesFromCode(File file, Class<T> instanceType) throws IOException {
-        List<String> lines = Files.readAllLines(file.toPath());
-        List<Object> code = getCode(lines);
+            List<String> lines = reader.lines().collect(Collectors.toList());
 
-        return code.stream()
-                .filter(obj -> instanceType.isAssignableFrom(obj.getClass()))
-                .map(instanceType::cast)
-                .toList();
+            List<Object> code = getCode(lines);
+
+            return code.stream()
+                    .filter(obj -> instanceType.isAssignableFrom(obj.getClass()))
+                    .map(instanceType::cast)
+                    .toList();
+        }
     }
 
     public static List<Object> getCode(List<String> lines) {

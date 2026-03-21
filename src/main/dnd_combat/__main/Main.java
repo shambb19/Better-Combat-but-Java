@@ -11,15 +11,22 @@ import combat_menu.popup.EncounterFinalizationPopup;
 import combat_menu.popup.FileGetter;
 import org.jetbrains.annotations.NotNull;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Main {
 
-    public static final URL WEAPON_RES = Main.class.getResource("/weapons.txt");
-    public static final URL SPELL_RES = Main.class.getResource("/spells.txt");
+    @NotNull
+    public static final URL WEAPON_RES = Objects.requireNonNull(Main.class.getResource("/weapons.txt"));
+    @NotNull
+    public static final URL SPELL_RES = Objects.requireNonNull(Main.class.getResource("/spells.txt"));
 
     private static CampaignCreatorMenu CREATOR_MENU;
 
@@ -63,7 +70,7 @@ public class Main {
     }
 
     public static void finalizeCombat() {
-        SwingUtilities.invokeLater(()-> {
+        SwingUtilities.invokeLater(() -> {
             EncounterInfo.confirmQueueFinalized();
             COMBAT_MENU = CombatMenu.newInstance();
             COMBAT_MENU.setVisible(true);
@@ -97,17 +104,24 @@ public class Main {
 
     @NotNull
     public static ImageIcon getIcon() {
-        URL imgUrl = Main.class.getResource("/logo.png");
+        InputStream imgUrl = Main.class.getResourceAsStream("/logo.png");
         if (imgUrl == null) {
             throw new NullPointerException();
         }
 
-        ImageIcon originalIcon = new ImageIcon(imgUrl);
-        int width = originalIcon.getIconWidth() / 2;
-        int height = originalIcon.getIconHeight() / 2;
+        try {
+            ImageIcon originalIcon = new ImageIcon(ImageIO.read(imgUrl));
+            int width = originalIcon.getIconWidth() / 2;
+            int height = originalIcon.getIconHeight() / 2;
 
-        Image scaledImage = originalIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
-        return new ImageIcon(scaledImage);
+            Image scaledImage = originalIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+            return new ImageIcon(scaledImage);
+        } catch (IOException e) {
+            Logger.getAnonymousLogger().log(
+                    Level.SEVERE, "getIcon in Main : could not read logo InputStream"
+            );
+            return new ImageIcon();
+        }
     }
 
 }
