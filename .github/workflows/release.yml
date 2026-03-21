@@ -36,12 +36,12 @@ jobs:
       - name: Create Native Installer
         run: |
           jpackage `
-            --input target/ `
-            --name "dnd_combat_but_better" `
-            --main-jar dnd-combat-but-better.jar `
-            --main-class com.__main.Main `
-            --type exe `
-            --dest dist/
+          --input target/ `
+          --name "DndCombat" `
+          --main-jar "0-1.0-SNAPSHOT-jar-with-dependencies.jar" `
+          --main-class YOUR_MAIN_CLASS_HERE `
+          --type exe `
+          --dest dist/
 
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
