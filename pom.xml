@@ -164,11 +164,13 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.7.1</version>
                 <configuration>
+                    <finalName>dnd-combat</finalName>
                     <appendAssemblyId>false</appendAssemblyId>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
@@ -189,7 +191,6 @@
                     </execution>
                 </executions>
             </plugin>
-
         </plugins>
     </build>
 

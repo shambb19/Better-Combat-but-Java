@@ -47,8 +47,8 @@ jobs:
         run: |
           jpackage `
           --input target/ `
-          --name "DndCombat" `
-          --main-jar "dnd-combat-jar-with-dependencies.jar" `
+          --name "DndCombat-${{ github.ref_name }}" `
+          --main-jar "dnd-combat.jar" `
           --main-class __main.Main `
           --type exe `
           --dest dist/
