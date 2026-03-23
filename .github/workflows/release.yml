@@ -40,7 +40,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: executable-jar
-          # Changed to match the Assembly plugin output
           path: target/dnd-combat-jar-with-dependencies.jar
 
       - name: Create Native Installer
@@ -51,6 +50,7 @@ jobs:
           --main-jar "dnd-combat.jar" `
           --main-class __main.Main `
           --type exe `
+          --win-console `
           --dest dist/
 
       - name: Upload to GitHub Release
