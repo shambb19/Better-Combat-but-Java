@@ -14,7 +14,7 @@
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.version>2.1.20</kotlin.version>
-        <app.tag>LOCAL</app.tag>
+        <app.tag>vLocal</app.tag>
     </properties>
 
     <dependencies>
@@ -146,8 +146,6 @@
                                 <argument>--win-shortcut</argument>
                                 <argument>--win-menu</argument>
                                 <argument>--win-console</argument>
-                                <argument>--vendor</argument>
-                                <argument>RedBullTeam</argument>
                             </arguments>
                         </configuration>
                     </execution>

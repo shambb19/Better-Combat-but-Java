@@ -21,26 +21,14 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Build with Maven
-        # We pass the dynamic name here. Note: XML doesn't like quotes in properties,
-        # so we'll construct the full string in the POM or just pass the tag.
+      - name: Build and Package
+        # This triggers both the JAR creation AND the jpackage installer
         run: mvn clean package -Dapp.tag=${{ github.ref_name }}
-
-      - name: Create Native Installer (CLI Manual)
-        # Using the ref_name directly in the jpackage command for the filename
-        run: |
-          jpackage `
-          --input target/ `
-          --name "DnD Red Bull Edition ${{ github.ref_name }}" `
-          --main-jar "dnd-combat-jar-with-dependencies.jar" `
-          --main-class __main.Main `
-          --type exe `
-          --win-console `
-          --dest dist/
 
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          # Maven puts the exe in the 'dist' folder as defined in your POM
           files: dist/*.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
