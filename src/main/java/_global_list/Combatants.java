@@ -1,0 +1,52 @@
+package _global_list;
+
+import character_info.combatant.Combatant;
+import encounter_info.Battle;
+import encounter_info.Scenario;
+
+import java.net.URL;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+public class Combatants extends GlobalList<Combatant> {
+
+    private static final Combatants INSTANCE = new Combatants();
+
+    private Combatants() {
+    }
+
+    public static void init(URL file) {
+        INSTANCE.list.clear();
+        INSTANCE.init(file, Combatant.class);
+    }
+
+    public static List<Combatant> toList() {
+        return INSTANCE.castToList(Combatant.class);
+    }
+
+    public static Scenario toScenario() {
+        HashMap<Combatant, Integer> friendlyMap = new HashMap<>();
+        partitionedList().get(false).forEach(friendly -> friendlyMap.put(friendly, 1));
+
+        HashMap<Combatant, Integer> enemyMap = new HashMap<>();
+        partitionedList().get(true).forEach(enemy -> enemyMap.put(enemy, 1));
+
+        return new Scenario("Full Campaign (All Combatants)", friendlyMap, enemyMap);
+    }
+
+    public static Battle toBattle() {
+        return new Battle(
+                partitionedList().get(false),
+                partitionedList().get(true),
+                Scenarios.toList()
+        );
+    }
+
+    private static Map<Boolean, List<Combatant>> partitionedList() {
+        return INSTANCE.list.stream()
+                .collect(Collectors.partitioningBy(Combatant::isEnemy));
+    }
+
+}
