@@ -143,9 +143,11 @@
                                 <argument>dnd-combat-jar-with-dependencies.jar</argument>
                                 <argument>--main-class</argument>
                                 <argument>__main.Main</argument>
+
                                 <argument>--win-shortcut</argument>
                                 <argument>--win-menu</argument>
-                                <argument>--win-console</argument>
+                                <argument>--vendor</argument>
+                                <argument>RedBullTeam</argument>
                             </arguments>
                         </configuration>
                     </execution>
