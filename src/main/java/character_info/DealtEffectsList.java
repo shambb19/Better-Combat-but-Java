@@ -2,7 +2,6 @@ package character_info;
 
 import character_info.combatant.Combatant;
 import damage_implements.Effect;
-import util.Message;
 
 import java.util.ArrayList;
 
@@ -38,10 +37,7 @@ public class DealtEffectsList {
                 healBlockedCombatants.add(target);
                 target.setCanHeal(false);
             }
-            case Effect.BONUS_DAMAGE -> {
-                target.setHexedBy(parentCombatant);
-                Message.informHexSuccess(target);
-            }
+            case Effect.BONUS_DAMAGE -> target.setHexedBy(parentCombatant);
         }
     }
 

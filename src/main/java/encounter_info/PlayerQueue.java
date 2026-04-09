@@ -1,9 +1,11 @@
 package encounter_info;
 
+import __main.CombatManager;
 import __main.Main;
 import character_info.combatant.Combatant;
 import util.Message;
 
+import javax.swing.*;
 import java.util.Comparator;
 import java.util.List;
 
@@ -30,6 +32,8 @@ public class PlayerQueue {
             this.enemyIndex = 0;
             this.currentCombatant = this.enemies.get(enemyIndex);
         }
+
+        SwingUtilities.invokeLater(CombatManager::confirmButtonStates);
     }
 
     public Combatant getCurrentCombatant() {
@@ -56,6 +60,7 @@ public class PlayerQueue {
         }
 
         processTurnStart();
+        CombatManager.confirmButtonStates();
     }
 
     private void incrementFriendly() {

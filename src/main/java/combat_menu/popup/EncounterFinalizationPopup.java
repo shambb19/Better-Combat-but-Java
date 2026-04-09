@@ -5,27 +5,45 @@ import __main.Main;
 import _global_list.Combatants;
 import character_info.combatant.Combatant;
 import character_info.combatant.NPC;
-import character_info.combatant.PC;
-import com.formdev.flatlaf.FlatClientProperties;
 import encounter_info.Scenario;
-import format.ColorStyle;
-import format.swing_comp.SwingComp;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static format.swing_comp.SwingComp.*;
-import static format.swing_comp.SwingPane.modifiable;
-import static format.swing_comp.SwingPane.*;
-
 public class EncounterFinalizationPopup extends JDialog {
 
-    private final List<CombatantCard> activeCards = new ArrayList<>();
+    // ── Palette ───────────────────────────────────────────────────────────────
+    private static final Color BG_DIALOG = new Color(0x1E, 0x21, 0x28);
+    private static final Color BG_BAR = new Color(0x19, 0x1C, 0x22);
+    private static final Color BG_CARD = new Color(0x23, 0x26, 0x2E);
+    private static final Color BG_CARD_ABS = new Color(0x1C, 0x1E, 0x24);
+    private static final Color BG_FIELD = new Color(0x2A, 0x2E, 0x3A);
+    private static final Color BG_CONFIRM = new Color(0x1D, 0x9E, 0x75);
 
+    private static final Color BORDER = new Color(0x2A, 0x2E, 0x3A);
+    private static final Color BORDER_FLD = new Color(0x3A, 0x3E, 0x4A);
+
+    private static final Color FG_PRIMARY = new Color(0xD8, 0xDC, 0xE8);
+    private static final Color FG_MUTED = new Color(0x6B, 0x70, 0x80);
+    private static final Color FG_HINT = new Color(0x50, 0x55, 0x68);
+
+    private static final Color ACCENT_PARTY = new Color(0x5D, 0xCA, 0xA5);
+    private static final Color ACCENT_ALLY = new Color(0x7F, 0x77, 0xDD);
+    private static final Color ACCENT_ENEMY = new Color(0xE2, 0x4B, 0x4A);
+
+    private static final Color SECTION_PARTY = new Color(0x5D, 0xCA, 0xA5);
+    private static final Color SECTION_ALLY = new Color(0x7F, 0x77, 0xDD);
+    private static final Color SECTION_ENEMY = new Color(0xE2, 0x4B, 0x4A);
+
+    // ── State ─────────────────────────────────────────────────────────────────
+    private final List<CombatantCard> activeCards = new ArrayList<>();
     private final JPanel partyContainer;
     private final JPanel dynamicContainer;
+
+    // ── Constructor ───────────────────────────────────────────────────────────
 
     private EncounterFinalizationPopup() {
         setTitle("Finalize Combat Information");
@@ -33,102 +51,130 @@ public class EncounterFinalizationPopup extends JDialog {
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setAlwaysOnTop(true);
         setIconImage(Main.getImage());
+        setBackground(BG_DIALOG);
+        setLayout(new BorderLayout());
+        getRootPane().setBorder(BorderFactory.createLineBorder(BORDER, 1));
 
-        modifiable(this).withLayout(BORDER).withGaps(15, 15).withEmptyBorder(15);
+        // ── Top bar: scenario selector ────────────────────────────────────────
+        JPanel topBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 8));
+        topBar.setBackground(BG_BAR);
+        topBar.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, BORDER));
+        add(topBar, BorderLayout.NORTH);
 
-        partyContainer = panel().withLayout(VERTICAL_BOX).onLeft().transparent().build();
-        dynamicContainer = panel().withLayout(VERTICAL_BOX).onLeft().transparent().build();
+        JLabel scenarioLabel = new JLabel("Combat scenario:");
+        scenarioLabel.setFont(scenarioLabel.getFont().deriveFont(Font.PLAIN, 12f));
+        scenarioLabel.setForeground(FG_MUTED);
+        topBar.add(scenarioLabel);
 
-        JPanel scenarioPanel = panelIn(this, BorderLayout.NORTH).onLeft().build();
+        JComboBox<Scenario> scenarioCombo = new JComboBox<>(
+                EncounterInfo.getBattle().scenarios().toArray(new Scenario[0]));
+        scenarioCombo.setBackground(BG_FIELD);
+        scenarioCombo.setForeground(FG_PRIMARY);
+        scenarioCombo.setFont(scenarioCombo.getFont().deriveFont(Font.PLAIN, 12f));
+        styleComboBox(scenarioCombo);
+        scenarioCombo.setSelectedIndex(-1);
+        scenarioCombo.addActionListener(
+                e -> updateScenario((Scenario) scenarioCombo.getSelectedItem()));
+        topBar.add(scenarioCombo);
 
-        label("Select Combat Scenario:")
-                .withFont(SUB_HEADER)
-                .withForeground(ColorStyle.SCENARIO.getColor())
-                .onLeft()
-                .in(scenarioPanel);
+        // ── Scroll area ───────────────────────────────────────────────────────
+        partyContainer = boxPanel();
+        dynamicContainer = boxPanel();
 
-        gapIn(15, scenarioPanel);
+        JPanel scrollContent = boxPanel();
+        scrollContent.setBackground(BG_DIALOG);
+        scrollContent.setBorder(new EmptyBorder(8, 12, 12, 12));
+        scrollContent.add(sectionLabel("The Party", SECTION_PARTY));
+        scrollContent.add(partyContainer);
+        scrollContent.add(vgap());
+        scrollContent.add(dynamicContainer);
 
-        comboBox(EncounterInfo.getBattle().scenarios())
-                .withAction(b -> updateScenario((Scenario) b.getSelectedItem()))
-                .withSelection(Combatants.toScenario())
-                .onLeft()
-                .in(scenarioPanel);
+        JScrollPane scroller = new JScrollPane(scrollContent);
+        scroller.setBorder(null);
+        scroller.getViewport().setBackground(BG_DIALOG);
+        scroller.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        scroller.setPreferredSize(new Dimension(500, 520));
+        add(scroller, BorderLayout.CENTER);
 
-        gapIn(15, scenarioPanel);
+        // ── Footer: begin button ──────────────────────────────────────────────
+        JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 8));
+        footer.setBackground(BG_BAR);
+        footer.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER));
+        add(footer, BorderLayout.SOUTH);
 
-        panelIn(this, BorderLayout.CENTER).collect(
-                        getSectionHeader("THE PARTY", ColorStyle.PARTY.getColor()),
-                        partyContainer,
-                        gap(20),
-                        dynamicContainer
-                ).withLayout(VERTICAL_BOX)
-                .toScroller()
-                .withEmptyBorder(10)
-                .withSize(500, 600);
+        JButton beginButton = new JButton("Begin Encounter");
+        beginButton.setFont(beginButton.getFont().deriveFont(Font.PLAIN, 13f));
+        beginButton.setBackground(BG_CONFIRM);
+        beginButton.setForeground(new Color(0xD8, 0xF4, 0xEC));
+        beginButton.setBorder(new EmptyBorder(8, 20, 8, 20));
+        beginButton.setFocusPainted(false);
+        beginButton.setOpaque(true);
+        beginButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        beginButton.addActionListener(e -> logAndBegin());
+        footer.add(beginButton);
 
-        JPanel confirmButton = button("Begin Encounter", this::logAndBegin)
-                .withBackground(ColorStyle.DARKER_GREEN.getColor())
-                .toPanel(FLOW_RIGHT)
-                .in(this, BorderLayout.SOUTH)
-                .build();
-
+        // ── Init ──────────────────────────────────────────────────────────────
         initializeParty();
-
         updateScenario(Combatants.toScenario());
+
         pack();
         setLocationRelativeTo(null);
-
-        SwingUtilities.invokeLater(confirmButton::requestFocusInWindow);
+        SwingUtilities.invokeLater(beginButton::requestFocusInWindow);
     }
 
-    public static void run() {
-        new EncounterFinalizationPopup().setVisible(true);
+    private static void styleComboBox(JComboBox<?> combo) {
+        combo.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER_FLD, 1),
+                new EmptyBorder(2, 8, 2, 8)));
     }
 
-    private JLabel getSectionHeader(String title, Color accent) {
-        return label(title.toUpperCase()).withFont(HEADER)
-                .withForeground(accent)
-                .withEmptyBorder(10)
-                .onLeft()
-                .build();
-    }
-
-    private void initializeParty() {
-        EncounterInfo.getParty().forEach(pc -> {
-            CombatantCard card = new CombatantCard(pc, ColorStyle.PARTY.getColor());
-            activeCards.add(card);
-            partyContainer.add(card);
-            partyContainer.add(gap(8));
-        });
-    }
+    // ── Section labels ────────────────────────────────────────────────────────
 
     private void updateScenario(Scenario scenario) {
         if (scenario == null) return;
 
-        activeCards.removeIf(card -> card.combatant instanceof NPC);
-
+        activeCards.removeIf(card -> card.getCombatant() instanceof NPC);
         dynamicContainer.removeAll();
 
         if (scenario.containsFriendlies()) {
-            dynamicContainer.add(getSectionHeader("ALLIES", ColorStyle.NPC.getColor()));
+            dynamicContainer.add(sectionLabel("Allies", SECTION_ALLY));
             scenario.withListAllOccurrences().forEach(npc ->
-                    addCombatantToUI((NPC) npc, dynamicContainer, ColorStyle.NPC.getColor()));
+                    addCombatantCard((NPC) npc, ACCENT_ALLY));
         }
 
-        dynamicContainer.add(getSectionHeader("ENEMIES", ColorStyle.ENEMY.getColor()));
+        dynamicContainer.add(sectionLabel("Enemies", SECTION_ENEMY));
         scenario.againstListAllOccurrences().forEach(npc ->
-                addCombatantToUI((NPC) npc, dynamicContainer, ColorStyle.ENEMY.getColor()));
+                addCombatantCard((NPC) npc, ACCENT_ENEMY));
 
         dynamicContainer.revalidate();
         dynamicContainer.repaint();
     }
 
-    private void addCombatantToUI(NPC npc, JPanel container, Color accent) {
-        CombatantCard card = new CombatantCard(npc.copy(), accent);
-        activeCards.add(card);
-        modifiable(container).collect(card, gap(8));
+    // ── Party init ────────────────────────────────────────────────────────────
+
+    private static JPanel boxPanel() {
+        JPanel p = new JPanel();
+        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
+        p.setOpaque(false);
+        return p;
     }
+
+    // ── Scenario update ───────────────────────────────────────────────────────
+
+    private static JLabel sectionLabel(String text, Color color) {
+        JLabel l = new JLabel(text.toUpperCase());
+        l.setFont(l.getFont().deriveFont(Font.BOLD, 10f));
+        l.setForeground(color);
+        l.setBorder(new EmptyBorder(10, 2, 6, 2));
+        l.setAlignmentX(LEFT_ALIGNMENT);
+        return l;
+    }
+
+    private static Component vgap() {
+        return Box.createRigidArea(new Dimension(0, 6));
+    }
+
+    // ── Confirm ───────────────────────────────────────────────────────────────
 
     private void logAndBegin() {
         EncounterInfo.getFriendlies().clear();
@@ -143,53 +189,156 @@ public class EncounterFinalizationPopup extends JDialog {
         Main.finalizeCombat();
     }
 
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private void initializeParty() {
+        EncounterInfo.getParty().forEach(pc -> {
+            CombatantCard card = new CombatantCard(pc, ACCENT_PARTY, true);
+            activeCards.add(card);
+            partyContainer.add(card);
+            partyContainer.add(vgap());
+        });
+    }
+
+    private void addCombatantCard(NPC npc, Color accent) {
+        CombatantCard card = new CombatantCard(npc, accent, false);
+        activeCards.add(card);
+        dynamicContainer.add(card);
+        dynamicContainer.add(vgap());
+    }
+
+    public static void run() {
+        new EncounterFinalizationPopup().setVisible(true);
+    }
+
+    // =========================================================================
+    // CombatantCard
+    // =========================================================================
+
     private static class CombatantCard extends JPanel {
+
+        private static final int ACCENT_W = 3;
+        private static final int CARD_H = 52;
 
         private final Combatant combatant;
         private final JSpinner spinner;
         private final JCheckBox absentCheck;
+        private final JPanel accentBar;
 
-        public CombatantCard(Combatant combatant, Color accentColor) {
+        CombatantCard(Combatant combatant, Color accent, boolean showAbsent) {
             this.combatant = combatant;
 
-            modifiable(this)
-                    .withLayout(BORDER)
-                    .withGaps(15, 15)
-                    .withHighlight(accentColor, LEFT)
-                    .onLeft();
-            putClientProperty(FlatClientProperties.STYLE, "arc: 12; background: lighten($Panel.background, 3%)");
+            setLayout(new BorderLayout(10, 0));
+            setBackground(BG_CARD);
+            setOpaque(true);
+            setMaximumSize(new Dimension(Integer.MAX_VALUE, CARD_H));
+            setPreferredSize(new Dimension(0, CARD_H));
+            setAlignmentX(LEFT_ALIGNMENT);
+            setBorder(new EmptyBorder(0, 0, 0, 12));
 
-            label(combatant.name())
-                    .bold(13f)
-                    .withFont(HEADER)
-                    .in(this, BorderLayout.CENTER)
-                    .build();
+            // Left accent strip
+            accentBar = new JPanel();
+            accentBar.setPreferredSize(new Dimension(ACCENT_W, 0));
+            accentBar.setBackground(accent);
+            accentBar.setOpaque(true);
+            add(accentBar, BorderLayout.WEST);
 
-            JLabel initiativeLabel = label("Initiative:")
-                    .withFont(SUB_HEADER)
-                    .withForeground(new Color(136, 136, 136))
-                    .build();
+            // Name
+            JLabel nameLabel = new JLabel(combatant.name());
+            nameLabel.setFont(nameLabel.getFont().deriveFont(Font.BOLD, 14f));
+            nameLabel.setForeground(FG_PRIMARY);
+            nameLabel.setBorder(new EmptyBorder(0, 10, 0, 0));
+            add(nameLabel, BorderLayout.CENTER);
 
-            spinner = spinner(1, 20, 10)
-                    .withSize(60, 28)
-                    .build();
+// Right: initiative + optional absent checkbox
+            JPanel right = new JPanel(new GridBagLayout()); // GridBagLayout centers vertically by default
+            right.setOpaque(false);
+            add(right, BorderLayout.EAST);
 
-            JPanel spinnerGroup = flowPair(initiativeLabel, spinner, true).transparent().build();
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.insets = new Insets(0, 8, 0, 0); // Replaces the 8px hgap from FlowLayout
+            gbc.anchor = GridBagConstraints.CENTER;
 
-            absentCheck = SwingComp.checkBox("Absent")
-                    .withAction(this::updateVisualState)
-                    .enabledIf(combatant instanceof PC)
-                    .build();
+            JLabel initLabel = new JLabel("Initiative");
+            initLabel.setFont(initLabel.getFont().deriveFont(Font.PLAIN, 11f));
+            initLabel.setForeground(FG_MUTED);
+            right.add(initLabel, gbc);
 
-            panelIn(this, BorderLayout.EAST).collect(spinnerGroup, absentCheck).transparent();
+            SpinnerNumberModel model = new SpinnerNumberModel(10, 1, 20, 1);
+            spinner = new JSpinner(model);
+            spinner.setPreferredSize(new Dimension(60, 26));
+            styleSpinner(spinner);
+            right.add(spinner, gbc);
+
+            if (showAbsent) {
+                absentCheck = new JCheckBox("Absent");
+                absentCheck.setFont(absentCheck.getFont().deriveFont(Font.PLAIN, 11f));
+                absentCheck.setForeground(FG_MUTED);
+                absentCheck.setBackground(BG_CARD);
+                absentCheck.setOpaque(false);
+                absentCheck.setFocusPainted(false);
+                absentCheck.addActionListener(e -> updateAbsentState());
+                right.add(absentCheck, gbc);
+            } else {
+                absentCheck = null;
+            }
         }
 
-        private void updateVisualState() {
-            boolean isAbsent = absentCheck.isSelected();
-            spinner.setEnabled(!isAbsent);
-            putClientProperty(FlatClientProperties.STYLE, isAbsent ?
-                    "arc: 12; background: darken($Panel.background, 5%)" :
-                    "arc: 12; background: lighten($Panel.background, 3%)");
+        // ── Absent state ──────────────────────────────────────────────────────
+
+        /**
+         * Recursively dims all labels in the card.
+         */
+        private static void setForegroundAlpha(Container c, float alpha) {
+            for (Component child : c.getComponents()) {
+                if (child instanceof JLabel lbl) {
+                    Color fg = lbl.getForeground();
+                    lbl.setForeground(new Color(
+                            fg.getRed(), fg.getGreen(), fg.getBlue(),
+                            Math.round(255 * alpha)));
+                }
+                if (child instanceof Container cont) setForegroundAlpha(cont, alpha);
+            }
+        }
+
+        private static void styleSpinner(JSpinner spinner) {
+            spinner.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(BORDER_FLD, 1),
+                    new EmptyBorder(0, 4, 0, 4)));
+            spinner.setBackground(BG_FIELD);
+            spinner.setOpaque(true);
+
+            JComponent editor = spinner.getEditor();
+            if (editor instanceof JSpinner.DefaultEditor de) {
+                de.getTextField().setBackground(BG_FIELD);
+                de.getTextField().setForeground(FG_PRIMARY);
+                de.getTextField().setCaretColor(FG_PRIMARY);
+                de.getTextField().setBorder(new EmptyBorder(0, 2, 0, 2));
+                de.getTextField().setHorizontalAlignment(SwingConstants.CENTER);
+            }
+        }
+
+        // ── Spinner styling ───────────────────────────────────────────────────
+
+        private void updateAbsentState() {
+            boolean absent = absentCheck.isSelected();
+            spinner.setEnabled(!absent);
+            setBackground(absent ? BG_CARD_ABS : BG_CARD);
+            accentBar.setBackground(absent
+                    ? new Color(0x2A, 0x2E, 0x3A)
+                    : accentBar.getBackground()); // keeps original accent if not absent
+
+            // Restore correct accent when un-ticking — stored as client property
+            if (!absent) {
+                Color orig = (Color) getClientProperty("accent");
+                if (orig != null) accentBar.setBackground(orig);
+            } else {
+                putClientProperty("accent", accentBar.getBackground());
+                accentBar.setBackground(new Color(0x2A, 0x2E, 0x3A));
+            }
+
+            float alpha = absent ? 0.5f : 1.0f;
+            setForegroundAlpha(this, alpha);
             repaint();
         }
 
@@ -199,7 +348,7 @@ public class EncounterFinalizationPopup extends JDialog {
         }
 
         public boolean isPresent() {
-            return !absentCheck.isSelected();
+            return absentCheck == null || !absentCheck.isSelected();
         }
     }
 }

@@ -1,35 +1,21 @@
 package encounter_info;
 
-import _global_list.Combatants;
-import _global_list.Scenarios;
 import character_info.combatant.Combatant;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-public record Battle(List<Combatant> friendlies, List<Combatant> enemies, List<Scenario> scenarios) {
+public record Battle(ArrayList<Combatant> friendlies, ArrayList<Combatant> enemies, List<Scenario> scenarios) {
 
-    public Battle create() {
-        var combatantsByAllegiance = Combatants.toList().stream()
-                .collect(Collectors.partitioningBy(Combatant::isEnemy));
-
-        return new Battle(
-                combatantsByAllegiance.get(false),
-                combatantsByAllegiance.get(true),
-                Scenarios.toList()
-        );
-    }
-
-    public void reset() {
-        friendlies.clear();
-        friendlies.addAll(create().friendlies);
-
-        enemies.clear();
-        enemies.addAll(create().enemies);
+    public Battle(List<Combatant> friendlies, List<Combatant> enemies, List<Scenario> scenarios) {
+        this(new ArrayList<>(friendlies), new ArrayList<>(enemies), new ArrayList<>(scenarios));
     }
 
     public boolean isEncounterOver() {
+        enemies.forEach(e -> {
+            if (!e.lifeStatus().isConscious()) System.out.println(e.lifeStatus().status());
+        });
         return isTeamDefeated(friendlies) || isTeamDefeated(enemies);
     }
 

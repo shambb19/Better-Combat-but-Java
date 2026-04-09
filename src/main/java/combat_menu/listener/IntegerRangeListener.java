@@ -1,6 +1,10 @@
 package combat_menu.listener;
 
+import format.ColorStyles;
+import swing.swing_comp.SwingComp;
+
 import javax.swing.*;
+import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 
@@ -16,7 +20,7 @@ public class IntegerRangeListener extends IntegerFieldListener {
      * a field associated with a 2d6 roll would be limited to integers on [2, 12].
      * @param root the root JTextField
      */
-    public IntegerRangeListener(int min, int max, JComponent root) {
+    public IntegerRangeListener(int min, int max, JTextComponent root) {
         this.min = min;
         this.max = max;
         this.root = root;
@@ -30,21 +34,49 @@ public class IntegerRangeListener extends IntegerFieldListener {
      */
     @Override
     public void keyTyped(KeyEvent e) {
-        super.keyTyped(e);
+        char c = e.getKeyChar();
 
-        int value;
-        switch (root) {
-            case JTextField f when f.getText().isEmpty() -> {
-                return;
-            }
-            case JTextField f -> value = Integer.parseInt(f.getText());
-            case JSpinner s -> value = (int) s.getValue();
-            default -> value = 0;
+        if (Character.isISOControl(c)) {
+            super.keyTyped(e);
+            return;
         }
 
-        if (value < min || value > max)
-            root.putClientProperty("JComponent.outline", "error");
-        else
-            root.putClientProperty("JComponent.outline", Color.GREEN);
+        String prospectiveText = switch (root) {
+            case JTextComponent f -> {
+                String currentText = f.getText();
+
+                int start = f.getSelectionStart();
+                int end = f.getSelectionEnd();
+
+                yield currentText.substring(0, start) + c + currentText.substring(end);
+            }
+            case JSpinner s -> String.valueOf(s.getValue());
+            default -> throw new ClassCastException(
+                    "keyTyped in IntegerRangeListener: JTextComponent or JSpinner expected"
+            );
+        };
+
+        if (prospectiveText.isBlank()) {
+            SwingComp.modifiable(root)
+                    .withHighlight(Color.GRAY, SwingComp.BOTTOM, true);
+            super.keyTyped(e);
+            return;
+        }
+
+        boolean outsideRange;
+        try {
+            long value = Long.parseLong(prospectiveText);
+            outsideRange = value < min || value > max;
+        } catch (NumberFormatException ex) {
+            outsideRange = true;
+        }
+
+        if (outsideRange) {
+            e.consume();
+        } else {
+            SwingComp.modifiable(root)
+                    .withHighlight(ColorStyles.GREEN_APPLE, SwingComp.BOTTOM, true);
+            super.keyTyped(e);
+        }
     }
 }

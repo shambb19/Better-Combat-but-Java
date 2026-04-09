@@ -12,10 +12,14 @@ public class Locators {
 
     public static List<Combatant> getTargetList(boolean isForDamage) {
         boolean isEnemy = EncounterInfo.getCurrentCombatant().isEnemy();
-        if (isEnemy == isForDamage)
-            return EncounterInfo.getFriendlies();
+
+        List<Combatant> fullList = ((isEnemy == isForDamage) ? EncounterInfo.getFriendlies() : EncounterInfo.getEnemies())
+                .stream().filter(c -> !c.equals(EncounterInfo.getCurrentCombatant())).toList();
+
+        if (isForDamage)
+            return fullList;
         else
-            return EncounterInfo.getEnemies();
+            return fullList.stream().filter(combatant -> combatant.maxHp() != combatant.hp()).toList();
     }
 
     public static <T> T getWithNameFromDirectory(List<T> source, Object obj) {

@@ -3,8 +3,8 @@ package campaign_creator_menu;
 import character_info.AbilityModifier;
 import character_info.Stats;
 import character_info.combatant.PC;
-import format.swing_comp.SwingComp;
-import format.swing_comp.SwingPane;
+import swing.swing_comp.SwingComp;
+import swing.swing_comp.SwingPane;
 
 import javax.swing.*;
 import java.util.HashMap;

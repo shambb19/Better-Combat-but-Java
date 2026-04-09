@@ -1,10 +1,17 @@
 package character_info.combatant;
 
+import _global_list.DamageImplements;
+import character_info.Stats;
+import damage_implements.Spell;
+import damage_implements.Weapon;
+import format.ColorStyles;
 import txt_input.Key;
 import util.TxtReader;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.List;
 
 import static txt_input.Key.*;
 
@@ -31,16 +38,31 @@ public class NPC extends Combatant {
         this.isEnemy = source.isEnemy;
     }
 
-    public NPC copy() {
-        return new NPC(name, hpMax, armorClass, isEnemy);
-    }
-
     public boolean isAlly() {
         return !isEnemy;
     }
 
     public boolean isEnemy() {
         return isEnemy;
+    }
+
+    public Stats stats() {
+        return Stats.defaultStats();
+    }
+
+    public List<Weapon> weapons() {
+        return List.of(DamageImplements.MANUAL_WEAPON);
+    }
+
+    public List<Spell> spells() {
+        return List.of(DamageImplements.MANUAL_SAVE, DamageImplements.MANUAL_HIT);
+    }
+
+    public Color getHealthBarColor() {
+        if (isEnemy)
+            return ColorStyles.ENEMY;
+        else
+            return super.getHealthBarColor();
     }
 
     /**

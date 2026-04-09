@@ -3,8 +3,9 @@ package combat_menu.popup;
 import __main.EncounterInfo;
 import __main.Main;
 import character_info.combatant.PC;
-import format.swing_comp.SwingComp;
-import format.swing_comp.SwingPane;
+import org.intellij.lang.annotations.MagicConstant;
+import swing.swing_comp.SwingComp;
+import swing.swing_comp.SwingPane;
 import txt_input.CampaignWriter;
 import util.Message;
 
@@ -23,13 +24,13 @@ public class CombatEndPopup extends JDialog {
     private static final String lossTitle = "Defeat";
 
     public static void run(boolean isVictory) {
+        Main.getMenu().dispose();
         new CombatEndPopup(isVictory).setVisible(true);
     }
 
     private CombatEndPopup(boolean isVictory) {
         setTitle(isVictory ? victoryTitle : lossTitle);
         setModal(false);
-        setAlwaysOnTop(true);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setIconImage(Main.getImage());
 
@@ -38,7 +39,9 @@ public class CombatEndPopup extends JDialog {
                 new JSeparator(),
                 "Options:",
                 partyLevelUpButton(), downloadUpdatedPartyTxtButton(), quitButton()
-        ).withLayout(SwingPane.ONE_COLUMN);
+                )
+                .withLayout(SwingPane.ONE_COLUMN)
+                .withEmptyBorder(20);
 
         pack();
         setLocationRelativeTo(Main.getMenu());
@@ -55,13 +58,13 @@ public class CombatEndPopup extends JDialog {
     }
 
     public JButton quitButton() {
-        return SwingComp.button("Quit Program", this::quit).build();
+        return SwingComp.button("Quit Program", () -> quit("quit")).build();
     }
 
     private void levelUp(JButton button) {
         EncounterInfo.getParty().forEach(PC::levelUp);
 
-        String message = "As of v4.1.0, only proficiency bonuses are handled internally. " +
+        String message = "Level up successful! As of v4.2.4, only proficiency bonuses are handled internally. " +
                 "All other changes (hp, stats, etc.) need to be manually entered in the Campaign Creator " +
                 "for now. If you buy Braden a Red Bull he might fix that :P";
         template(message);
@@ -79,11 +82,14 @@ public class CombatEndPopup extends JDialog {
             System.err.println("Failed to save the campaign file.");
     }
 
-    public void quit() {
-        if (confirmIf("quit") == JOptionPane.OK_OPTION) {
+    public static void quit(@MagicConstant(stringValues = {"quit", "restart"}) String mode) {
+        if (confirmIf(mode + " and lose all progress") == JOptionPane.OK_OPTION) {
             Message.template("Goodbye! Thanks for playing :)");
-            dispose();
-            System.exit(0);
+
+            if (mode.equals("quit"))
+                System.exit(0);
+            else
+                Main.restart();
         }
     }
 

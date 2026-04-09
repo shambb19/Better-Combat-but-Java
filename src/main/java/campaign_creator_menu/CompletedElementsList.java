@@ -5,7 +5,7 @@ import character_info.combatant.NPC;
 import character_info.combatant.PC;
 import encounter_info.Battle;
 import encounter_info.Scenario;
-import format.swing_comp.SwingComp;
+import swing.swing_comp.SwingComp;
 import util.Filter;
 import util.Message;
 
@@ -18,9 +18,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import static format.swing_comp.SwingComp.HEADER;
-import static format.swing_comp.SwingComp.button;
-import static format.swing_comp.SwingPane.*;
+import static swing.swing_comp.SwingComp.HEADER;
+import static swing.swing_comp.SwingComp.button;
+import static swing.swing_comp.SwingPane.*;
 
 public class CompletedElementsList extends JPanel {
 

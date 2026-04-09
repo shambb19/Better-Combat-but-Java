@@ -21,7 +21,7 @@ public class GlobalList<T> {
             List<S> inputs = Reader5e.getInstancesFromCode(url, type);
             list.addAll(inputs);
         } catch (IOException e) {
-            Message.fileError(e);
+            Message.fileError(null, e);
             Logger.getAnonymousLogger().severe("init in GlobalList: could not add elements");
         }
     }

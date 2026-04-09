@@ -3,8 +3,8 @@ package campaign_creator_menu;
 import character_info.combatant.Combatant;
 import character_info.combatant.PC;
 import encounter_info.Scenario;
-import format.swing_comp.SwingComp;
-import format.swing_comp.SwingPane;
+import swing.swing_comp.SwingComp;
+import swing.swing_comp.SwingPane;
 
 import javax.swing.*;
 import java.awt.*;

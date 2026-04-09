@@ -48,6 +48,6 @@ class LifeStatus {
         get() = thisStatus != Status.DEAD
 
     override fun toString(): String {
-        return String.format("Defeated (%d-%d)", deathSuccesses, deathFails)
+        return String.format("%d - %d Saves", deathSuccesses, deathFails)
     }
 }

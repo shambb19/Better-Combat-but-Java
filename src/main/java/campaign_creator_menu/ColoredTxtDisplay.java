@@ -1,6 +1,5 @@
 package campaign_creator_menu;
 
-import format.ColorStyle;
 import util.TxtReader;
 
 import javax.swing.*;
@@ -13,7 +12,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static format.ColorStyle.*;
+import static format.ColorStyles.*;
 import static util.TxtReader.*;
 
 public class ColoredTxtDisplay extends JTextPane {
@@ -40,13 +39,14 @@ public class ColoredTxtDisplay extends JTextPane {
         setText("");
 
         for (String line : lines) {
-            ColorStyle lineType = getLineType(line);
+            Color lineType = getLineType(line);
 
-            switch (lineType) {
-                case PARAMETER -> appendParameter(line, "\n");
-                case STAT_PARAMETER -> appendStatsParameter(line);
-                default -> appendToPane(line + "\n", lineType);
-            }
+            if (lineType.equals(PARAMETER))
+                appendParameter(line, "\n");
+            else if (lineType.equals(STAT_PARAMETER))
+                appendStatsParameter(line);
+            else
+                appendToPane(line + "\n", lineType);
         }
     }
 
@@ -68,11 +68,10 @@ public class ColoredTxtDisplay extends JTextPane {
 
     }
 
-    private void appendToPane(String line, ColorStyle lineType) {
-        Color color = lineType.getColor();
+    private void appendToPane(String line, Color lineType) {
 
         StyleContext sc = StyleContext.getDefaultStyleContext();
-        AttributeSet aSet = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Foreground, color);
+        AttributeSet aSet = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Foreground, lineType);
 
         aSet = sc.addAttribute(aSet, StyleConstants.Alignment, StyleConstants.ALIGN_JUSTIFIED);
 
@@ -91,7 +90,7 @@ public class ColoredTxtDisplay extends JTextPane {
         appendToPane(value + end, VALUE);
     }
 
-    private ColorStyle getLineType(String line) {
+    private Color getLineType(String line) {
         if (line.isBlank())
             return EMPTY;
         else if (line.startsWith("stats"))

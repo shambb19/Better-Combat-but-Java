@@ -39,11 +39,8 @@ public class PC extends Combatant {
         this.hpCurrent = TxtReader.getHpCur((String) values.get(HP));
         this.stats = (Stats) values.get(STATS);
 
-        List<Weapon> weaponTemp = (List<Weapon>) values.get(WEAPONS);
-        this.weapons = Objects.requireNonNullElseGet(weaponTemp, ArrayList::new);
-
-        List<Spell> spellTemp = (List<Spell>) values.get(SPELLS);
-        this.spells = Objects.requireNonNullElseGet(spellTemp, ArrayList::new);
+        this.weapons = Objects.requireNonNullElseGet((List<Weapon>) values.get(WEAPONS), ArrayList::new);
+        this.spells = Objects.requireNonNullElseGet((List<Spell>) values.get(SPELLS), ArrayList::new);
     }
 
     public int mod(AbilityModifier stat) {

@@ -9,13 +9,11 @@ import com.formdev.flatlaf.intellijthemes.FlatSpacegrayIJTheme;
 import combat_menu.CombatMenu;
 import combat_menu.popup.CombatEndPopup;
 import combat_menu.popup.EncounterFinalizationPopup;
-import combat_menu.popup.FileGetter;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
 import java.net.URL;
-import java.util.Objects;
 
 public class Main {
 
@@ -32,10 +30,9 @@ public class Main {
         SwingUtilities.invokeLater(UploadMain::showNewInstance);
     }
 
-    public static void restartCombat() {
+    public static void restart() {
         COMBAT_MENU.dispose();
-        INPUT = Objects.requireNonNullElse(INPUT, FileGetter.getUrl(COMBAT_MENU));
-        completeSetup();
+        SwingUtilities.invokeLater(UploadMain::showNewInstance);
     }
 
     private static void completeSetup() {
@@ -78,6 +75,7 @@ public class Main {
      */
     public static void checkCombatOver() {
         if (EncounterInfo.getBattle().isEncounterOver()) {
+            System.out.println("ran");
             boolean isVictory = EncounterInfo.getBattle().isVictory();
             CombatEndPopup.run(isVictory);
         }
@@ -97,8 +95,8 @@ public class Main {
         URL imgUrl = Resource.PROGRAM_LOGO.url();
 
         ImageIcon originalIcon = new ImageIcon(imgUrl);
-        int width = originalIcon.getIconWidth() / 2;
-        int height = originalIcon.getIconHeight() / 2;
+        int width = originalIcon.getIconWidth() / 4;
+        int height = originalIcon.getIconHeight() / 4;
 
         Image scaledImage = originalIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
         return new ImageIcon(scaledImage);

@@ -17,9 +17,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import static format.swing_comp.SwingComp.button;
-import static format.swing_comp.SwingComp.scrollPane;
-import static format.swing_comp.SwingPane.*;
+import static swing.swing_comp.SwingComp.button;
+import static swing.swing_comp.SwingComp.scrollPane;
+import static swing.swing_comp.SwingPane.*;
 import static util.Message.template;
 
 public class DownloadDocDisplayPanel extends JPanel {

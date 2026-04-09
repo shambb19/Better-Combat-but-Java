@@ -6,7 +6,7 @@ import _global_list.Scenarios;
 import character_info.combatant.Combatant;
 import encounter_info.Battle;
 import encounter_info.Scenario;
-import format.swing_comp.SwingPane;
+import swing.swing_comp.SwingPane;
 
 import javax.swing.*;
 import java.awt.*;

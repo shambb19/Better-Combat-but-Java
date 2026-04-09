@@ -1,22 +1,22 @@
 package character_info.combatant;
 
-import __main.Main;
 import character_info.AbilityModifier;
 import character_info.DealtEffectsList;
 import character_info.LifeStatus;
+import character_info.Stats;
 import damage_implements.Effect;
+import damage_implements.Spell;
 import damage_implements.Weapon;
-import format.ColorStyle;
-import format.swing_comp.SwingComp;
-import format.swing_comp.SwingPane;
-import org.jetbrains.annotations.NotNull;
+import format.ColorStyles;
 
-import javax.swing.*;
 import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
 import java.util.ArrayList;
-import java.util.Objects;
+import java.util.List;
 
 public abstract class Combatant {
+
+    public static final DataFlavor COMBATANT_FLAVOR = new DataFlavor(Combatant.class, "Combatant");
 
     protected final LifeStatus lifeStatus = new LifeStatus();
     protected final DealtEffectsList dealtEffects = new DealtEffectsList(this);
@@ -24,8 +24,8 @@ public abstract class Combatant {
     protected String name;
     protected int armorClass;
     protected int hpMax, hpCurrent;
-    private JProgressBar healthBar;
     protected int initiative, inspiration;
+    protected double[] rollQualityData;
     protected boolean isHealBlocked, isPoisoned;
 
     /**
@@ -38,17 +38,30 @@ public abstract class Combatant {
 
         hpCurrent = hpMax;
         inspiration = 0;
+        rollQualityData = new double[]{0, 0, 0};
     }
 
     /**
      * Increments the number of inspirations used
-     *
-     * @return true if the combatant has used more than two inspirations
      */
-    public boolean useInspirationAndCheckExcess() {
+    public void useInspiration() {
         inspiration++;
-        Main.logAction();
-        return inspiration > 2;
+    }
+
+    public int numInspirationUsed() {
+        return inspiration;
+    }
+
+    public void logRoll(int roll, int outOf) {
+        rollQualityData[0] += roll;
+        rollQualityData[1] += outOf;
+        rollQualityData[2]++;
+    }
+
+    public double getRollQuality() {
+        if (rollQualityData[2] == 0) return -1;
+
+        return rollQualityData[0] / rollQualityData[1];
     }
 
     /**
@@ -83,40 +96,26 @@ public abstract class Combatant {
     public Color getHealthBarColor() {
         if (!lifeStatus.isConscious())
             return Color.BLACK;
-        if (isEnemy())
-            return ColorStyle.ENEMY.getColor();
-
-        return ColorStyle.getPercentColor(hpCurrent, hpMax);
+        else
+            return ColorStyles.getPercentColor(hpCurrent, hpMax);
     }
 
     public String getHealthBarString() {
         return switch (lifeStatus.status()) {
             case ALIVE -> {
                 if (hpCurrent == 0)
-                    yield "Alive but down for the count";
+                    yield "Knocked Out";
                 else if (isEnemy())
-                    yield "?";
-                yield String.format("%d/%d", hpCurrent, hpMax);
+                    yield "? / ?";
+                yield String.format("%d / %d", hpCurrent, hpMax);
             }
             case UNCONSCIOUS -> lifeStatus.toString();
-            case DEAD -> "Dead :((";
+            case DEAD -> "Dead";
         };
     }
 
     public void setHealth(int newHealth) {
         hpCurrent = newHealth;
-    }
-
-    public void setHealthBar(JProgressBar healthBar) {
-        this.healthBar = healthBar;
-    }
-
-    public JProgressBar getHealthBarOrSafeVersion() {
-        JProgressBar safeVersion = SwingComp.progressBar(0, hpMax, hpCurrent, SwingConstants.HORIZONTAL)
-                .round()
-                .build();
-
-        return Objects.requireNonNullElse(healthBar, safeVersion);
     }
 
     public int initiative() {
@@ -155,16 +154,18 @@ public abstract class Combatant {
         return 10;
     }
 
+    public abstract List<Weapon> weapons();
+
+    public abstract List<Spell> spells();
+
+    public abstract Stats stats();
+
     public boolean canHeal() {
         return !isHealBlocked;
     }
 
     public void setCanHeal(boolean canHeal) {
         isHealBlocked = !canHeal;
-    }
-
-    public boolean isPoisoned() {
-        return isPoisoned;
     }
 
     public void setPoisoned(boolean isPoisoned) {
@@ -190,40 +191,12 @@ public abstract class Combatant {
         dealtEffects.clear();
     }
 
-    public boolean isHexedBy(Combatant hexer) {
-        return hexedByList.contains(hexer);
-    }
-
     public void setHexedBy(Combatant hexer) {
         hexedByList.add(hexer);
     }
 
-    public JPanel getEffectListPanel() {
-        JPanel panel = SwingPane.panel()
-                .collectIf(isPoisoned, SwingComp.label("\uD83D\uDC80").withFont(SwingComp.SUB_HEADER))
-                .collectIf(!hexedByList.isEmpty(), SwingComp.label("\uD83C\uDF00").withFont(SwingComp.SUB_HEADER))
-                .build();
-
-        panel.setVisible(panel.getComponents().length > 0);
-        return panel;
-    }
-
-    @NotNull
-    private JLabel getOptionLabel() {
-        String text = "Inspiration Used: " + inspiration + "/2";
-        if (!lifeStatus.isConscious())
-            text = "Not in Fighting Condition";
-
-        Color foreground = new Color(163, 163, 163);
-        if (!lifeStatus.isConscious() || inspiration > 2)
-            foreground = ColorStyle.ORANGE_ISH_RED.getColor();
-
-        return SwingComp.label(text)
-                .withFont(SwingComp.SUB_HEADER)
-                .withForeground(foreground)
-                .withEmptyBorder(4)
-                .visibleIf(!isEnemy())
-                .build();
+    public boolean isHexedBy(Combatant hexer) {
+        return hexedByList.contains(hexer);
     }
 
     @Override
@@ -231,41 +204,7 @@ public abstract class Combatant {
         return name;
     }
 
-    public JPanel toPanel() {
-        Color accentColor = switch (this) {
-            case PC ignored -> ColorStyle.PARTY.getColor();
-            case NPC npc when npc.isEnemy() -> ColorStyle.ENEMY.getColor();
-            default -> ColorStyle.NPC.getColor();
-        };
-
-        JPanel panel = SwingPane.panel()
-                .withLayout(SwingPane.VERTICAL_BOX)
-                .withHighlight(accentColor, SwingComp.LEFT)
-                .build();
-
-        SwingComp.label(name)
-                .withFont(SwingComp.BOLD, SwingComp.TITLE)
-                .withEmptyBorder(10)
-                .in(panel);
-
-        SwingComp.label("Initiative: " + initiative)
-                .withFont(SwingComp.SUB_HEADER)
-                .in(panel);
-
-        SwingComp.modifiable(getOptionLabel()).in(panel);
-        SwingComp.modifiable(getEffectListPanel()).in(panel);
-
-        SwingComp.cloned(getHealthBarOrSafeVersion())
-                .withEmptyBorder(10)
-                .applied(b -> b.setStringPainted(false))
-                .in(panel);
-
-        return panel;
-    }
-
-    public ArrayList<String> toTxt() {
-        return null;
-    }
+    public abstract ArrayList<String> toTxt();
 
     public String name() {
         return name;

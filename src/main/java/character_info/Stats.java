@@ -15,6 +15,16 @@ public class Stats {
             intelligence, wisdom, charisma;
     private int proficiencyBonus;
 
+    public static Stats defaultStats() {
+        Stats stats = new Stats(null, 1);
+        stats.proficiencyBonus = 0;
+
+        for (AbilityModifier stat : AbilityModifier.values())
+            stats.put(stat, 10);
+
+        return stats;
+    }
+
     /**
      * Stores str, dex, con, int, wis, cha stats, skill proficiency,
      * proficiency bonuses, spell casting ability modifiers, and calculates
@@ -68,6 +78,7 @@ public class Stats {
             case WIS -> wisdom;
             case CHA -> charisma;
             case OPTION -> Math.max(strength, dexterity);
+            case null -> 0;
         };
     }
 

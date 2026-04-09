@@ -8,16 +8,14 @@ import character_info.combatant.NPC;
 import character_info.combatant.PC;
 import damage_implements.Spell;
 import damage_implements.Weapon;
-import format.swing_comp.SwingComp;
+import swing.swing_comp.SwingComp;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 import java.util.logging.Logger;
 
-import static format.swing_comp.SwingComp.*;
-import static format.swing_comp.SwingPane.modifiable;
-import static format.swing_comp.SwingPane.*;
+import static swing.swing_comp.SwingPane.*;
 
 public class CombatantInputPanel extends JPanel {
 

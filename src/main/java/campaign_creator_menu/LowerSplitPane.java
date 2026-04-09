@@ -1,7 +1,7 @@
 package campaign_creator_menu;
 
-import format.swing_comp.SwingComp;
 import org.intellij.lang.annotations.MagicConstant;
+import swing.swing_comp.SwingComp;
 
 import javax.swing.*;
 import java.awt.*;

@@ -2,56 +2,81 @@ package combat_menu;
 
 import __main.EncounterInfo;
 import character_info.combatant.Combatant;
-import format.swing_comp.SwingPane;
+import format.ColorStyles;
+import org.intellij.lang.annotations.MagicConstant;
+import swing.swing_comp.SwingComp;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class EncounterListPanel extends JPanel {
-
-    private final ArrayList<CombatantPanel> combatantPanels = new ArrayList<>();
+    private static final Color BG = new Color(0x1E, 0x21, 0x28);
+    private static final Color DIVIDER_COLOR = new Color(0x2E, 0x32, 0x40);
+    private final List<CombatantPanel> allPanels = new ArrayList<>();
 
     public static EncounterListPanel newInstance() {
         return new EncounterListPanel();
     }
 
     private EncounterListPanel() {
-        SwingPane.modifiable(this).collect(
-                        getPanel("Belligerent Enemies", EncounterInfo.getEnemies()),
-                        getPanel("Party and Allies", EncounterInfo.getFriendlies())
-                ).withLayout(SwingPane.VERTICAL_BOX)
-                .withEmptyBorder(10);
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        setBackground(BG);
+        setOpaque(true);
+        populate();
     }
 
-    private JPanel getPanel(String label, List<Combatant> source) {
-        JPanel panel = SwingPane.panel()
-                .withLayout(SwingPane.ONE_COLUMN)
-                .withLabeledBorder(label)
-                .build();
+    public void populate() {
+        removeAll();
+        allPanels.clear();
 
-        source.forEach(combatant -> {
-            CombatantPanel combatantPanel = CombatantPanel.getPanelFor(combatant);
-            combatantPanels.add(combatantPanel);
-            panel.add(combatantPanel);
-        });
+        addSectionLabel("Party and Allies");
+        EncounterInfo.getFriendlies().forEach(this::addCombatantRow);
 
-        return panel;
+        add(Box.createVerticalStrut(10));
+        addSectionLabel("Belligerent Enemies");
+        EncounterInfo.getEnemies().forEach(this::addCombatantRow);
+
+        add(Box.createVerticalGlue());
+
+        revalidate();
+        repaint();
     }
 
-    public void refresh() {
-        combatantPanels.forEach(CombatantPanel::update);
-        combatantPanels.forEach(CombatantPanel::repaint);
-        updateActiveCombatant();
+    private void addSectionLabel(String text) {
+        SwingComp.label(text.toUpperCase())
+                .withForeground(ColorStyles.SECTION_FG)
+                .withFont(SwingComp.BOLD)
+                .onLeft()
+                .applied(l -> l.setBorder(new EmptyBorder(10, 15, 5, 0)))
+                .in(this);
     }
 
-    public void updateActiveCombatant() {
-        Combatant currentCombatant = EncounterInfo.getCurrentCombatant();
-
-        for (CombatantPanel panel : combatantPanels) {
-            boolean isTurn = panel.getThisCombatant().equals(currentCombatant);
-            panel.setIsTurn(isTurn);
-        }
+    private void addCombatantRow(Combatant c) {
+        CombatantPanel panel = CombatantPanel.getPanelFor(c);
+        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        allPanels.add(panel);
+        add(panel);
+        add(divider());
     }
 
+    private JSeparator divider() {
+        JSeparator sep = new JSeparator();
+        sep.setForeground(DIVIDER_COLOR);
+        sep.setMaximumSize(new Dimension(Integer.MAX_VALUE, 1));
+        return sep;
+    }
+
+    public void updateAll() {
+        allPanels.forEach(CombatantPanel::update);
+    }
+
+    public void setActionMode(
+            @MagicConstant(intValues = {CombatantPanel.TURN, CombatantPanel.ATTACK, CombatantPanel.HEAL}) int mode
+    ) {
+        allPanels.forEach(p -> p.setActionMode(mode));
+    }
 }

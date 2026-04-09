@@ -11,19 +11,19 @@ public class FileGetter {
 
     private File file;
 
-    public static URL getUrl(Container root) {
+    public static URL getUrl(Component parent) {
         try {
-            return new FileGetter(root).file.toURI().toURL();
+            FileGetter getter = new FileGetter(parent);
+            if (getter.file != null) {
+                return getter.file.toURI().toURL();
+            }
         } catch (MalformedURLException ignored) {
-            return null;
         }
+        return null;
     }
 
-    private FileGetter(Container root) {
-        root.setVisible(false);
-
+    private FileGetter(Component parent) {
         file = null;
-
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileFilter(new FileNameExtensionFilter(
                 "TEXT FILES",
@@ -31,13 +31,10 @@ public class FileGetter {
                 "text"
         ));
 
-        int result = fileChooser.showOpenDialog(null);
-        File selection = fileChooser.getSelectedFile();
+        int result = fileChooser.showOpenDialog(parent);
 
-        if (result == JFileChooser.APPROVE_OPTION)
-            file = selection;
-
-        root.setVisible(true);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            file = fileChooser.getSelectedFile();
+        }
     }
-
 }

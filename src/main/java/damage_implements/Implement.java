@@ -1,8 +1,9 @@
 package damage_implements;
 
 import character_info.AbilityModifier;
+import org.jetbrains.annotations.NotNull;
 
-public class Implement {
+public abstract class Implement {
 
     protected final String name;
     protected final int numDice;
@@ -23,13 +24,11 @@ public class Implement {
             return numDice + "d" + dieSize;
     }
 
-    public boolean isManual() {
-        return false;
+    public int getMaxDamage() {
+        return numDice * dieSize;
     }
 
-    public boolean isHalfDamage() {
-        return false;
-    }
+    public abstract boolean isManual();
 
     @Override
     public String toString() {
@@ -40,14 +39,7 @@ public class Implement {
         return name;
     }
 
-    public int numDice() {
-        return numDice;
-    }
-
-    public int dieSize() {
-        return dieSize;
-    }
-
+    @NotNull
     public AbilityModifier stat() {
         return stat;
     }

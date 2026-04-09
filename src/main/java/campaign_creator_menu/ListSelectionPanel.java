@@ -3,7 +3,7 @@ package campaign_creator_menu;
 import character_info.combatant.Combatant;
 import character_info.combatant.NPC;
 import damage_implements.Implement;
-import format.ColorStyle;
+import format.ColorStyles;
 import util.Filter;
 import util.Message;
 
@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
-import static format.swing_comp.SwingPane.*;
+import static swing.swing_comp.SwingPane.*;
 import static util.Message.getWithLoopUntilInt;
 import static util.Message.template;
 
@@ -35,7 +35,7 @@ public class ListSelectionPanel<T> extends JPanel {
 
         JTextField availableSearch = field()
                 .withAction(f -> availableList.logSearch(f.getText()))
-                .withHighlight(ColorStyle.GREEN_APPLE.getColor(), RIGHT)
+                .withHighlight(ColorStyles.GREEN_APPLE, RIGHT, false)
                 .build();
 
         JLabel selectedLabel = label("Selected " + name + ":")
