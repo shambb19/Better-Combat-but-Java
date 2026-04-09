@@ -1,7 +1,7 @@
 package character_info.combatant;
 
+import __main.manager.EffectManager;
 import character_info.AbilityModifier;
-import character_info.DealtEffectsList;
 import character_info.LifeStatus;
 import character_info.Stats;
 import damage_implements.Effect;
@@ -19,14 +19,12 @@ public abstract class Combatant {
     public static final DataFlavor COMBATANT_FLAVOR = new DataFlavor(Combatant.class, "Combatant");
 
     protected final LifeStatus lifeStatus = new LifeStatus();
-    protected final DealtEffectsList dealtEffects = new DealtEffectsList(this);
-    protected final ArrayList<Combatant> hexedByList = new ArrayList<>();
     protected String name;
     protected int armorClass;
     protected int hpMax, hpCurrent;
     protected int initiative, inspiration;
+    protected final RollTracker rollTracker;
     protected double[] rollQualityData;
-    protected boolean isHealBlocked, isPoisoned;
 
     /**
      * NPC constructor
@@ -38,6 +36,7 @@ public abstract class Combatant {
 
         hpCurrent = hpMax;
         inspiration = 0;
+        rollTracker = new RollTracker();
         rollQualityData = new double[]{0, 0, 0};
     }
 
@@ -52,16 +51,16 @@ public abstract class Combatant {
         return inspiration;
     }
 
-    public void logRoll(int roll, int outOf) {
-        rollQualityData[0] += roll;
-        rollQualityData[1] += outOf;
-        rollQualityData[2]++;
+    public void logD20Roll(int roll) {
+        rollTracker.logRoll(roll, 1, 20);
     }
 
-    public double getRollQuality() {
-        if (rollQualityData[2] == 0) return -1;
+    public void logRoll(int roll, int numDice, int dieSize) {
+        rollTracker.logRoll(roll, numDice, dieSize);
+    }
 
-        return rollQualityData[0] / rollQualityData[1];
+    public double getLuckScore() {
+        return rollTracker.getLuckScore();
     }
 
     /**
@@ -161,15 +160,7 @@ public abstract class Combatant {
     public abstract Stats stats();
 
     public boolean canHeal() {
-        return !isHealBlocked;
-    }
-
-    public void setCanHeal(boolean canHeal) {
-        isHealBlocked = !canHeal;
-    }
-
-    public void setPoisoned(boolean isPoisoned) {
-        this.isPoisoned = isPoisoned;
+        return !EffectManager.hasEffect(this, Effect.HEAL_BLOCK);
     }
 
     /**
@@ -181,22 +172,11 @@ public abstract class Combatant {
      * @param dealtEffect the effect dealt
      */
     public void putEffect(Combatant target, Effect dealtEffect) {
-        dealtEffects.put(target, dealtEffect);
-    }
-
-    /**
-     * Ends all effects dealt by the root combatant (outer method)
-     */
-    public void endDealtEffects() {
-        dealtEffects.clear();
-    }
-
-    public void setHexedBy(Combatant hexer) {
-        hexedByList.add(hexer);
+        EffectManager.logEffect(target, this, dealtEffect);
     }
 
     public boolean isHexedBy(Combatant hexer) {
-        return hexedByList.contains(hexer);
+        return EffectManager.isHexedBy(this, hexer);
     }
 
     @Override
@@ -208,6 +188,30 @@ public abstract class Combatant {
 
     public String name() {
         return name;
+    }
+
+    public static class RollTracker {
+
+        private final double[] rollStats = new double[]{0.0, 5.0};
+
+        /**
+         * @param roll      The total result of the dice
+         * @param diceCount Number of dice (e.g., 3 for 3d8)
+         * @param dieSize   Size of dice (e.g., 8 for 3d8)
+         */
+        public void logRoll(int roll, int diceCount, int dieSize) {
+            double expectedAverage = diceCount * ((dieSize + 1) / 2.0);
+
+            double netLuck = roll - expectedAverage;
+
+            rollStats[0] += netLuck;
+            rollStats[1]++;
+        }
+
+        public double getLuckScore() {
+            if (rollStats[1] == 0) return 0;
+            return rollStats[0] / rollStats[1];
+        }
     }
 
 }

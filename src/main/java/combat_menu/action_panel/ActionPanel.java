@@ -1,9 +1,9 @@
 package combat_menu.action_panel;
 
-import __main.CombatManager;
-import __main.EncounterInfo;
-import __main.InspirationManager;
 import __main.Main;
+import __main.manager.CombatManager;
+import __main.manager.EncounterManager;
+import __main.manager.InspirationManager;
 import character_info.combatant.Combatant;
 import combat_menu.CombatantHeaderPanel;
 import combat_menu.CombatantPanel;
@@ -85,7 +85,7 @@ public class ActionPanel extends JPanel {
     }
 
     public void update() {
-        Combatant currentCombatant = EncounterInfo.getCurrentCombatant();
+        Combatant currentCombatant = EncounterManager.getCurrentCombatant();
 
         if (headerPanel == null || headerPanel.getCombatant() != currentCombatant) {
             headerPanel = new CombatantHeaderPanel(currentCombatant);

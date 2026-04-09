@@ -1,6 +1,6 @@
 package combat_menu.action_panel.form;
 
-import __main.CombatManager;
+import __main.manager.CombatManager;
 import character_info.combatant.Combatant;
 import combat_menu.action_panel.DropZonePanel;
 import combat_menu.action_panel.LabeledField;
@@ -49,7 +49,7 @@ public abstract class ActionFormPanel extends JPanel {
         btnRow.setOpaque(false);
         btnRow.setAlignmentX(LEFT_ALIGNMENT);
 
-        confirmButton = styledButton(confirmLabel, ColorStyles.HP_HEALTHY, new Color(0xD8, 0xF4, 0xEC));
+        confirmButton = styledButton(confirmLabel, ColorStyles.HEALTHY, new Color(0xD8, 0xF4, 0xEC));
         cancelButton = styledButton("Cancel", ColorStyles.TRACK, ColorStyles.TEXT_MUTED);
 
         btnRow.add(confirmButton);
@@ -149,7 +149,7 @@ public abstract class ActionFormPanel extends JPanel {
         row.setAlignmentX(LEFT_ALIGNMENT);
         row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 52));
 
-        JLabel label = new JLabel("Select an attack option");
+        JLabel label = new JLabel("Select an attack");
         label.setFont(label.getFont().deriveFont(Font.PLAIN, 12f));
         label.setForeground(ColorStyles.TEXT_MUTED);
         label.setPreferredSize(new Dimension(110, 0));
@@ -217,9 +217,9 @@ public abstract class ActionFormPanel extends JPanel {
             if (text.isEmpty()) {
                 bar.setBackground(ColorStyles.TRACK);
             } else if (validator.test(text)) {
-                bar.setBackground(ColorStyles.HP_HEALTHY);
+                bar.setBackground(ColorStyles.HEALTHY);
             } else {
-                bar.setBackground(ColorStyles.HP_CRITICAL);
+                bar.setBackground(ColorStyles.CRITICAL);
             }
         }
 

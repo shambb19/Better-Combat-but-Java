@@ -1,6 +1,6 @@
 package util;
 
-import __main.EncounterInfo;
+import __main.manager.EncounterManager;
 import character_info.combatant.Combatant;
 
 import javax.swing.*;
@@ -11,10 +11,10 @@ import java.util.List;
 public class Locators {
 
     public static List<Combatant> getTargetList(boolean isForDamage) {
-        boolean isEnemy = EncounterInfo.getCurrentCombatant().isEnemy();
+        boolean isEnemy = EncounterManager.getCurrentCombatant().isEnemy();
 
-        List<Combatant> fullList = ((isEnemy == isForDamage) ? EncounterInfo.getFriendlies() : EncounterInfo.getEnemies())
-                .stream().filter(c -> !c.equals(EncounterInfo.getCurrentCombatant())).toList();
+        List<Combatant> fullList = ((isEnemy == isForDamage) ? EncounterManager.getFriendlies() : EncounterManager.getEnemies())
+                .stream().filter(c -> !c.equals(EncounterManager.getCurrentCombatant())).toList();
 
         if (isForDamage)
             return fullList;

@@ -28,6 +28,14 @@ public abstract class Implement {
         return numDice * dieSize;
     }
 
+    public int numDice() {
+        return numDice;
+    }
+
+    public int dieSize() {
+        return dieSize;
+    }
+
     public abstract boolean isManual();
 
     @Override

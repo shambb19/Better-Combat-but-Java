@@ -1,9 +1,8 @@
 package combat_menu;
 
-import __main.InspirationManager;
 import __main.Main;
+import __main.manager.InspirationManager;
 import combat_menu.action_panel.ActionPanel;
-import combat_menu.action_panel.InspirationBar;
 import org.intellij.lang.annotations.MagicConstant;
 import swing.swing_comp.SwingComp;
 import swing.swing_comp.SwingPane;
@@ -13,7 +12,7 @@ import java.awt.*;
 
 public class CombatMenu extends JFrame {
 
-    public static final String TITLE = "Combat";
+    public static final String TITLE = "Combat" + Main.TITLE;
 
     private final EncounterListPanel initiativeListPanel;
     private final ActionPanel actionPanel;

@@ -1,6 +1,6 @@
 package combat_menu.action_panel.form;
 
-import __main.InspirationManager;
+import __main.manager.InspirationManager;
 import format.ColorStyles;
 
 import javax.swing.*;

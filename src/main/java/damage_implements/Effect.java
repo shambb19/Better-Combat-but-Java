@@ -1,7 +1,8 @@
 package damage_implements;
 
-import __main.EncounterInfo;
+import __main.manager.EncounterManager;
 import character_info.combatant.Combatant;
+import swing.swing_comp.SwingPane;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -14,16 +15,10 @@ public enum Effect {
     ILLUSION(Colors.purpleSet("Illusion", "..target.. now believes an illusion of ..attacker..'s choice. spooky")),
     ADVANTAGE_SOON(Colors.amberSet("Advantage", "..attacker.. can take advantage (unpunished) if they attack ..target.. again this turn")),
     BONUS_DAMAGE(Colors.amberSet("Hex", "..target.. is taking bonus 1d6 damage from ..attacker.. for the rest of combat (handled internally)")),
-
-    HALF_DAMAGE,
-    SPLIT_ATTACK,
-    NONE;
+    HALF_DAMAGE(Colors.blueSet("Half Damage", "This attack deals half damage on a failed attack (handled internally; enter full roll value)")),
+    NONE(null);
 
     private final NoticeComponents noticeComponents;
-
-    Effect() {
-        this.noticeComponents = null;
-    }
 
     Effect(NoticeComponents noticeComponents) {
         this.noticeComponents = noticeComponents;
@@ -34,11 +29,8 @@ public enum Effect {
             throw new IllegalStateException("Effect " + name() + " does not have an associated notice.");
         }
 
-        noticeComponents.updateSubtitle(EncounterInfo.getCurrentCombatant(), target);
-        return buildNoticeBanner();
-    }
+        noticeComponents.updateSubtitle(EncounterManager.getCurrentCombatant(), target);
 
-    private JPanel buildNoticeBanner() {
         JPanel notice = new JPanel(new BorderLayout(15, 0));
         notice.setBackground(noticeComponents.background());
         notice.setOpaque(true);
@@ -48,9 +40,7 @@ public enum Effect {
         notice.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
         notice.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JPanel textCol = new JPanel();
-        textCol.setLayout(new BoxLayout(textCol, BoxLayout.Y_AXIS));
-        textCol.setOpaque(false);
+        JPanel textCol = SwingPane.panel().withLayout(SwingPane.VERTICAL_BOX).transparent().build();
 
         JLabel titleLabel = new JLabel(noticeComponents.title());
         titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD, 12f));
@@ -77,15 +67,20 @@ public enum Effect {
 }
 
 class Colors {
-    public static final Color BG_PURPLE = new Color(0x22, 0x1E, 0x2E);
-    public static final Color FG_PURPLE = new Color(0xAF, 0xA9, 0xEC);
-    public static final Color FG_PURPLE_DIM = new Color(0x7F, 0x77, 0xDD);
-    public static final Color BORDER_PURPLE = new Color(0x53, 0x4A, 0xB7);
+    static final Color BG_PURPLE = new Color(0x22, 0x1E, 0x2E),
+            FG_PURPLE = new Color(0xAF, 0xA9, 0xEC),
+            FG_PURPLE_DIM = new Color(0x7F, 0x77, 0xDD),
+            BORDER_PURPLE = new Color(0x53, 0x4A, 0xB7),
 
-    public static final Color BG_AMBER = new Color(0x26, 0x20, 0x14);
-    public static final Color FG_AMBER = new Color(0xEF, 0x9F, 0x27);
-    public static final Color FG_AMBER_DIM = new Color(0xBA, 0x75, 0x17);
-    public static final Color BORDER_AMBER = new Color(0xBA, 0x75, 0x17);
+    BG_AMBER = new Color(0x26, 0x20, 0x14),
+            FG_AMBER = new Color(0xEF, 0x9F, 0x27),
+            FG_AMBER_DIM = new Color(0xBA, 0x75, 0x17),
+            BORDER_AMBER = new Color(0xBA, 0x75, 0x17),
+
+    BG_BLUE = new Color(0x1A, 0x22, 0x2E),
+            FG_BLUE = new Color(0x94, 0xC9, 0xFF),
+            FG_BLUE_DIM = new Color(0x60, 0x8A, 0xAF),
+            BORDER_BLUE = new Color(0x3A, 0x86, 0xFF);
 
     static NoticeComponents purpleSet(String title, String subtitle) {
         return new NoticeComponents(BG_PURPLE, BORDER_PURPLE, FG_PURPLE, FG_PURPLE_DIM, title, new StringBuilder(subtitle));
@@ -94,10 +89,16 @@ class Colors {
     static NoticeComponents amberSet(String title, String subtitle) {
         return new NoticeComponents(BG_AMBER, BORDER_AMBER, FG_AMBER, FG_AMBER_DIM, title, new StringBuilder(subtitle));
     }
+
+    @SuppressWarnings("all")
+    static NoticeComponents blueSet(String title, String subtitle) {
+        return new NoticeComponents(BG_BLUE, BORDER_BLUE, FG_BLUE, FG_BLUE_DIM, title, new StringBuilder(subtitle));
+    }
 }
 
-record NoticeComponents(Color background, Color accent, Color foreground, Color foregroundDim, String title,
-                        StringBuilder subtitle) {
+record NoticeComponents(Color background, Color accent,
+                        Color foreground, Color foregroundDim,
+                        String title, StringBuilder subtitle) {
     void updateSubtitle(Combatant attacker, Combatant target) {
         final String ATTACKER = "..attacker..";
         final String TARGET = "..target..";

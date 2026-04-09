@@ -1,6 +1,6 @@
 package combat_menu;
 
-import __main.EncounterInfo;
+import __main.manager.EncounterManager;
 import character_info.combatant.Combatant;
 import character_info.combatant.CombatantTransferable;
 import format.ColorStyles;
@@ -55,20 +55,19 @@ public class CombatantPanel extends JPanel {
         nameLabel.setBorder(new EmptyBorder(0, 10, 0, 0));
         add(nameLabel, BorderLayout.CENTER);
 
-        // Bar Assembly
         barTrack = new RoundPanel(BAR_HEIGHT / 2, ColorStyles.TRACK);
         barTrack.setLayout(null);
         barTrack.setPreferredSize(new Dimension(BAR_WIDTH, BAR_HEIGHT));
 
-        barFill = new RoundPanel(BAR_HEIGHT / 2, ColorStyles.HP_HEALTHY);
-        barFill.setBounds(0, 0, 0, BAR_HEIGHT); // Start empty for animation
+        barFill = new RoundPanel(BAR_HEIGHT / 2, ColorStyles.HEALTHY);
+        barFill.setBounds(0, 0, 0, BAR_HEIGHT);
 
         barLabel = new JLabel("", SwingConstants.CENTER);
         barLabel.setBounds(0, 0, BAR_WIDTH, BAR_HEIGHT);
         barLabel.setFont(new Font("SansSerif", Font.BOLD, 10));
         barLabel.setForeground(Color.WHITE);
 
-        barTrack.add(barLabel); // Added first so it stays on top via Z-Order
+        barTrack.add(barLabel);
         barTrack.add(barFill);
 
         add(barTrack, BorderLayout.EAST);
@@ -94,7 +93,7 @@ public class CombatantPanel extends JPanel {
         boolean unknown = combatant.isEnemy() && combatant.lifeStatus().isConscious();
         if (unknown) {
             targetFillWidth = BAR_WIDTH;
-            barFill.setFill(ColorStyles.HP_UNKNOWN);
+            barFill.setFill(ColorStyles.UNKNOWN);
             barLabel.setText("? / ?");
         } else {
             float ratio = combatant.maxHp() > 0 ? (float) combatant.hp() / combatant.maxHp() : 0;
@@ -109,7 +108,7 @@ public class CombatantPanel extends JPanel {
     public void setActionMode(
             @MagicConstant(intValues = {CombatantPanel.TURN, CombatantPanel.ATTACK, CombatantPanel.HEAL}) int mode
     ) {
-        Combatant currentCombatant = EncounterInfo.getCurrentCombatant();
+        Combatant currentCombatant = EncounterManager.getCurrentCombatant();
 
         boolean isTurn = combatant == currentCombatant;
 
@@ -120,7 +119,7 @@ public class CombatantPanel extends JPanel {
             isValidDragTarget = Locators.getTargetList(mode == ATTACK).contains(combatant);
 
         if (isTurn) {
-            accentBar.setBackground(ColorStyles.HP_HEALTHY);
+            accentBar.setBackground(ColorStyles.HEALTHY);
             nameLabel.setForeground(new Color(0xC8, 0xCC, 0xD8));
             setBackground(ROW_TURN);
         } else if (isValidDragTarget) {

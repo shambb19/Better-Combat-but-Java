@@ -1,5 +1,6 @@
 package __main;
 
+import __main.manager.EncounterManager;
 import _global_list.Combatants;
 import _global_list.DamageImplements;
 import _global_list.Resource;
@@ -17,10 +18,15 @@ import java.net.URL;
 
 public class Main {
 
+    public static final String VERSION = "v4.3.1";
+    public static final String TITLE = " || DnD Red Bull Edition " + VERSION;
+
     private static CampaignCreatorMenu CREATOR_MENU;
 
     private static CombatMenu COMBAT_MENU;
     private static URL INPUT;
+
+    private static boolean isCombatFinished = false;
 
     public static void main(String[] args) {
         FlatSpacegrayIJTheme.setup();
@@ -38,7 +44,7 @@ public class Main {
     private static void completeSetup() {
         Combatants.init(INPUT);
         Scenarios.init(INPUT);
-        EncounterInfo.init(Combatants.toBattle());
+        EncounterManager.init(Combatants.toBattle());
         EncounterFinalizationPopup.run();
     }
 
@@ -58,7 +64,7 @@ public class Main {
 
     public static void finalizeCombat() {
         SwingUtilities.invokeLater(() -> {
-            EncounterInfo.confirmQueueFinalized();
+            EncounterManager.confirmQueueFinalized();
             COMBAT_MENU = CombatMenu.newInstance();
             COMBAT_MENU.setVisible(true);
             logAction();
@@ -74,10 +80,12 @@ public class Main {
      * Opens a CombatEndPopup if one of the teams has been completely defeated.
      */
     public static void checkCombatOver() {
-        if (EncounterInfo.getBattle().isEncounterOver()) {
-            System.out.println("ran");
-            boolean isVictory = EncounterInfo.getBattle().isVictory();
+        if (isCombatFinished) return;
+
+        if (EncounterManager.getBattle().isEncounterOver()) {
+            boolean isVictory = EncounterManager.getBattle().isVictory();
             CombatEndPopup.run(isVictory);
+            isCombatFinished = true;
         }
     }
 

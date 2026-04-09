@@ -1,7 +1,7 @@
 package combat_menu.action_panel.form;
 
-import __main.CombatManager;
-import __main.EncounterInfo;
+import __main.manager.CombatManager;
+import __main.manager.EncounterManager;
 import character_info.combatant.Combatant;
 import combat_menu.action_panel.LabeledField;
 import damage_implements.Effect;
@@ -72,7 +72,7 @@ public class DamageFormPanel extends ActionFormPanel {
 
                 if (attackFailed)
                     addNotice(Effect.HALF_DAMAGE, container, insertIdx);
-                if (target.isHexedBy(EncounterInfo.getCurrentCombatant()))
+                if (target.isHexedBy(EncounterManager.getCurrentCombatant()))
                     addNotice(Effect.BONUS_DAMAGE, container, insertIdx);
                 if (effect.equals(Effect.ADVANTAGE_SOON))
                     addNotice(effect, container, insertIdx);

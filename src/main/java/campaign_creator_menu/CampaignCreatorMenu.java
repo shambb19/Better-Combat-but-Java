@@ -14,7 +14,7 @@ import java.net.URL;
 
 public class CampaignCreatorMenu extends JFrame {
 
-    public static final String TITLE = "Campaign Creator";
+    public static final String TITLE = "Campaign Creator" + Main.TITLE;
 
     private final CompletedElementsList completedList;
 

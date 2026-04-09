@@ -100,7 +100,7 @@ public class ColoredTxtDisplay extends JTextPane {
 
         return switch (line) {
             case ".party" -> PARTY;
-            case ".npc" -> NPC;
+            case ".npc" -> ALLY;
             case ".enemy" -> ENEMY;
             case ".scenario" -> SCENARIO;
             default -> PARAMETER;

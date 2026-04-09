@@ -1,8 +1,8 @@
 package combat_menu.action_panel.form;
 
-import __main.CombatManager;
-import __main.EncounterInfo;
 import __main.Main;
+import __main.manager.CombatManager;
+import __main.manager.EncounterManager;
 import character_info.combatant.Combatant;
 import combat_menu.CombatantPanel;
 import combat_menu.action_panel.LabeledField;
@@ -42,7 +42,7 @@ public class AttackFormPanel extends ActionFormPanel {
     protected void buildFields(JPanel container) {
         attackCombo = addMixedCombo(container);
 
-        LabeledField rollRow = addLabeledField(container, "Roll for hit", "Enter roll…");
+        LabeledField rollRow = addLabeledField(container, "Roll for hit", "Enter roll");
         rollFieldLabel = rollRow.label();
         rollField = rollRow.field();
 
@@ -62,19 +62,24 @@ public class AttackFormPanel extends ActionFormPanel {
 
     @Override
     protected void onConfirm() {
-        Combatant attacker = EncounterInfo.getCurrentCombatant();
-        Implement selected = (Implement) attackCombo.getSelectedItem();
+        Combatant attacker = EncounterManager.getCurrentCombatant();
+        Implement implement = (Implement) attackCombo.getSelectedItem();
         int roll = Integer.parseInt(rollField.getValue());
 
-        boolean hit = CombatManager.logAttack(target, roll, selected);
+        boolean hit = CombatManager.logAttack(target, roll, implement);
 
         if (!hit) {
             String reason;
-            assert selected != null;
-            if (selected instanceof Spell s && s.hasSave())
-                reason = "Roll " + (roll + target.mod(selected.stat())) + " beat save DC";
-            else
-                reason = "Roll " + (roll + attacker.mod(selected.stat())) + " did not meet target AC";
+            assert implement != null;
+            reason = switch (implement) {
+                case Weapon w ->
+                        "Roll " + (roll + attacker.attackBonus(w)) + " did not meet " + target.name() + "'s AC";
+                case Spell s when s.hasSave() ->
+                        "Roll " + (roll + target.mod(s.stat())) + " beat " + target.name() + "'s " + s.stat() + " save";
+                case Spell s when !s.hasSave() ->
+                        "Roll " + (roll + attacker.mod(s.stat())) + " did not meet " + target.name() + "'s AC";
+                default -> throw new ClassCastException("onConfirm in AttackFormPanel: implement not Weapon or Spell");
+            };
 
             showMissResult(reason);
             return;
@@ -99,9 +104,6 @@ public class AttackFormPanel extends ActionFormPanel {
 
         drain.addActionListener(e -> {
             float progress = (float) (System.currentTimeMillis() - start[0]) / DURATION;
-            int stripH = Math.round((1f - progress) * 36);
-            timerStrip.setPreferredSize(new Dimension(3, Math.max(0, stripH)));
-            timerStrip.revalidate();
 
             if (progress >= 1f) {
                 drain.stop();
@@ -115,8 +117,6 @@ public class AttackFormPanel extends ActionFormPanel {
         });
         drain.start();
     }
-
-    private JPanel timerStrip;
 
     private JPanel buildMissBanner(String reason) {
         JPanel banner = new JPanel(new BorderLayout(10, 0));
@@ -150,13 +150,6 @@ public class AttackFormPanel extends ActionFormPanel {
         text.add(sub);
         banner.add(text, BorderLayout.CENTER);
 
-        // Drain strip (shrinks over 2s)
-        timerStrip = new JPanel();
-        timerStrip.setPreferredSize(new Dimension(3, 36));
-        timerStrip.setBackground(new Color(0xE2, 0x4B, 0x4A, 120));
-        timerStrip.setOpaque(true);
-        banner.add(timerStrip, BorderLayout.EAST);
-
         return banner;
     }
 
@@ -182,7 +175,7 @@ public class AttackFormPanel extends ActionFormPanel {
     }
 
     private void populateComboBox() {
-        Combatant currentCombatant = EncounterInfo.getCurrentCombatant();
+        Combatant currentCombatant = EncounterManager.getCurrentCombatant();
 
         List<Weapon> weapons = currentCombatant.weapons();
         List<Spell> spells = currentCombatant.spells();

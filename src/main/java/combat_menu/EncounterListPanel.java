@@ -1,6 +1,6 @@
 package combat_menu;
 
-import __main.EncounterInfo;
+import __main.manager.EncounterManager;
 import character_info.combatant.Combatant;
 import format.ColorStyles;
 import org.intellij.lang.annotations.MagicConstant;
@@ -33,11 +33,11 @@ public class EncounterListPanel extends JPanel {
         allPanels.clear();
 
         addSectionLabel("Party and Allies");
-        EncounterInfo.getFriendlies().forEach(this::addCombatantRow);
+        EncounterManager.getFriendlies().forEach(this::addCombatantRow);
 
         add(Box.createVerticalStrut(10));
         addSectionLabel("Belligerent Enemies");
-        EncounterInfo.getEnemies().forEach(this::addCombatantRow);
+        EncounterManager.getEnemies().forEach(this::addCombatantRow);
 
         add(Box.createVerticalGlue());
 

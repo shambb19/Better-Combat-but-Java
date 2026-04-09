@@ -1,7 +1,7 @@
 package combat_menu.action_panel;
 
-import __main.EncounterInfo;
-import __main.InspirationManager;
+import __main.manager.EncounterManager;
+import __main.manager.InspirationManager;
 import _global_list.Resource;
 import encounter_info.PlayerQueue;
 import format.ColorStyles;
@@ -24,7 +24,7 @@ public class ActionButtons extends JPanel {
     JButton healButton, inspirationButton;
 
     private ActionButtons(ActionPanel root) {
-        PlayerQueue queue = EncounterInfo.getQueue();
+        PlayerQueue queue = EncounterManager.getQueue();
 
         SwingPane.modifiable(this).withLayout(SwingPane.ONE_COLUMN);
 
@@ -36,14 +36,14 @@ public class ActionButtons extends JPanel {
         healButton = button(Resource.HEAL_BUTTON, () -> root.switchTo(ActionPanel.HEAL_OPTION))
                 .withToolTip("Heal")
                 .applied(this::setupToolStyle)
-                .enabledIf(() -> EncounterInfo.getCurrentCombatant().canHeal())
+                .enabledIf(() -> EncounterManager.getCurrentCombatant().canHeal())
                 .in(this)
                 .build();
 
         inspirationButton = button(Resource.INSPIRATION_BUTTON, InspirationManager.MANAGER::useInspiration)
                 .withToolTip("Use Inspiration")
                 .applied(this::setupToolStyle)
-                .enabledIf(() -> !EncounterInfo.getCurrentCombatant().isEnemy())
+                .enabledIf(() -> !EncounterManager.getCurrentCombatant().isEnemy())
                 .in(this)
                 .build();
 
@@ -84,7 +84,7 @@ public class ActionButtons extends JPanel {
 
     public void confirmButtonStates() {
         healButton.setEnabled(!Locators.getTargetList(false).isEmpty());
-        inspirationButton.setEnabled(!EncounterInfo.getCurrentCombatant().isEnemy());
+        inspirationButton.setEnabled(!EncounterManager.getCurrentCombatant().isEnemy());
     }
 
     public void deselectAllButtons() {

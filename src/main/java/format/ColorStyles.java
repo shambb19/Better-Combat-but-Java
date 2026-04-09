@@ -6,11 +6,12 @@ public class ColorStyles {
 
     public static final Color
 
-            // ----- HP COLORS (Baseline) ----- //
-            HP_HEALTHY = new Color(0x5D, 0xCA, 0xA5),
-            HP_WARNING = new Color(0xEF, 0x9F, 0x27),
-            HP_CRITICAL = new Color(0xE2, 0x4B, 0x4A),
-            HP_UNKNOWN = new Color(0x3A, 0x2E, 0x3A),
+            // ----- STATUS COLORS (Baseline) ----- //
+            PERFECT = new Color(0xC6, 0x78, 0xDD),
+            HEALTHY = new Color(0x5D, 0xCA, 0xA5),
+            WARNING = new Color(0xEF, 0x9F, 0x27),
+            CRITICAL = new Color(0xE2, 0x4B, 0x4A),
+            UNKNOWN = new Color(0x3A, 0x2E, 0x3A),
 
     // ----- GUI COLORS ----- //
     SELECTION = new Color(0x9D, 0x8B, 0xEF),
@@ -26,8 +27,8 @@ public class ColorStyles {
 
     // ----- TYPE COLORS ----- //
     PARTY = new Color(0x6A, 0xBC, 0xFF),
-            NPC = new Color(0x9D, 0x8B, 0xEF),
-            ENEMY = new Color(0xF2, 0x61, 0x91),
+            ALLY = new Color(0x9D, 0x8B, 0xEF),
+            ENEMY = new Color(0xE2, 0x4B, 0x4A),
             SCENARIO = new Color(0xFF, 0xED, 0x7A),
 
     // ----- CODE / SYSTEM COLORS ----- //
@@ -40,18 +41,17 @@ public class ColorStyles {
             EMPTY = new Color(0x1E, 0x21, 0x28),
 
     // ----- GENERIC GOOD/BAD COLORS ----- //
-    GREEN_APPLE = new Color(0xA3, 0xBE, 0x8C),
-            ORANGE_ISH_RED = new Color(0xD0, 0x87, 0x70);
+    GREEN_APPLE = new Color(0xA3, 0xBE, 0x8C);
 
     public static Color getPercentColor(int val, int max) {
-        if (max <= 0) return HP_UNKNOWN;
+        if (max <= 0) return UNKNOWN;
         double percent = (double) val / max;
 
         if (percent > 0.6)
-            return HP_HEALTHY;
+            return HEALTHY;
         else if (percent > 0.25)
-            return HP_WARNING;
+            return WARNING;
         else
-            return HP_CRITICAL;
+            return CRITICAL;
     }
 }

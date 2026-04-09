@@ -1,11 +1,12 @@
 package combat_menu.popup;
 
-import __main.EncounterInfo;
 import __main.Main;
+import __main.manager.EncounterManager;
 import _global_list.Combatants;
 import character_info.combatant.Combatant;
 import character_info.combatant.NPC;
 import encounter_info.Scenario;
+import format.ColorStyles;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -15,7 +16,6 @@ import java.util.List;
 
 public class EncounterFinalizationPopup extends JDialog {
 
-    // ── Palette ───────────────────────────────────────────────────────────────
     private static final Color BG_DIALOG = new Color(0x1E, 0x21, 0x28);
     private static final Color BG_BAR = new Color(0x19, 0x1C, 0x22);
     private static final Color BG_CARD = new Color(0x23, 0x26, 0x2E);
@@ -26,24 +26,9 @@ public class EncounterFinalizationPopup extends JDialog {
     private static final Color BORDER = new Color(0x2A, 0x2E, 0x3A);
     private static final Color BORDER_FLD = new Color(0x3A, 0x3E, 0x4A);
 
-    private static final Color FG_PRIMARY = new Color(0xD8, 0xDC, 0xE8);
-    private static final Color FG_MUTED = new Color(0x6B, 0x70, 0x80);
-    private static final Color FG_HINT = new Color(0x50, 0x55, 0x68);
-
-    private static final Color ACCENT_PARTY = new Color(0x5D, 0xCA, 0xA5);
-    private static final Color ACCENT_ALLY = new Color(0x7F, 0x77, 0xDD);
-    private static final Color ACCENT_ENEMY = new Color(0xE2, 0x4B, 0x4A);
-
-    private static final Color SECTION_PARTY = new Color(0x5D, 0xCA, 0xA5);
-    private static final Color SECTION_ALLY = new Color(0x7F, 0x77, 0xDD);
-    private static final Color SECTION_ENEMY = new Color(0xE2, 0x4B, 0x4A);
-
-    // ── State ─────────────────────────────────────────────────────────────────
     private final List<CombatantCard> activeCards = new ArrayList<>();
     private final JPanel partyContainer;
     private final JPanel dynamicContainer;
-
-    // ── Constructor ───────────────────────────────────────────────────────────
 
     private EncounterFinalizationPopup() {
         setTitle("Finalize Combat Information");
@@ -55,7 +40,6 @@ public class EncounterFinalizationPopup extends JDialog {
         setLayout(new BorderLayout());
         getRootPane().setBorder(BorderFactory.createLineBorder(BORDER, 1));
 
-        // ── Top bar: scenario selector ────────────────────────────────────────
         JPanel topBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 8));
         topBar.setBackground(BG_BAR);
         topBar.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, BORDER));
@@ -63,13 +47,13 @@ public class EncounterFinalizationPopup extends JDialog {
 
         JLabel scenarioLabel = new JLabel("Combat scenario:");
         scenarioLabel.setFont(scenarioLabel.getFont().deriveFont(Font.PLAIN, 12f));
-        scenarioLabel.setForeground(FG_MUTED);
+        scenarioLabel.setForeground(ColorStyles.TEXT_MUTED);
         topBar.add(scenarioLabel);
 
         JComboBox<Scenario> scenarioCombo = new JComboBox<>(
-                EncounterInfo.getBattle().scenarios().toArray(new Scenario[0]));
+                EncounterManager.getBattle().scenarios().toArray(new Scenario[0]));
         scenarioCombo.setBackground(BG_FIELD);
-        scenarioCombo.setForeground(FG_PRIMARY);
+        scenarioCombo.setForeground(ColorStyles.TEXT_PRIMARY);
         scenarioCombo.setFont(scenarioCombo.getFont().deriveFont(Font.PLAIN, 12f));
         styleComboBox(scenarioCombo);
         scenarioCombo.setSelectedIndex(-1);
@@ -77,14 +61,13 @@ public class EncounterFinalizationPopup extends JDialog {
                 e -> updateScenario((Scenario) scenarioCombo.getSelectedItem()));
         topBar.add(scenarioCombo);
 
-        // ── Scroll area ───────────────────────────────────────────────────────
         partyContainer = boxPanel();
         dynamicContainer = boxPanel();
 
         JPanel scrollContent = boxPanel();
         scrollContent.setBackground(BG_DIALOG);
         scrollContent.setBorder(new EmptyBorder(8, 12, 12, 12));
-        scrollContent.add(sectionLabel("The Party", SECTION_PARTY));
+        scrollContent.add(sectionLabel("The Party", ColorStyles.PARTY));
         scrollContent.add(partyContainer);
         scrollContent.add(vgap());
         scrollContent.add(dynamicContainer);
@@ -96,7 +79,6 @@ public class EncounterFinalizationPopup extends JDialog {
         scroller.setPreferredSize(new Dimension(500, 520));
         add(scroller, BorderLayout.CENTER);
 
-        // ── Footer: begin button ──────────────────────────────────────────────
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 8));
         footer.setBackground(BG_BAR);
         footer.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER));
@@ -113,7 +95,6 @@ public class EncounterFinalizationPopup extends JDialog {
         beginButton.addActionListener(e -> logAndBegin());
         footer.add(beginButton);
 
-        // ── Init ──────────────────────────────────────────────────────────────
         initializeParty();
         updateScenario(Combatants.toScenario());
 
@@ -128,8 +109,6 @@ public class EncounterFinalizationPopup extends JDialog {
                 new EmptyBorder(2, 8, 2, 8)));
     }
 
-    // ── Section labels ────────────────────────────────────────────────────────
-
     private void updateScenario(Scenario scenario) {
         if (scenario == null) return;
 
@@ -137,20 +116,18 @@ public class EncounterFinalizationPopup extends JDialog {
         dynamicContainer.removeAll();
 
         if (scenario.containsFriendlies()) {
-            dynamicContainer.add(sectionLabel("Allies", SECTION_ALLY));
+            dynamicContainer.add(sectionLabel("Allies", ColorStyles.ALLY));
             scenario.withListAllOccurrences().forEach(npc ->
-                    addCombatantCard((NPC) npc, ACCENT_ALLY));
+                    addCombatantCard((NPC) npc, ColorStyles.ALLY));
         }
 
-        dynamicContainer.add(sectionLabel("Enemies", SECTION_ENEMY));
+        dynamicContainer.add(sectionLabel("Enemies", ColorStyles.ENEMY));
         scenario.againstListAllOccurrences().forEach(npc ->
-                addCombatantCard((NPC) npc, ACCENT_ENEMY));
+                addCombatantCard((NPC) npc, ColorStyles.ENEMY));
 
         dynamicContainer.revalidate();
         dynamicContainer.repaint();
     }
-
-    // ── Party init ────────────────────────────────────────────────────────────
 
     private static JPanel boxPanel() {
         JPanel p = new JPanel();
@@ -158,8 +135,6 @@ public class EncounterFinalizationPopup extends JDialog {
         p.setOpaque(false);
         return p;
     }
-
-    // ── Scenario update ───────────────────────────────────────────────────────
 
     private static JLabel sectionLabel(String text, Color color) {
         JLabel l = new JLabel(text.toUpperCase());
@@ -174,26 +149,23 @@ public class EncounterFinalizationPopup extends JDialog {
         return Box.createRigidArea(new Dimension(0, 6));
     }
 
-    // ── Confirm ───────────────────────────────────────────────────────────────
 
     private void logAndBegin() {
-        EncounterInfo.getFriendlies().clear();
-        EncounterInfo.getEnemies().clear();
+        EncounterManager.getFriendlies().clear();
+        EncounterManager.getEnemies().clear();
 
         activeCards.stream()
                 .filter(CombatantCard::isPresent)
                 .map(CombatantCard::getCombatant)
-                .forEach(EncounterInfo::addCombatant);
+                .forEach(EncounterManager::addCombatant);
 
         dispose();
         Main.finalizeCombat();
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
-
     private void initializeParty() {
-        EncounterInfo.getParty().forEach(pc -> {
-            CombatantCard card = new CombatantCard(pc, ACCENT_PARTY, true);
+        EncounterManager.getParty().forEach(pc -> {
+            CombatantCard card = new CombatantCard(pc, ColorStyles.PARTY, true);
             activeCards.add(card);
             partyContainer.add(card);
             partyContainer.add(vgap());
@@ -210,10 +182,6 @@ public class EncounterFinalizationPopup extends JDialog {
     public static void run() {
         new EncounterFinalizationPopup().setVisible(true);
     }
-
-    // =========================================================================
-    // CombatantCard
-    // =========================================================================
 
     private static class CombatantCard extends JPanel {
 
@@ -236,32 +204,29 @@ public class EncounterFinalizationPopup extends JDialog {
             setAlignmentX(LEFT_ALIGNMENT);
             setBorder(new EmptyBorder(0, 0, 0, 12));
 
-            // Left accent strip
             accentBar = new JPanel();
             accentBar.setPreferredSize(new Dimension(ACCENT_W, 0));
             accentBar.setBackground(accent);
             accentBar.setOpaque(true);
             add(accentBar, BorderLayout.WEST);
 
-            // Name
             JLabel nameLabel = new JLabel(combatant.name());
             nameLabel.setFont(nameLabel.getFont().deriveFont(Font.BOLD, 14f));
-            nameLabel.setForeground(FG_PRIMARY);
+            nameLabel.setForeground(ColorStyles.TEXT_PRIMARY);
             nameLabel.setBorder(new EmptyBorder(0, 10, 0, 0));
             add(nameLabel, BorderLayout.CENTER);
 
-// Right: initiative + optional absent checkbox
-            JPanel right = new JPanel(new GridBagLayout()); // GridBagLayout centers vertically by default
+            JPanel right = new JPanel(new GridBagLayout());
             right.setOpaque(false);
             add(right, BorderLayout.EAST);
 
             GridBagConstraints gbc = new GridBagConstraints();
-            gbc.insets = new Insets(0, 8, 0, 0); // Replaces the 8px hgap from FlowLayout
+            gbc.insets = new Insets(0, 8, 0, 0);
             gbc.anchor = GridBagConstraints.CENTER;
 
             JLabel initLabel = new JLabel("Initiative");
             initLabel.setFont(initLabel.getFont().deriveFont(Font.PLAIN, 11f));
-            initLabel.setForeground(FG_MUTED);
+            initLabel.setForeground(ColorStyles.TEXT_MUTED);
             right.add(initLabel, gbc);
 
             SpinnerNumberModel model = new SpinnerNumberModel(10, 1, 20, 1);
@@ -273,7 +238,7 @@ public class EncounterFinalizationPopup extends JDialog {
             if (showAbsent) {
                 absentCheck = new JCheckBox("Absent");
                 absentCheck.setFont(absentCheck.getFont().deriveFont(Font.PLAIN, 11f));
-                absentCheck.setForeground(FG_MUTED);
+                absentCheck.setForeground(ColorStyles.TEXT_MUTED);
                 absentCheck.setBackground(BG_CARD);
                 absentCheck.setOpaque(false);
                 absentCheck.setFocusPainted(false);
@@ -284,11 +249,6 @@ public class EncounterFinalizationPopup extends JDialog {
             }
         }
 
-        // ── Absent state ──────────────────────────────────────────────────────
-
-        /**
-         * Recursively dims all labels in the card.
-         */
         private static void setForegroundAlpha(Container c, float alpha) {
             for (Component child : c.getComponents()) {
                 if (child instanceof JLabel lbl) {
@@ -311,14 +271,12 @@ public class EncounterFinalizationPopup extends JDialog {
             JComponent editor = spinner.getEditor();
             if (editor instanceof JSpinner.DefaultEditor de) {
                 de.getTextField().setBackground(BG_FIELD);
-                de.getTextField().setForeground(FG_PRIMARY);
-                de.getTextField().setCaretColor(FG_PRIMARY);
+                de.getTextField().setForeground(ColorStyles.TEXT_PRIMARY);
+                de.getTextField().setCaretColor(ColorStyles.TEXT_PRIMARY);
                 de.getTextField().setBorder(new EmptyBorder(0, 2, 0, 2));
                 de.getTextField().setHorizontalAlignment(SwingConstants.CENTER);
             }
         }
-
-        // ── Spinner styling ───────────────────────────────────────────────────
 
         private void updateAbsentState() {
             boolean absent = absentCheck.isSelected();
@@ -326,9 +284,8 @@ public class EncounterFinalizationPopup extends JDialog {
             setBackground(absent ? BG_CARD_ABS : BG_CARD);
             accentBar.setBackground(absent
                     ? new Color(0x2A, 0x2E, 0x3A)
-                    : accentBar.getBackground()); // keeps original accent if not absent
+                    : accentBar.getBackground());
 
-            // Restore correct accent when un-ticking — stored as client property
             if (!absent) {
                 Color orig = (Color) getClientProperty("accent");
                 if (orig != null) accentBar.setBackground(orig);

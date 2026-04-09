@@ -1,7 +1,8 @@
 package encounter_info;
 
-import __main.CombatManager;
 import __main.Main;
+import __main.manager.CombatManager;
+import __main.manager.EffectManager;
 import character_info.combatant.Combatant;
 import util.Message;
 
@@ -26,9 +27,9 @@ public class PlayerQueue {
         sortList(this.friendlies);
         sortList(this.enemies);
 
-        if (!this.friendlies.isEmpty()) {
+        if (!this.friendlies.isEmpty())
             this.currentCombatant = this.friendlies.get(friendlyIndex);
-        } else if (!this.enemies.isEmpty()) {
+        else if (!this.enemies.isEmpty()) {
             this.enemyIndex = 0;
             this.currentCombatant = this.enemies.get(enemyIndex);
         }
@@ -74,7 +75,7 @@ public class PlayerQueue {
     private void processTurnStart() {
         if (currentCombatant == null) return;
 
-        currentCombatant.endDealtEffects();
+        EffectManager.processCombatantTurnStart();
 
         if (!currentCombatant.lifeStatus().isConscious()) {
             if (currentCombatant.lifeStatus().isAlive()) {

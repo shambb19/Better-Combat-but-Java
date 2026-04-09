@@ -56,7 +56,7 @@ effect: BONUS_DAMAGE
 name: Scorching Ray
 dmg: 2d6
 stat: none
-effect: SPLIT_ATTACK
+effect: NONE
 
 .spell
 name: Eldritch Blast

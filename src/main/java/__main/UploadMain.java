@@ -17,7 +17,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-public class UploadMain extends JDialog {
+public class UploadMain extends JFrame {
 
     private static final Color BG_MAIN = new Color(0x1E, 0x21, 0x28);
     private static final Color BG_SIDEBAR = new Color(0x19, 0x1C, 0x22);
@@ -46,8 +46,7 @@ public class UploadMain extends JDialog {
     private URL currentFile = null;
 
     private UploadMain() {
-        setTitle("Campaign File Selection");
-        setModal(false);
+        setTitle("Campaign File Selection" + Main.TITLE);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setMinimumSize(new Dimension(860, 500));
         setIconImage(Main.getImage());
@@ -264,9 +263,9 @@ public class UploadMain extends JDialog {
     }
 
     private void showNewCampaignState() {
-        updateAccent(ColorStyles.NPC);
-        statusDot.setBackground(ColorStyles.NPC);
-        statusDot.setBorder(BorderFactory.createLineBorder(ColorStyles.NPC, 4));
+        updateAccent(ColorStyles.ALLY);
+        statusDot.setBackground(ColorStyles.ALLY);
+        statusDot.setBorder(BorderFactory.createLineBorder(ColorStyles.ALLY, 4));
         statusText.setText("Mode: new campaign");
         statusText.setForeground(ColorStyles.TEXT_MUTED);
         scrollPane.setViewportView(

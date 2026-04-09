@@ -1,9 +1,8 @@
 package swing.swing_comp;
 
-import __main.EncounterInfo;
+import __main.manager.EncounterManager;
 import _global_list.Resource;
 import combat_menu.listener.IntegerFieldListener;
-import combat_menu.listener.IntegerRangeListener;
 import org.intellij.lang.annotations.MagicConstant;
 
 import javax.swing.*;
@@ -13,7 +12,10 @@ import javax.swing.border.MatteBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
@@ -45,48 +47,6 @@ public class SwingComp<E extends JComponent> {
 
     public E build() {
         return component;
-    }
-
-    public SwingPane toPanel(@MagicConstant(valuesFromClass = SwingPane.class) int layout) {
-        return SwingPane.panel().collect(component).withLayout(layout);
-    }
-
-    public SwingComp<JScrollPane> toScroller() {
-        Container parent = component.getParent();
-        JScrollPane scrollPane = new JScrollPane(component);
-
-        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-
-        if (parent != null) {
-            LayoutManager layout = parent.getLayout();
-            Object constraints = null;
-            int index = -1;
-
-            if (layout instanceof BorderLayout bl)
-                constraints = bl.getConstraints(component);
-            else {
-                Component[] comps = parent.getComponents();
-                for (int i = 0; i < comps.length; i++) {
-                    if (comps[i] == component) {
-                        index = i;
-                        break;
-                    }
-                }
-            }
-
-            parent.remove(component);
-            if (index != -1)
-                parent.add(scrollPane, index);
-            else
-                parent.add(scrollPane, constraints);
-
-
-            parent.revalidate();
-            parent.repaint();
-        }
-
-        return new SwingComp<>(scrollPane);
     }
 
     public SwingComp<E> in(JPanel panel) {
@@ -126,18 +86,13 @@ public class SwingComp<E extends JComponent> {
     public SwingComp<E> enabledIf(Supplier<Boolean> condition) {
         component.setEnabled(condition.get());
 
-        EncounterInfo.addQueueListener(e -> SwingUtilities.invokeLater(() -> component.setEnabled(condition.get())));
+        EncounterManager.addQueueListener(e -> SwingUtilities.invokeLater(() -> component.setEnabled(condition.get())));
 
         return this;
     }
 
     public SwingComp<E> enabledWhen(JCheckBox box, boolean selectionRequirement) {
         box.addActionListener(e -> component.setEnabled(box.isSelected() == selectionRequirement));
-        return this;
-    }
-
-    public SwingComp<E> visibleIf(boolean condition) {
-        component.setVisible(condition);
         return this;
     }
 
@@ -181,30 +136,6 @@ public class SwingComp<E extends JComponent> {
         if (!(component instanceof JTextComponent comp)) throw new ClassCastException();
 
         comp.addKeyListener(new IntegerFieldListener());
-        return this;
-    }
-
-    public SwingComp<E> forIntegersOnRange(int min, int max) {
-        if (!(component instanceof JTextComponent comp)) throw new ClassCastException();
-
-        comp.addKeyListener(new IntegerRangeListener(min, max, comp));
-        return withHighlight(Color.GRAY, BOTTOM, true);
-    }
-
-    @SuppressWarnings("unchecked")
-    public SwingComp<E> withSelection(Object selection) {
-        if (!(component instanceof JComboBox<?> box)) throw new ClassCastException();
-
-        boolean boxContainsSelection = false;
-        for (int i = 0; i < box.getItemCount(); i++)
-            if (box.getItemAt(i).equals(selection))
-                boxContainsSelection = true;
-
-        if (!boxContainsSelection)
-            ((JComboBox<Object>) box).addItem(selection);
-
-        box.setSelectedItem(selection);
-
         return this;
     }
 
@@ -386,10 +317,6 @@ public class SwingComp<E extends JComponent> {
         return new SwingComp<>(new JLabel(labelText.toString()));
     }
 
-    public static SwingComp<JLabel> label(ImageIcon icon) {
-        return new SwingComp<>(new JLabel(icon));
-    }
-
     @SafeVarargs
     public static <T> SwingComp<JComboBox<T>> comboBox(List<T> contents, T... additionalContents) {
         JComboBox<T> box = new JComboBox<>();
@@ -408,41 +335,6 @@ public class SwingComp<E extends JComponent> {
 
     public static SwingComp<JCheckBox> checkBox(String label) {
         return new SwingComp<>(new JCheckBox(label));
-    }
-
-    public static SwingComp<JSpinner> spinner(int min, int max, int val) {
-        JSpinner spinner = new JSpinner(new SpinnerNumberModel(val, min, max, 1));
-
-        FocusListener onFocus = new FocusAdapter() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                if (e.getComponent() instanceof JTextField field)
-                    SwingUtilities.invokeLater(field::selectAll);
-            }
-        };
-        MouseListener onClick = new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                if (e.getComponent() instanceof JTextField field && !field.hasFocus())
-                    SwingUtilities.invokeLater(field::selectAll);
-            }
-        };
-
-        JSpinner.DefaultEditor editor = (JSpinner.DefaultEditor) spinner.getEditor();
-        JTextField field = editor.getTextField();
-        field.addFocusListener(onFocus);
-        field.addMouseListener(onClick);
-
-        return new SwingComp<>(spinner);
-    }
-
-    public static SwingComp<JProgressBar> progressBar(
-            int min, int max, int val,
-            @MagicConstant(valuesFromClass = SwingConstants.class) int orient
-    ) {
-        JProgressBar bar = new JProgressBar(orient, min, max);
-        bar.setValue(val);
-        return new SwingComp<>(bar);
     }
 
     public static SwingComp<JScrollPane> scrollPane(Component contents) {
