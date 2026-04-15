@@ -1,9 +1,12 @@
 package campaign_creator_menu;
 
-import character_info.combatant.Combatant;
-import character_info.combatant.NPC;
-import damage_implements.Implement;
-import format.ColorStyles;
+import _global_list.DamageImplements;
+import combat_object.combatant.NPC;
+import combat_object.combatant.PC;
+import combat_object.damage_implements.Implement;
+import combat_object.damage_implements.Spell;
+import combat_object.damage_implements.Weapon;
+import swing.ValidatedField;
 import util.Filter;
 import util.Message;
 
@@ -21,11 +24,25 @@ import static util.Message.template;
 
 public class ListSelectionPanel<T> extends JPanel {
 
-    private final ImplementListPane<T> availableList;
-    private final ImplementListPane<T> selectedList;
+    private final ImplementListPane<T> availableList, selectedList;
+    protected final ValidatedField searchBar;
+
+    @SuppressWarnings("unchecked")
+    public static <S extends Implement> ListSelectionPanel<S> implementsFilteredFor(
+            Class<S> sourceType, String name, PC referenceCombatant
+    ) {
+        ListSelectionPanel<S> selectionPanel = new ListSelectionPanel<>(DamageImplements.toList(sourceType), name);
+
+        for (Weapon weapon : referenceCombatant.getWeapons())
+            selectionPanel.swapWithOtherList((S) weapon);
+        for (Spell spell : referenceCombatant.getSpells())
+            selectionPanel.swapWithOtherList((S) spell);
+
+        return selectionPanel;
+    }
 
     public ListSelectionPanel(List<T> sourceList, String name) {
-        modifiable(this).withLayout(BORDER);
+        modifiable(this).withLayout(SINGLE_ROW).withGaps(20, 0);
 
         ArrayList<T> sourceWithoutManual = new ArrayList<>(sourceList);
         sourceWithoutManual.removeIf(item -> item.toString().startsWith("Manual"));
@@ -33,27 +50,28 @@ public class ListSelectionPanel<T> extends JPanel {
         availableList = new ImplementListPane<>(sourceWithoutManual, this, true);
         selectedList = new ImplementListPane<>(null, this, false);
 
-        JTextField availableSearch = field()
-                .withAction(f -> availableList.logSearch(f.getText()))
-                .withHighlight(ColorStyles.GREEN_APPLE, RIGHT, false)
-                .build();
+        searchBar = new ValidatedField(name);
+        searchBar.setValidator(availableList::logSearch);
 
         JLabel selectedLabel = label("Selected " + name + ":")
-                .withEmptyBorder(10)
-                .build();
+                .withDerivedFont(Font.PLAIN, 13f)
+                .withEmptyBorder(10, 10, 10, 10)
+                .component();
 
-        panelIn(this, BorderLayout.NORTH)
-                .collect(availableSearch, selectedLabel)
-                .withLayout(SINGLE_ROW);
+        panelIn(this).withLayout(BORDER)
+                .with(searchBar, BorderLayout.NORTH)
+                .with(availableList, BorderLayout.CENTER);
 
-        panelIn(this, BorderLayout.CENTER).collect(availableList, selectedList).withLayout(FLOW);
+        panelIn(this).withLayout(BORDER)
+                .with(selectedLabel, BorderLayout.NORTH)
+                .with(selectedList, BorderLayout.CENTER);
     }
 
     public List<T> getSelected() {
         return Filter.matchingCondition(selectedList.getList(), Objects::nonNull);
     }
 
-    public HashMap<Combatant, Integer> getSelectedScenario() {
+    public HashMap<String, Integer> getSelectedScenario() {
         return selectedList.scenarioQtyList;
     }
 
@@ -97,7 +115,7 @@ public class ListSelectionPanel<T> extends JPanel {
         private final List<T> implementList;
         private final JList<T> list;
 
-        private final HashMap<Combatant, Integer> scenarioQtyList = new HashMap<>();
+        private final HashMap<String, Integer> scenarioQtyList = new HashMap<>();
 
         @SuppressWarnings("all")
         public ImplementListPane(List<T> allImplements, ListSelectionPanel root, boolean isAvailableList) {
@@ -117,8 +135,8 @@ public class ListSelectionPanel<T> extends JPanel {
         public void add(T implement) {
             if (implementList.contains(implement)) return;
 
-            if (implement instanceof Combatant c)
-                scenarioQtyList.put(c, 1);
+            if (implement instanceof NPC c)
+                scenarioQtyList.put(c.getName(), 1);
 
             implementList.add(implement);
             refresh();
@@ -152,7 +170,7 @@ public class ListSelectionPanel<T> extends JPanel {
         }
 
         @SuppressWarnings("unchecked")
-        public void logSearch(String search) {
+        public boolean logSearch(String search) {
             String searchFormatted = search.toLowerCase().replace(" ", "");
 
             implementList.clear();
@@ -167,9 +185,10 @@ public class ListSelectionPanel<T> extends JPanel {
             implementList.addAll(implementsMatchingSearch);
 
             list.setListData((T[]) implementList.toArray());
-
             list.revalidate();
             list.repaint();
+
+            return !searchFormatted.isBlank() && !implementsMatchingSearch.isEmpty();
         }
 
         private void logChange(ListSelectionEvent e) {
@@ -186,14 +205,15 @@ public class ListSelectionPanel<T> extends JPanel {
 
             NPC npc = (NPC) selection;
 
-            int input = Message.editOrRemoveOption(npc.name());
+            String name = npc.getName();
+            int input = Message.editOrRemoveOption(name);
             if (input == 1)
                 root.swapWithOtherList(list.getSelectedValue());
             else if (input == 0) {
-                int qty = getWithLoopUntilInt("Set quantity of " + npc.name() + ".", "Quantity");
-                scenarioQtyList.put(npc, qty);
+                int qty = getWithLoopUntilInt("Set quantity of " + name + ".", "Quantity");
+                scenarioQtyList.put(npc.getName(), qty);
 
-                template("Quantity of " + npc.name() + "set to " + qty + ".");
+                template("Quantity of " + name + " set to " + qty + ".");
             }
         }
 

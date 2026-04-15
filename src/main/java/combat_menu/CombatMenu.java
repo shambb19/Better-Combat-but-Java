@@ -1,8 +1,9 @@
 package combat_menu;
 
 import __main.Main;
-import __main.manager.InspirationManager;
 import combat_menu.action_panel.ActionPanel;
+import lombok.*;
+import lombok.experimental.*;
 import org.intellij.lang.annotations.MagicConstant;
 import swing.swing_comp.SwingComp;
 import swing.swing_comp.SwingPane;
@@ -10,31 +11,27 @@ import swing.swing_comp.SwingPane;
 import javax.swing.*;
 import java.awt.*;
 
+@FieldDefaults(makeFinal = true)
+@RequiredArgsConstructor(staticName = "newInstance")
 public class CombatMenu extends JFrame {
 
-    public static final String TITLE = "Combat" + Main.TITLE;
+    public static String TITLE = "Combat" + Main.TITLE;
 
-    private final EncounterListPanel initiativeListPanel;
-    private final ActionPanel actionPanel;
+    private EncounterListPanel encounterListPanel = EncounterListPanel.newInstance();
+    @Getter private ActionPanel actionPanel = ActionPanel.newInstance();
 
-    public static CombatMenu newInstance() {
-        return new CombatMenu();
-    }
-
-    private CombatMenu() {
+    {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setIconImage(Main.getImage());
+        setIconImage(Main.getAppIcon().getImage());
         setJMenuBar(CombatMenuBar.newInstance());
 
-        initiativeListPanel = EncounterListPanel.newInstance();
-        InspirationBar excessInspirationBar = new InspirationBar(InspirationManager.MANAGER);
-        actionPanel = ActionPanel.newInstance();
+        InspirationBar excessInspirationBar = InspirationBar.newInstance();
 
         SwingPane.modifiable(this).withLayout(SwingPane.BORDER)
                 .with(actionPanel, BorderLayout.CENTER)
-                .with(SwingComp.scrollPane(initiativeListPanel).withSize(300, 0), BorderLayout.EAST)
+                .with(SwingComp.scrollPane(encounterListPanel).withPreferredSize(300, 0), BorderLayout.EAST)
                 .with(excessInspirationBar, BorderLayout.SOUTH)
-                .withEmptyBorder(10);
+                .withEmptyBorder(10, 10, 10, 10);
 
         pack();
         setLocationRelativeTo(null);
@@ -45,11 +42,15 @@ public class CombatMenu extends JFrame {
     public void setActionMode(
             @MagicConstant(intValues = {CombatantPanel.TURN, CombatantPanel.ATTACK, CombatantPanel.HEAL}) int mode
     ) {
-        initiativeListPanel.setActionMode(mode);
+        encounterListPanel.setActionMode(mode);
+    }
+
+    public void startNewTurn() {
+        actionPanel.startNewTurn();
     }
 
     public void update() {
-        initiativeListPanel.updateAll();
+        encounterListPanel.updateAll();
         actionPanel.update();
     }
 

@@ -69,7 +69,6 @@ public class ColoredTxtDisplay extends JTextPane {
     }
 
     private void appendToPane(String line, Color lineType) {
-
         StyleContext sc = StyleContext.getDefaultStyleContext();
         AttributeSet aSet = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Foreground, lineType);
 

@@ -9,7 +9,8 @@ import campaign_creator_menu.CampaignCreatorMenu;
 import com.formdev.flatlaf.intellijthemes.FlatSpacegrayIJTheme;
 import combat_menu.CombatMenu;
 import combat_menu.popup.CombatEndPopup;
-import combat_menu.popup.EncounterFinalizationPopup;
+import combat_menu.popup.EncounterSelectionPopup;
+import lombok.*;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -21,86 +22,85 @@ public class Main {
     public static final String VERSION = "v4.3.1";
     public static final String TITLE = " || DnD Red Bull Edition " + VERSION;
 
-    private static CampaignCreatorMenu CREATOR_MENU;
+    private static URL input;
 
-    private static CombatMenu COMBAT_MENU;
-    private static URL INPUT;
+    private static CampaignCreatorMenu creatorMenu;
+    @Getter private static CombatMenu combatMenu;
 
     private static boolean isCombatFinished = false;
 
-    public static void main(String[] args) {
+    static {
         FlatSpacegrayIJTheme.setup();
+    }
 
+    public static void main(String[] args) {
         DamageImplements.init();
-
-        SwingUtilities.invokeLater(UploadMain::showNewInstance);
+        clearAllAndShowUploadMenu();
     }
 
-    public static void restart() {
-        COMBAT_MENU.dispose();
-        SwingUtilities.invokeLater(UploadMain::showNewInstance);
+    public static void clearAllAndShowUploadMenu() {
+        if (combatMenu != null) combatMenu.dispose();
+        if (creatorMenu != null) creatorMenu.dispose();
+
+        SwingUtilities.invokeLater(() -> UploadMain.newInstance().setVisible(true));
     }
 
-    private static void completeSetup() {
-        Combatants.init(INPUT);
-        Scenarios.init(INPUT);
-        EncounterManager.init(Combatants.toBattle());
-        EncounterFinalizationPopup.run();
+    private static void uploadCampaignAndFinalizeEncounter() {
+        // 1. Load all Combatants into the GlobalList first
+        // This fills Combatants.INSTANCE.list
+        Combatants.init(input);
+
+        // 2. NOW load Scenarios.
+        // When Scenario.from() is called inside this method,
+        // Combatants.getEnemies() will actually have data!
+        Scenarios.init(input);
+
+        EncounterManager.setEncounter(Combatants.toBattle());
+        EncounterSelectionPopup.newInstance().setVisible(true);
     }
 
-    public static void switchToCombat(URL file) {
-        CREATOR_MENU.dispose();
+    public static void closeCreatorAndOpenCombat(URL file) {
+        creatorMenu.dispose();
         runCombatEncounter(file);
     }
 
-    public static void runCombatEncounter(URL file) {
-        INPUT = file;
-        completeSetup();
+    public static void runCombatEncounter(@NonNull URL file) {
+        input = file;
+        uploadCampaignAndFinalizeEncounter();
     }
 
     public static void runCampaignCreator(URL url) {
-        CREATOR_MENU = CampaignCreatorMenu.newInstance(url);
+        creatorMenu = CampaignCreatorMenu.newInstance(url);
     }
 
-    public static void finalizeCombat() {
+    public static void finalizeAndStartCombat() {
         SwingUtilities.invokeLater(() -> {
             EncounterManager.confirmQueueFinalized();
-            COMBAT_MENU = CombatMenu.newInstance();
-            COMBAT_MENU.setVisible(true);
-            logAction();
+            combatMenu = CombatMenu.newInstance();
+            combatMenu.setVisible(true);
+            refreshUI();
         });
     }
 
-    public static void logAction() {
-        COMBAT_MENU.update();
-        checkCombatOver();
+    public static void refreshUI() {
+        if (combatMenu == null) return;
+
+        combatMenu.update();
+        checkVictoryConditions();
     }
 
-    /**
-     * Opens a CombatEndPopup if one of the teams has been completely defeated.
-     */
-    public static void checkCombatOver() {
+    public static void checkVictoryConditions() {
         if (isCombatFinished) return;
 
-        if (EncounterManager.getBattle().isEncounterOver()) {
-            boolean isVictory = EncounterManager.getBattle().isVictory();
+        if (EncounterManager.getEncounter().isEncounterOver()) {
+            boolean isVictory = EncounterManager.getEncounter().isVictory();
             CombatEndPopup.run(isVictory);
             isCombatFinished = true;
         }
     }
 
-    public static CombatMenu getMenu() {
-        return COMBAT_MENU;
-    }
-
-    @NotNull
-    public static Image getImage() {
-        return getIcon().getImage();
-    }
-
-    @NotNull
-    public static ImageIcon getIcon() {
-        URL imgUrl = Resource.PROGRAM_LOGO.url();
+    @NotNull public static ImageIcon getAppIcon() {
+        URL imgUrl = Resource.APP_ICON.getUrl();
 
         ImageIcon originalIcon = new ImageIcon(imgUrl);
         int width = originalIcon.getIconWidth() / 4;

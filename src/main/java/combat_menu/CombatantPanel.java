@@ -1,38 +1,44 @@
 package combat_menu;
 
 import __main.manager.EncounterManager;
-import character_info.combatant.Combatant;
-import character_info.combatant.CombatantTransferable;
+import combat_object.combatant.Combatant;
+import combat_object.combatant.CombatantTransferable;
+import combat_object.combatant.StatTooltipWindow;
 import format.ColorStyles;
+import lombok.experimental.*;
 import org.intellij.lang.annotations.MagicConstant;
 import swing.RoundPanel;
 import util.Locators;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import static swing.swing_comp.SwingComp.label;
+import static swing.swing_comp.SwingPane.*;
+
+@FieldDefaults(makeFinal = true)
 public class CombatantPanel extends JPanel {
 
     public static final int TURN = 0, ATTACK = 1, HEAL = 2;
 
-    private static final int BAR_WIDTH = 110, BAR_HEIGHT = 16, ACCENT_WIDTH = 3;
+    static int BAR_WIDTH = 110, BAR_HEIGHT = 16, ACCENT_WIDTH = 3;
 
-    private static final Color ROW_DEFAULT = new Color(0x1E, 0x21, 0x28);
-    private static final Color ROW_TURN = new Color(0x1A, 0x22, 0x30);
+    static Color ROW_DEFAULT = new Color(0x1E, 0x21, 0x28);
+    static Color ROW_TURN = new Color(0x1A, 0x22, 0x30);
 
-    private final Combatant combatant;
-    private final JLabel nameLabel;
-    private final JPanel accentBar;
-    private final RoundPanel barTrack;
-    private final RoundPanel barFill;
-    private final JLabel barLabel;
+    Combatant combatant;
+    JLabel nameLabel;
+    JPanel accentBar;
+    RoundPanel barTrack;
+    RoundPanel barFill;
+    JLabel barLabel;
+    @NonFinal StatTooltipWindow activeTooltip = null;
 
-    private final Timer animationTimer;
-    private int targetFillWidth = 0;
+    Timer animationTimer;
+    @NonFinal int targetFillWidth = 0;
 
     public static CombatantPanel getPanelFor(Combatant combatant) {
         return new CombatantPanel(combatant);
@@ -40,20 +46,23 @@ public class CombatantPanel extends JPanel {
 
     private CombatantPanel(Combatant combatant) {
         this.combatant = combatant;
-        setLayout(new BorderLayout(10, 0));
-        setBorder(new EmptyBorder(5, 0, 5, 10));
-        setBackground(ROW_DEFAULT);
-        setOpaque(true);
 
-        accentBar = new JPanel();
-        accentBar.setPreferredSize(new Dimension(ACCENT_WIDTH, 0));
-        accentBar.setBackground(ColorStyles.TRACK);
-        add(accentBar, BorderLayout.WEST);
+        modifiable(this).withLayout(BORDER)
+                .withGaps(10, 0)
+                .withEmptyBorder(5, 0, 5, 10)
+                .withBackground(ROW_DEFAULT)
+                .opaque();
 
-        nameLabel = new JLabel(combatant.name());
-        nameLabel.setForeground(new Color(0xC8, 0xCC, 0xD8));
-        nameLabel.setBorder(new EmptyBorder(0, 10, 0, 0));
-        add(nameLabel, BorderLayout.CENTER);
+        accentBar = panelIn(this, BorderLayout.WEST)
+                .withPreferredSize(ACCENT_WIDTH, 0)
+                .withBackground(ColorStyles.TRACK)
+                .component();
+
+        nameLabel = label(combatant.getName())
+                .withForeground(new Color(0xC8, 0xcc, 0xd8))
+                .withEmptyBorder(0, 10, 0, 0)
+                .in(this, BorderLayout.CENTER)
+                .component();
 
         barTrack = new RoundPanel(BAR_HEIGHT / 2, ColorStyles.TRACK);
         barTrack.setLayout(null);
@@ -74,6 +83,7 @@ public class CombatantPanel extends JPanel {
 
         animationTimer = new Timer(16, e -> tickAnimation());
         installDragSource();
+        installStatTooltip();
         update();
     }
 
@@ -90,17 +100,14 @@ public class CombatantPanel extends JPanel {
     }
 
     public void update() {
-        boolean unknown = combatant.isEnemy() && combatant.lifeStatus().isConscious();
-        if (unknown) {
+        barFill.setFill(combatant.getHealthBarColor());
+        barLabel.setText(combatant.getHealthBarString());
+
+        boolean unknown = combatant.isEnemy() && combatant.getLifeStatus().isConscious();
+        if (unknown)
             targetFillWidth = BAR_WIDTH;
-            barFill.setFill(ColorStyles.UNKNOWN);
-            barLabel.setText("? / ?");
-        } else {
-            float ratio = combatant.maxHp() > 0 ? (float) combatant.hp() / combatant.maxHp() : 0;
-            targetFillWidth = (int) (ratio * BAR_WIDTH);
-            barFill.setFill(ColorStyles.getPercentColor(combatant.hp(), combatant.maxHp()));
-            barLabel.setText(combatant.getHealthBarString());
-        }
+        else
+            targetFillWidth = (int) (combatant.getHpRatio() * BAR_WIDTH);
 
         barFill.fireSlideAdjust(targetFillWidth, BAR_HEIGHT, barTrack);
     }
@@ -149,6 +156,36 @@ public class CombatantPanel extends JPanel {
             @Override
             public void mousePressed(MouseEvent e) {
                 getTransferHandler().exportAsDrag(CombatantPanel.this, e, TransferHandler.COPY);
+            }
+        });
+    }
+
+    private void installStatTooltip() {
+        barTrack.addMouseListener(new MouseAdapter() {
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                if (activeTooltip != null) activeTooltip.dispose();
+
+                Window owner = SwingUtilities.getWindowAncestor(CombatantPanel.this);
+                activeTooltip = new StatTooltipWindow(owner, combatant);
+
+                Point barOnScreen = barTrack.getLocationOnScreen();
+                int tx = barOnScreen.x - activeTooltip.getWidth() - 8;
+                int ty = barOnScreen.y + (barTrack.getHeight() - activeTooltip.getHeight()) / 2;
+
+                if (tx < 0) tx = barOnScreen.x + barTrack.getWidth() + 8;
+
+                activeTooltip.setLocation(tx, ty);
+                activeTooltip.setVisible(true);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                if (activeTooltip != null) {
+                    activeTooltip.dispose();
+                    activeTooltip = null;
+                }
             }
         });
     }

@@ -1,20 +1,24 @@
 package util;
 
 import format.ColorStyles;
+import lombok.*;
+import swing.swing_comp.SwingComp;
 import swing.swing_comp.SwingPane;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
+import javax.swing.border.MatteBorder;
 import java.awt.*;
 
 public class PopupPrompt extends JDialog {
-    private static final Color BG_DIALOG = new Color(0x1E, 0x21, 0x28);
-    private static final Color BG_BAR = new Color(0x19, 0x1C, 0x22);
-    private static final Color BORDER = new Color(0x2A, 0x2E, 0x3A);
+
+    private static final Color
+            BG_DIALOG = new Color(0x1E, 0x21, 0x28),
+            BG_BAR = new Color(0x19, 0x1C, 0x22),
+            BORDER = new Color(0x2A, 0x2E, 0x3A);
 
     protected JPanel contentArea;
     protected JPanel footer;
-    private int result = -1;
+    @Getter private int result = -1;
 
     public PopupPrompt(String title) {
         setModal(true);
@@ -24,49 +28,39 @@ public class PopupPrompt extends JDialog {
         setBackground(BG_DIALOG);
         getRootPane().setBorder(BorderFactory.createLineBorder(BORDER, 1));
 
-        JPanel topBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
-        topBar.setBackground(BG_BAR);
+        JPanel topBar = SwingPane.panelIn(this, BorderLayout.NORTH).withLayout(SwingPane.FLOW_LEFT)
+                .withBackground(BG_BAR).component();
 
-        JLabel lblTitle = new JLabel(title.toUpperCase());
-        lblTitle.setFont(lblTitle.getFont().deriveFont(Font.BOLD, 11f));
-        lblTitle.setForeground(ColorStyles.TEXT_MUTED);
-        topBar.add(lblTitle);
-        add(topBar, BorderLayout.NORTH);
+        SwingComp.label(title.toUpperCase()).withDerivedFont(Font.BOLD, 11f)
+                .withForeground(ColorStyles.TEXT_MUTED)
+                .in(topBar);
 
         contentArea = SwingPane.panelIn(this, BorderLayout.CENTER)
                 .withLayout(SwingPane.VERTICAL_BOX)
                 .withBackground(BG_DIALOG)
-                .withEmptyBorder(20)
-                .build();
+                .withEmptyBorder(20, 20, 20, 20)
+                .component();
 
-        footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
-        footer.setBackground(BG_BAR);
-        footer.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER));
-        add(footer, BorderLayout.SOUTH);
+        footer = SwingPane.panelIn(this, BorderLayout.SOUTH).withLayout(SwingPane.FLOW_RIGHT)
+                .withBackground(BG_BAR)
+                .withBorder(new MatteBorder(1, 0, 0, 0, BORDER))
+                .component();
     }
 
     protected void addMessage(String text) {
-        JLabel lbl = new JLabel("<html><body style='width: 300px'>" + text + "</body></html>");
-        lbl.setForeground(ColorStyles.TEXT_PRIMARY);
-        lbl.setFont(lbl.getFont().deriveFont(13f));
-        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
-        contentArea.add(lbl);
+        SwingComp.label("<html><body style='width: 300px'>", text, "</body></html>").withDerivedFont(Font.PLAIN, 13f)
+                .withForeground(ColorStyles.TEXT_PRIMARY).onLeft()
+                .in(contentArea);
     }
 
     protected JButton createButton(String text, Color bg, int resultToSet) {
-        JButton btn = new JButton(text);
-        btn.setBackground(bg);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setBorder(new EmptyBorder(8, 16, 8, 16));
-        btn.addActionListener(e -> {
-            this.result = resultToSet;
-            dispose();
-        });
-        return btn;
+        return SwingComp.button(text, () -> {
+                    this.result = resultToSet;
+                    dispose();
+                })
+                .withBackgroundAndForeground(bg, ColorStyles.TEXT_PRIMARY)
+                .withEmptyBorder(8, 16, 8, 16)
+                .component();
     }
 
-    public int getResult() {
-        return result;
-    }
 }

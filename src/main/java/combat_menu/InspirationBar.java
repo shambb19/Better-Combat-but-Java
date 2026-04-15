@@ -2,48 +2,47 @@ package combat_menu;
 
 import __main.manager.InspirationManager;
 import format.ColorStyles;
+import lombok.*;
+import lombok.experimental.*;
+import swing.swing_comp.SwingComp;
 
 import javax.swing.*;
 import java.awt.*;
 
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+@NoArgsConstructor(staticName = "newInstance", force = true)
 public class InspirationBar extends JPanel implements InspirationManager.Listener {
 
-    private static final Color BG = new Color(0x16, 0x18, 0x1E);
-    private static final Color FILL = new Color(0x7F, 0x77, 0xDD);
-    private static final Color TICK_CLR = new Color(0x00, 0x00, 0x00, 100);
-    private static final Color FG_LABEL = new Color(0x6B, 0x70, 0x80);
-    private static final Color FG_VAL = new Color(0xAF, 0xA9, 0xEC);
+    static int
+            BAR_H = 8,
+            TICKS = 10,
+            ANIM_MS = 400,
+            ANIM_FPS = 60;
 
-    private static final int BAR_H = 8;
-    private static final int TICKS = 10;
-    private static final int ANIM_MS = 400;
-    private static final int ANIM_FPS = 60;
+    AnimatedBar bar = new AnimatedBar();
+    JLabel valueLabel = new JLabel();
 
-    private final AnimatedBar bar;
-    private final JLabel valueLabel;
+    {
+        InspirationManager.MANAGER.addListener(this);
 
-    public InspirationBar(InspirationManager manager) {
-        manager.addListener(this);
-
-        setBackground(BG);
+        setBackground(ColorStyles.BG_DEEP);
         setOpaque(true);
         setLayout(new BorderLayout(12, 0));
         setPreferredSize(new Dimension(0, 40));
 
-        JLabel title = new JLabel("Excess Inspiration 1d4 Points");
-        title.setFont(title.getFont().deriveFont(Font.PLAIN, 12f));
-        title.setForeground(FG_LABEL);
-        add(title, BorderLayout.WEST);
+        SwingComp.label("Excess Inspiration 1d4 Points")
+                .asStandardTextSize()
+                .withForeground(ColorStyles.TEXT_MUTED)
+                .in(this, BorderLayout.WEST);
 
-        bar = new AnimatedBar();
         add(bar, BorderLayout.CENTER);
 
-        valueLabel = new JLabel("0");
-        valueLabel.setFont(valueLabel.getFont().deriveFont(Font.PLAIN, 12f));
-        valueLabel.setForeground(FG_VAL);
-        valueLabel.setPreferredSize(new Dimension(20, 0));
-        valueLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        add(valueLabel, BorderLayout.EAST);
+        SwingComp.modifiable(valueLabel)
+                .asStandardTextSize()
+                .withForeground(new Color(0xAF, 0xA9, 0xEC))
+                .withPreferredSize(20, 0)
+                .applied(l -> l.setHorizontalAlignment(SwingConstants.RIGHT))
+                .in(this, BorderLayout.EAST);
     }
 
     @Override
@@ -74,14 +73,13 @@ public class InspirationBar extends JPanel implements InspirationManager.Listene
         });
     }
 
+    @FieldDefaults(level = AccessLevel.PRIVATE)
     private static class AnimatedBar extends JPanel {
 
-        private float displayRatio = 0f;   // what is currently painted
-        private float fromRatio = 0f;
-        private float toRatio = 0f;
-        private long animStart = 0;
-        private Timer timer = null;
-        private Runnable onComplete = null;
+        float displayRatio = 0f, fromRatio = 0f, toRatio = 0f;
+        long animStart = 0;
+        Timer timer = null;
+        Runnable onComplete = null;
 
         AnimatedBar() {
             setOpaque(false);
@@ -139,11 +137,11 @@ public class InspirationBar extends JPanel implements InspirationManager.Listene
 
             int fillW = Math.round(displayRatio * w);
             if (fillW > 0) {
-                g2.setColor(FILL);
+                g2.setColor(ColorStyles.PURPLE_FILL);
                 g2.fillRoundRect(0, cy, fillW, BAR_H, BAR_H, BAR_H);
             }
 
-            g2.setColor(TICK_CLR);
+            g2.setColor(new Color(0, 0, 0, 100)); // Tick color
             for (int i = 1; i < TICKS; i++) {
                 int x = Math.round((float) i / TICKS * w);
                 g2.fillRect(x, cy, 1, BAR_H);

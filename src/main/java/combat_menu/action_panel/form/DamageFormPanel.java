@@ -1,36 +1,44 @@
 package combat_menu.action_panel.form;
 
 import __main.manager.CombatManager;
-import __main.manager.EncounterManager;
-import character_info.combatant.Combatant;
-import combat_menu.action_panel.LabeledField;
-import damage_implements.Effect;
-import damage_implements.Implement;
-import damage_implements.Spell;
+import __main.manager.EffectManager;
+import combat_object.combatant.Combatant;
+import combat_object.damage_implements.Effect;
+import combat_object.damage_implements.Implement;
 import format.ColorStyles;
+import lombok.*;
+import lombok.experimental.*;
+import swing.ValidatedField;
+import swing.swing_comp.SwingComp;
+import swing.swing_comp.SwingPane;
+import util.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.LinkedHashMap;
+import java.util.stream.Stream;
 
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@ExtensionMethod(StringUtils.class)
 public class DamageFormPanel extends ActionFormPanel {
 
-    private final Implement implement;
-    private final boolean attackFailed;
+    final Implement implement;
+    final boolean attackFailed;
 
-    private ValidatedField amountField;
-    private ValidatedField bonusField;
-    private JPanel bonusRow;
+    ValidatedField amountField;
+    ValidatedField bonusField;
+    JPanel bonusRow;
 
-    public DamageFormPanel(Combatant combatant, Implement implement, boolean attackSucceeded) {
-        super("Apply " + (attackSucceeded ? implement.damageString() : "Halved") + " Damage");
+    public DamageFormPanel(Combatant target, Implement implement, boolean attackSucceeded) {
+        super("Apply "
+                + ((!attackSucceeded) ? (implement.getNumDice() / 2) + "d" + implement.getDieSize() : implement.damageString())
+                + " Damage", target);
 
         this.implement = implement;
         this.attackFailed = !attackSucceeded;
 
-        this.target = combatant;
         if (dropZone != null) {
-            dropZone.setTarget(combatant);
+            dropZone.setTarget(target);
             dropZone.removeClearOption();
             dropZone.setTargetValidator(c -> false);
         }
@@ -43,13 +51,10 @@ public class DamageFormPanel extends ActionFormPanel {
         LabeledField amountLF = addLabeledField(container, "Damage amount", "Enter amount...");
         amountField = amountLF.field();
         amountField.setValidator(s -> {
-            try {
-                int v = Integer.parseInt(s);
-                int max = (implement != null) ? implement.getMaxDamage() : Integer.MAX_VALUE;
-                return v > 0 && v <= max;
-            } catch (NumberFormatException e) {
-                return false;
-            }
+            int v = s.toInt();
+            if (v == Integer.MIN_VALUE) return false;
+
+            return v >= 0 && v <= calculateMaxDamage();
         });
 
         container.add(vgap(10));
@@ -65,60 +70,37 @@ public class DamageFormPanel extends ActionFormPanel {
         container.add(vgap(12));
 
         SwingUtilities.invokeLater(() -> {
-            AtomicInteger insertIdx = new AtomicInteger(0);
+            noticeConditions = new LinkedHashMap<>();
 
-            if (implement instanceof Spell s) {
-                Effect effect = s.effect();
+            noticeConditions.put(Effect.HALF_DAMAGE, attackFailed);
+            noticeConditions.put(Effect.BONUS_DAMAGE, EffectManager.isHexedBy(target, attacker));
 
-                if (attackFailed)
-                    addNotice(Effect.HALF_DAMAGE, container, insertIdx);
-                if (target.isHexedBy(EncounterManager.getCurrentCombatant()))
-                    addNotice(Effect.BONUS_DAMAGE, container, insertIdx);
-                if (effect.equals(Effect.ADVANTAGE_SOON))
-                    addNotice(effect, container, insertIdx);
-                if (effect.equals(Effect.ILLUSION))
-                    addNotice(effect, container, insertIdx);
-            }
+            Stream.of(
+                    Effect.ADVANTAGE_SOON, Effect.ILLUSION, Effect.BLIND, Effect.DIFFICULT_TERRAIN,
+                    Effect.DISADVANTAGE_ATTACK, Effect.FORCED_MOVE, Effect.FRIGHTEN,
+                    Effect.PRONE, Effect.PULL, Effect.RESTRAIN, Effect.TRACKING
+            ).forEach(e -> noticeConditions.put(e, implement.effectEquals(e)));
 
-            container.revalidate();
-            container.repaint();
+            addNotices(noticeConditions, container);
         });
     }
 
-    private void addNotice(Effect effect, Container container, AtomicInteger insertIdx) {
-        container.add(effect.noticePanel(target), insertIdx.getAndIncrement());
-        container.add(Box.createRigidArea(new Dimension(0, 10)), insertIdx.getAndIncrement());
+    @Override
+    protected void onConfirm() {
+        if (!isInputValid()) return;
+
+        int base = amountField.getValue().toInt();
+        if (base != Integer.MIN_VALUE) {
+            int bonus = parseBonusOrZero();
+            CombatManager.logDamage(target, implement, base, bonus);
+            onCancel();
+        }
     }
 
-    private JPanel buildBonusRow() {
-        JPanel row = new JPanel(new BorderLayout(12, 0));
-        row.setOpaque(false);
-        row.setAlignmentX(LEFT_ALIGNMENT);
-
-        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 45));
-        row.setMinimumSize(new Dimension(0, 45));
-
-        JLabel lbl = new JLabel("Bonus damage");
-        lbl.setFont(lbl.getFont().deriveFont(Font.PLAIN, 12f));
-        lbl.setForeground(ColorStyles.TEXT_MUTED);
-
-        lbl.setPreferredSize(new Dimension(110, 30));
-
-        row.add(lbl, BorderLayout.WEST);
-
-        bonusField = new ValidatedField("0", this::refreshButtons);
-        row.add(bonusField, BorderLayout.CENTER);
-        return row;
-    }
-
-    private void toggleBonusRow(boolean show, JPanel container) {
-        bonusRow.setVisible(show);
-        if (!show && bonusField != null)
-            bonusField.clear();
-
-        container.revalidate();
-        container.repaint();
-        refreshButtons();
+    @Override
+    protected void refreshButtons() {
+        super.refreshButtons();
+        cancelButton.setEnabled(false);
     }
 
     @Override
@@ -129,33 +111,13 @@ public class DamageFormPanel extends ActionFormPanel {
         return true;
     }
 
-    @Override
-    protected void refreshButtons() {
-        super.refreshButtons();
-        cancelButton.setEnabled(false);
-    }
-
-    @Override
-    protected void onConfirm() {
-        if (!isInputValid()) return;
-        try {
-            int base = Integer.parseInt(amountField.getValue());
-            int bonus = parseBonusOrZero();
-            CombatManager.logDamage(target, implement, base, bonus, attackFailed);
-            onCancel();
-        } catch (NumberFormatException ignored) {
-        }
-    }
-
     private int parseBonusOrZero() {
         if (bonusField == null || bonusRow == null || !bonusRow.isVisible()) return 0;
         String v = bonusField.getValue();
         if (v.isBlank()) return 0;
-        try {
-            return Integer.parseInt(v);
-        } catch (Exception e) {
-            return 0;
-        }
+
+        int n = v.toInt();
+        return (n != Integer.MIN_VALUE) ? n : 0;
     }
 
     private static JCheckBox styledCheckbox() {
@@ -168,11 +130,57 @@ public class DamageFormPanel extends ActionFormPanel {
         return cb;
     }
 
+    private void toggleBonusRow(boolean show, JPanel container) {
+        bonusRow.setVisible(show);
+        if (!show && bonusField != null)
+            bonusField.clear();
+
+        container.revalidate();
+        container.repaint();
+        refreshButtons();
+    }
+
     private static JPanel checkboxRow(JCheckBox cb) {
         JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         row.setOpaque(false);
         row.setAlignmentX(LEFT_ALIGNMENT);
         row.add(cb);
         return row;
+    }
+
+    private JPanel buildBonusRow() {
+        JPanel row = SwingPane.panel().withLayout(SwingPane.BORDER).withGaps(12, 0)
+                .transparent().onLeft().component();
+
+        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 45));
+        row.setMinimumSize(new Dimension(0, 45));
+
+        JLabel lbl = SwingComp.label("Bonus damage").withDerivedFont(Font.PLAIN, 12f)
+                .withForeground(ColorStyles.TEXT_MUTED).component();
+
+        lbl.setPreferredSize(new Dimension(110, 30));
+
+        row.add(lbl, BorderLayout.WEST);
+
+        bonusField = new ValidatedField("0", this::refreshButtons);
+        row.add(bonusField, BorderLayout.CENTER);
+        return row;
+    }
+
+    private int calculateMaxDamage() {
+        int numDice = implement.getNumDice();
+        int dieSize = implement.getDieSize();
+
+        if (attackFailed)
+            numDice /= 2;
+        if (implement.effectEquals(Effect.FULL_HP_OPTION))
+            dieSize = 12;
+
+        int max = numDice * dieSize;
+
+        if (EffectManager.isHexedBy(target, attacker))
+            max += 6;
+
+        return max;
     }
 }

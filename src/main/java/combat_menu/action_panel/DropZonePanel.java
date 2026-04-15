@@ -1,70 +1,59 @@
 package combat_menu.action_panel;
 
-import character_info.combatant.Combatant;
+import combat_object.combatant.Combatant;
+import combat_object.combatant.CombatantTransferable;
+import format.ColorStyles;
+import lombok.*;
+import lombok.experimental.*;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.dnd.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import static combat_object.combatant.CombatantTransferable.COMBATANT_FLAVOR;
+import static format.ColorStyles.*;
+import static swing.swing_comp.SwingComp.button;
+import static swing.swing_comp.SwingComp.label;
+
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class DropZonePanel extends JPanel {
 
-    private static final Color BG_EMPTY = new Color(0x23, 0x26, 0x2E);
-    private static final Color BG_HOVER = new Color(0x1A, 0x2A, 0x24);
-    private static final Color BG_FILLED = new Color(0x1A, 0x2A, 0x24);
-    private static final Color BG_ERROR = new Color(0x2A, 0x1A, 0x1A);
-    private static final Color FG_TARGET = new Color(0x5D, 0xCA, 0xA5);
-    private static final Color FG_PROMPT = new Color(0x50, 0x55, 0x68);
-    private static final Color FG_ERROR = new Color(0xE2, 0x4B, 0x4A);
-    private static final Color FG_HP = new Color(0x6B, 0x70, 0x80);
-    private static final Color BG_CLEAR = new Color(0x2A, 0x2E, 0x3A);
-    private static final Color BORDER_CLR = new Color(0x3A, 0x3E, 0x4A);
+    static int ERROR_DURATION_MS = 1000;
 
-    private static final int ERROR_DURATION_MS = 1000;
+    Consumer<Combatant> onDrop;
+    JLabel nameLabel;
+    JLabel hpLabel;
+    JButton clearBtn;
+    JPanel contentStack;
 
-    private final Consumer<Combatant> onDrop;
-    private final JLabel nameLabel;
-    private final JLabel hpLabel;
-    private final JButton clearBtn;
-    private final JPanel contentStack;
-
-    private Predicate<Combatant> isValidTarget = c -> true;
-    private Combatant current;
-    private Timer errorTimer;
+    @NonFinal Predicate<Combatant> isValidTarget = c -> true;
+    @NonFinal Combatant current;
+    @NonFinal Timer errorTimer;
 
     public DropZonePanel(Consumer<Combatant> onDrop) {
         this.onDrop = onDrop;
 
-        JLabel promptLabel = new JLabel("Drag a highlighted combatant here");
-        promptLabel.setFont(promptLabel.getFont().deriveFont(Font.PLAIN, 13f));
-        promptLabel.setForeground(FG_PROMPT);
+        JLabel promptLabel = label("Drag a highlighted combatant here").withDerivedFont(Font.PLAIN, 13f)
+                .withForeground(FG_HINT).component();
 
-        JLabel errorLabel = new JLabel("Invalid target");
-        errorLabel.setFont(errorLabel.getFont().deriveFont(Font.BOLD, 13f));
-        errorLabel.setForeground(FG_ERROR);
+        JLabel errorLabel = label("Invalid target").withDerivedFont(Font.BOLD, 13f)
+                .withForeground(CRITICAL).component();
         errorLabel.setVisible(false);
 
-        nameLabel = new JLabel("");
-        nameLabel.setFont(nameLabel.getFont().deriveFont(Font.BOLD, 14f));
-        nameLabel.setForeground(FG_TARGET);
+        nameLabel = label("").withDerivedFont(Font.BOLD, 14f)
+                .withForeground(HEALTHY).component();
 
-        hpLabel = new JLabel("");
-        hpLabel.setFont(hpLabel.getFont().deriveFont(Font.PLAIN, 12f));
-        hpLabel.setForeground(FG_HP);
+        hpLabel = label("").withDerivedFont(Font.PLAIN, 12f)
+                .withForeground(TEXT_MUTED).component();
 
-        clearBtn = new JButton("✕ clear");
-        clearBtn.setFont(clearBtn.getFont().deriveFont(Font.PLAIN, 11f));
-        clearBtn.setForeground(FG_HP);
-        clearBtn.setBackground(BG_CLEAR);
-        clearBtn.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(BORDER_CLR, 1),
-                new EmptyBorder(3, 8, 3, 8)));
-        clearBtn.setFocusPainted(false);
-        clearBtn.setOpaque(true);
-        clearBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        clearBtn.addActionListener(e -> clearTarget());
+        clearBtn = button("Clear", this::clearTarget).withDerivedFont(Font.PLAIN, 11f)
+                .withBackgroundAndForeground(TRACK, TEXT_MUTED)
+                .withPaddedBorder(new LineBorder(BORDER_LIGHT, 1), 3, 8, 3, 8)
+                .component();
 
         JPanel filledRow = new JPanel(new GridBagLayout());
         filledRow.setOpaque(false);
@@ -88,9 +77,9 @@ public class DropZonePanel extends JPanel {
         gbc.anchor = GridBagConstraints.EAST;
         filledRow.add(clearBtn, gbc);
 
-        // 4. Main Panel Layout
+        // Main Panel Layout
         setLayout(new BorderLayout());
-        setBackground(BG_EMPTY);
+        setBackground(ColorStyles.BG_SURFACE);
         setOpaque(true);
         setPreferredSize(new Dimension(0, 44));
         setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
@@ -120,16 +109,16 @@ public class DropZonePanel extends JPanel {
 
     public void setTarget(Combatant c) {
         this.current = c;
-        nameLabel.setText(c.name());
+        nameLabel.setText(c.getName());
         hpLabel.setText(c.getHealthBarString());
         showCard("FILLED");
-        setBackground(BG_FILLED);
+        setBackground(ColorStyles.HOVER_TINT);
     }
 
     public void clearTarget() {
         this.current = null;
         showCard("PROMPT");
-        setBackground(BG_EMPTY);
+        setBackground(ColorStyles.BG_SURFACE);
     }
 
     private void showCard(String cardName) {
@@ -143,15 +132,15 @@ public class DropZonePanel extends JPanel {
         if (errorTimer != null && errorTimer.isRunning()) errorTimer.stop();
 
         showCard("ERROR");
-        setBackground(BG_ERROR);
+        setBackground(ColorStyles.ERROR_BG);
 
         errorTimer = new Timer(ERROR_DURATION_MS, e -> {
             if (current == null) {
                 showCard("PROMPT");
-                setBackground(BG_EMPTY);
+                setBackground(ColorStyles.BG_SURFACE);
             } else {
                 showCard("FILLED");
-                setBackground(BG_FILLED);
+                setBackground(ColorStyles.HOVER_TINT);
             }
         });
         errorTimer.setRepeats(false);
@@ -162,20 +151,22 @@ public class DropZonePanel extends JPanel {
         new DropTarget(this, DnDConstants.ACTION_COPY, new DropTargetAdapter() {
             @Override
             public void dragEnter(DropTargetDragEvent e) {
-                if (e.isDataFlavorSupported(Combatant.COMBATANT_FLAVOR)) setBackground(BG_HOVER);
+                if (e.isDataFlavorSupported(COMBATANT_FLAVOR)) {
+                    setBackground(ColorStyles.HOVER_TINT);
+                }
             }
 
             @Override
             public void dragExit(DropTargetEvent e) {
-                setBackground(current == null ? BG_EMPTY : BG_FILLED);
+                setBackground(current == null ? ColorStyles.BG_SURFACE : ColorStyles.HOVER_TINT);
             }
 
             @Override
             public void drop(DropTargetDropEvent e) {
                 try {
-                    if (e.isDataFlavorSupported(Combatant.COMBATANT_FLAVOR)) {
+                    if (e.isDataFlavorSupported(COMBATANT_FLAVOR)) {
                         e.acceptDrop(DnDConstants.ACTION_COPY);
-                        Combatant dropped = (Combatant) e.getTransferable().getTransferData(Combatant.COMBATANT_FLAVOR);
+                        Combatant dropped = (Combatant) e.getTransferable().getTransferData(CombatantTransferable.COMBATANT_FLAVOR);
 
                         if (isValidTarget.test(dropped)) {
                             onDrop.accept(dropped);

@@ -2,35 +2,42 @@ package combat_menu.action_panel.form;
 
 import __main.Main;
 import __main.manager.CombatManager;
-import __main.manager.EncounterManager;
-import character_info.combatant.Combatant;
+import __main.manager.EffectManager;
 import combat_menu.CombatantPanel;
-import combat_menu.action_panel.LabeledField;
-import damage_implements.Effect;
-import damage_implements.Implement;
-import damage_implements.Spell;
-import damage_implements.Weapon;
+import combat_object.damage_implements.Effect;
+import combat_object.damage_implements.Implement;
+import combat_object.damage_implements.Spell;
+import combat_object.damage_implements.Weapon;
 import format.ColorStyles;
+import lombok.*;
+import lombok.experimental.*;
+import swing.ValidatedField;
+import swing.swing_comp.SwingComp;
+import swing.swing_comp.SwingPane;
 import util.Locators;
+import util.StringUtils;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.util.LinkedHashMap;
 import java.util.List;
 
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@ExtensionMethod(StringUtils.class)
 public class AttackFormPanel extends ActionFormPanel {
 
-    private static final Implement HEADER_WEAPON = new Weapon("── Weapons ──", 0, 0, null);
-    private static final Implement HEADER_SPELL = new Spell("── Spells ──", 0, 0, null, Effect.NONE);
+    static final Implement HEADER_WEAPON = new Weapon("── Weapons ──", 0, 0, null);
+    static final Implement HEADER_SPELL = new Spell("── Spells ──", 0, 0, null, Effect.NONE);
 
-    private JComboBox<Implement> attackCombo;
-    private ValidatedField rollField;
-    private JLabel rollFieldLabel;
+    JComboBox<Implement> attackCombo;
+    ValidatedField rollField;
+    JLabel rollFieldLabel;
+
 
     private AttackFormPanel() {
         super("Use Weapon");
         populateComboBox();
-        Main.getMenu().setActionMode(CombatantPanel.ATTACK);
+        Main.getCombatMenu().setActionMode(CombatantPanel.ATTACK);
         setTargetValidator(c -> Locators.getTargetList(true).contains(c));
     }
 
@@ -51,42 +58,47 @@ public class AttackFormPanel extends ActionFormPanel {
         attackCombo.addActionListener(e -> onSelectionChanged());
 
         rollField.setValidator(s -> {
-            try {
-                int v = Integer.parseInt(s);
-                return v > 0 && v <= 20;
-            } catch (NumberFormatException ex) {
-                return false;
-            }
+            int v = s.toInt();
+            if (v == Integer.MIN_VALUE) return false;
+            return v > 0 && v <= 20;
         });
+
+        noticeConditions = new LinkedHashMap<>();
+
+        noticeConditions.put(Effect.POISON, EffectManager.hasEffect(attacker, Effect.POISON));
+        noticeConditions.put(Effect.FRIGHTEN, EffectManager.hasEffect(attacker, Effect.FRIGHTEN));
+        noticeConditions.put(Effect.BLIND, EffectManager.hasEffect(target, Effect.BLIND));
+        noticeConditions.put(Effect.PRONE, EffectManager.hasEffect(target, Effect.PRONE));
+        noticeConditions.put(Effect.RESTRAIN, EffectManager.hasEffect(target, Effect.RESTRAIN));
+
+        addNotices(noticeConditions, container);
     }
 
     @Override
     protected void onConfirm() {
-        Combatant attacker = EncounterManager.getCurrentCombatant();
         Implement implement = (Implement) attackCombo.getSelectedItem();
-        int roll = Integer.parseInt(rollField.getValue());
+        int roll = rollField.getValue().toInt();
 
-        boolean hit = CombatManager.logAttack(target, roll, implement);
+        boolean continues = CombatManager.logAttack(target, roll, implement);
 
-        if (!hit) {
+        if (!continues) {
             String reason;
             assert implement != null;
             reason = switch (implement) {
                 case Weapon w ->
-                        "Roll " + (roll + attacker.attackBonus(w)) + " did not meet " + target.name() + "'s AC";
+                        "Roll " + (roll + attacker.attackBonus(w)) + " did not meet " + target.getName() + "'s AC";
                 case Spell s when s.hasSave() ->
-                        "Roll " + (roll + target.mod(s.stat())) + " beat " + target.name() + "'s " + s.stat() + " save";
+                        "Roll " + (roll + target.mod(s.getStat())) + " beat " + attacker.getName() + "'s " + s.getStat() + " save";
                 case Spell s when !s.hasSave() ->
-                        "Roll " + (roll + attacker.mod(s.stat())) + " did not meet " + target.name() + "'s AC";
-                default -> throw new ClassCastException("onConfirm in AttackFormPanel: implement not Weapon or Spell");
+                        "Roll " + (roll + attacker.mod(s.getStat())) + " did not meet " + target.getName() + "'s AC";
+                default -> throw new ClassCastException("onConfirm error: implement type unknown");
             };
 
             showMissResult(reason);
-            return;
+        } else {
+            clearTarget();
+            rollField.clear();
         }
-
-        clearTarget();
-        rollField.clear();
     }
 
     private void showMissResult(String reason) {
@@ -107,10 +119,14 @@ public class AttackFormPanel extends ActionFormPanel {
 
             if (progress >= 1f) {
                 drain.stop();
+
                 fieldsPanel.remove(banner);
                 btnRow.setVisible(true);
                 clearTarget();
                 rollField.clear();
+
+                CombatManager.finishAction();
+
                 fieldsPanel.revalidate();
                 fieldsPanel.repaint();
             }
@@ -119,36 +135,31 @@ public class AttackFormPanel extends ActionFormPanel {
     }
 
     private JPanel buildMissBanner(String reason) {
-        JPanel banner = new JPanel(new BorderLayout(10, 0));
-        banner.setBackground(new Color(0x2A, 0x1E, 0x1E));
-        banner.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 3, 0, 0, new Color(0xE2, 0x4B, 0x4A)),
-                new EmptyBorder(10, 12, 10, 10)));
-        banner.setMaximumSize(new Dimension(Integer.MAX_VALUE, 56));
+        JPanel banner = SwingPane.panel().withLayout(SwingPane.BORDER)
+                .withGaps(10, 0)
+                .withBackground(new Color(0x2A, 0x1E, 0x1E))
+                .withMaximumSize(Integer.MAX_VALUE, 56)
+                .withPaddedMatteBorderOnSide(new Color(0xe2, 0x4b, 0x4a), SwingComp.LEFT, 10, 12, 10, 10)
+                .component();
 
-        // Icon
-        JLabel icon = new JLabel("✕");
-        icon.setFont(icon.getFont().deriveFont(Font.PLAIN, 15f));
-        icon.setForeground(new Color(0xE2, 0x4B, 0x4A));
-        banner.add(icon, BorderLayout.WEST);
+        SwingComp.label("✕")
+                .withDerivedFont(Font.PLAIN, 15f)
+                .withForeground(new Color(0xE2, 0x4B, 0x4A))
+                .in(banner, BorderLayout.WEST);
 
-        // Text
-        JPanel text = new JPanel();
-        text.setLayout(new BoxLayout(text, BoxLayout.Y_AXIS));
-        text.setOpaque(false);
+        JPanel text = SwingPane.panelIn(banner, BorderLayout.CENTER).withLayout(SwingPane.VERTICAL_BOX).transparent().component();
 
-        JLabel title = new JLabel("Attack missed");
-        title.setFont(title.getFont().deriveFont(Font.BOLD, 13f));
-        title.setForeground(new Color(0xE2, 0x4B, 0x4A));
+        SwingComp.label("Attack missed")
+                .withDerivedFont(Font.BOLD, 13f)
+                .withForeground(new Color(0xE2, 0x4B, 0x4A))
+                .in(text);
 
-        JLabel sub = new JLabel(reason);
-        sub.setFont(sub.getFont().deriveFont(Font.PLAIN, 11f));
-        sub.setForeground(new Color(0x6B, 0x70, 0x80));
+        SwingComp.gapIn(2, text);
 
-        text.add(title);
-        text.add(Box.createRigidArea(new Dimension(0, 2)));
-        text.add(sub);
-        banner.add(text, BorderLayout.CENTER);
+        SwingComp.label(reason)
+                .withDerivedFont(Font.PLAIN, 11f)
+                .withForeground(new Color(0x6B, 0x70, 0x80))
+                .in(text);
 
         return banner;
     }
@@ -175,10 +186,8 @@ public class AttackFormPanel extends ActionFormPanel {
     }
 
     private void populateComboBox() {
-        Combatant currentCombatant = EncounterManager.getCurrentCombatant();
-
-        List<Weapon> weapons = currentCombatant.weapons();
-        List<Spell> spells = currentCombatant.spells();
+        List<Weapon> weapons = attacker.getWeapons();
+        List<Spell> spells = attacker.getSpells();
 
         if (!weapons.isEmpty()) {
             attackCombo.addItem(HEADER_WEAPON);
@@ -192,6 +201,7 @@ public class AttackFormPanel extends ActionFormPanel {
 
     private void onSelectionChanged() {
         Object selected = attackCombo.getSelectedItem();
+        clearNotices(fieldsPanel);
 
         if (selected == null || selected instanceof String) {
             rollField.setVisible(false);
@@ -200,39 +210,20 @@ public class AttackFormPanel extends ActionFormPanel {
             return;
         }
 
-        if (selected instanceof Spell spell) {
-            if (spell.hasSave()) {
-                rollFieldLabel.setText("Target save roll");
-                rollField.setValidator(s -> {
-                    try {
-                        int v = Integer.parseInt(s);
-                        return v >= 1 && v <= 20;
-                    } catch (NumberFormatException ex) {
-                        return false;
-                    }
-                });
-            } else {
-                rollFieldLabel.setText("Roll for hit");
-                rollField.setValidator(s -> {
-                    try {
-                        int v = Integer.parseInt(s);
-                        return v > 0 && v <= 20;
-                    } catch (NumberFormatException ex) {
-                        return false;
-                    }
-                });
-            }
-        } else {
-            rollFieldLabel.setText("Roll for hit");
-            rollField.setValidator(s -> {
-                try {
-                    int v = Integer.parseInt(s);
-                    return v > 0 && v <= 20;
-                } catch (NumberFormatException ex) {
-                    return false;
-                }
-            });
+        if (selected instanceof Spell spell && spell.effectEquals(Effect.AUTO_HIT)) {
+            rollField.setVisible(false);
+            confirmButton.setEnabled(true);
+            confirmButton.setText("Cast Spell");
+            addNotice(spell.getEffect(), fieldsPanel);
+            return;
         }
+
+        String rollFieldText;
+        if (selected instanceof Spell spell && spell.hasSave())
+            rollFieldText = "Target save roll";
+        else
+            rollFieldText = "Roll for hit";
+        rollFieldLabel.setText(rollFieldText);
 
         rollField.setVisible(true);
         rollField.clear();
@@ -258,10 +249,10 @@ public class AttackFormPanel extends ActionFormPanel {
                 setBackground(new Color(0x23, 0x26, 0x2E));
                 setEnabled(false);
             } else if (value instanceof Weapon w) {
-                setText(w.name());
+                setText(w.getName());
                 setForeground(new Color(0xD8, 0xDC, 0xE8));
             } else if (value instanceof Spell s) {
-                setText(s.name() + (s.hasSave() ? "  [save]" : ""));
+                setText(s.getName() + (s.hasSave() ? "  [save]" : ""));
                 setForeground(new Color(0xAF, 0xA9, 0xEC)); // purple tint for spells
             }
             return this;

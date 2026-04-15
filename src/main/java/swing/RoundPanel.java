@@ -1,18 +1,19 @@
 package swing;
 
+import lombok.*;
+
 import javax.swing.*;
 import java.awt.*;
 
+@RequiredArgsConstructor
 public class RoundPanel extends JPanel {
 
     private final int radius;
-    private Color bg;
+    @NonNull private Color bg;
 
     private Timer timer;
 
-    public RoundPanel(int radius, Color bg) {
-        this.radius = radius;
-        this.bg = bg;
+    {
         setOpaque(false);
     }
 

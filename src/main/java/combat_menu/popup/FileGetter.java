@@ -1,29 +1,23 @@
 package combat_menu.popup;
 
+import util.Message;
+
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
-import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 public class FileGetter {
 
-    private File file;
+    private URL url;
 
     public static URL getUrl(Component parent) {
-        try {
-            FileGetter getter = new FileGetter(parent);
-            if (getter.file != null) {
-                return getter.file.toURI().toURL();
-            }
-        } catch (MalformedURLException ignored) {
-        }
-        return null;
+        return new FileGetter(parent).url;
     }
 
     private FileGetter(Component parent) {
-        file = null;
+        url = null;
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileFilter(new FileNameExtensionFilter(
                 "TEXT FILES",
@@ -33,8 +27,11 @@ public class FileGetter {
 
         int result = fileChooser.showOpenDialog(parent);
 
-        if (result == JFileChooser.APPROVE_OPTION) {
-            file = fileChooser.getSelectedFile();
-        }
+        if (result == JFileChooser.APPROVE_OPTION)
+            try {
+                url = fileChooser.getSelectedFile().toURI().toURL();
+            } catch (MalformedURLException e) {
+                Message.fileError(null, e);
+            }
     }
 }

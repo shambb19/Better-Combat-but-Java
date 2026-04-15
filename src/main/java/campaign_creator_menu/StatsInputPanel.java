@@ -1,62 +1,63 @@
 package campaign_creator_menu;
 
-import character_info.AbilityModifier;
-import character_info.Stats;
-import character_info.combatant.PC;
-import swing.swing_comp.SwingComp;
+import combat_object.combatant.AbilityModifier;
+import combat_object.combatant.PC;
+import combat_object.combatant.Stats;
+import lombok.*;
+import lombok.experimental.*;
+import swing.ValidatedField;
 import swing.swing_comp.SwingPane;
+import util.StringUtils;
 
 import javax.swing.*;
 import java.util.HashMap;
 import java.util.Map;
 
+@NoArgsConstructor(staticName = "newInstance", force = true)
+@ExtensionMethod(StringUtils.class)
 public class StatsInputPanel extends JPanel {
 
-    private final Map<JPanel, AbilityModifier> statMap;
+    private final Map<ValidatedField, AbilityModifier> statMap = new HashMap<>();
 
-    public StatsInputPanel() {
+    {
         SwingPane.modifiable(this)
                 .withLayout(SwingPane.ONE_COLUMN)
-                .withEmptyBorder(20);
+                .withEmptyBorder(20, 20, 20, 20);
 
-        statMap = new HashMap<>();
         for (AbilityModifier stat : AbilityModifier.values()) {
             if (stat.equals(AbilityModifier.OPTION)) continue;
 
-            JPanel panel = fieldTemplate(stat.name());
+            ValidatedField panel = fieldTemplate(stat.name());
+            panel.setAlignmentX(RIGHT_ALIGNMENT);
             statMap.put(panel, stat);
         }
     }
 
-    private JPanel fieldTemplate(String name) {
-        return SwingPane.panelIn(this).collect(name + ":", SwingComp.field().onlyIntegers())
-                .withLayout(SwingPane.FLOW)
-                .build();
-    }
+    private ValidatedField fieldTemplate(String name) {
+        ValidatedField inputField = new ValidatedField(name);
+        inputField.setValidator(s -> inputField.getValue().toInt() != Integer.MIN_VALUE);
 
-    private int val(JPanel panel) {
-        return Integer.parseInt(templateTextField(panel).getText());
-    }
+        SwingPane.panelIn(this).collect(name + ":", inputField).withLayout(SwingPane.FLOW);
 
-    private JTextField templateTextField(JPanel panel) {
-        return (JTextField) panel.getComponent(1);
+        return inputField;
     }
 
     public void addTo(Stats directory) {
-        statMap.forEach((panel, stat) -> directory.put(stat, val(panel)));
+        statMap.forEach((validatedField, stat) -> directory.put(stat, validatedField.getValue().toInt()));
     }
 
     public void reset() {
-        statMap.keySet().forEach(panel -> templateTextField(panel).setText(""));
+        for (ValidatedField validatedField : statMap.keySet())
+            validatedField.setValue("");
     }
 
     public void setTo(PC combatant) {
-        Stats stats = combatant.stats();
+        Stats stats = combatant.getStats();
 
-        for (JPanel panel : statMap.keySet()) {
+        for (ValidatedField panel : statMap.keySet()) {
             AbilityModifier stat = statMap.get(panel);
 
-            templateTextField(panel).setText(String.valueOf(stats.get(stat)));
+            panel.setValue(String.valueOf(stats.get(stat)));
         }
     }
 

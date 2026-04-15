@@ -6,7 +6,7 @@ level: 4
 class: cleric
 stats: [STR: 12, DEX: 12, CON: 16, INT: 11, WIS: 19, CHA: 6]
 weapons: [Longsword]
-spells: [Guiding Bolt, Ray of Frost, Sacred Flame, Starry Wisp, Phantasmal Force]
+spells: [Guiding Bolt, Ray of Frost, Sacred Flame, Starry Wisp, Phantasmal Force, Cloud of Daggers]
 
 .party
 name: Braxton

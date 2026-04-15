@@ -2,9 +2,11 @@ package txt_input;
 
 import _global_list.Combatants;
 import _global_list.Scenarios;
-import character_info.combatant.Combatant;
-import character_info.combatant.PC;
-import encounter_info.Scenario;
+import combat_object.combatant.Combatant;
+import combat_object.combatant.PC;
+import combat_object.scenario.Scenario;
+import lombok.*;
+import lombok.experimental.*;
 import util.Filter;
 import util.Message;
 
@@ -17,27 +19,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+@ExtensionMethod(Filter.class)
+@RequiredArgsConstructor
 public class CampaignWriter {
 
-    private final List<Combatant> friendlySource;
-    private final List<Combatant> enemySource;
+    private final List<Combatant> friendlySource, enemySource;
     private final List<Scenario> scenarioSource;
 
-    private ArrayList<String> code;
+    private ArrayList<String> code = null;
 
-    public CampaignWriter() {
-        friendlySource = Filter.matchingCondition(Combatants.toList(), c -> !c.isEnemy());
-        enemySource = Filter.matchingCondition(Combatants.toList(), Combatant::isEnemy);
-
-        scenarioSource = Scenarios.toList();
+    public static CampaignWriter ofFullCampaign() {
+        return new CampaignWriter(Combatants.getFriendlies(), Combatants.getEnemies(), Scenarios.toList());
     }
-
-    public CampaignWriter(List<Combatant> friendlies, List<Combatant> enemies, List<Scenario> scenarios) {
-        friendlySource = friendlies;
-        enemySource = enemies;
-        scenarioSource = scenarios;
-    }
-
 
     public ArrayList<String> getCode() {
         code = new ArrayList<>();
@@ -68,24 +61,20 @@ public class CampaignWriter {
             file.deleteOnExit();
         }
 
-        writeTo(file);
-        return file.toURI().toURL();
-    }
+        @Cleanup FileWriter writer = new FileWriter(file);
+        for (String line : getCode())
+            writer.write(line + System.lineSeparator());
 
-    private void writeTo(File file) throws IOException {
-        try (FileWriter writer = new FileWriter(file)) {
-            for (String line : getCode())
-                writer.write(line + System.lineSeparator());
-        }
+        return file.toURI().toURL();
     }
 
     private void writeCombatants() {
         friendlySource.forEach(c -> {
-            if (c instanceof PC || c.lifeStatus().isAlive())
+            if (c instanceof PC || c.getLifeStatus().isAlive())
                 code.addAll(c.toTxt());
         });
 
-        Filter.matchingCondition(enemySource, enemy -> enemy.lifeStatus().isConscious())
+        enemySource.matchingCondition(enemy -> enemy.getLifeStatus().isConscious())
                 .forEach(enemy -> code.addAll(enemy.toTxt()));
     }
 

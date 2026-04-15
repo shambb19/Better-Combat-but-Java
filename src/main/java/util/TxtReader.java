@@ -1,9 +1,12 @@
 package util;
 
+import lombok.experimental.*;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@ExtensionMethod(StringUtils.class)
 public class TxtReader {
 
     /**
@@ -66,7 +69,7 @@ public class TxtReader {
      * @return the number of dice from that damage roll as int (for example, "1d6" returns 1)
      */
     public static int getNumDice(String fullString) {
-        return Integer.parseInt(fullString.split("d")[0]);
+        return fullString.split("d")[0].toInt();
     }
 
     /**
@@ -74,7 +77,7 @@ public class TxtReader {
      * @return the die size from that damage roll as int (for example, "1d6" returns 6)
      */
     public static int getDieSize(String fullString) {
-        return Integer.parseInt(fullString.split("d")[1]);
+        return fullString.split("d")[1].toInt();
     }
 
     /**
@@ -83,9 +86,9 @@ public class TxtReader {
      */
     public static int getHp(String fullString) {
         if (!fullString.contains("/"))
-            return Integer.parseInt(fullString);
+            return fullString.toInt();
         else
-            return Integer.parseInt(fullString.split("/")[1]);
+            return fullString.split("/")[1].toInt();
     }
 
     /**
@@ -94,9 +97,9 @@ public class TxtReader {
      */
     public static int getHpCur(String fullString) {
         if (!fullString.contains("/"))
-            return Integer.parseInt(fullString);
+            return fullString.toInt();
         else
-            return Integer.parseInt(fullString.split("/")[0]);
+            return fullString.split("/")[0].toInt();
     }
 
     /**
@@ -119,7 +122,7 @@ public class TxtReader {
         if (!fullString.contains("_")) return 1;
 
         String num = fullString.substring(fullString.indexOf("_") + 1);
-        return Integer.parseInt(num);
+        return num.toInt();
     }
 
 }

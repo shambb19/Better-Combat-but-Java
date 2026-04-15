@@ -1,27 +1,28 @@
 package combat_menu;
 
 import __main.manager.EncounterManager;
-import character_info.combatant.Combatant;
+import combat_object.combatant.Combatant;
 import format.ColorStyles;
+import lombok.*;
+import lombok.experimental.*;
 import org.intellij.lang.annotations.MagicConstant;
 import swing.swing_comp.SwingComp;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+@RequiredArgsConstructor(staticName = "newInstance")
 public class EncounterListPanel extends JPanel {
-    private static final Color BG = new Color(0x1E, 0x21, 0x28);
-    private static final Color DIVIDER_COLOR = new Color(0x2E, 0x32, 0x40);
-    private final List<CombatantPanel> allPanels = new ArrayList<>();
 
-    public static EncounterListPanel newInstance() {
-        return new EncounterListPanel();
-    }
+    static Color BG = new Color(0x1E, 0x21, 0x28);
+    static Color DIVIDER_COLOR = new Color(0x2E, 0x32, 0x40);
 
-    private EncounterListPanel() {
+    List<CombatantPanel> allPanels = new ArrayList<>();
+
+    {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBackground(BG);
         setOpaque(true);
@@ -48,9 +49,9 @@ public class EncounterListPanel extends JPanel {
     private void addSectionLabel(String text) {
         SwingComp.label(text.toUpperCase())
                 .withForeground(ColorStyles.SECTION_FG)
-                .withFont(SwingComp.BOLD)
+                .withDerivedFont(Font.BOLD, 12f)
                 .onLeft()
-                .applied(l -> l.setBorder(new EmptyBorder(10, 15, 5, 0)))
+                .withEmptyBorder(10, 15, 5, 0)
                 .in(this);
     }
 

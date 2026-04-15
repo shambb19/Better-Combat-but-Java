@@ -8,15 +8,12 @@ import java.util.Arrays;
 
 public class SwingPane extends SwingComp<JPanel> {
 
-    public static final int BORDER = 0;
-    public static final int VERTICAL_BOX = 1;
-    public static final int HORIZONTAL_BOX = 2;
-    public static final int FLOW = 3;
-    public static final int FLOW_RIGHT = 4;
-    public static final int FLOW_LEFT = 5;
-    public static final int ONE_COLUMN = 6;
-    public static final int TWO_COLUMN = 7;
-    public static final int SINGLE_ROW = 8;
+    public static final int
+            BORDER = 0,
+            VERTICAL_BOX = 1, HORIZONTAL_BOX = 2,
+            FLOW = 3, FLOW_RIGHT = 4, FLOW_LEFT = 5,
+            ONE_COLUMN = 6, TWO_COLUMN = 7,
+            SINGLE_ROW = 8;
 
     private SwingPane(JPanel panel) {
         super(panel);
@@ -54,23 +51,11 @@ public class SwingPane extends SwingComp<JPanel> {
         return new SwingPane(new JPanel());
     }
 
-    public static SwingPane flowPair(Object comp1, Object comp2, boolean isOnLeft) {
-        LayoutManager layout = isOnLeft ? new FlowLayout(FlowLayout.LEFT) : new FlowLayout();
-        return modifiable(new JPanel(layout)).collect(comp1, comp2);
-    }
-
     public SwingPane collect(Object... components) {
         Arrays.stream(components).forEach(comp -> component.add(getComponent(comp)));
         component.revalidate();
         component.repaint();
         return this;
-    }
-
-    public SwingPane collectIf(boolean condition, Object... components) {
-        if (!condition)
-            return this;
-        else
-            return collect(components);
     }
 
     public SwingPane with(
@@ -100,23 +85,21 @@ public class SwingPane extends SwingComp<JPanel> {
         return this;
     }
 
-    public SwingPane contentsReplacedWith(Object... components) {
-        component.removeAll();
-        return collect(components);
-    }
-
     public SwingPane withGaps(int hgap, int vgap) {
         switch (component.getLayout()) {
-            case BorderLayout b:
+            case BorderLayout b -> {
                 b.setHgap(hgap);
                 b.setVgap(vgap);
-                break;
-            case GridLayout g:
+            }
+            case GridLayout g -> {
                 g.setHgap(hgap);
                 g.setVgap(vgap);
-                break;
-            default:
-                throw new ClassCastException("withGaps in SwingPane: GridLayout or BorderLayout expected");
+            }
+            case FlowLayout f -> {
+                f.setHgap(hgap);
+                f.setVgap(vgap);
+            }
+            default -> throw new ClassCastException("withGaps in SwingPane: unexpected layout");
         }
         return this;
     }
@@ -133,7 +116,7 @@ public class SwingPane extends SwingComp<JPanel> {
         return switch (comp) {
             case String s -> new JLabel(s);
             case Component c -> c;
-            case SwingComp<?> sc -> sc.build();
+            case SwingComp<?> sc -> sc.component();
             default -> throw new ClassCastException();
         };
     }

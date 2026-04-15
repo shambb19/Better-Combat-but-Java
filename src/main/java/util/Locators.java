@@ -1,7 +1,9 @@
 package util;
 
+import __main.manager.EffectManager;
 import __main.manager.EncounterManager;
-import character_info.combatant.Combatant;
+import combat_object.combatant.Combatant;
+import combat_object.damage_implements.Effect;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,7 +21,9 @@ public class Locators {
         if (isForDamage)
             return fullList;
         else
-            return fullList.stream().filter(combatant -> combatant.maxHp() != combatant.hp()).toList();
+            return fullList.stream()
+                    .filter(c -> c.getMaxHp() != c.getHp() && !EffectManager.hasEffect(c, Effect.HEAL_BLOCK))
+                    .toList();
     }
 
     public static <T> T getWithNameFromDirectory(List<T> source, Object obj) {

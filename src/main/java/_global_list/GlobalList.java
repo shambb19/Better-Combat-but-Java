@@ -1,7 +1,9 @@
 package _global_list;
 
+import combat_object.CombatObject;
+import lombok.*;
+import lombok.experimental.Delegate;
 import txt_input.Reader5e;
-import util.Filter;
 import util.Message;
 
 import java.io.IOException;
@@ -10,13 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-public class GlobalList<T> {
+public class GlobalList<T extends CombatObject> {
 
-    protected final ArrayList<T> list = new ArrayList<>();
+    @Delegate protected final ArrayList<T> list = new ArrayList<>();
 
-    protected <S extends T> void init(URL url, Class<S> type) {
-        if (url == null) return;
-
+    protected <S extends T> void init(@NonNull URL url, Class<S> type) {
         try {
             List<S> inputs = Reader5e.getInstancesFromCode(url, type);
             list.addAll(inputs);
@@ -24,20 +24,6 @@ public class GlobalList<T> {
             Message.fileError(null, e);
             Logger.getAnonymousLogger().severe("init in GlobalList: could not add elements");
         }
-    }
-
-    protected <S extends T> void addItem(S item) {
-        if (item != null) list.add(item);
-    }
-
-    protected <S extends T> S getItem(String name, Class<S> type) {
-        var withCorrectType = Filter.matchingClass(list, type);
-
-        return Filter.firstWithToStringEquals(withCorrectType, name);
-    }
-
-    protected <S extends T> List<S> castToList(Class<S> type) {
-        return Filter.matchingClass(list, type);
     }
 
 }

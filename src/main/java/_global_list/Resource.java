@@ -1,10 +1,13 @@
 package _global_list;
 
+import lombok.*;
+
 import java.net.URL;
 
+@Getter
 public enum Resource {
 
-    PROGRAM_LOGO("/logo.png"),
+    APP_ICON("/logo.png"),
     ATTACK_BUTTON("/attack-button.png"),
     END_TURN_BUTTON("/end-turn-button.png"),
     HEAL_BUTTON("/heal-button.png"),
@@ -14,14 +17,10 @@ public enum Resource {
     SPELL_CODE("/spells.txt"),
     WEAPON_CODE("/weapons.txt");
 
-    private final String root;
+    private final URL url;
 
     Resource(String root) {
-        this.root = root;
-    }
-
-    public URL url() {
-        return Resource.class.getResource(root);
+        url = Resource.class.getResource(root);
     }
 
 }

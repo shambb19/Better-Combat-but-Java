@@ -2,63 +2,76 @@ package combat_menu.popup;
 
 import __main.Main;
 import __main.manager.EncounterManager;
-import _global_list.Combatants;
-import character_info.combatant.Combatant;
-import character_info.combatant.NPC;
-import encounter_info.Scenario;
+import combat_object.combatant.Combatant;
+import combat_object.combatant.NPC;
+import combat_object.scenario.Scenario;
 import format.ColorStyles;
+import lombok.*;
+import lombok.experimental.*;
+import swing.swing_comp.SwingComp;
+import swing.swing_comp.SwingPane;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
+import javax.swing.border.MatteBorder;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class EncounterFinalizationPopup extends JDialog {
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+public class EncounterSelectionPopup extends JDialog {
 
-    private static final Color BG_DIALOG = new Color(0x1E, 0x21, 0x28);
-    private static final Color BG_BAR = new Color(0x19, 0x1C, 0x22);
-    private static final Color BG_CARD = new Color(0x23, 0x26, 0x2E);
-    private static final Color BG_CARD_ABS = new Color(0x1C, 0x1E, 0x24);
-    private static final Color BG_FIELD = new Color(0x2A, 0x2E, 0x3A);
-    private static final Color BG_CONFIRM = new Color(0x1D, 0x9E, 0x75);
+    static Color
+            BG_DIALOG = new Color(0x1E, 0x21, 0x28),
+            BG_BAR = new Color(0x19, 0x1C, 0x22),
+            BG_CARD = new Color(0x23, 0x26, 0x2E),
+            BG_CARD_ABS = new Color(0x1C, 0x1E, 0x24),
+            BG_FIELD = new Color(0x2A, 0x2E, 0x3A),
+            BG_CONFIRM = new Color(0x1D, 0x9E, 0x75),
 
-    private static final Color BORDER = new Color(0x2A, 0x2E, 0x3A);
-    private static final Color BORDER_FLD = new Color(0x3A, 0x3E, 0x4A);
+    BORDER = new Color(0x2A, 0x2E, 0x3A),
+            BORDER_FLD = new Color(0x3A, 0x3E, 0x4A);
 
-    private final List<CombatantCard> activeCards = new ArrayList<>();
-    private final JPanel partyContainer;
-    private final JPanel dynamicContainer;
+    @NonFinal boolean updatingScenario = false;
 
-    private EncounterFinalizationPopup() {
+    List<CombatantCard> activeCards = new ArrayList<>();
+    JPanel partyContainer, dynamicContainer;
+    JButton beginButton;
+
+    public static EncounterSelectionPopup newInstance() {
+        return new EncounterSelectionPopup();
+    }
+
+    private EncounterSelectionPopup() {
         setTitle("Finalize Combat Information");
         setModal(false);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setAlwaysOnTop(true);
-        setIconImage(Main.getImage());
+        setIconImage(Main.getAppIcon().getImage());
         setBackground(BG_DIALOG);
         setLayout(new BorderLayout());
         getRootPane().setBorder(BorderFactory.createLineBorder(BORDER, 1));
 
-        JPanel topBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 8));
-        topBar.setBackground(BG_BAR);
-        topBar.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, BORDER));
-        add(topBar, BorderLayout.NORTH);
+        JPanel topBar = SwingPane.panelIn(this, BorderLayout.NORTH).withLayout(SwingPane.FLOW_LEFT)
+                .withGaps(10, 0)
+                .withBackground(BG_BAR)
+                .withBorder(new MatteBorder(0, 0, 1, 0, BORDER))
+                .component();
 
-        JLabel scenarioLabel = new JLabel("Combat scenario:");
-        scenarioLabel.setFont(scenarioLabel.getFont().deriveFont(Font.PLAIN, 12f));
-        scenarioLabel.setForeground(ColorStyles.TEXT_MUTED);
-        topBar.add(scenarioLabel);
+        SwingComp.label("Combat scenario:").withDerivedFont(Font.PLAIN, 12f)
+                .withForeground(ColorStyles.TEXT_MUTED)
+                .in(topBar);
 
         JComboBox<Scenario> scenarioCombo = new JComboBox<>(
-                EncounterManager.getBattle().scenarios().toArray(new Scenario[0]));
+                EncounterManager.getEncounter().getScenarios().toArray(new Scenario[0]));
         scenarioCombo.setBackground(BG_FIELD);
         scenarioCombo.setForeground(ColorStyles.TEXT_PRIMARY);
         scenarioCombo.setFont(scenarioCombo.getFont().deriveFont(Font.PLAIN, 12f));
         styleComboBox(scenarioCombo);
         scenarioCombo.setSelectedIndex(-1);
-        scenarioCombo.addActionListener(
-                e -> updateScenario((Scenario) scenarioCombo.getSelectedItem()));
+        scenarioCombo.addActionListener(e -> updateScenario((Scenario) scenarioCombo.getSelectedItem()));
         topBar.add(scenarioCombo);
 
         partyContainer = boxPanel();
@@ -84,19 +97,14 @@ public class EncounterFinalizationPopup extends JDialog {
         footer.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER));
         add(footer, BorderLayout.SOUTH);
 
-        JButton beginButton = new JButton("Begin Encounter");
-        beginButton.setFont(beginButton.getFont().deriveFont(Font.PLAIN, 13f));
-        beginButton.setBackground(BG_CONFIRM);
-        beginButton.setForeground(new Color(0xD8, 0xF4, 0xEC));
-        beginButton.setBorder(new EmptyBorder(8, 20, 8, 20));
-        beginButton.setFocusPainted(false);
-        beginButton.setOpaque(true);
-        beginButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        beginButton.addActionListener(e -> logAndBegin());
-        footer.add(beginButton);
+        beginButton = SwingComp.button("Begin Encounter", this::logAndBegin)
+                .withDerivedFont(Font.PLAIN, 13f)
+                .withBackgroundAndForeground(BG_CONFIRM, new Color(0xd8, 0xf4, 0xec))
+                .withEmptyBorder(8, 20, 8, 20)
+                .disabled()
+                .in(footer).component();
 
         initializeParty();
-        updateScenario(Combatants.toScenario());
 
         pack();
         setLocationRelativeTo(null);
@@ -104,29 +112,29 @@ public class EncounterFinalizationPopup extends JDialog {
     }
 
     private static void styleComboBox(JComboBox<?> combo) {
-        combo.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(BORDER_FLD, 1),
-                new EmptyBorder(2, 8, 2, 8)));
+        SwingComp.modifiable(combo)
+                .withPaddedBorder(new LineBorder(BORDER_FLD, 1), 2, 8, 2, 8);
     }
 
     private void updateScenario(Scenario scenario) {
-        if (scenario == null) return;
-
+        if (updatingScenario) return;
+        updatingScenario = true;
         activeCards.removeIf(card -> card.getCombatant() instanceof NPC);
         dynamicContainer.removeAll();
+        if (scenario == null) return;
 
         if (scenario.containsFriendlies()) {
             dynamicContainer.add(sectionLabel("Allies", ColorStyles.ALLY));
-            scenario.withListAllOccurrences().forEach(npc ->
-                    addCombatantCard((NPC) npc, ColorStyles.ALLY));
+            scenario.list(true, false).forEach(npc ->
+                    addCombatantCard(npc, ColorStyles.ALLY));
         }
-
         dynamicContainer.add(sectionLabel("Enemies", ColorStyles.ENEMY));
-        scenario.againstListAllOccurrences().forEach(npc ->
-                addCombatantCard((NPC) npc, ColorStyles.ENEMY));
-
+        scenario.list(false, false).forEach(npc -> addCombatantCard(npc, ColorStyles.ENEMY));
         dynamicContainer.revalidate();
         dynamicContainer.repaint();
+        beginButton.setEnabled(true);
+
+        updatingScenario = false;
     }
 
     private static JPanel boxPanel() {
@@ -151,16 +159,16 @@ public class EncounterFinalizationPopup extends JDialog {
 
 
     private void logAndBegin() {
-        EncounterManager.getFriendlies().clear();
-        EncounterManager.getEnemies().clear();
-
-        activeCards.stream()
+        var activeCombatants = activeCards.stream()
                 .filter(CombatantCard::isPresent)
                 .map(CombatantCard::getCombatant)
-                .forEach(EncounterManager::addCombatant);
+                .collect(Collectors.partitioningBy(Combatant::isEnemy));
+
+        EncounterManager.getEncounter().setEnemies(activeCombatants.get(true));
+        EncounterManager.getEncounter().setFriendlies(activeCombatants.get(false));
 
         dispose();
-        Main.finalizeCombat();
+        Main.finalizeAndStartCombat();
     }
 
     private void initializeParty() {
@@ -179,42 +187,38 @@ public class EncounterFinalizationPopup extends JDialog {
         dynamicContainer.add(vgap());
     }
 
-    public static void run() {
-        new EncounterFinalizationPopup().setVisible(true);
-    }
-
+    @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
     private static class CombatantCard extends JPanel {
 
-        private static final int ACCENT_W = 3;
-        private static final int CARD_H = 52;
+        static int ACCENT_W = 3, CARD_H = 52;
 
-        private final Combatant combatant;
-        private final JSpinner spinner;
-        private final JCheckBox absentCheck;
-        private final JPanel accentBar;
+        Combatant combatant;
+        JSpinner spinner;
+        JCheckBox absentCheck;
+        JPanel accentBar;
 
         CombatantCard(Combatant combatant, Color accent, boolean showAbsent) {
             this.combatant = combatant;
 
-            setLayout(new BorderLayout(10, 0));
-            setBackground(BG_CARD);
-            setOpaque(true);
-            setMaximumSize(new Dimension(Integer.MAX_VALUE, CARD_H));
-            setPreferredSize(new Dimension(0, CARD_H));
-            setAlignmentX(LEFT_ALIGNMENT);
-            setBorder(new EmptyBorder(0, 0, 0, 12));
+            SwingPane.modifiable(this).withLayout(SwingPane.BORDER).withGaps(10, 0)
+                    .withBackground(BG_CARD)
+                    .opaque()
+                    .withMaximumSize(Integer.MAX_VALUE, CARD_H)
+                    .withPreferredSize(0, CARD_H)
+                    .onLeft()
+                    .withEmptyBorder(0, 0, 0, 12);
 
-            accentBar = new JPanel();
-            accentBar.setPreferredSize(new Dimension(ACCENT_W, 0));
-            accentBar.setBackground(accent);
-            accentBar.setOpaque(true);
-            add(accentBar, BorderLayout.WEST);
+            accentBar = SwingPane.panelIn(this, BorderLayout.WEST)
+                    .withPreferredSize(ACCENT_W, 0)
+                    .withBackground(accent)
+                    .opaque()
+                    .component();
 
-            JLabel nameLabel = new JLabel(combatant.name());
-            nameLabel.setFont(nameLabel.getFont().deriveFont(Font.BOLD, 14f));
-            nameLabel.setForeground(ColorStyles.TEXT_PRIMARY);
-            nameLabel.setBorder(new EmptyBorder(0, 10, 0, 0));
-            add(nameLabel, BorderLayout.CENTER);
+            SwingComp.label(combatant.getName())
+                    .withDerivedFont(Font.BOLD, 14f)
+                    .withForeground(ColorStyles.TEXT_PRIMARY)
+                    .withEmptyBorder(0, 10, 0, 0)
+                    .in(this, BorderLayout.CENTER);
 
             JPanel right = new JPanel(new GridBagLayout());
             right.setOpaque(false);
@@ -224,9 +228,8 @@ public class EncounterFinalizationPopup extends JDialog {
             gbc.insets = new Insets(0, 8, 0, 0);
             gbc.anchor = GridBagConstraints.CENTER;
 
-            JLabel initLabel = new JLabel("Initiative");
-            initLabel.setFont(initLabel.getFont().deriveFont(Font.PLAIN, 11f));
-            initLabel.setForeground(ColorStyles.TEXT_MUTED);
+            JLabel initLabel = SwingComp.label("Initiative").withDerivedFont(Font.PLAIN, 11f)
+                    .withForeground(ColorStyles.TEXT_MUTED).component();
             right.add(initLabel, gbc);
 
             SpinnerNumberModel model = new SpinnerNumberModel(10, 1, 20, 1);
@@ -236,13 +239,12 @@ public class EncounterFinalizationPopup extends JDialog {
             right.add(spinner, gbc);
 
             if (showAbsent) {
-                absentCheck = new JCheckBox("Absent");
-                absentCheck.setFont(absentCheck.getFont().deriveFont(Font.PLAIN, 11f));
-                absentCheck.setForeground(ColorStyles.TEXT_MUTED);
-                absentCheck.setBackground(BG_CARD);
-                absentCheck.setOpaque(false);
-                absentCheck.setFocusPainted(false);
-                absentCheck.addActionListener(e -> updateAbsentState());
+                absentCheck = SwingComp.checkBox("Absent").withAction(this::updateAbsentState)
+                        .withDerivedFont(Font.PLAIN, 11f)
+                        .withBackgroundAndForeground(BG_CARD, ColorStyles.TEXT_MUTED)
+                        .transparent()
+                        .withoutPaintedFocus()
+                        .component();
                 right.add(absentCheck, gbc);
             } else {
                 absentCheck = null;
@@ -270,11 +272,11 @@ public class EncounterFinalizationPopup extends JDialog {
 
             JComponent editor = spinner.getEditor();
             if (editor instanceof JSpinner.DefaultEditor de) {
-                de.getTextField().setBackground(BG_FIELD);
-                de.getTextField().setForeground(ColorStyles.TEXT_PRIMARY);
-                de.getTextField().setCaretColor(ColorStyles.TEXT_PRIMARY);
-                de.getTextField().setBorder(new EmptyBorder(0, 2, 0, 2));
-                de.getTextField().setHorizontalAlignment(SwingConstants.CENTER);
+                SwingComp.modifiable(de.getTextField())
+                        .withBackground(BG_FIELD)
+                        .withForegroundAndCaretColor(ColorStyles.TEXT_PRIMARY)
+                        .withEmptyBorder(0, 2, 0, 2)
+                        .centered();
             }
         }
 

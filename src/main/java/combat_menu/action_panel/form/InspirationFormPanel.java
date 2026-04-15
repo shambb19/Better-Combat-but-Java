@@ -2,72 +2,56 @@ package combat_menu.action_panel.form;
 
 import __main.manager.InspirationManager;
 import format.ColorStyles;
+import lombok.*;
+import lombok.experimental.*;
+import swing.swing_comp.SwingComp;
+import swing.swing_comp.SwingPane;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import static format.ColorStyles.*;
+
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+@NoArgsConstructor(staticName = "newInstance")
 public class InspirationFormPanel extends JPanel {
 
-    private static final Color BG = new Color(0x1E, 0x21, 0x28);
-    private static final Color BG_BTN = new Color(0x25, 0x29, 0x30);
-    private static final Color BG_BTN_HOV = new Color(0x2E, 0x32, 0x40);
-    private static final Color BG_BTN_ACT = new Color(0x3A, 0x34, 0x60);
-    private static final Color BORDER_BTN = new Color(0x32, 0x36, 0x40);
-    private static final Color BORDER_HOV = new Color(0x50, 0x48, 0xA0);
-    private static final Color FG_HINT = new Color(0x60, 0x58, 0x68);
-    private static final Color FG_TITLE = new Color(0x6B, 0x70, 0x80);
-    private static final Color FG_SUBTITLE = new Color(0x50, 0x55, 0x68);
+    static final Color FG_HINT = new Color(0x60, 0x58, 0x68);
 
-    private final InspirationManager manager;
+    {
+        SwingPane.modifiable(this).withLayout(SwingPane.BORDER)
+                .withBackground(BACKGROUND)
+                .opaque()
+                .withEmptyBorder(18, 20, 18, 20);
 
-    public static InspirationFormPanel newInstance() {
-        return new InspirationFormPanel();
-    }
+        JPanel header = SwingPane.panelIn(this, BorderLayout.NORTH).withLayout(SwingPane.VERTICAL_BOX)
+                .transparent()
+                .withEmptyBorder(0, 0, 16, 0)
+                .component();
 
-    public InspirationFormPanel() {
-        this.manager = InspirationManager.MANAGER;
-        setBackground(BG);
-        setOpaque(true);
-        setBorder(new EmptyBorder(18, 20, 18, 20));
-        setLayout(new BorderLayout(0, 0));
+        SwingComp.label("Excess inspiration")
+                .asStandardTextSize()
+                .withForeground(TEXT_MUTED)
+                .onLeft()
+                .in(header);
 
-        add(buildHeader(), BorderLayout.NORTH);
-        add(buildGrid(), BorderLayout.CENTER);
-    }
+        SwingComp.gapIn(3, header);
 
-    private JPanel buildHeader() {
-        JPanel p = new JPanel();
-        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
-        p.setOpaque(false);
-        p.setBorder(new EmptyBorder(0, 0, 16, 0));
+        SwingComp.label("Roll 1d4 and select your result")
+                .withDerivedFont(Font.PLAIN, 11f)
+                .withForeground(ColorStyles.FG_HINT)
+                .onLeft()
+                .in(header);
 
-        JLabel title = new JLabel("Excess inspiration");
-        title.setFont(title.getFont().deriveFont(Font.PLAIN, 12f));
-        title.setForeground(FG_TITLE);
-        title.setAlignmentX(LEFT_ALIGNMENT);
+        JPanel grid = SwingPane.panelIn(this, BorderLayout.CENTER)
+                .withLayout(SwingPane.TWO_COLUMN)
+                .transparent()
+                .component();
 
-        JLabel sub = new JLabel("Roll 1d4 and select your result");
-        sub.setFont(sub.getFont().deriveFont(Font.PLAIN, 11f));
-        sub.setForeground(FG_SUBTITLE);
-        sub.setAlignmentX(LEFT_ALIGNMENT);
-
-        p.add(title);
-        p.add(Box.createRigidArea(new Dimension(0, 3)));
-        p.add(sub);
-        return p;
-    }
-
-    private JPanel buildGrid() {
-        JPanel grid = new JPanel(new GridLayout(2, 2, 8, 8));
-        grid.setOpaque(false);
-
-        for (int i = 1; i <= 4; i++) {
+        for (int i = 1; i <= 4; i++)
             grid.add(dieButton(i));
-        }
-        return grid;
     }
 
     private JButton dieButton(int value) {
@@ -76,52 +60,56 @@ public class InspirationFormPanel extends JPanel {
         btn.setLayout(new BorderLayout());
         btn.setForeground(ColorStyles.TEXT_PRIMARY);
 
-        JLabel numLabel = new JLabel(String.valueOf(value), SwingConstants.CENTER);
-        numLabel.setFont(numLabel.getFont().deriveFont(Font.PLAIN, 28f));
-        numLabel.setForeground(ColorStyles.TEXT_PRIMARY);
+        JLabel numLabel = SwingComp.label(String.valueOf(value))
+                .withDerivedFont(Font.PLAIN, 28f)
+                .withForeground(ColorStyles.TEXT_PRIMARY)
+                .component();
+
         btn.add(numLabel, BorderLayout.CENTER);
 
-        JPanel hintWrap = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
-        hintWrap.setOpaque(false);
-        JLabel hint = new JLabel("d4");
-        hint.setFont(hint.getFont().deriveFont(Font.PLAIN, 10f));
-        hint.setForeground(FG_HINT);
-        hint.setBorder(new EmptyBorder(0, 0, 6, 8));
-        hintWrap.add(hint);
-        btn.add(hintWrap, BorderLayout.SOUTH);
+        JPanel hintWrap = SwingPane.panelIn(this, BorderLayout.SOUTH)
+                .withLayout(SwingPane.FLOW_RIGHT)
+                .transparent()
+                .component();
+
+        SwingComp.label("d4")
+                .withDerivedFont(Font.PLAIN, 10f)
+                .withForeground(FG_HINT)
+                .withEmptyBorder(0, 0, 6, 8)
+                .in(hintWrap);
 
         btn.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                btn.setBg(BG_BTN_ACT);
+                btn.setBg(ACTION_PRIMARY);
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                btn.setBg(BG_BTN_HOV);
+                btn.setBg(DIVIDER);
             }
 
             @Override
             public void mouseEntered(MouseEvent e) {
-                btn.setBg(BG_BTN_HOV);
-                btn.setBorder(BORDER_HOV);
+                btn.setBg(DIVIDER);
+                btn.setBorder(ACTION_HOVER);
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                btn.setBg(BG_BTN);
-                btn.setBorder(BORDER_BTN);
+                btn.setBg(BG_SURFACE);
+                btn.setBorder(DIVIDER);
             }
         });
 
-        btn.addActionListener(e -> manager.submitExcessRoll(value));
+        btn.addActionListener(e -> InspirationManager.MANAGER.submitExcessRoll(value));
         return btn;
     }
 
     private static class DieButton extends JButton {
 
-        private Color bgColor = BG_BTN;
-        private Color borderColor = BORDER_BTN;
+        private Color bgColor = BG_SURFACE;
+        private Color borderColor = ACTION_HOVER;
 
         DieButton() {
             setContentAreaFilled(false);

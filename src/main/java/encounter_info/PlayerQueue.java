@@ -3,22 +3,24 @@ package encounter_info;
 import __main.Main;
 import __main.manager.CombatManager;
 import __main.manager.EffectManager;
-import character_info.combatant.Combatant;
+import combat_object.combatant.Combatant;
+import combat_object.combatant.LifeStatus;
+import lombok.*;
+import lombok.experimental.*;
 import util.Message;
 
 import javax.swing.*;
 import java.util.Comparator;
 import java.util.List;
 
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class PlayerQueue {
 
-    private final List<Combatant> friendlies;
-    private final List<Combatant> enemies;
+    final List<Combatant> friendlies, enemies;
 
-    private int friendlyIndex = 0;
-    private int enemyIndex = -1;
+    int friendlyIndex = 0, enemyIndex = -1;
 
-    private Combatant currentCombatant = null;
+    @Getter Combatant currentCombatant = null;
 
     public PlayerQueue(List<Combatant> friendlies, List<Combatant> enemies) {
         this.friendlies = friendlies;
@@ -35,10 +37,6 @@ public class PlayerQueue {
         }
 
         SwingUtilities.invokeLater(CombatManager::confirmButtonStates);
-    }
-
-    public Combatant getCurrentCombatant() {
-        return currentCombatant;
     }
 
     public void endCurrentTurn() {
@@ -62,6 +60,7 @@ public class PlayerQueue {
 
         processTurnStart();
         CombatManager.confirmButtonStates();
+        Main.getCombatMenu().startNewTurn();
     }
 
     private void incrementFriendly() {
@@ -77,24 +76,25 @@ public class PlayerQueue {
 
         EffectManager.processCombatantTurnStart();
 
-        if (!currentCombatant.lifeStatus().isConscious()) {
-            if (currentCombatant.lifeStatus().isAlive()) {
+        LifeStatus status = currentCombatant.getLifeStatus();
+        if (!status.isConscious()) {
+            if (status.isAlive()) {
                 int saveRoll = Message.getDeathSaveRoll();
-                currentCombatant.lifeStatus().rollDeathSave(saveRoll);
+                status.rollDeathSave(saveRoll);
             }
 
             endCurrentTurn();
             return;
         }
 
-        Main.logAction();
+        Main.refreshUI();
     }
 
     private void sortList(List<Combatant> combatants) {
         combatants.sort(
-                Comparator.comparingInt(Combatant::initiative)
+                Comparator.comparingInt(Combatant::getInitiative)
                         .reversed()
-                        .thenComparing(Combatant::name)
+                        .thenComparing(Combatant::getName)
         );
     }
 }

@@ -1,26 +1,27 @@
-package character_info.combatant;
+package combat_object.combatant;
 
+import lombok.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 
+@AllArgsConstructor
 public class CombatantTransferable implements Transferable {
-    private final Combatant combatant;
 
-    public CombatantTransferable(Combatant combatant) {
-        this.combatant = combatant;
-    }
+    public static final DataFlavor COMBATANT_FLAVOR = new DataFlavor(Combatant.class, "Combatant");
+
+    private final Combatant combatant;
 
     @Override
     public DataFlavor[] getTransferDataFlavors() {
-        return new DataFlavor[]{Combatant.COMBATANT_FLAVOR};
+        return new DataFlavor[]{COMBATANT_FLAVOR};
     }
 
     @Override
     public boolean isDataFlavorSupported(DataFlavor flavor) {
-        return flavor.equals(Combatant.COMBATANT_FLAVOR);
+        return flavor.equals(COMBATANT_FLAVOR);
     }
 
     @NotNull

@@ -1,9 +1,13 @@
 package campaign_creator_menu;
 
 import __main.Main;
-import character_info.combatant.Combatant;
-import encounter_info.Battle;
-import encounter_info.Scenario;
+import combat_object.CombatObject;
+import combat_object.combatant.Combatant;
+import combat_object.scenario.Scenario;
+import encounter_info.Encounter;
+import format.ColorStyles;
+import lombok.*;
+import lombok.experimental.*;
 import txt_input.CampaignWriter;
 import util.Locators;
 import util.Message;
@@ -15,41 +19,43 @@ import java.awt.datatransfer.StringSelection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
+import java.util.stream.Stream;
 
 import static swing.swing_comp.SwingComp.button;
 import static swing.swing_comp.SwingComp.scrollPane;
 import static swing.swing_comp.SwingPane.*;
 import static util.Message.template;
 
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class DownloadDocDisplayPanel extends JPanel {
 
-    private final List<Combatant> friendlies;
-    private final List<Combatant> enemies;
-    private final List<Scenario> scenarios;
-    private final ColoredTxtDisplay display;
+    ArrayList<Combatant> friendlies, enemies;
+    ArrayList<Scenario> scenarios;
+    ColoredTxtDisplay display;
 
-    public DownloadDocDisplayPanel(Battle input) {
-        friendlies = input.friendlies();
-        enemies = input.enemies();
-        scenarios = input.scenarios();
+    public DownloadDocDisplayPanel(Encounter input) {
+        friendlies = new ArrayList<>(input.getFriendlies());
+        enemies = new ArrayList<>(input.getEnemies());
+        scenarios = new ArrayList<>(input.getScenarios());
         display = new ColoredTxtDisplay(null);
 
         modifiable(this).withLayout(BORDER).withLabeledBorder("Completed Campaign Code Preview");
 
         scrollPane(display).in(this, BorderLayout.CENTER);
 
-        panelIn(this, BorderLayout.SOUTH)
-                .collect(
-                        button("Download", this::download),
-                        button("Copy to Clipboard", this::clipboardCopy),
-                        button("Start Combat (This Campaign)", () -> Main.switchToCombat(download()))
-                ).withLayout(FLOW);
+        JButton download = button("Download", this::download).component();
+        JButton clipboard = button("Copy to clipboard", this::clipboardCopy).component();
+        JButton start = button("Start combat (this campaign)", () -> Main.closeCreatorAndOpenCombat(download())).component();
+
+        Stream.of(download, clipboard, start)
+                .forEach(b -> modifiable(b).withBackgroundAndForeground(ColorStyles.SUCCESS, ColorStyles.TEXT_PRIMARY));
+
+        panelIn(this, BorderLayout.SOUTH).collect(download, clipboard, start).withLayout(FLOW);
 
         setText();
     }
 
-    public void addElement(Object selection) {
+    public void addElement(CombatObject selection) {
         addOrReplace(selection);
         setText();
     }
@@ -59,16 +65,18 @@ public class DownloadDocDisplayPanel extends JPanel {
         display.setCaretPosition(0);
     }
 
-    @SuppressWarnings("unchecked")
-    private void addOrReplace(Object obj) {
-        var destination = switch (obj) {
-            case Combatant c when c.isEnemy() -> enemies;
-            case Combatant c when !c.isEnemy() -> friendlies;
-            case Scenario ignored -> scenarios;
-            default -> throw new IllegalArgumentException("unexpected class parameter: need Combatant or Scenario");
-        };
+    private void addOrReplace(CombatObject obj) {
+        switch (obj) {
+            case Combatant c when c.isEnemy() -> addOrReplaceFromList(c, enemies);
+            case Combatant c -> addOrReplaceFromList(c, friendlies);
+            case Scenario s -> addOrReplaceFromList(s, scenarios);
+            default ->
+                    throw new ClassCastException("DownloadDocDisplayPanel.addOrReplace: Combatant or Scenario expected");
+        }
+    }
 
-        Object oldVer = Locators.getWithNameFromDirectory(destination, obj);
+    private <T extends CombatObject> void addOrReplaceFromList(T object, ArrayList<T> destination) {
+        T oldVer = Locators.getWithNameFromDirectory(destination, object);
 
         if (oldVer != null && destination.contains(oldVer)) {
             int confirmOption = Message.question("Another item has been found with the same name. " +
@@ -79,9 +87,9 @@ public class DownloadDocDisplayPanel extends JPanel {
             }
 
             int idx = destination.indexOf(oldVer);
-            ((List<Object>) destination).set(idx, obj);
+            destination.set(idx, object);
         } else {
-            ((List<Object>) destination).add(obj);
+            destination.add(object);
         }
 
         destination.sort(Comparator.comparing(Object::toString));
@@ -100,7 +108,6 @@ public class DownloadDocDisplayPanel extends JPanel {
             template("Successfully saved to Downloads");
             return savedFile;
         } else {
-            System.err.println("Failed to save the campaign file.");
             return null;
         }
     }

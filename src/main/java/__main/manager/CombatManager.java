@@ -1,91 +1,105 @@
 package __main.manager;
 
 import __main.Main;
-import character_info.combatant.Combatant;
 import combat_menu.CombatantPanel;
 import combat_menu.action_panel.ActionPanel;
-import damage_implements.Implement;
-import damage_implements.Spell;
-import damage_implements.Weapon;
+import combat_object.combatant.Combatant;
+import combat_object.damage_implements.Effect;
+import combat_object.damage_implements.Implement;
+import combat_object.damage_implements.Spell;
+import combat_object.damage_implements.Weapon;
+import lombok.experimental.*;
 
 import javax.swing.*;
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicReference;
 
+@UtilityClass
 public class CombatManager {
 
-    private static final AtomicReference<ActionPanel> ACTION_PANEL_ATOMIC_REFERENCE = new AtomicReference<>();
-
-    public static void init(ActionPanel actionPanel) {
-        ACTION_PANEL_ATOMIC_REFERENCE.set(actionPanel);
+    public void confirmButtonStates() {
+        SwingUtilities.invokeLater(() -> {
+            getActionPanel().returnToButtons();
+            getActionPanel().confirmButtonStates();
+        });
     }
 
-    public static void confirmButtonStates() {
-        ACTION_PANEL_ATOMIC_REFERENCE.get().returnToButtons();
-        ACTION_PANEL_ATOMIC_REFERENCE.get().confirmButtonStates();
+    public void cancelAction() {
+        SwingUtilities.invokeLater(() -> {
+            getActionPanel().cancelAction();
+            Main.getCombatMenu().setActionMode(CombatantPanel.TURN);
+        });
     }
 
-    public static void cancelAction() {
-        ACTION_PANEL_ATOMIC_REFERENCE.get().returnToButtons();
-        Main.getMenu().setActionMode(CombatantPanel.TURN);
-    }
-
-    public static boolean logAttack(Combatant target, int roll, Implement implement) {
+    public boolean logAttack(Combatant target, int roll, Implement implement) {
         Combatant attacker = EncounterManager.getCurrentCombatant();
 
-        if (implement instanceof Spell s && s.hasSave())
-            target.logD20Roll(roll);
-        else
-            attacker.logD20Roll(roll);
+        boolean autoHits = implement instanceof Spell s && s.doesNotRequireAttackRoll();
 
-        boolean hit = isAttackSuccess(attacker, target, implement, roll);
-        boolean continues = hit || (implement instanceof Spell s && s.dealsHalfDamageAnyways());
+        if (!autoHits) {
+            if (implement instanceof Spell s && s.hasSave()) {
+                target.logRoll(roll, 1, 20);
 
-        if (continues) {
-            SwingUtilities.invokeLater(() -> ACTION_PANEL_ATOMIC_REFERENCE.get().promptDamageAmount(implement, target, hit));
-
-            if (implement instanceof Spell s)
-                attacker.putEffect(target, s.effect());
+                EffectManager.endPenaltiesOn(target);
+            } else
+                attacker.logRoll(roll, 1, 20);
         }
 
+        boolean hit = isAttackSuccess(attacker, target, implement, roll);
+        boolean continues = hit;
+        if (!hit && implement instanceof Spell s) {
+            continues = s.dealsHalfDamageAnyways() || autoHits;
+        }
 
-        Main.logAction();
-        Main.getMenu().setActionMode(CombatantPanel.TURN);
+        if (continues) {
+            EffectManager.logEffect(target, attacker, implement);
 
+            SwingUtilities.invokeLater(() ->
+                    getActionPanel().promptDamageAmount(implement, target, hit));
+        }
+
+        Main.refreshUI();
         return continues;
     }
 
-    public static void logDamage(Combatant target, Implement implement, int roll, int bonus, boolean attackFailed) {
-        Combatant attacker = EncounterManager.getCurrentCombatant();
-
-        if (!implement.isManual())
-            attacker.logRoll(roll, implement.numDice(), implement.dieSize());
-
-        int damage = roll + bonus;
-        if (attackFailed)
-            damage /= 2;
-        if (target.isHexedBy(attacker))
-            damage += new Random().nextInt(0, 6);
-
-        target.damage(damage);
-        ACTION_PANEL_ATOMIC_REFERENCE.get().returnToButtons();
-        Main.logAction();
-    }
-
-    public static void logHeal(Combatant target, int amount) {
-        target.heal(amount);
-        ACTION_PANEL_ATOMIC_REFERENCE.get().returnToButtons();
-        Main.logAction();
-        Main.getMenu().setActionMode(CombatantPanel.TURN);
-    }
-
-    private static boolean isAttackSuccess(Combatant attacker, Combatant target, Implement implement, int roll) {
+    private boolean isAttackSuccess(Combatant attacker, Combatant target, Implement implement, int roll) {
         return switch (implement) {
-            case Weapon w -> (roll + attacker.attackBonus(w)) >= target.ac();
-            case Spell s when s.hasSave() -> (roll + target.mod(s.stat())) < attacker.saveDc();
-            case Spell s when !s.hasSave() -> roll + attacker.spellAttackBonus() >= target.ac();
-            default -> throw new ClassCastException();
+            case Weapon w -> roll + attacker.attackBonus(w) >= target.getArmorClass();
+            case Spell s when s.doesNotRequireAttackRoll() -> true;
+            case Spell s when s.hasSave() -> roll + target.mod(s.getStat()) < attacker.saveDc();
+            case Spell s when !s.hasSave() -> roll + attacker.spellAttackBonus() >= target.getArmorClass();
+            default -> throw new ClassCastException("isAttackSuccess: implement is neither Weapon nor Spell");
         };
     }
 
+    public void finishAction() {
+        SwingUtilities.invokeLater(() -> {
+            getActionPanel().returnToButtons();
+            getActionPanel().onMainActionConfirmed();
+            Main.getCombatMenu().setActionMode(CombatantPanel.TURN);
+            Main.refreshUI();
+        });
+    }
+
+    public void logDamage(Combatant target, Implement implement,
+                          int roll, int bonus) {
+        Combatant attacker = EncounterManager.getCurrentCombatant();
+
+        if (!implement.isManual())
+            attacker.logRoll(roll, implement.getNumDice(), implement.getDieSize());
+
+        target.damage(roll + bonus);
+
+        if (implement.effectEquals(Effect.HEAL_SELF))
+            attacker.heal(roll);
+
+        finishAction();
+    }
+
+    public void logHeal(Combatant target, int amount) {
+        target.heal(amount);
+        finishAction();
+    }
+
+    private ActionPanel getActionPanel() {
+        return Main.getCombatMenu().getActionPanel();
+    }
 }

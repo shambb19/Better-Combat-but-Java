@@ -3,25 +3,27 @@ package campaign_creator_menu;
 import __main.Main;
 import _global_list.Combatants;
 import _global_list.Scenarios;
-import character_info.combatant.Combatant;
-import encounter_info.Battle;
-import encounter_info.Scenario;
-import swing.swing_comp.SwingPane;
+import combat_object.CombatObject;
+import combat_object.combatant.Combatant;
+import combat_object.scenario.Scenario;
+import encounter_info.Encounter;
+import lombok.*;
+import lombok.experimental.*;
 
 import javax.swing.*;
-import java.awt.*;
 import java.net.URL;
 
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class CampaignCreatorMenu extends JFrame {
 
     public static final String TITLE = "Campaign Creator" + Main.TITLE;
 
-    private final CompletedElementsList completedList;
+    CompletedElementsList completedList;
 
-    private final LowerSplitPane splitPane;
-    private final CombatantInputPanel inputPanel;
-    private final ScenarioInputPanel scenarioPanel;
-    private final DownloadDocDisplayPanel displayPanel;
+    HostPanel hostPanel;
+    CombatantInputPanel inputPanel;
+    ScenarioInputPanel scenarioPanel;
+    DownloadDocDisplayPanel displayPanel;
 
     public static CampaignCreatorMenu newInstance(URL input) {
         return new CampaignCreatorMenu(input);
@@ -30,22 +32,20 @@ public class CampaignCreatorMenu extends JFrame {
     private CampaignCreatorMenu(URL input) {
         setTitle(TITLE);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setIconImage(Main.getImage());
+        setIconImage(Main.getAppIcon().getImage());
 
         Combatants.init(input);
         Scenarios.init(input);
-        Battle battle = Combatants.toBattle();
+        Encounter encounter = Combatants.toBattle();
 
-        completedList = new CompletedElementsList(battle, this);
+        completedList = new CompletedElementsList(encounter, this);
         inputPanel = new CombatantInputPanel(this);
         scenarioPanel = new ScenarioInputPanel(completedList, this);
-        displayPanel = new DownloadDocDisplayPanel(battle);
-        splitPane = new LowerSplitPane(inputPanel, scenarioPanel, displayPanel);
+        LevelUpPanel levelUpPanel = new LevelUpPanel(encounter, this);
+        displayPanel = new DownloadDocDisplayPanel(encounter);
+        hostPanel = new HostPanel(inputPanel, scenarioPanel, levelUpPanel, completedList, displayPanel);
 
-        SwingPane.modifiable(this).withLayout(SwingPane.BORDER)
-                .with(completedList, BorderLayout.NORTH)
-                .with(splitPane, BorderLayout.CENTER)
-                .withEmptyBorder(10);
+        add(hostPanel);
 
         pack();
         setLocationRelativeTo(null);
@@ -56,12 +56,11 @@ public class CampaignCreatorMenu extends JFrame {
         setVisible(true);
     }
 
-    public void logEdit(Object selection, boolean isNew) {
-        switch (selection) {
-            case Combatant c -> editCombatant(c, isNew);
-            case Scenario s -> editScenario(s, isNew);
-            default -> throw new ClassCastException();
-        }
+    public void logEdit(CombatObject selection, boolean isNew) {
+        if (selection instanceof Combatant c)
+            editCombatant(c, isNew);
+        else if (selection instanceof Scenario s)
+            editScenario(s, isNew);
     }
 
     public void editCombatant(Combatant selection, boolean isNew) {
@@ -92,11 +91,15 @@ public class CampaignCreatorMenu extends JFrame {
     }
 
     public void setInputPanelEnabled(boolean isEnabled) {
-        splitPane.changeInputPanel(LowerSplitPane.COMBATANT_INPUT, isEnabled);
+        hostPanel.changeInputPanel(HostPanel.COMBATANT_INPUT, isEnabled);
     }
 
     public void setScenarioPanelEnabled(boolean isEnabled) {
-        splitPane.changeInputPanel(LowerSplitPane.SCENARIO_INPUT, isEnabled);
+        hostPanel.changeInputPanel(HostPanel.SCENARIO_INPUT, isEnabled);
+    }
+
+    public void finishLevelUpProcess() {
+        hostPanel.endLevelUp();
     }
 
 }
