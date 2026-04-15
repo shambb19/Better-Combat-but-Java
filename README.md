@@ -3,155 +3,92 @@ user-friendly, but does admittedly take a while. If you don't want to
 deal with that, this is how to manually type campaign code:
 
 ***
-## Part 1: General Syntax
-Each individual combatant or scenario is headed by ```.code```, with "code"
-being different for each and being specified in those sections.
 
-Individual parameters are written as ```key: value```.
+# Section 1: Manual Code Writing
 
-As of my testing only the names should be case-sensitive, but as a general
-rule leave things lowercase unless otherwise specified because the reader
-likes to pull errors out of its ass sometimes.
+## 1) General Syntax
 
+All items follow the syntax
+
+```text
+.type
+key: value
+key: value
+// and so on
 ```
-***
 
-## Part 2: NPCs and Enemies
+Values that are in a list follow the syntax
 
-PCs have three parameters:
-1. Name
-2. Maximum HP
-3. Armor Class
+```text
+key: [value1, value2, value3, value4]
+```
 
-and uses the header code ```.npc```. So, a correct NPC will look like the 
-following:
+## 2) Type Examples
 
+Note that all of the following should be included in one .txt document:
+
+### NPC (Friendly NPCs and all Enemies)
 ```text
 .npc
-name: Elrond
-hp: 42/42
+name: Faramir
+hp: 22/30
 ac: 14
 ```
 
-Enemies are formatted identically to NPCs but with the header code ```.enemy```.
-***
-
-## Part 3: PCs
-
-PCs have the same three parameters as NPCs as well as the following:
-1. Level
-2. Class
-3. Main Field Stats
-4. Weapons (Optional)
-5. Spells (Optional)
-
-Level and Class are written in the standard ```key: value``` format, so 
-```level: 2``` and ```class: bard``` as examples respectively.
-
-### Main Field Stats
-These are written like
-```stats: [STR: 10, DEX: 12, CON: 9, INT: 12, WIS: 14, CHA: 10]```. 
-Stats are separated by ```,```. Each stat has its abbreviation and value
-with colon and space separation. Note the enclosing brackets as well.
-
-### Weapons and Spells
-These are written in a list like ```weapons: [Dagger, Longsword]``` or
-```spells: [Eldritch Blast, Toll the Dead, Hex]```, with lowercase and 
-underscore-separated words, separated by comma and space. Note the enclosing
-brackets here as well.
-
-### Putting the PC Together
-Finally, the pc uses the header code ```.party``` so a correct PC will look 
-similar to the following:
+or
 
 ```text
-.party
-name: Gandalf the Grey
-hp: 48/62
-ac: 14
-level: 100
-class: wizard
-stats: [STR: 12, DEX: 14, CON: 14, INT: 18, WIS: 20, CHA: 20]
-weapons: [Longsword, Staff]
-spells: [Intimidate Bilbo, You Shall Not Pass, Beam of Light]
+.enemy
+name: Nazgul
+hp: 44/44
+ac: 18
 ```
 
-## Scenarios
-Scenarios allow you to combine created combatants into different encounters 
-that you can easily call at runtime. They require only a name, list of 
-included friendly NPCs ONLY and enemies. All party members are implicitly 
-included in all scenarios (you will have an option to mark them absent at 
-runtime), so they are not part of this. 
+### PC (Party Members only)
 
-If you have a generic npc you would like to add multiple of, you can do so by
-adding ```_num``` after the NPC's name, with "num" being the total number you
-would like to add.
-
-A correct scenario will look like this:
-
-```text
-.scenario
-name: Sacking of Coruscant
-with: Ven Zallow,Jedi_12
-against: Darth Malgus,Shae Vizla,Sith_20
-```
-
-## Putting it All Together
-Below is a full correct example:
 ```text
 .party
 name: Frodo Baggins
-hp: 20/20
-ac: 18
-class: fighter
-stats: [STR: 10, DEX: 12, CON: 16, INT: 13, WIS: 16, CHA: 14]
-weapons: [Sting]
-
-.party
-name: Samwise Gamgee
-hp: 20/20
-ac: 10
-class: paladin
-stats: [STR: 14, DEX: 9, CON: 16, INT: 9, WIS: 16, CHA: 11]
-weapons: [Dagger, Pot]
-
-.npc
-name: Pippin Took
-hp: 20/20
+hp: 16/20
 ac: 14
-
-.npc
-name: Merry Brandybuck
-hp: 20/20
-ac: 12
-
-.npc
-name: Boromir
-hp: 40/40
-ac: 16
-
-.enemy
-name: Orc
-hp: 20/20
-ac: 16
-
-.enemy
-name: Uruk-hai
-hp: 40/40
-ac: 17
-
-.enemy
-name: Nazgul
-hp: 160/160
-ac: 19
-
-.scenario
-name: Forest Chase
-with: Pippin Took,Merry Brandybuck
-against: Nazgul_4
-
-.scenario
-name: Breaking of the Fellowship
-with: Pippin Took,Merry Brandybuck,Boromir
-against: Orc_50,Uruk-hai
+level: 3
+class: paladin
+stats: [STR: 12, DEX: 12, CON: 18, INT: 17, WIS: 16, CHA: 15]
+weapons: [Shortsword]
 ```
+
+or
+```text
+.party
+name: Gandalf the Grey
+hp: 32/44
+ac: 18
+level: 20
+class: wizard
+stats: [STR: 12, DEX: 14, CON: 18, INT: 20, WIS: 20, CHA: 20]
+weapons: [Longsword, Staff]
+spells: [You Shall Not Pass, Light Beacon]
+```
+
+### Scenarios (specific, pre-programmed encounters)
+```text
+.scenario
+name: Flight to the Ford
+with: [Samwise Gamgee, Peregrin Took, Meriadoc Brandybuck, Boromir]
+against: [Orc_22, Uruk-hai]
+```
+
+Note here that the underscored number represents the quantity of that
+particular NPC present.
+
+Also note that all PCs in the file will automatically be included in any
+created scenarios. There is an option in the app to mark them absent, either
+if the player is gone or if the character is not participating in the battle.
+***
+
+# Section 2: Weapons and Spells
+
+As of v4.4.0, the game has all simple and martial weapons found in the PHB,
+as well as what I *think* is all the spells in the PHB. I intend to add the
+ability to put custom weapons and spells in your campaign .txt, but this
+functionality does not as yet exist.
