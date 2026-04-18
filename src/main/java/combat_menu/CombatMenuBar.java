@@ -1,6 +1,7 @@
 package combat_menu;
 
 import combat_menu.popup.CombatEndPopup;
+import combat_menu.popup.EffectManagerPopup;
 import lombok.*;
 
 import javax.swing.*;
@@ -9,13 +10,19 @@ import javax.swing.*;
 public class CombatMenuBar extends JMenuBar {
 
     {
-        JMenuItem restart = new JMenuItem("Restart Encounter");
-        restart.addActionListener(e -> CombatEndPopup.quit("restart"));
+        addMenuItem("Start New Encounter", "End the current encounter without any saved progress",
+                () -> CombatEndPopup.quit("restart"));
+        addMenuItem("Effect Manager", "Manually end the effects of any dealt spell",
+                EffectManagerPopup::run);
+        addMenuItem("Quit", "You know this one",
+                () -> CombatEndPopup.run(CombatEndPopup.QUIT));
+    }
 
-        JMenuItem endEarly = new JMenuItem("End Now");
-        endEarly.addActionListener(e -> CombatEndPopup.run(true));
-
-        add(restart);
+    private void addMenuItem(String name, String toolTip, Runnable action) {
+        JMenuItem item = new JMenuItem(name);
+        item.setToolTipText(toolTip);
+        item.addActionListener(e -> action.run());
+        add(item);
     }
 
 }

@@ -2,17 +2,17 @@ package __main;
 
 import _global_list.Resource;
 import campaign_creator_menu.ColoredTxtDisplay;
+import combat_menu.EncounterSelectionPanel;
 import combat_menu.popup.FileGetter;
 import format.ColorStyles;
+import input.Reader5e;
 import lombok.*;
 import lombok.experimental.*;
 import org.jetbrains.annotations.NotNull;
-import swing.swing_comp.SwingComp;
 import swing.swing_comp.SwingPane;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
-import javax.swing.border.MatteBorder;
 import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,6 +21,10 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+
+import static swing.swing_comp.SwingComp.fluent;
+import static swing.swing_comp.SwingComp.*;
+import static swing.swing_comp.SwingPane.*;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor(staticName = "newInstance", force = true)
@@ -41,141 +45,80 @@ public class UploadMain extends JFrame {
 
     {
         setTitle("Campaign File Selection" + Main.TITLE);
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setMinimumSize(new Dimension(860, 500));
-        setIconImage(Main.getAppIcon().getImage());
+        setIconImage(__main.Main.getAppIcon().getImage());
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+        setResizable(false);
         setBackground(ColorStyles.BACKGROUND);
 
-        SwingPane.modifiable(this).withLayout(SwingPane.BORDER)
-                .with(buildSidebar(), BorderLayout.WEST)
-                .with(buildPreview(), BorderLayout.CENTER);
+        SwingPane.fluent(this).arrangedAs(BORDER).borderCollect(
+                west(buildSidebar()), center(buildPreview()));
 
-        pack();
-        setLocationRelativeTo(null);
+        GraphicsConfiguration config = getGraphicsConfiguration();
+        Rectangle bounds = config.getBounds();
+        Insets insets = Toolkit.getDefaultToolkit().getScreenInsets(config);
+
+        int SHADOW = 8;
+
+        int x = bounds.x + insets.left - SHADOW;
+        int y = bounds.y + insets.top;
+        int width = bounds.width - insets.left - insets.right + (SHADOW * 2);
+        int height = bounds.height - insets.top - insets.bottom + SHADOW;
+
+        setBounds(x, y, width, height);
+
+        setVisible(true);
     }
 
     private JPanel buildSidebar() {
-        JPanel sidebar = SwingPane.panel().withLayout(SwingPane.VERTICAL_BOX)
-                .withBackground(ColorStyles.BG_DARK)
+        combatButton = uploadButton("Start", () -> {
+            Main.uploadCampaign(currentFile);
+            scrollPane.setViewportView(EncounterSelectionPanel.newInstance(this));
+        });
+        combatButton.setEnabled(false);
+
+        creatorButton = uploadButton("Edit", () -> {
+            Main.uploadCampaign(currentFile);
+            Main.closeUploadAndRun(Main.CREATOR, this);
+        });
+        creatorButton.setEnabled(false);
+
+        return newArrangedAs(VERTICAL_BOX, 0, 5)
+                .collect(
+                        new JLabel(Main.getAppIcon()),
+                        spacer(0, 13),
+                        instructionsArea(),
+                        spacer(0, 13),
+                        sectionLabel("Upload Options"), spacer(0, 3),
+                        uploadButton("New Campaign", () -> onInputChange(null)),
+                        uploadButton("Upload Existing (.txt)", () -> onInputChange(FileGetter.getUrl(this))),
+                        uploadButton("Load Kyreun Starter", () -> onInputChange(Resource.STARTER_CODE.getUrl())),
+                        spacer(0, 7),
+                        sectionLabel("Run mode"), spacer(0, 3),
+                        combatButton, creatorButton
+                ).withBackground(ColorStyles.BG_DARK)
                 .withPreferredSize(300, 0)
-                .withPaddedMatteBorderOnSide(ColorStyles.TRACK, SwingComp.RIGHT, 22, 20, 18, 20)
+                .withEmptyBorder(22, 20, 18, 20)
                 .component();
-
-        JLabel icon = new JLabel(Main.getAppIcon());
-        icon.setAlignmentX(CENTER_ALIGNMENT);
-        sidebar.add(icon);
-        sidebar.add(vgap(18));
-
-        JTextArea instructions = instructionsArea();
-        sidebar.add(instructions);
-        sidebar.add(vgap(18));
-
-        sidebar.add(sectionLabel("Upload options"));
-        sidebar.add(vgap(8));
-        sidebar.add(uploadButton("New campaign", () -> logNewInput(null)));
-        sidebar.add(vgap(5));
-        sidebar.add(uploadButton("Upload existing (.txt)", () -> logNewInput(FileGetter.getUrl(this))));
-        sidebar.add(vgap(5));
-        sidebar.add(uploadButton("Load Kyreun starter", () -> logNewInput(Resource.STARTER_CODE.getUrl())));
-
-        sidebar.add(Box.createVerticalGlue());
-
-        sidebar.add(sectionLabel("Run mode"));
-        sidebar.add(vgap(8));
-
-        combatButton = runButton("Start", true, () -> {
-            Main.runCombatEncounter(currentFile);
-            dispose();
-        });
-        creatorButton = runButton("Edit", false, () -> {
-            Main.runCampaignCreator(currentFile);
-            dispose();
-        });
-
-        SwingPane.panelIn(sidebar).withLayout(SwingPane.TWO_COLUMN)
-                .collect(combatButton, creatorButton)
-                .withGaps(6, 0)
-                .onLeft()
-                .withMaximumSize(Integer.MAX_VALUE, 36);
-
-        return sidebar;
-    }
-
-    private JPanel buildPreview() {
-        JPanel preview = SwingPane.panel().withLayout(SwingPane.BORDER).withBackground(ColorStyles.BACKGROUND).component();
-
-        accentStrip = SwingPane.panelIn(preview, BorderLayout.NORTH)
-                .withPreferredSize(0, 2)
-                .withBackground(ColorStyles.FG_HINT)
-                .component();
-
-        JPanel header = SwingPane.panelIn(preview, BorderLayout.NORTH).withLayout(SwingPane.FLOW_LEFT)
-                .withGaps(10, 8)
-                .withBackground(ColorStyles.BG_DARK)
-                .withBorder(new MatteBorder(0, 0, 1, 0, ColorStyles.TRACK))
-                .component();
-
-        statusDot = SwingComp.label().opaque()
-                .withPreferredSize(8, 8)
-                .withBackground(ColorStyles.FG_HINT)
-                .withBorder(new LineBorder(ColorStyles.FG_HINT, 4))
-                .in(header)
-                .component();
-
-        statusText = SwingComp.label("No file selected")
-                .asStandardTextSize()
-                .withForeground(ColorStyles.TEXT_MUTED)
-                .in(header)
-                .component();
-
-        SwingPane.panelIn(preview, BorderLayout.NORTH).withLayout(SwingPane.BORDER)
-                .with(accentStrip, BorderLayout.NORTH)
-                .with(header, BorderLayout.CENTER)
-                .transparent();
-
-        codeDisplay = new ColoredTxtDisplay(null);
-        fallbackDisplay = SwingComp.textArea("").asStandardTextSize()
-                .withBackgroundAndForeground(ColorStyles.BACKGROUND, ColorStyles.CRITICAL)
-                .withEmptyBorder(12, 14, 12, 14)
-                .applied(f -> f.setEditable(false))
-                .component();
-
-        scrollPane = SwingComp.scrollPane(buildEmptyState()).withBorder(null)
-                .applied(p -> p.getViewport().setBackground(ColorStyles.BACKGROUND))
-                .in(preview, BorderLayout.CENTER)
-                .component();
-
-        return preview;
-    }
-
-    private static Component vgap(int h) {
-        return Box.createRigidArea(new Dimension(0, h));
     }
 
     @NotNull
     private static JTextArea instructionsArea() {
-        return SwingComp.textArea(INSTRUCTIONS)
-                .asStandardTextSize()
-                .withBackgroundAndForeground(ColorStyles.BG_DARK, ColorStyles.TEXT_MUTED)
+        return textArea(INSTRUCTIONS)
+                .withText(Font.PLAIN, 13f, ColorStyles.TEXT_MUTED)
                 .onLeft()
                 .withMaximumSize(Integer.MAX_VALUE, 80).component();
     }
 
     private static JLabel sectionLabel(String text) {
-        return SwingComp.label(text.toUpperCase())
-                .withDerivedFont(Font.PLAIN, 10f)
-                .withForeground(ColorStyles.FG_HINT)
-                .onLeft()
-                .component();
+        return label(text.toUpperCase(), Font.PLAIN, 10f, ColorStyles.TEXT_HINT).onLeft().component();
     }
 
     private JButton uploadButton(String label, Runnable action) {
-        JButton button = SwingComp.button(label, action).asStandardTextSize()
-                .withBackgroundAndForeground(ColorStyles.BG_SURFACE, ColorStyles.TEXT_PRIMARY)
-                .withPaddedBorder(new LineBorder(ColorStyles.BORDER_LIGHT, 1), 7, 12, 7, 12)
+        JButton button = button(label, ColorStyles.BG_SURFACE, action)
                 .applied(b -> b.setHorizontalAlignment(SwingConstants.LEFT))
                 .onLeft()
-                .withMaximumSize(Integer.MAX_VALUE, 34)
+                .withMaximumSize(221, 34)
                 .component();
 
         button.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -192,78 +135,49 @@ public class UploadMain extends JFrame {
         return button;
     }
 
-    private void logNewInput(URL input) {
-        this.currentFile = input;
+    private void onInputChange(URL input) {
+        currentFile = input;
 
+        boolean valid = Reader5e.fileCompiles(currentFile);
+
+        Color background, foreground;
+        String text;
         if (currentFile == null) {
-            showNewCampaignState();
-            return;
+            background = ColorStyles.FRIENDLY;
+            foreground = ColorStyles.TEXT_MUTED;
+            text = "Mode: New Campaign";
+            scrollPane.setViewportView(centeredLabel());
+        } else if (valid) {
+            background = ColorStyles.SUCCESS;
+            foreground = ColorStyles.HEALTHY;
+            text = "✔  Valid Configuration Found";
+            previewFileContent(true);
+        } else {
+            background = ColorStyles.CRITICAL;
+            foreground = ColorStyles.CRITICAL;
+            text = "✘  Syntax error — ensure formatting matches current version";
+            previewFileContent(false);
         }
+        accentStrip.setBackground(background);
+        statusDot.setBackground(background);
+        statusDot.setBorder(new LineBorder(background, 4));
 
-        boolean valid = txt_input.Reader5e.fileCompiles(currentFile);
-        updateAccent(valid ? ColorStyles.SUCCESS : ColorStyles.CRITICAL);
-        updateStatus(valid);
+        statusText.setText(text);
+        statusText.setForeground(foreground);
+
+        fluent(statusDot)
+                .withBackgroundAndForeground(background, foreground)
+                .withBorder(new LineBorder(background, 4))
+                .applied(d -> d.setText(text));
+
         combatButton.setEnabled(valid);
-        creatorButton.setEnabled(true);
+        creatorButton.setEnabled(valid || currentFile == null);
         previewFileContent(valid);
     }
 
-    private JButton runButton(String label, boolean isPrimary, Runnable onClick) {
-        Color bg, fg, border;
-        if (isPrimary) {
-            bg = ColorStyles.SUCCESS;
-            fg = ColorStyles.TEXT_PRIMARY;
-            border = ColorStyles.SUCCESS;
-        } else {
-            bg = ColorStyles.BG_SURFACE;
-            fg = ColorStyles.TEXT_PRIMARY;
-            border = ColorStyles.BORDER_LIGHT;
-        }
-
-        return SwingComp.button(label, onClick).asStandardTextSize()
-                .withBackgroundAndForeground(bg, fg)
-                .withPaddedBorder(new LineBorder(border, 1), 7, 10, 7, 10)
-                .centered()
-                .disabled()
-                .component();
-    }
-
-    private JLabel buildEmptyState() {
-        return SwingComp.label("No file loaded; select an option from the left").withDerivedFont(Font.PLAIN, 13f)
-                .centered()
-                .withForeground(ColorStyles.FG_HINT).component();
-    }
-
-    private void showNewCampaignState() {
-        updateAccent(ColorStyles.ALLY);
-        statusDot.setBackground(ColorStyles.ALLY);
-        statusDot.setBorder(BorderFactory.createLineBorder(ColorStyles.ALLY, 4));
-        statusText.setText("Mode: new campaign");
-        statusText.setForeground(ColorStyles.TEXT_MUTED);
-        scrollPane.setViewportView(
-                centeredLabel());
-        combatButton.setEnabled(false);
-        creatorButton.setEnabled(true);
-    }
-
-    private void updateAccent(Color c) {
-        accentStrip.setBackground(c);
-        accentStrip.repaint();
-    }
-
-    private void updateStatus(boolean valid) {
-        Color dotColor = valid ? ColorStyles.SUCCESS : ColorStyles.CRITICAL;
-        Color fgColor = valid ? ColorStyles.HEALTHY : ColorStyles.CRITICAL;
-        String text = valid ? "✔  Valid configuration found"
-                : "✘  Syntax error — ensure formatting matches current version";
-
-        SwingComp.modifiable(statusDot)
-                .withBackgroundAndForeground(dotColor, fgColor)
-                .withBorder(new LineBorder(dotColor, 4))
-                .applied(d -> d.setText(text));
-    }
-
     private void previewFileContent(boolean valid) {
+        if (currentFile == null) return;
+
         try (InputStream is = currentFile.openStream();
              BufferedReader reader = new BufferedReader(
                      new InputStreamReader(is, StandardCharsets.UTF_8))) {
@@ -281,15 +195,61 @@ public class UploadMain extends JFrame {
             }
 
         } catch (IOException e) {
-            util.Message.fileError(this, e);
+            util.Message.fileError(e);
         }
     }
 
     private static JLabel centeredLabel() {
-        return SwingComp.label("A new campaign file will be generated on save.")
-                .withDerivedFont(Font.PLAIN, 13f)
-                .withForeground(ColorStyles.TEXT_MUTED)
-                .centered()
+        return label("A new campaign file will be generated on save.", Font.PLAIN, 13f, ColorStyles.TEXT_MUTED)
+                .component();
+    }
+
+    private JPanel buildPreview() {
+        JPanel preview = newArrangedAs(BORDER).withBackground(ColorStyles.BACKGROUND).component();
+
+        accentStrip = panelIn(preview, BorderLayout.NORTH)
+                .withPreferredSize(0, 2)
+                .withBackground(ColorStyles.TEXT_HINT)
+                .component();
+
+        JPanel header = panelIn(preview, BorderLayout.NORTH).arrangedAs(FLOW_LEFT, 10, 8)
+                .withBackground(ColorStyles.BG_DARK)
+                .withPaddedMatteBorderOnSide(ColorStyles.TRACK, BOTTOM, 0, 0, 0, 0)
+                .component();
+
+        statusDot = label(null).opaque()
+                .withPreferredSize(8, 8)
+                .withBackground(ColorStyles.TEXT_HINT)
+                .withBorder(new LineBorder(ColorStyles.TEXT_HINT, 4))
+                .in(header);
+
+        statusText = label("No file selected", ColorStyles.TEXT_MUTED).in(header);
+
+        panelIn(preview, BorderLayout.NORTH).arrangedAs(BORDER)
+                .borderCollect(
+                        north(accentStrip), center(header)
+                ).transparent()
+                .transparent();
+
+        codeDisplay = new ColoredTxtDisplay(null);
+        fallbackDisplay = textArea("")
+                .withText(Font.PLAIN, 12f, ColorStyles.CRITICAL)
+                .withBackground(ColorStyles.BACKGROUND)
+                .withEmptyBorder(12, 14, 12, 14)
+                .applied(f -> f.setEditable(false))
+                .component();
+
+        scrollPane = scrollPane(buildEmptyState()).withBorder(null)
+                .applied(p -> p.getViewport().setBackground(ColorStyles.BACKGROUND))
+                .in(preview, BorderLayout.CENTER);
+
+        return preview;
+    }
+
+    private JTextArea buildEmptyState() {
+        return textArea("No file loaded; select an option from the left")
+                .withText(Font.PLAIN, 20f, ColorStyles.TEXT_HINT)
+                .applied(a -> a.setAlignmentY(Component.CENTER_ALIGNMENT))
                 .component();
     }
 

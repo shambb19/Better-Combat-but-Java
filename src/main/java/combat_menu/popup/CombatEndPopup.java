@@ -3,121 +3,111 @@ package combat_menu.popup;
 import __main.Main;
 import __main.manager.EncounterManager;
 import combat_object.combatant.PC;
-import format.ColorStyles;
+import input.CampaignWriter;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
-import txt_input.CampaignWriter;
 import util.Message;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
+import javax.swing.border.MatteBorder;
 import java.awt.*;
 import java.net.URL;
+import java.util.function.Consumer;
 
+import static format.ColorStyles.*;
+import static swing.swing_comp.SwingComp.fluent;
+import static swing.swing_comp.SwingComp.*;
+import static swing.swing_comp.SwingPane.*;
 import static util.Message.confirmIf;
 import static util.Message.template;
 
 public class CombatEndPopup extends JDialog {
 
-    public static void run(boolean isVictory) {
+    public static final String VICTORY = "VICTORY", DEFEAT = "DEFEAT", QUIT = "ENDED EARLY";
+
+    public static void run(@MagicConstant(valuesFromClass = CombatEndPopup.class) String endType) {
         Main.getCombatMenu().dispose();
-        new CombatEndPopup(isVictory).setVisible(true);
+        new CombatEndPopup(endType).setVisible(true);
     }
 
-    private CombatEndPopup(boolean isVictory) {
-        setTitle(isVictory ? "Victory" : "Defeat");
-        setModal(false);
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setIconImage(Main.getAppIcon().getImage());
-        getContentPane().setBackground(ColorStyles.BACKGROUND);
+    private CombatEndPopup(@MagicConstant(valuesFromClass = CombatEndPopup.class) String endType) {
+        getContentPane().setBackground(BACKGROUND);
         setLayout(new BorderLayout());
-        getRootPane().setBorder(BorderFactory.createLineBorder(ColorStyles.TRACK, 1));
+        getRootPane().setBorder(BorderFactory.createLineBorder(TRACK, 1));
 
-        JPanel topBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 12));
-        topBar.setBackground(ColorStyles.BG_DARK);
-        topBar.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, ColorStyles.TRACK));
-        add(topBar, BorderLayout.NORTH);
+        String title = "Quit";
+        Color titleForeground = TEXT_PRIMARY;
+        if (endType.equals(VICTORY)) {
+            title = "Victory";
+            titleForeground = HEALTHY;
+        } else if (endType.equals(DEFEAT)) {
+            title = "Defeat";
+            titleForeground = CRITICAL;
+        }
+        setTitle(title);
 
-        JLabel titleLabel = new JLabel(isVictory ? "VICTORY" : "DEFEAT");
-        titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD, 16f));
-        titleLabel.setForeground(isVictory ? ColorStyles.HEALTHY : ColorStyles.CRITICAL);
-        topBar.add(titleLabel);
+        // top bar with the title text (victory or defeat or whatever)
+        panelIn(this, BorderLayout.NORTH).arrangedAs(FLOW_LEFT, 15, 12)
+                .collect(
+                        label(endType, Font.BOLD, 16f, titleForeground)
+                )
+                .withBackground(BG_DARK)
+                .withBorder(new MatteBorder(0, 0, 1, 0, TRACK));
 
-        JPanel center = new JPanel();
-        center.setLayout(new BoxLayout(center, BoxLayout.Y_AXIS));
-        center.setBackground(ColorStyles.BACKGROUND);
-        center.setBorder(new EmptyBorder(20, 20, 20, 20));
-        add(center, BorderLayout.CENTER);
+        // longer end description and the three action buttons
+        panelIn(this, BorderLayout.CENTER).arrangedAs(VERTICAL_BOX)
+                .collect(
+                        getEndMessage(endType), spacer(0, 24),
+                        label("OPTIONS", Font.BOLD, 10f, TEXT_MUTED).onLeft(),
+                        createActionButton("Level Up the Party", SUCCESS, this::levelUp), spacer(0, 10),
+                        createActionButton("Download Updated .txt File", TRACK, b -> download()), spacer(0, 10),
+                        createActionButton("Quit Program", CRITICAL, b -> quit("quit"))
+                )
+                .withEmptyBorder(20, 20, 20, 20);
 
-        JLabel messageLabel = getVictoryMessage(isVictory);
-        center.add(messageLabel);
-
-        center.add(Box.createRigidArea(new Dimension(0, 24)));
-
-        JLabel optionsLabel = new JLabel("OPTIONS");
-        optionsLabel.setFont(optionsLabel.getFont().deriveFont(Font.BOLD, 10f));
-        optionsLabel.setForeground(ColorStyles.TEXT_MUTED);
-        optionsLabel.setBorder(new EmptyBorder(0, 0, 8, 0));
-        optionsLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        center.add(optionsLabel);
-
-        JButton btnLevelUp = createActionButton("Level Up the Party", ColorStyles.SUCCESS);
-        btnLevelUp.addActionListener(e -> levelUp(btnLevelUp));
-
-        JButton btnDownload = createActionButton("Download Updated .txt File", ColorStyles.TRACK);
-        btnDownload.addActionListener(e -> download());
-
-        JButton btnQuit = createActionButton("Quit Program", ColorStyles.CRITICAL);
-        btnQuit.addActionListener(e -> quit("quit"));
-
-        center.add(btnLevelUp);
-        center.add(Box.createRigidArea(new Dimension(0, 10)));
-        center.add(btnDownload);
-        center.add(Box.createRigidArea(new Dimension(0, 10)));
-        center.add(btnQuit);
-
-        pack();
+        setIconImage(__main.Main.getAppIcon().getImage());
+        setModal(false);
+        setAlwaysOnTop(true);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+        pack();
+        setVisible(true);
     }
 
     @NotNull
-    private static JLabel getVictoryMessage(boolean isVictory) {
-        String msg = isVictory ? "Victory! You have won this combat." :
-                "You have been defeated. You were " + EncounterManager.getEncounter().percentToVictory() + " of the way to victory.";
+    private static JLabel getEndMessage(@MagicConstant(valuesFromClass = CombatEndPopup.class) String endType) {
+        String percentToVictory = EncounterManager.getEncounter().percentToVictory();
+        String msg = switch (endType) {
+            case VICTORY -> "Victory! You have won this combat.";
+            case DEFEAT -> "You have been defeated. You were " + percentToVictory + " of the way to victory.";
+            case QUIT -> "You have quit early. Lame.";
+            default -> throw new ClassCastException("CombatEndPopup.getEndMessage: unexpected String endType");
+        };
 
-        JLabel messageLabel = new JLabel("<html><p style='width: 250px;'>" + msg + "</p></html>");
-        messageLabel.setFont(messageLabel.getFont().deriveFont(Font.PLAIN, 14f));
-        messageLabel.setForeground(ColorStyles.TEXT_PRIMARY);
-        messageLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        return messageLabel;
+        return label("<html><p style='width: 250px;'>" + msg + "</p></html>")
+                .withDerivedFont(Font.PLAIN, 14f)
+                .onLeft().component();
     }
 
-    private JButton createActionButton(String text, Color bg) {
-        JButton button = new JButton(text);
-        button.setFont(button.getFont().deriveFont(Font.PLAIN, 13f));
-        button.setBackground(bg);
-        button.setForeground(ColorStyles.TEXT_PRIMARY);
-        button.setBorder(new EmptyBorder(10, 20, 10, 20));
-        button.setFocusPainted(false);
-        button.setOpaque(true);
-        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        button.setAlignmentX(Component.LEFT_ALIGNMENT);
-        button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
-        return button;
+    private JButton createActionButton(String text, Color bg, Consumer<JButton> onClick) {
+        return button(text, bg, null).withDerivedFont(Font.PLAIN, 13f)
+                .withAction(onClick)
+                .withBackground(bg)
+                .onLeft()
+                .withMaximumSize(Integer.MAX_VALUE, 40).component();
     }
 
     private void levelUp(JButton button) {
         EncounterManager.getParty().forEach(PC::levelUp);
 
-        String message = "Level up successful! As of " + Main.VERSION + ", only proficiency bonuses and hp are handled internally. " +
-                "All other changes (stats, etc.) need to be manually entered in the Campaign Creator " +
-                "for now. If you buy Braden a Red Bull he might fix that :P";
+        final String message = "Level up successful! As of " + Main.VERSION + ", only proficiency bonuses " +
+                "and hp are handled internally. All other changes (stats, etc.) need to be manually entered " +
+                "in the Campaign Creator for now. If you buy Braden a Red Bull he might fix that :P";
         template(message);
 
-        button.setEnabled(false);
-        button.setText("Party Level Increased");
-        button.setBackground(ColorStyles.TRACK);
-        button.setForeground(ColorStyles.TEXT_MUTED);
+        fluent(button).enabled(false)
+                .withBackgroundAndForeground(TRACK, TEXT_MUTED)
+                .applied(b -> b.setText("Party Level Increased"));
     }
 
     private void download() {
@@ -126,7 +116,7 @@ public class CombatEndPopup extends JDialog {
         if (savedFile != null)
             template("Successfully saved to Downloads");
         else
-            System.err.println("Failed to save the campaign file.");
+            Message.error("Could not download file");
     }
 
     public static void quit(@MagicConstant(stringValues = {"quit", "restart"}) String mode) {

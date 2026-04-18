@@ -1,13 +1,12 @@
 package __main.manager;
 
 import __main.Main;
-import combat_menu.CombatantPanel;
 import combat_menu.action_panel.ActionPanel;
 import combat_object.combatant.Combatant;
+import combat_object.combatant.info.AbilityModifier;
 import combat_object.damage_implements.Effect;
 import combat_object.damage_implements.Implement;
 import combat_object.damage_implements.Spell;
-import combat_object.damage_implements.Weapon;
 import lombok.experimental.*;
 
 import javax.swing.*;
@@ -25,7 +24,7 @@ public class CombatManager {
     public void cancelAction() {
         SwingUtilities.invokeLater(() -> {
             getActionPanel().cancelAction();
-            Main.getCombatMenu().setActionMode(CombatantPanel.TURN);
+            Main.getCombatMenu().endActionState();
         });
     }
 
@@ -38,7 +37,7 @@ public class CombatManager {
             if (implement instanceof Spell s && s.hasSave()) {
                 target.logRoll(roll, 1, 20);
 
-                EffectManager.endPenaltiesOn(target);
+                EffectManager.removeEffectOn(target, Effect.PENALTY_SAVE);
             } else
                 attacker.logRoll(roll, 1, 20);
         }
@@ -62,11 +61,9 @@ public class CombatManager {
 
     private boolean isAttackSuccess(Combatant attacker, Combatant target, Implement implement, int roll) {
         return switch (implement) {
-            case Weapon w -> roll + attacker.attackBonus(w) >= target.getArmorClass();
             case Spell s when s.doesNotRequireAttackRoll() -> true;
-            case Spell s when s.hasSave() -> roll + target.mod(s.getStat()) < attacker.saveDc();
-            case Spell s when !s.hasSave() -> roll + attacker.spellAttackBonus() >= target.getArmorClass();
-            default -> throw new ClassCastException("isAttackSuccess: implement is neither Weapon nor Spell");
+            case Spell s when s.hasSave() -> target.getSaveThrow(roll, implement) < attacker.getStats().saveDc();
+            default -> attacker.getAttackRoll(roll, implement) >= target.getArmorClass();
         };
     }
 
@@ -74,7 +71,7 @@ public class CombatManager {
         SwingUtilities.invokeLater(() -> {
             getActionPanel().returnToButtons();
             getActionPanel().onMainActionConfirmed();
-            Main.getCombatMenu().setActionMode(CombatantPanel.TURN);
+            Main.getCombatMenu().endActionState();
             Main.refreshUI();
         });
     }
@@ -86,10 +83,13 @@ public class CombatManager {
         if (!implement.isManual())
             attacker.logRoll(roll, implement.getNumDice(), implement.getDieSize());
 
-        target.damage(roll + bonus);
-
-        if (implement.effectEquals(Effect.HEAL_SELF))
+        if (implement.effectEquals(Effect.STAT_DROP)) {
+            target.getStats().put(AbilityModifier.INT, 1);
+            target.getStats().put(AbilityModifier.CHA, 1);
+        } else if (implement.effectEquals(Effect.HEAL_SELF)) {
             attacker.heal(roll);
+        }
+        target.damage(roll + bonus);
 
         finishAction();
     }

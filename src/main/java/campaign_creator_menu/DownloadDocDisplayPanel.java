@@ -4,11 +4,13 @@ import __main.Main;
 import combat_object.CombatObject;
 import combat_object.combatant.Combatant;
 import combat_object.scenario.Scenario;
-import encounter_info.Encounter;
+import encounter.Encounter;
 import format.ColorStyles;
+import input.CampaignWriter;
 import lombok.*;
 import lombok.experimental.*;
-import txt_input.CampaignWriter;
+import swing.swing_comp.SwingComp;
+import swing.swing_comp.SwingPane;
 import util.Locators;
 import util.Message;
 
@@ -39,18 +41,20 @@ public class DownloadDocDisplayPanel extends JPanel {
         scenarios = new ArrayList<>(input.getScenarios());
         display = new ColoredTxtDisplay(null);
 
-        modifiable(this).withLayout(BORDER).withLabeledBorder("Completed Campaign Code Preview");
+        SwingPane.fluent(this).arrangedAs(BORDER).withLabeledBorder("Completed Campaign Code Preview");
 
         scrollPane(display).in(this, BorderLayout.CENTER);
 
-        JButton download = button("Download", this::download).component();
-        JButton clipboard = button("Copy to clipboard", this::clipboardCopy).component();
-        JButton start = button("Start combat (this campaign)", () -> Main.closeCreatorAndOpenCombat(download())).component();
+        SwingComp<JButton> download = button("Download", ColorStyles.SUCCESS, this::download);
+        SwingComp<JButton> clipboard = button("Copy to clipboard", ColorStyles.SUCCESS, this::clipboardCopy);
+        SwingComp<JButton> start = button("Start combat (this campaign)", ColorStyles.SUCCESS,
+                () -> Main.closeCreatorAndOpenCombat(download()));
 
         Stream.of(download, clipboard, start)
-                .forEach(b -> modifiable(b).withBackgroundAndForeground(ColorStyles.SUCCESS, ColorStyles.TEXT_PRIMARY));
+                .forEach(b -> b.withBackgroundAndForeground(ColorStyles.SUCCESS, ColorStyles.TEXT_PRIMARY));
 
-        panelIn(this, BorderLayout.SOUTH).collect(download, clipboard, start).withLayout(FLOW);
+        panelIn(this, BorderLayout.SOUTH).collect(download, clipboard, start).arrangedAs(FLOW, 10, 0)
+                .withEmptyBorder(10, 0, 10, 0);
 
         setText();
     }
@@ -104,6 +108,7 @@ public class DownloadDocDisplayPanel extends JPanel {
         }
 
         URL savedFile = writer.getUrl("Campaign File", true);
+
         if (savedFile != null) {
             template("Successfully saved to Downloads");
             return savedFile;
@@ -120,14 +125,11 @@ public class DownloadDocDisplayPanel extends JPanel {
     }
 
     private ArrayList<String> displayTextAsList() {
-        CampaignWriter writer = new CampaignWriter(friendlies, enemies, scenarios);
-        return writer.getCode();
+        return new CampaignWriter(friendlies, enemies, scenarios).getCode();
     }
 
     private String displayTextAsString() {
-        StringBuilder string = new StringBuilder();
-        displayTextAsList().forEach(line -> string.append(line).append("\n"));
-        return string.toString();
+        return String.join(System.lineSeparator(), displayTextAsList());
     }
 
 }

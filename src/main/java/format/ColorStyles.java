@@ -24,7 +24,6 @@ public class ColorStyles {
     SELECTION = new Color(0x9D, 0x8B, 0xEF),
             ACTION_PRIMARY = new Color(0x3A, 0x34, 0x60),
             ACTION_HOVER = new Color(0x50, 0x48, 0xA0),
-            HOVER_TINT = new Color(0x1A, 0x2A, 0x24),
 
     // ----- BORDERS & DIVIDERS ----- //
     TRACK = new Color(0x2A, 0x2E, 0x3A),
@@ -34,18 +33,18 @@ public class ColorStyles {
     // ----- UI TEXT COLORS ----- //
     TEXT_PRIMARY = new Color(0xD8, 0xDC, 0xE8),
             TEXT_MUTED = new Color(0x6B, 0x70, 0x80),
-            FG_HINT = new Color(0x50, 0x55, 0x68),
-            SECTION_FG = new Color(0x50, 0x55, 0x68),
+            TEXT_HINT = new Color(0x50, 0x55, 0x68),
+            TEXT_SECTION = new Color(0x50, 0x55, 0x68),
 
     // ----- TYPE COLORS ----- //
     PARTY = new Color(0x6A, 0xBC, 0xFF),
-            ALLY = new Color(0x9D, 0x8B, 0xEF),
+            FRIENDLY = new Color(0x9D, 0x8B, 0xEF),
             ENEMY = new Color(0xE2, 0x4B, 0x4A),
             SCENARIO = new Color(0xFF, 0xED, 0x7A),
 
     // ----- SPECIAL THEMES ----- //
-    LOCKED = new Color(0x35, 0x38, 0x42),
-            LOCKED_FG = new Color(0x40, 0x44, 0x50),
+    BG_LOCKED = new Color(0x35, 0x38, 0x42),
+            TEXT_LOCKED = new Color(0x40, 0x44, 0x50),
             GOLD = new Color(0xBA, 0x75, 0x17),
             GOLD_TINT = new Color(0x28, 0x22, 0x10),
             PURPLE_FILL = new Color(0x7F, 0x77, 0xDD),

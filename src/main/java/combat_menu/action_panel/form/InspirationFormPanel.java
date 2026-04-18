@@ -21,32 +21,23 @@ public class InspirationFormPanel extends JPanel {
     static final Color FG_HINT = new Color(0x60, 0x58, 0x68);
 
     {
-        SwingPane.modifiable(this).withLayout(SwingPane.BORDER)
+        SwingPane.fluent(this).arrangedAs(SwingPane.BORDER)
                 .withBackground(BACKGROUND)
-                .opaque()
                 .withEmptyBorder(18, 20, 18, 20);
 
-        JPanel header = SwingPane.panelIn(this, BorderLayout.NORTH).withLayout(SwingPane.VERTICAL_BOX)
+        JPanel header = SwingPane.panelIn(this, BorderLayout.NORTH).arrangedAs(SwingPane.VERTICAL_BOX)
+                .collect(
+                        SwingComp.label("Excess Inspiration", TEXT_MUTED).onLeft(), SwingComp.spacer(0, 3)
+                )
                 .transparent()
                 .withEmptyBorder(0, 0, 16, 0)
                 .component();
 
-        SwingComp.label("Excess inspiration")
-                .asStandardTextSize()
-                .withForeground(TEXT_MUTED)
+        SwingComp.label("Roll 1d4 and select your result", Font.PLAIN, 11f, TEXT_HINT)
                 .onLeft()
                 .in(header);
 
-        SwingComp.gapIn(3, header);
-
-        SwingComp.label("Roll 1d4 and select your result")
-                .withDerivedFont(Font.PLAIN, 11f)
-                .withForeground(ColorStyles.FG_HINT)
-                .onLeft()
-                .in(header);
-
-        JPanel grid = SwingPane.panelIn(this, BorderLayout.CENTER)
-                .withLayout(SwingPane.TWO_COLUMN)
+        JPanel grid = SwingPane.panelIn(this, BorderLayout.CENTER).arrangedAs(SwingPane.TWO_COLUMN)
                 .transparent()
                 .component();
 
@@ -60,23 +51,17 @@ public class InspirationFormPanel extends JPanel {
         btn.setLayout(new BorderLayout());
         btn.setForeground(ColorStyles.TEXT_PRIMARY);
 
-        JLabel numLabel = SwingComp.label(String.valueOf(value))
+        JLabel numLabel = SwingComp.label(value)
                 .withDerivedFont(Font.PLAIN, 28f)
-                .withForeground(ColorStyles.TEXT_PRIMARY)
                 .component();
-
         btn.add(numLabel, BorderLayout.CENTER);
 
-        JPanel hintWrap = SwingPane.panelIn(this, BorderLayout.SOUTH)
-                .withLayout(SwingPane.FLOW_RIGHT)
+        JPanel hintWrap = SwingPane.panelIn(this, BorderLayout.SOUTH).arrangedAs(SwingPane.FLOW_RIGHT)
                 .transparent()
                 .component();
 
-        SwingComp.label("d4")
-                .withDerivedFont(Font.PLAIN, 10f)
-                .withForeground(FG_HINT)
-                .withEmptyBorder(0, 0, 6, 8)
-                .in(hintWrap);
+        SwingComp.label("d4", Font.PLAIN, 10f, FG_HINT)
+                .withEmptyBorder(0, 0, 6, 0).in(hintWrap);
 
         btn.addMouseListener(new MouseAdapter() {
             @Override
@@ -107,17 +92,18 @@ public class InspirationFormPanel extends JPanel {
     }
 
     private static class DieButton extends JButton {
-
         private Color bgColor = BG_SURFACE;
-        private Color borderColor = ACTION_HOVER;
+        private Color borderColor = DIVIDER;
 
         DieButton() {
-            setContentAreaFilled(false);
-            setBorderPainted(false);
-            setFocusPainted(false);
-            setOpaque(false);
-            setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            setPreferredSize(new Dimension(0, 80));
+            SwingComp.fluent(this).withPreferredSize(0, 80)
+                    .withoutPaintedFocus()
+                    .transparent()
+                    .applied(b -> {
+                        b.setContentAreaFilled(false);
+                        b.setBorderPainted(false);
+                        b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                    });
         }
 
         void setBg(Color c) {

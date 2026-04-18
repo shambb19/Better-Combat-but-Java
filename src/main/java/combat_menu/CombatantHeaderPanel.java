@@ -5,24 +5,22 @@ import combat_object.combatant.PC;
 import format.ColorStyles;
 import lombok.*;
 import lombok.experimental.*;
-import org.intellij.lang.annotations.MagicConstant;
 import swing.swing_comp.SwingComp;
 import swing.swing_comp.SwingPane;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import java.awt.*;
+
+import static format.ColorStyles.*;
+import static swing.swing_comp.SwingComp.label;
+import static swing.swing_comp.SwingPane.*;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class CombatantHeaderPanel extends JPanel {
 
-    static Color BD_STANDARD = new Color(0x1E, 0x21, 0x28);
     static Color BG_ENEMY = new Color(0x2A, 0x1E, 0x1E);
 
-    static Color FG_HINT = new Color(0x6B, 0x70, 0x80);
-    static Color DIVIDER = new Color(0x2A, 0x2E, 0x3A);
-
-    static Color TRACK_BG = new Color(0x2A, 0x2E, 0x3A);
     static int TRACK_H = 6;
     static int PIP_D = 10;
 
@@ -36,33 +34,31 @@ public class CombatantHeaderPanel extends JPanel {
     public CombatantHeaderPanel(Combatant combatant) {
         this.combatant = combatant;
 
-        SwingPane.modifiable(this).withLayout(SwingPane.BORDER)
-                .withBackground((combatant.isEnemy()) ? BG_ENEMY : BD_STANDARD)
-                .opaque()
+        SwingPane.fluent(this).arrangedAs(BORDER)
+                .withBackground((combatant.isEnemy()) ? BG_ENEMY : BACKGROUND)
                 .withEmptyBorder(20, 20, 20, 20);
 
-        JPanel stack = SwingPane.panelIn(this, BorderLayout.CENTER)
-                .withLayout(SwingPane.VERTICAL_BOX)
+        JPanel stack = SwingPane.panelIn(this, BorderLayout.CENTER).arrangedAs(VERTICAL_BOX)
                 .transparent()
                 .component();
 
         JPanel nameRow = row();
         stack.add(nameRow);
-        stack.add(vgap(10));
+        stack.add(SwingComp.spacer(0, 10));
 
-        JLabel nameLabel = label(combatant.getName(), 26f, Font.PLAIN, ColorStyles.TEXT_PRIMARY);
-        nameRow.add(nameLabel);
-        nameRow.add(hgap(12));
+        label(combatant, Font.PLAIN, 26f, ColorStyles.TEXT_PRIMARY)
+                .in(nameRow);
+        nameRow.add(SwingComp.spacer(12, 0));
 
         String classText = (combatant instanceof PC pc) ? pc.getStats().getClass5e().toString() :
                 (combatant.isEnemy() ? "Enemy" : "Ally");
 
         nameRow.add(badge(classText));
-        nameRow.add(hgap(8));
+        nameRow.add(SwingComp.spacer(8, 0));
 
         JPanel statsRow = row();
         stack.add(statsRow);
-        stack.add(vgap(12));
+        stack.add(SwingComp.spacer(0, 12));
 
         statChip(statsRow, "Initiative", "+" + combatant.getInitiative());
         statsRow.add(dividerLine());
@@ -77,16 +73,15 @@ public class CombatantHeaderPanel extends JPanel {
         JPanel rollRow = row();
         stack.add(rollRow);
 
-        JLabel rollLabel = label("Roll luck", 11f, Font.PLAIN, ColorStyles.TEXT_MUTED);
-        rollRow.add(rollLabel);
-        rollRow.add(hgap(12));
+        label("Roll luck", Font.PLAIN, 11f, ColorStyles.TEXT_MUTED)
+                .in(rollRow);
+        rollRow.add(SwingComp.spacer(12, 0));
 
         rollTrack = new RollTrack();
         rollRow.add(rollTrack);
-        rollRow.add(hgap(10));
+        rollRow.add(SwingComp.spacer(10, 0));
 
-        rollCaption = label("—", 11f, Font.PLAIN, FG_HINT);
-        rollRow.add(rollCaption);
+        rollCaption = label("-", Font.PLAIN, 11f, TEXT_HINT).in(rollRow);
 
         refresh();
     }
@@ -101,14 +96,14 @@ public class CombatantHeaderPanel extends JPanel {
         String caption;
 
         if (luck == 0) {
-            c = ColorStyles.FG_HINT;
+            c = ColorStyles.TEXT_HINT;
             caption = "Too early to tell";
         } else if (luck >= 3.0) {
             c = ColorStyles.PERFECT;
             caption = "Dice of the divine";
         } else if (luck >= 1.0) {
             c = ColorStyles.HEALTHY;
-            caption = "'Tis a good day for " + combatant.getName();
+            caption = "'Tis a good day for " + combatant;
         } else if (luck >= -1.0) {
             c = ColorStyles.WARNING;
             caption = (luck >= -0.5) ? "Pretty solid" : "Kinda rough";
@@ -125,64 +120,36 @@ public class CombatantHeaderPanel extends JPanel {
     }
 
     private static JPanel row() {
-        JPanel p = new JPanel();
-        p.setLayout(new BoxLayout(p, BoxLayout.X_AXIS));
-        p.setOpaque(false);
-        p.setAlignmentX(LEFT_ALIGNMENT);
-        return p;
-    }
-
-    private static Component vgap(int h) {
-        return Box.createRigidArea(new Dimension(0, h));
-    }
-
-    private static Component hgap(int w) {
-        return Box.createRigidArea(new Dimension(w, 0));
-    }
-
-    private static JLabel label(String text, float size, @MagicConstant(intValues = {Font.PLAIN, Font.BOLD, Font.ITALIC}) int style, Color fg) {
-        return SwingComp.label(text).withDerivedFont(style, size).withForeground(fg).component();
+        return newArrangedAs(HORIZONTAL_BOX).transparent().onLeft().component();
     }
 
     private static JLabel badge(String text) {
-        JLabel l = new JLabel(text);
-        l.setFont(l.getFont().deriveFont(Font.PLAIN, 11f));
-        l.setForeground(ColorStyles.TEXT_MUTED);
-        l.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(DIVIDER, 1),
-                new EmptyBorder(2, 8, 2, 8)
-        ));
-        return l;
+        return label(text, Font.PLAIN, 11f, ColorStyles.TEXT_MUTED)
+                .withPaddedBorder(new LineBorder(DIVIDER, 1), 2, 8, 2, 8)
+                .component();
     }
 
     private static JLabel statChip(JPanel parent, String labelText, String value) {
-        JPanel chip = SwingPane.panel()
-                .withLayout(SwingPane.VERTICAL_BOX)
+        JPanel chip = SwingPane.panelIn(parent).arrangedAs(VERTICAL_BOX)
                 .withEmptyBorder(20, 20, 20, 20)
                 .transparent().component();
 
-        JLabel lbl = label(labelText.toUpperCase(), 10f, Font.PLAIN, ColorStyles.TEXT_MUTED);
-        lbl.setAlignmentX(LEFT_ALIGNMENT);
-        chip.add(lbl);
+        label(labelText.toUpperCase(), Font.PLAIN, 10f, ColorStyles.TEXT_MUTED)
+                .onLeft().in(chip);
 
-        JLabel val = label(value, 14f, Font.BOLD, ColorStyles.TEXT_PRIMARY);
-        val.setAlignmentX(LEFT_ALIGNMENT);
-        chip.add(val);
-
-        parent.add(chip);
-        return val;
+        return label(value, Font.BOLD, 14f, ColorStyles.TEXT_PRIMARY)
+                .onLeft().in(chip);
     }
 
     private static Component dividerLine() {
-        JPanel d = SwingPane.panel()
+        JPanel d = newArrangedAs(BORDER)
                 .withPreferredSize(1, 28)
                 .withMaximumSize(1, 28)
                 .withBackground(DIVIDER)
-                .opaque()
                 .component();
 
-        return SwingPane.panel().withLayout(SwingPane.BORDER)
-                .with(d, BorderLayout.CENTER)
+        return SwingPane.newArrangedAs(BORDER)
+                .borderCollect(center(d))
                 .transparent()
                 .withEmptyBorder(0, 10, 0, 10)
                 .withMaximumSize(21, 28)
@@ -229,7 +196,7 @@ public class CombatantHeaderPanel extends JPanel {
             int h = getHeight();
             int cy = (h - TRACK_H) / 2;
 
-            g2.setColor(TRACK_BG);
+            g2.setColor(TRACK);
             g2.fillRoundRect(0, cy, w, TRACK_H, TRACK_H, TRACK_H);
 
             double range = 5.0;
@@ -245,7 +212,7 @@ public class CombatantHeaderPanel extends JPanel {
             int pipY = (h - PIP_D) / 2;
 
             g2.fillOval(pipX, pipY, PIP_D, PIP_D);
-            g2.setColor(BD_STANDARD);
+            g2.setColor(BACKGROUND);
             g2.setStroke(new BasicStroke(2f));
             g2.drawOval(pipX, pipY, PIP_D, PIP_D);
 

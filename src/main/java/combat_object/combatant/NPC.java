@@ -1,17 +1,17 @@
 package combat_object.combatant;
 
-import combat_object.CombatObject;
-import lombok.experimental.*;
-import txt_input.Key;
+import format.ColorStyles;
+import input.Key;
 import util.TxtReader;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.EnumMap;
 
-import static txt_input.Key.*;
+import static input.Key.*;
 
-@SuperBuilder
-public class NPC extends Combatant implements CombatObject {
+@lombok.experimental.SuperBuilder
+public class NPC extends Combatant implements combat_object.CombatObject {
 
     public static NPC create(String name, int hpMax, int armorClass, boolean isEnemy) {
         return NPC.builder()
@@ -25,6 +25,10 @@ public class NPC extends Combatant implements CombatObject {
 
     public static NPC create(String name, NPC source) {
         return create(name, source.maxHp, source.armorClass, source.isEnemy);
+    }
+
+    public Color getCombatantColor() {
+        return isEnemy ? ColorStyles.ENEMY : ColorStyles.FRIENDLY;
     }
 
     @Override

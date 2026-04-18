@@ -1,8 +1,6 @@
 package util;
 
-import lombok.experimental.*;
-
-@UtilityClass
+@lombok.experimental.UtilityClass
 public class StringUtils {
 
     public int toInt(String string) {
@@ -11,6 +9,10 @@ public class StringUtils {
         } catch (NumberFormatException ignored) {
             return Integer.MIN_VALUE;
         }
+    }
+
+    public String capitalized(String str) {
+        return org.apache.commons.lang3.StringUtils.capitalize(str);
     }
 
 }

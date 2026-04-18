@@ -2,9 +2,9 @@ package combat_menu.action_panel.form;
 
 import __main.Main;
 import __main.manager.CombatManager;
-import combat_menu.CombatantPanel;
+import combat_menu.encounter_info.HealthBarPanel;
 import lombok.experimental.*;
-import swing.ValidatedField;
+import swing.custom_component.ValidatedField;
 import util.StringUtils;
 
 import javax.swing.*;
@@ -16,8 +16,7 @@ public class HealFormPanel extends ActionFormPanel {
 
     private HealFormPanel() {
         super("Apply Heal");
-        Main.getCombatMenu().setActionMode(CombatantPanel.HEAL);
-        setTargetValidator(c -> !c.equals(attacker) && c.getHp() != c.getMaxHp() && c.getLifeStatus().isConscious());
+        Main.getCombatMenu().setActionMode(HealthBarPanel.HEAL, this);
     }
 
     public static HealFormPanel newInstance() {
@@ -35,7 +34,6 @@ public class HealFormPanel extends ActionFormPanel {
         int amount = amountField.getValue().toInt();
 
         CombatManager.logHeal(target, amount);
-        clearTarget();
         amountField.clear();
     }
 

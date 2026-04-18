@@ -20,47 +20,54 @@ public class PopupPrompt extends JDialog {
     protected JPanel footer;
     @Getter private int result = -1;
 
-    public PopupPrompt(String title) {
+    private PopupPrompt(String title, String message, PromptButton... buttons) {
         setModal(true);
         setTitle(title);
         setUndecorated(true);
         setLayout(new BorderLayout());
         setBackground(BG_DIALOG);
         getRootPane().setBorder(BorderFactory.createLineBorder(BORDER, 1));
+        setLocationRelativeTo(null);
 
-        JPanel topBar = SwingPane.panelIn(this, BorderLayout.NORTH).withLayout(SwingPane.FLOW_LEFT)
+        JPanel topBar = SwingPane.panelIn(this, BorderLayout.NORTH).arrangedAs(SwingPane.FLOW_LEFT)
                 .withBackground(BG_BAR).component();
 
-        SwingComp.label(title.toUpperCase()).withDerivedFont(Font.BOLD, 11f)
-                .withForeground(ColorStyles.TEXT_MUTED)
-                .in(topBar);
+        SwingComp.label(title.toUpperCase(), Font.BOLD, 11f, ColorStyles.TEXT_MUTED).in(topBar);
 
-        contentArea = SwingPane.panelIn(this, BorderLayout.CENTER)
-                .withLayout(SwingPane.VERTICAL_BOX)
+        contentArea = SwingPane.panelIn(this, BorderLayout.CENTER).arrangedAs(SwingPane.VERTICAL_BOX)
                 .withBackground(BG_DIALOG)
                 .withEmptyBorder(20, 20, 20, 20)
                 .component();
 
-        footer = SwingPane.panelIn(this, BorderLayout.SOUTH).withLayout(SwingPane.FLOW_RIGHT)
+        footer = SwingPane.panelIn(this, BorderLayout.SOUTH).arrangedAs(SwingPane.FLOW_RIGHT)
                 .withBackground(BG_BAR)
                 .withBorder(new MatteBorder(1, 0, 0, 0, BORDER))
                 .component();
+
+        SwingComp.label("<html><body style='width: 300px'>" + message + "</body></html>",
+                        Font.PLAIN, 13f, ColorStyles.TEXT_PRIMARY)
+                .onLeft().in(contentArea);
+
+        for (PromptButton button : buttons) {
+            SwingComp.button(button.text, button.bg,
+                    () -> {
+                        this.result = button.resultToSet;
+                        dispose();
+                    }).in(footer);
+        }
+
+        pack();
+        setVisible(true);
     }
 
-    protected void addMessage(String text) {
-        SwingComp.label("<html><body style='width: 300px'>", text, "</body></html>").withDerivedFont(Font.PLAIN, 13f)
-                .withForeground(ColorStyles.TEXT_PRIMARY).onLeft()
-                .in(contentArea);
+    public static PopupPrompt of(String title, String message, PromptButton... buttons) {
+        return new PopupPrompt(title, message, buttons);
     }
 
-    protected JButton createButton(String text, Color bg, int resultToSet) {
-        return SwingComp.button(text, () -> {
-                    this.result = resultToSet;
-                    dispose();
-                })
-                .withBackgroundAndForeground(bg, ColorStyles.TEXT_PRIMARY)
-                .withEmptyBorder(8, 16, 8, 16)
-                .component();
+    @Value @AllArgsConstructor public static class PromptButton {
+        String text;
+        Color bg;
+        int resultToSet;
     }
 
 }

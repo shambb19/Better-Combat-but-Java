@@ -1,7 +1,10 @@
 package campaign_creator_menu;
 
+import campaign_creator_menu.input.CombatantInputPanel;
+import campaign_creator_menu.input.ScenarioInputPanel;
 import format.ColorStyles;
 import org.intellij.lang.annotations.MagicConstant;
+import swing.swing_comp.SwingPane;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,14 +24,15 @@ public class HostPanel extends JPanel {
             CombatantInputPanel inputPanel, ScenarioInputPanel scenarioPanel, LevelUpPanel levelPanel,
             CompletedElementsList completedList, DownloadDocDisplayPanel displayPanel
     ) {
-        modifiable(this).withLayout(TWO_COLUMN).withGaps(10, 10)
+        SwingPane.fluent(this).arrangedAs(TWO_COLUMN, 10, 10)
                 .withEmptyBorder(10, 10, 10, 10);
 
         cardLayout = new CardLayout();
         cards = new JPanel(cardLayout);
 
-        JLabel disabledPanel = label("Select a completed combatant or add a new one to continue.")
-                .asHeader().disabled().component();
+        JLabel disabledPanel = label("Select a completed combatant or add a new one to continue.",
+                Font.PLAIN, 18f, ColorStyles.TEXT_PRIMARY)
+                .enabled(false).component();
 
         cards.add(inputPanel, COMBATANT_INPUT);
         cards.add(scenarioPanel, SCENARIO_INPUT);
@@ -37,18 +41,14 @@ public class HostPanel extends JPanel {
 
         cardLayout.show(cards, DISABLED);
 
-        levelUpButton = button("Level up party", () -> changeInputPanel(LEVEL, true))
-                .withBackgroundAndForeground(ColorStyles.PERFECT, ColorStyles.TEXT_PRIMARY)
-                .withEmptyBorder(6, 10, 6, 10)
+        levelUpButton = button("Level up party", ColorStyles.PERFECT, () -> changeInputPanel(LEVEL, true))
                 .component();
 
-        panelIn(this).withLayout(BORDER)
-                .with(cards, BorderLayout.CENTER)
-                .with(levelUpButton, BorderLayout.SOUTH);
+        panelIn(this).arrangedAs(BORDER).borderCollect(
+                center(cards), south(levelUpButton));
 
-        panelIn(this).withLayout(BORDER)
-                .with(completedList, BorderLayout.NORTH)
-                .with(displayPanel, BorderLayout.CENTER);
+        panelIn(this).arrangedAs(BORDER).borderCollect(
+                north(completedList), center(displayPanel));
     }
 
     public void changeInputPanel(

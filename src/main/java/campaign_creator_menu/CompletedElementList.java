@@ -8,7 +8,7 @@ import format.ColorStyles;
 import lombok.*;
 import lombok.experimental.*;
 import org.intellij.lang.annotations.MagicConstant;
-import swing.swing_comp.SwingComp;
+import swing.swing_comp.SwingPane;
 import util.Filter;
 import util.Message;
 
@@ -56,34 +56,27 @@ public class CompletedElementList<T extends CombatObject> extends JPanel {
         this.newOption = newOption;
         list = new ScrollPane<>(parent, root);
 
-        modifiable(this).collect(getPanel()).withLayout(SINGLE_ROW);
+        SwingPane.fluent(this).collect(getPanel()).arrangedAs(SINGLE_ROW);
 
         contents.forEach(list::add);
     }
 
     private JPanel getPanel() {
         String labelText = labelNames.get(newOption);
-        String buttonText = newOption.getName();
 
-        JLabel label = label(labelText)
-                .withDerivedFont(Font.PLAIN, 18f)
-                .withForeground(ColorStyles.TEXT_PRIMARY)
+        JLabel label = label(labelText, Font.PLAIN, 18f, ColorStyles.TEXT_PRIMARY)
                 .withEmptyBorder(4, 4, 4, 4)
-                .disabled()
-                .component();
+                .enabled(false).component();
 
-        JButton withNew = button(buttonText, () -> root.logEdit(newOption, true))
-                .withBackgroundAndForeground(ColorStyles.SUCCESS, ColorStyles.TEXT_PRIMARY)
-                .withEmptyBorder(10, 0, 10, 0)
+        JButton withNew = button(newOption.getName(), ColorStyles.SUCCESS,
+                () -> root.logEdit(newOption, true))
                 .withDerivedFont(Font.PLAIN, 13f)
                 .component();
 
-        return panel().withLayout(BORDER)
-                .withGaps(0, 4)
-                .with(label, BorderLayout.NORTH)
-                .with(list, BorderLayout.CENTER)
-                .with(withNew, BorderLayout.SOUTH)
-                .component();
+        return newArrangedAs(BORDER, 0, 4)
+                .borderCollect(
+                        north(label), center(list), south(withNew)
+                ).component();
     }
 
     public void add(T item) {
@@ -117,7 +110,9 @@ public class CompletedElementList<T extends CombatObject> extends JPanel {
 
             model = new DefaultListModel<>();
 
-            list = SwingComp.list(model).withEmptyBorder(4, 4, 4, 4).component();
+            list = fluent(new JList<>(model))
+                    .applied(l -> l.setSelectionMode(ListSelectionModel.SINGLE_SELECTION))
+                    .withEmptyBorder(4, 4, 4, 4).component();
 
             listener = this::logSelection;
             list.addListSelectionListener(listener);
@@ -127,27 +122,23 @@ public class CompletedElementList<T extends CombatObject> extends JPanel {
 
         @SuppressWarnings("unchecked")
         public void add(T element) {
-            list.removeListSelectionListener(listener);
+            doWithoutListener(() -> {
+                List<T> modelList = (List<T>) (Object) Arrays.asList(model.toArray());
+                T existingVersion = Filter.firstWithToStringEquals(modelList, element.toString());
 
-            List<T> modelList = (List<T>) (Object) Arrays.asList(model.toArray());
-            T existingVersion = Filter.firstWithToStringEquals(modelList, element.toString());
-
-            model.removeElement(existingVersion);
-            model.addElement(element);
-
-            list.addListSelectionListener(listener);
-
-            revalidate();
-            repaint();
+                model.removeElement(existingVersion);
+                model.addElement(element);
+            });
         }
 
         public void remove(CombatObject element) {
+            doWithoutListener(() -> model.removeElement(element));
+        }
+
+        private void doWithoutListener(Runnable action) {
             list.removeListSelectionListener(listener);
-
-            model.removeElement(element);
-
+            action.run();
             list.addListSelectionListener(listener);
-
             revalidate();
             repaint();
         }

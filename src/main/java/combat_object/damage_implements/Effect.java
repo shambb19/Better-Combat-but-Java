@@ -11,7 +11,6 @@ import javax.swing.border.MatteBorder;
 import java.awt.*;
 
 @AllArgsConstructor
-@Getter
 public enum Effect {
 
     // pre 4.3.1
@@ -20,7 +19,7 @@ public enum Effect {
     POISON(Colors.green("Poisoned",
             "..attacker.. has disadvantage on all attack rolls")),
     ILLUSION(Colors.purple("Illusion",
-            "..target.. now believes an illusion of ..attacker..'s choice. spooky")),
+            "..target.. now believes an illusion of ..attacker..'s choice. Spooky")),
     ADVANTAGE_SOON(Colors.amber("Advantage",
             "..attacker.. can take advantage (unpunished) if they attack ..target.. again this turn")),
     BONUS_DAMAGE(Colors.amber("Hex / Mark",
@@ -58,6 +57,20 @@ public enum Effect {
     FULL_HP_OPTION(Colors.blue("Toll the Dead",
             "Deals a d12 instead of a d8 if ..target.. is missing any hit points")),
 
+    // released 4.5.0
+    BANISH(Colors.purple("Banished",
+            "..target.. is banished to another plane of existence if reduced to 50 hit points or fewer")),
+    CHARMED(Colors.purple("Charmed",
+            "..target.. is magically compelled by ..attacker.. and cannot disobey. Kinky")),
+    PENALTY_ATTACK(Colors.amber("Muddled Mind",
+            "..target.. must subtract 1d6 from their attack rolls and ability checks")),
+    RANDOM_ACTION(Colors.purple("Reality Broken",
+            "..target.. suffers unpredictable effects each turn based on a d10 roll")),
+    STAT_DROP(Colors.red("Mind Shattered",
+            "..target.. has their Intelligence and Charisma scores dropped to 1")),
+    STUNNED(Colors.purple("Stunned",
+            "..target.. is incapacitated, can't move, and automatically fails Str and Dex saves")),
+
     NONE(null);
 
     private final NoticeComponents noticeComponents;
@@ -66,41 +79,38 @@ public enum Effect {
         return new NoticePanel(this, target);
     }
 
+    public String getOfficialName() {
+        return noticeComponents.title;
+    }
+
     public static class NoticePanel extends JPanel {
         public NoticePanel(Effect effect, Combatant target) {
-            if (effect.noticeComponents == null) {
+            if (effect.noticeComponents == null)
                 throw new IllegalStateException("Effect " + effect.name() + " does not have an associated notice.");
-            }
 
             String subtitle = effect.noticeComponents.getSubtitle(EncounterManager.getCurrentCombatant(), target);
 
-            SwingPane.modifiable(this).withLayout(SwingPane.BORDER).withGaps(15, 0)
+            SwingPane.fluent(this).arrangedAs(SwingPane.BORDER, 15, 0)
                     .withBackground(effect.noticeComponents.getBackground())
-                    .opaque()
                     .withPaddedBorder(new MatteBorder(0, 4, 0, 0, effect.noticeComponents.getAccent()),
                             10, 12, 10, 12)
                     .withMaximumSize(Integer.MAX_VALUE, 60)
                     .onLeft();
 
-            JPanel textCol = SwingPane.panel().withLayout(SwingPane.VERTICAL_BOX).transparent().component();
+            JPanel textCol = SwingPane.panelIn(this, BorderLayout.CENTER)
+                    .arrangedAs(SwingPane.VERTICAL_BOX).transparent().component();
 
-            JLabel titleLabel = SwingComp.label(effect.noticeComponents.getTitle())
-                    .withDerivedFont(Font.BOLD, 12f)
-                    .withForeground(effect.noticeComponents.getForeground())
+            JLabel titleLabel =
+                    SwingComp.label(effect.noticeComponents.getTitle(), Font.BOLD, 12f, effect.noticeComponents.getForeground())
+                            .component();
+
+            JLabel subLabel = SwingComp.label(subtitle, Font.PLAIN, 11f, effect.noticeComponents.getForegroundDim())
                     .component();
 
-            JLabel subLabel = SwingComp.label(subtitle)
-                    .withDerivedFont(Font.PLAIN, 11f)
-                    .withForeground(effect.noticeComponents.getForegroundDim())
-                    .component();
-
-            textCol.add(Box.createVerticalGlue());
-            textCol.add(titleLabel);
-            textCol.add(Box.createRigidArea(new Dimension(0, 2)));
-            textCol.add(subLabel);
-            textCol.add(Box.createVerticalGlue());
-
-            add(textCol, BorderLayout.CENTER);
+            SwingPane.fluent(textCol).collect(
+                    Box.createVerticalGlue(), titleLabel, SwingComp.spacer(0, 2),
+                    subLabel, Box.createVerticalGlue()
+            );
         }
     }
 
@@ -162,18 +172,21 @@ public enum Effect {
 
             StringBuilder builder = new StringBuilder(subtitle);
 
-            replaceKey(builder, ATTACKER, attacker);
-            replaceKey(builder, TARGET, target);
+            class Replacer {
+                void replaceKey(final String key, Combatant combatant) {
+                    while (builder.toString().contains(key)) {
+                        int idxKey = subtitle.indexOf(key);
+                        int idxKeyEnd = idxKey + key.length();
+                        builder.replace(idxKey, idxKeyEnd, combatant.getName());
+                    }
+                }
+            }
+            Replacer r = new Replacer();
+
+            r.replaceKey(ATTACKER, attacker);
+            r.replaceKey(TARGET, target);
 
             return builder.toString();
-        }
-
-        void replaceKey(StringBuilder builder, final String key, Combatant combatant) {
-            while (builder.toString().contains(key)) {
-                int idxKey = subtitle.indexOf(key);
-                int idxKeyEnd = idxKey + key.length();
-                builder.replace(idxKey, idxKeyEnd, combatant.getName());
-            }
         }
     }
 }

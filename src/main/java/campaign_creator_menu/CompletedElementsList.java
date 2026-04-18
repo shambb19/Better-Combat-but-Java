@@ -4,15 +4,15 @@ import combat_object.combatant.Combatant;
 import combat_object.combatant.NPC;
 import combat_object.combatant.PC;
 import combat_object.scenario.Scenario;
-import encounter_info.Encounter;
+import encounter.Encounter;
 import lombok.*;
 import lombok.experimental.*;
+import swing.swing_comp.SwingPane;
 
 import javax.swing.*;
 import java.util.List;
 
 import static swing.swing_comp.SwingPane.FLOW;
-import static swing.swing_comp.SwingPane.modifiable;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class CompletedElementsList extends JPanel {
@@ -21,13 +21,11 @@ public class CompletedElementsList extends JPanel {
     CompletedElementList<Scenario> scenarioPane;
 
     public CompletedElementsList(Encounter input, CampaignCreatorMenu root) {
-
         friendlyPane = new CompletedElementList<>(input.getFriendlies(), CompletedElementList.FRIENDLY_NEW, this, root);
         enemyPane = new CompletedElementList<>(input.getEnemies(), CompletedElementList.ENEMY_NEW, this, root);
         scenarioPane = new CompletedElementList<>(input.getScenarios(), CompletedElementList.SCENARIO_NEW, this, root);
 
-        modifiable(this).withLayout(FLOW)
-                .withGaps(10, 0)
+        SwingPane.fluent(this).arrangedAs(FLOW, 10, 0)
                 .collect(friendlyPane, enemyPane, scenarioPane)
                 .withLabeledBorder("Completed Elements");
     }
@@ -63,9 +61,9 @@ public class CompletedElementsList extends JPanel {
     }
 
     public boolean isNotEnoughForScenario() {
-        int friendlyCount = (int) friendlyPane.toList().stream().filter(PC.class::isInstance).count();
+        boolean noPartyFound = friendlyPane.toList().stream().noneMatch(PC.class::isInstance);
 
-        return enemyPane.toList().isEmpty() || friendlyCount < 1;
+        return enemyPane.toList().isEmpty() || noPartyFound;
     }
 
 }

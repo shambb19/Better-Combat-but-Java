@@ -1,10 +1,10 @@
 package swing.swing_comp;
 
+import lombok.*;
 import org.intellij.lang.annotations.MagicConstant;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Arrays;
 
 public class SwingPane extends SwingComp<JPanel> {
 
@@ -17,12 +17,11 @@ public class SwingPane extends SwingComp<JPanel> {
 
     private SwingPane(JPanel panel) {
         super(panel);
+        component.setOpaque(true);
     }
 
     public static SwingPane panelIn(JPanel panel) {
-        JPanel pane = new JPanel();
-        panel.add(pane);
-        return new SwingPane(pane);
+        return panelIn(panel, null);
     }
 
     public static SwingPane panelIn(
@@ -35,9 +34,7 @@ public class SwingPane extends SwingComp<JPanel> {
     }
 
     public static SwingPane panelIn(RootPaneContainer container) {
-        JPanel pane = new JPanel();
-        container.getContentPane().add(pane);
-        return new SwingPane(pane);
+        return panelIn(container, null);
     }
 
     public static SwingPane panelIn(
@@ -47,68 +44,92 @@ public class SwingPane extends SwingComp<JPanel> {
         return panelIn((JPanel) container.getContentPane(), location);
     }
 
-    public static SwingPane panel() {
-        return new SwingPane(new JPanel());
+    public static SwingPane newArrangedAs(@MagicConstant(valuesFromClass = SwingPane.class) int layout) {
+        return newArrangedAs(layout, 0, 0);
     }
 
-    public SwingPane collect(Object... components) {
-        Arrays.stream(components).forEach(comp -> component.add(getComponent(comp)));
-        component.revalidate();
-        component.repaint();
-        return this;
-    }
-
-    public SwingPane with(
-            Object comp,
-            @MagicConstant(valuesFromClass = BorderLayout.class) String location
+    public static SwingPane newArrangedAs(
+            @MagicConstant(valuesFromClass = SwingPane.class) int layout, int hgap, int vgap
     ) {
-        component.add(getComponent(comp), location);
-        return this;
+        return new SwingPane(new JPanel()).arrangedAs(layout, hgap, vgap);
     }
 
-    public SwingPane withLayout(@MagicConstant(valuesFromClass = SwingPane.class) int layout) {
+    public SwingPane arrangedAs(
+            @MagicConstant(valuesFromClass = SwingPane.class) int layout
+    ) {
+        return arrangedAs(layout, 0, 0);
+    }
+
+    public SwingPane arrangedAs(@MagicConstant(valuesFromClass = SwingPane.class) int layout, int hgap, int vgap) {
         LayoutManager manager = switch (layout) {
-            case BORDER -> new BorderLayout();
+            case BORDER -> new BorderLayout(hgap, vgap);
             case VERTICAL_BOX -> new BoxLayout(component, BoxLayout.Y_AXIS);
             case HORIZONTAL_BOX -> new BoxLayout(component, BoxLayout.X_AXIS);
-            case FLOW -> new FlowLayout();
-            case FLOW_RIGHT -> new FlowLayout(FlowLayout.RIGHT);
-            case FLOW_LEFT -> new FlowLayout(FlowLayout.LEFT);
-            case ONE_COLUMN -> new GridLayout(0, 1);
-            case TWO_COLUMN -> new GridLayout(0, 2);
-            case SINGLE_ROW -> new GridLayout(1, 0);
+            case FLOW -> new FlowLayout(FlowLayout.CENTER, hgap, vgap);
+            case FLOW_RIGHT -> new FlowLayout(FlowLayout.RIGHT, hgap, vgap);
+            case FLOW_LEFT -> new FlowLayout(FlowLayout.LEFT, hgap, vgap);
+            case ONE_COLUMN -> new GridLayout(0, 1, hgap, vgap);
+            case TWO_COLUMN -> new GridLayout(0, 2, hgap, vgap);
+            case SINGLE_ROW -> new GridLayout(1, 0, hgap, vgap);
             default -> throw new IllegalArgumentException("withLayout in SwingPane : unexpected layout value");
         };
         component.setLayout(manager);
         component.revalidate();
         component.repaint();
+
         return this;
     }
 
-    public SwingPane withGaps(int hgap, int vgap) {
-        switch (component.getLayout()) {
-            case BorderLayout b -> {
-                b.setHgap(hgap);
-                b.setVgap(vgap);
-            }
-            case GridLayout g -> {
-                g.setHgap(hgap);
-                g.setVgap(vgap);
-            }
-            case FlowLayout f -> {
-                f.setHgap(hgap);
-                f.setVgap(vgap);
-            }
-            default -> throw new ClassCastException("withGaps in SwingPane: unexpected layout");
+    public SwingPane collect(Object... components) {
+        for (Object obj : components) {
+            if (obj instanceof Object[] array)
+                for (Object arrObj : array) component.add(getComponent(arrObj));
+            else if (obj instanceof Iterable<?> iterable)
+                iterable.forEach(o -> component.add(getComponent(o)));
+            else
+                component.add(getComponent(obj));
         }
+
+        component.revalidate();
+        component.repaint();
         return this;
     }
 
-    public static SwingPane modifiable(JPanel panel) {
+    @SneakyThrows
+    public SwingPane borderCollect(BorderComponent... components) {
+        for (BorderComponent comp : components) {
+            component.add(comp.component, comp.location);
+        }
+        component.revalidate();
+        component.repaint();
+        return this;
+    }
+
+    public static BorderComponent north(Object component) {
+        return new BorderComponent(BorderLayout.NORTH, SwingPane.getComponent(component));
+    }
+
+    public static BorderComponent east(Object component) {
+        return new BorderComponent(BorderLayout.EAST, SwingPane.getComponent(component));
+    }
+
+    public static BorderComponent south(Object component) {
+        return new BorderComponent(BorderLayout.SOUTH, SwingPane.getComponent(component));
+    }
+
+    public static BorderComponent west(Object component) {
+        return new BorderComponent(BorderLayout.WEST, SwingPane.getComponent(component));
+    }
+
+    public static BorderComponent center(Object component) {
+        return new BorderComponent(BorderLayout.CENTER, SwingPane.getComponent(component));
+    }
+
+    public static SwingPane fluent(JPanel panel) {
         return new SwingPane(panel);
     }
 
-    public static SwingPane modifiable(RootPaneContainer container) {
+    public static SwingPane fluent(RootPaneContainer container) {
         return new SwingPane((JPanel) container.getContentPane());
     }
 
@@ -117,8 +138,20 @@ public class SwingPane extends SwingComp<JPanel> {
             case String s -> new JLabel(s);
             case Component c -> c;
             case SwingComp<?> sc -> sc.component();
-            default -> throw new ClassCastException();
+            default -> {
+                String cause;
+                if (comp instanceof BorderComponent)
+                    cause = "use SwingPane.borderCollect for BorderLayout assignment";
+                else
+                    cause = "unsupported obj " + comp.getClass();
+                throw new ClassCastException("SwingPane.getComponent: " + cause);
+            }
         };
+    }
+
+    @Value public static class BorderComponent {
+        @MagicConstant(valuesFromClass = BorderLayout.class) String location;
+        Component component;
     }
 
 }

@@ -74,7 +74,7 @@ effect: PENALTY_SAVE
 name: Poison Spray
 dmg: 1d12
 stat: con
-effect: NONE
+effect: POISON
 
 .spell
 name: Primal Savagery
@@ -251,6 +251,12 @@ stat: none
 effect: NONE
 
 .spell
+name: Jim's Magic Missile
+dmg: 2d4
+stat: none
+effect: NONE
+
+.spell
 name: Magic Missile
 dmg: 1d4
 stat: none
@@ -281,16 +287,34 @@ stat: con
 effect: HALF_DAMAGE
 
 .spell
+name: Witch Bolt
+dmg: 1d12
+stat: none
+effect: DAMAGE_OVER_TIME
+
+.spell
 name: Wrathful Smite
 dmg: 1d6
 stat: wis
 effect: FRIGHTEN
 
 .spell
+name: Zephyr Strike
+dmg: 1d8
+stat: none
+effect: ADVANTAGE_SOON
+
+.spell
 name: Aganazzar's Scorcher
 dmg: 3d8
 stat: dex
 effect: HALF_DAMAGE
+
+.spell
+name: Branding Smite
+dmg: 2d6
+stat: none
+effect: TRACKING
 
 .spell
 name: Cloud of Daggers
@@ -321,6 +345,12 @@ name: Heat Metal
 dmg: 2d8
 stat: none
 effect: DISADVANTAGE_ATTACK
+
+.spell
+name: Maximilian's Earthen Grasp
+dmg: 2d6
+stat: str
+effect: RESTRAIN
 
 .spell
 name: Melf's Acid Arrow
@@ -374,6 +404,12 @@ effect: HALF_DAMAGE
 name: Spiritual Weapon
 dmg: 1d8
 stat: none
+effect: NONE
+
+.spell
+name: Tasha's Mind Whip
+dmg: 3d6
+stat: int
 effect: NONE
 
 .spell
@@ -455,16 +491,34 @@ stat: con
 effect: NONE
 
 .spell
+name: Staggering Smite
+dmg: 4d6
+stat: wis
+effect: DISADVANTAGE_ATTACK
+
+.spell
 name: Storm Sphere
 dmg: 2d6
 stat: str
 effect: DIFFICULT_TERRAIN
 
 .spell
+name: Vitriolic Sphere
+dmg: 5d4
+stat: dex
+effect: DAMAGE_OVER_TIME
+
+.spell
 name: Wall of Fire
 dmg: 5d8
 stat: dex
 effect: HALF_DAMAGE
+
+.spell
+name: Banishing Smite
+dmg: 5d10
+stat: none
+effect: BANISH
 
 .spell
 name: Cloudkill
@@ -485,9 +539,33 @@ stat: con
 effect: PRONE
 
 .spell
+name: Enervation
+dmg: 4d8
+stat: dex
+effect: HEAL_SELF
+
+.spell
 name: Flame Strike
 dmg: 4d6
 stat: dex
+effect: HALF_DAMAGE
+
+.spell
+name: Geas
+dmg: 5d10
+stat: wis
+effect: CHARMED
+
+.spell
+name: Immolation
+dmg: 8d6
+stat: dex
+effect: DAMAGE_OVER_TIME
+
+.spell
+name: Negative Energy Flood
+dmg: 5d12
+stat: con
 effect: HALF_DAMAGE
 
 .spell
@@ -495,6 +573,12 @@ name: Steel Wind Strike
 dmg: 6d10
 stat: none
 effect: NONE
+
+.spell
+name: Synaptic Static
+dmg: 8d6
+stat: int
+effect: PENALTY_ATTACK
 
 .spell
 name: Chain Lightning
@@ -515,10 +599,28 @@ stat: con
 effect: HEAL_BLOCK
 
 .spell
+name: Mental Prison
+dmg: 5d10
+stat: int
+effect: RESTRAIN
+
+.spell
+name: Otiluke's Freezing Sphere
+dmg: 10d6
+stat: con
+effect: HALF_DAMAGE
+
+.spell
 name: Sunbeam
 dmg: 6d8
 stat: con
 effect: BLIND
+
+.spell
+name: Crown of Stars
+dmg: 4d12
+stat: none
+effect: NONE
 
 .spell
 name: Delayed Blast Fireball
@@ -539,10 +641,46 @@ stat: dex
 effect: HALF_DAMAGE
 
 .spell
+name: Prismatic Spray
+dmg: 10d6
+stat: dex
+effect: RANDOM_ACTION
+
+.spell
+name: Abi-Dalzim's Horrid Wilting
+dmg: 12d8
+stat: con
+effect: HALF_DAMAGE
+
+.spell
+name: Feeblemind
+dmg: 4d6
+stat: int
+effect: STAT_DROP
+
+.spell
+name: Illusory Dragon
+dmg: 7d6
+stat: int
+effect: HALF_DAMAGE
+
+.spell
+name: Reality Break
+dmg: 10d12
+stat: wis
+effect: RANDOM_ACTION
+
+.spell
 name: Sunburst
 dmg: 12d6
 stat: con
 effect: BLIND
+
+.spell
+name: Blade of Disaster
+dmg: 4d12
+stat: none
+effect: NONE
 
 .spell
 name: Meteor Swarm
@@ -554,4 +692,16 @@ effect: HALF_DAMAGE
 name: Psychic Scream
 dmg: 14d6
 stat: int
+effect: STUNNED
+
+.spell
+name: Ravenous Void
+dmg: 5d10
+stat: str
+effect: FORCED_MOVE
+
+.spell
+name: Time Ravage
+dmg: 10d12
+stat: con
 effect: HALF_DAMAGE

@@ -1,5 +1,6 @@
 package campaign_creator_menu;
 
+import lombok.experimental.*;
 import util.TxtReader;
 
 import javax.swing.*;
@@ -11,10 +12,12 @@ import javax.swing.text.StyleContext;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static format.ColorStyles.*;
-import static util.TxtReader.*;
+import static util.TxtReader.value;
 
+@ExtensionMethod(TxtReader.class)
 public class ColoredTxtDisplay extends JTextPane {
 
     private ArrayList<String> lines;
@@ -25,8 +28,7 @@ public class ColoredTxtDisplay extends JTextPane {
         setBorder(new EmptyBorder(new Insets(10, 10, 10, 10)));
         setMargin(new Insets(5, 5, 5, 5));
 
-        if (lines != null)
-            addLines();
+        Optional.ofNullable(lines).ifPresent(l -> addLines());
     }
 
     public void setLines(List<String> lines) {
@@ -55,7 +57,7 @@ public class ColoredTxtDisplay extends JTextPane {
         appendToPane(": ", EQUATOR);
         appendToPane("[", VALUE);
 
-        String[] vals = listTextAsArray(line);
+        String[] vals = line.listTextAsArray();
         for (int i = 0; i < vals.length; i++) {
             appendParameter(vals[i], "");
 
@@ -81,7 +83,7 @@ public class ColoredTxtDisplay extends JTextPane {
     }
 
     private void appendParameter(String line, String end) {
-        String key = key(line);
+        String key = line.key();
         String value = value(line);
 
         appendToPane(key, KEY);
@@ -99,7 +101,7 @@ public class ColoredTxtDisplay extends JTextPane {
 
         return switch (line) {
             case ".party" -> PARTY;
-            case ".npc" -> ALLY;
+            case ".npc" -> FRIENDLY;
             case ".enemy" -> ENEMY;
             case ".scenario" -> SCENARIO;
             default -> PARAMETER;

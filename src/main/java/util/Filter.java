@@ -1,18 +1,13 @@
 package util;
 
-import lombok.experimental.*;
-
 import java.util.List;
 import java.util.function.Function;
 
-@UtilityClass
+@lombok.experimental.UtilityClass
 public class Filter {
 
     public <T> List<T> matchingClass(List<?> source, Class<T> type) {
-        return source.stream()
-                .filter(type::isInstance)
-                .map(type::cast)
-                .toList();
+        return source.stream().filter(type::isInstance).map(type::cast).toList();
     }
 
     public <T> List<T> matchingCondition(List<T> source, Function<T, Boolean> condition) {
@@ -20,10 +15,8 @@ public class Filter {
     }
 
     public <T> T firstWithToStringEquals(List<T> source, String equalTo) {
-        return source.stream()
-                .filter(item -> item.toString().equalsIgnoreCase(equalTo))
-                .findFirst()
-                .orElse(null);
+        return source.stream().filter(item -> item.toString().equalsIgnoreCase(equalTo))
+                .findFirst().orElse(null);
     }
 
 }

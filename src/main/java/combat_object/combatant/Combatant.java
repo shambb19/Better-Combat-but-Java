@@ -1,6 +1,12 @@
 package combat_object.combatant;
 
+import __main.manager.EffectManager;
 import combat_object.CombatObject;
+import combat_object.combatant.info.AbilityModifier;
+import combat_object.combatant.info.LifeStatus;
+import combat_object.combatant.info.Stats;
+import combat_object.damage_implements.Effect;
+import combat_object.damage_implements.Implement;
 import combat_object.damage_implements.Spell;
 import combat_object.damage_implements.Weapon;
 import format.ColorStyles;
@@ -9,9 +15,9 @@ import lombok.experimental.*;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Random;
 
-@SuperBuilder
-@Data
+@SuperBuilder @Data
 @FieldDefaults(level = AccessLevel.PROTECTED)
 public abstract class Combatant implements CombatObject {
 
@@ -47,7 +53,7 @@ public abstract class Combatant implements CombatObject {
     public void damage(int damage) {
         hp = Math.max(0, hp - damage);
         if (hp == 0)
-            lifeStatus.setUnconscious();
+            lifeStatus.setStatus(LifeStatus.UNCONSCIOUS);
     }
 
     public void heal(int healthRegained) {
@@ -64,15 +70,41 @@ public abstract class Combatant implements CombatObject {
         else return ColorStyles.CRITICAL;
     }
 
+    public abstract Color getCombatantColor();
+
     public String getHealthBarString() {
         return switch (lifeStatus.getStatus()) {
-            case ALIVE -> {
+            case LifeStatus.ALIVE -> {
                 if (hp == 0) yield "Knocked Out";
                 if (isEnemy()) yield "? / ?";
                 yield String.format("%d / %d", hp, maxHp);
             }
-            case UNCONSCIOUS -> lifeStatus.toString();
-            case DEAD -> "Dead";
+            case LifeStatus.UNCONSCIOUS -> lifeStatus.toString();
+            case LifeStatus.DEAD -> "Dead";
+            default ->
+                    throw new ClassCastException("Combatant.getHealthBarString: unexpected int lifeStatus.getStatus");
+        };
+    }
+
+    public int getAttackRoll(int roll, Implement implement) {
+        if (EffectManager.hasEffect(this, Effect.PENALTY_ATTACK)) {
+            roll -= new Random().nextInt(7);
+        }
+        return roll + attackBonus(implement);
+    }
+
+    public int getSaveThrow(int roll, Implement implement) {
+        if (EffectManager.hasEffect(this, Effect.STUNNED)
+                && implement.getStat().equals(AbilityModifier.STR) || implement.getStat().equals(AbilityModifier.DEX)) {
+            return 0;
+        }
+        if (EffectManager.hasEffect(this, Effect.PENALTY_SAVE)) {
+            roll -= new Random().nextInt(5);
+        }
+        return switch (implement) {
+            case Weapon ignored -> roll;
+            case Spell s -> roll + mod(s.getStat());
+            default -> throw new ClassCastException("Combatant.getSaveThrow: somehow not Weapon or Spell");
         };
     }
 
@@ -80,16 +112,12 @@ public abstract class Combatant implements CombatObject {
         return stats.mod(stat);
     }
 
-    public int attackBonus(Weapon weapon) {
-        return stats.getProficiencyBonus() + stats.mod(weapon.getStat());
-    }
-
-    public int spellAttackBonus() {
-        return stats.spellAttackBonus();
-    }
-
-    public int saveDc() {
-        return stats.saveDc();
+    public int attackBonus(Implement implement) {
+        return switch (implement) {
+            case Weapon w -> stats.getProficiencyBonus() + stats.mod(w.getStat());
+            case Spell ignored -> stats.spellAttackBonus();
+            default -> throw new ClassCastException("Combatant.attackBonus: somehow not Weapon or Spell");
+        };
     }
 
     public ArrayList<String> toTxt() {

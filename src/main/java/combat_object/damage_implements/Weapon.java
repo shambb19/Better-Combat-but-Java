@@ -1,19 +1,18 @@
 package combat_object.damage_implements;
 
-import _global_list.DamageImplements;
-import combat_object.CombatObject;
-import combat_object.combatant.AbilityModifier;
-import txt_input.Key;
+import combat_object.combatant.info.AbilityModifier;
+import input.Key;
 import util.TxtReader;
 
 import java.util.EnumMap;
 
-import static txt_input.Key.*;
+import static input.Key.*;
 
-public class Weapon extends Implement implements CombatObject {
+public class Weapon extends Implement implements combat_object.CombatObject {
 
     public Weapon(String name, int numDice, int dieSize, AbilityModifier stat) {
-        super(name, numDice, dieSize, stat, DamageImplements.isManual(name));
+        // this is a disgusting solution to the manual problem, but it works?
+        super(name, numDice, dieSize, stat, name.startsWith("Manual"));
     }
 
     public static Weapon from(EnumMap<Key, Object> params) {
@@ -25,4 +24,9 @@ public class Weapon extends Implement implements CombatObject {
         );
     }
 
+    public static class ManualWeapon extends Weapon {
+        public ManualWeapon(String name) {
+            super(name, 1, 100, AbilityModifier.OPTION);
+        }
+    }
 }

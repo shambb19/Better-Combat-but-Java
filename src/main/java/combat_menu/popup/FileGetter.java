@@ -17,7 +17,6 @@ public class FileGetter {
     }
 
     private FileGetter(Component parent) {
-        url = null;
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileFilter(new FileNameExtensionFilter(
                 "TEXT FILES",
@@ -31,7 +30,7 @@ public class FileGetter {
             try {
                 url = fileChooser.getSelectedFile().toURI().toURL();
             } catch (MalformedURLException e) {
-                Message.fileError(null, e);
+                Message.fileError(e);
             }
     }
 }

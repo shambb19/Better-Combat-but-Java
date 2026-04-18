@@ -1,77 +1,63 @@
 package util;
 
-import __main.Main;
 import __main.manager.EncounterManager;
 import combat_menu.CombatMenu;
+import format.ColorStyles;
 import lombok.experimental.*;
 import org.intellij.lang.annotations.MagicConstant;
+import swing.swing_comp.SwingComp;
+import util.PopupPrompt.PromptButton;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.io.IOException;
+
+import static util.PopupPrompt.of;
 
 @ExtensionMethod(StringUtils.class)
 public class Message {
 
     public static final int CANCEL_OPTION = 2, REMOVE_OPTION = 1, EDIT_OPTION = 0;
 
-    private static final Color
-            COLOR_CONFIRM = new Color(0x1D, 0x9E, 0x75),
-            COLOR_CANCEL = new Color(0x3A, 0x3E, 0x4A),
-            COLOR_DANGER = new Color(0xE2, 0x4B, 0x4A);
-
     public static void error(String text) {
-        PopupPrompt dialog = new PopupPrompt(CombatMenu.TITLE + ": Error");
-        dialog.addMessage(text);
-        dialog.footer.add(dialog.createButton("Acknowledge", COLOR_DANGER, 0));
-        dialog.pack();
-        dialog.setLocationRelativeTo(null);
-        dialog.setVisible(true);
+        of(
+                CombatMenu.TITLE + ": Error", text,
+                new PromptButton("Acknowledge", ColorStyles.CRITICAL, 0)
+        );
     }
 
     public static void template(String text) {
-        PopupPrompt dialog = new PopupPrompt(CombatMenu.TITLE);
-        dialog.addMessage(text);
-        dialog.footer.add(dialog.createButton("Close", COLOR_CANCEL, 0));
-        dialog.pack();
-        dialog.setLocationRelativeTo(null);
-        dialog.setVisible(true);
+        of(
+                CombatMenu.TITLE, text, new PromptButton("Close", ColorStyles.BORDER_LIGHT, 0)
+        );
     }
 
     public static int confirmIf(String reason) {
-        PopupPrompt dialog = new PopupPrompt("Confirm Action");
-        dialog.addMessage("Are you sure you would like to " + reason + "?");
-        dialog.footer.add(dialog.createButton("Cancel", COLOR_CANCEL, JOptionPane.CANCEL_OPTION));
-        dialog.footer.add(dialog.createButton("Confirm", COLOR_CONFIRM, JOptionPane.OK_OPTION));
-
-        dialog.pack();
-        dialog.setLocationRelativeTo(Main.getCombatMenu());
-        dialog.setVisible(true);
-        return dialog.getResult();
+        return of(
+                "Confirm Action", "Are you sure you would like to " + reason + "?",
+                new PromptButton("Cancel", ColorStyles.BORDER_LIGHT, JOptionPane.CANCEL_OPTION),
+                new PromptButton("Confirm", ColorStyles.SUCCESS, JOptionPane.OK_OPTION)
+        ).getResult();
     }
 
     public static int getWithLoopUntilInt(String message, String title) {
         while (true) {
-            PopupPrompt dialog = new PopupPrompt(title);
-            dialog.addMessage(message);
+            PopupPrompt dialog = of(
+                    title, message,
+                    new PromptButton("Submit", ColorStyles.SUCCESS, 1)
+            );
 
-            JTextField input = new JTextField();
-            input.setBackground(new Color(0x2A, 0x2E, 0x3A));
-            input.setForeground(Color.WHITE);
-            input.setCaretColor(Color.WHITE);
-            input.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(new Color(0x3A, 0x3E, 0x4A)),
-                    new EmptyBorder(8, 8, 8, 8)
-            ));
+            Color inputColor = new Color(0x2a, 0x2e, 0x3a);
+            JTextField input = SwingComp.fluent(new JTextField())
+                    .withBackground(inputColor)
+                    .withForegroundAndCaretColor(Color.WHITE)
+                    .withPaddedBorder(new LineBorder(inputColor), 8, 8, 8, 8)
+                    .component();
+
             dialog.contentArea.add(Box.createRigidArea(new Dimension(0, 15)));
             dialog.contentArea.add(input);
 
-            dialog.footer.add(dialog.createButton("Submit", COLOR_CONFIRM, 1));
-
             dialog.pack();
-            dialog.setLocationRelativeTo(null);
-            dialog.setVisible(true);
 
             int value = input.getText().trim().toInt();
             if (value == Integer.MIN_VALUE)
@@ -82,58 +68,49 @@ public class Message {
     }
 
     public static @MagicConstant(intValues = {CANCEL_OPTION, REMOVE_OPTION, EDIT_OPTION}) int editOrRemoveOption(String name) {
-        PopupPrompt dialog = new PopupPrompt("Manage " + name);
-        dialog.addMessage("What would you like to do with this entry?");
+        int result = of(
+                "Manage " + name,
+                "What would you like to do with this entry?",
+                new PromptButton("Cancel", ColorStyles.BORDER_LIGHT, CANCEL_OPTION),
+                new PromptButton("Remove", ColorStyles.CRITICAL, REMOVE_OPTION),
+                new PromptButton("Edit", ColorStyles.SUCCESS, EDIT_OPTION)
+        ).getResult();
 
-        dialog.footer.add(dialog.createButton("Cancel", COLOR_CANCEL, CANCEL_OPTION));
-        dialog.footer.add(dialog.createButton("Remove", COLOR_DANGER, REMOVE_OPTION));
-        dialog.footer.add(dialog.createButton("Edit", COLOR_CONFIRM, EDIT_OPTION));
-
-        dialog.pack();
-        dialog.setLocationRelativeTo(null);
-        dialog.setVisible(true);
-
-        return switch (dialog.getResult()) {
-            case 0 -> EDIT_OPTION;
-            case 1 -> {
+        return switch (result) {
+            case EDIT_OPTION -> EDIT_OPTION;
+            case REMOVE_OPTION -> {
                 if (question("Are you sure you want to delete " + name + "?") == JOptionPane.YES_OPTION)
                     yield REMOVE_OPTION;
                 else
                     yield CANCEL_OPTION;
             }
-            case 2 -> CANCEL_OPTION;
+            case CANCEL_OPTION -> CANCEL_OPTION;
             default -> throw new IndexOutOfBoundsException();
         };
     }
 
-    public static void fileError(Component parent, Exception error) {
-        PopupPrompt dialog = new PopupPrompt("File Error");
-        dialog.addMessage("Error reading file: " + error.getMessage());
-        dialog.footer.add(dialog.createButton("Acknowledge", COLOR_DANGER, 0));
-        dialog.pack();
-        dialog.setLocationRelativeTo(parent);
-        dialog.setVisible(true);
-    }
-
-    public static int question(String text) {
-        PopupPrompt dialog = new PopupPrompt("Question");
-        dialog.addMessage(text);
-        dialog.footer.add(dialog.createButton("No", COLOR_CANCEL, JOptionPane.NO_OPTION));
-        dialog.footer.add(dialog.createButton("Yes", COLOR_CONFIRM, JOptionPane.YES_OPTION));
-        dialog.pack();
-        dialog.setLocationRelativeTo(null);
-        dialog.setVisible(true);
-        return dialog.getResult();
-    }
-
-    public static int getDeathSaveRoll() {
-        return getWithLoopUntilInt(
-                "Roll Death Save for " + EncounterManager.getCurrentCombatant().getName() + ".",
-                CombatMenu.TITLE
+    public static void fileError(Exception error) {
+        of(
+                "File Error", "Error reading file: " + error.getMessage(),
+                new PromptButton("Acknowledge", ColorStyles.CRITICAL, 0)
         );
     }
 
-    public static void throwFileDownloadError(JPanel root, IOException error) {
-        fileError(root, error);
+    public static int question(String text) {
+        return of(
+                "Question", text,
+                new PromptButton("No", ColorStyles.BORDER_LIGHT, JOptionPane.NO_OPTION),
+                new PromptButton("Yes", ColorStyles.SUCCESS, JOptionPane.YES_OPTION)
+        ).getResult();
+    }
+
+    public static int getDeathSaveRoll() {
+        String message = "Roll Death Save for " + EncounterManager.getCurrentCombatant() + ".";
+        int roll;
+        do {
+            roll = getWithLoopUntilInt(message, CombatMenu.TITLE);
+            message += "Enter flat d20 value on the range of 1-20 please.";
+        } while (roll <= 0 || roll > 20);
+        return roll;
     }
 }

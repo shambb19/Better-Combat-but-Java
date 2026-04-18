@@ -1,11 +1,10 @@
 package combat_object.scenario;
 
 import _global_list.Combatants;
-import combat_object.CombatObject;
 import combat_object.combatant.NPC;
+import input.Key;
 import lombok.*;
 import lombok.experimental.*;
-import txt_input.Key;
 import util.Filter;
 import util.Locators;
 import util.Message;
@@ -13,20 +12,15 @@ import util.TxtReader;
 
 import java.util.*;
 
-import static txt_input.Key.*;
+import static input.Key.*;
 
 @Value
 @ExtensionMethod(Filter.class)
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-public class Scenario implements CombatObject {
+public class Scenario implements combat_object.CombatObject {
 
     @ToString.Include String name;
-    HashMap<String, Integer> with;
-    HashMap<String, Integer> against;
-
-    public boolean containsFriendlies() {
-        return !with.isEmpty();
-    }
+    HashMap<String, Integer> with, against;
 
     public ArrayList<NPC> list(boolean isFriendlies, boolean isSingleOccurrences) {
         HashMap<String, Integer> team = isFriendlies ? with : against;
@@ -45,7 +39,7 @@ public class Scenario implements CombatObject {
                 list.add(template);
             } else {
                 for (int i = 0; i < qty; i++)
-                    list.add(NPC.create(template.getName() + " " + (i + 1), template));
+                    list.add(NPC.create(template + " " + (i + 1), template));
             }
         });
 

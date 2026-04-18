@@ -1,21 +1,22 @@
 package combat_object.combatant;
 
-import combat_object.CombatObject;
+import combat_object.combatant.info.Stats;
 import combat_object.damage_implements.Spell;
 import combat_object.damage_implements.Weapon;
-import lombok.experimental.*;
-import txt_input.Key;
+import format.ColorStyles;
+import input.Key;
 import util.TxtReader;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Objects;
 
-import static txt_input.Key.*;
+import static input.Key.*;
 
-@SuperBuilder
-public class PC extends Combatant implements CombatObject {
+@lombok.experimental.SuperBuilder
+public class PC extends Combatant implements combat_object.CombatObject {
 
     public static PC create(String name, int hpMax, int armorClass, Stats stats, List<Weapon> weapons, List<Spell> spells) {
         return PC.builder()
@@ -31,8 +32,11 @@ public class PC extends Combatant implements CombatObject {
     }
 
     public void levelUp() {
-        int hpIncrement = stats.levelUp();
-        maxHp += hpIncrement;
+        maxHp += stats.levelUp();
+    }
+
+    public Color getCombatantColor() {
+        return ColorStyles.PARTY;
     }
 
     /**

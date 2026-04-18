@@ -9,18 +9,21 @@ import campaign_creator_menu.CampaignCreatorMenu;
 import com.formdev.flatlaf.intellijthemes.FlatSpacegrayIJTheme;
 import combat_menu.CombatMenu;
 import combat_menu.popup.CombatEndPopup;
-import combat_menu.popup.EncounterSelectionPopup;
 import lombok.*;
+import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
 import java.net.URL;
+import java.util.Optional;
 
 public class Main {
 
-    public static final String VERSION = "v4.3.1";
+    public static final String VERSION = "v4.4.0";
     public static final String TITLE = " || DnD Red Bull Edition " + VERSION;
+
+    public static final int COMBAT = 0, CREATOR = 1;
 
     private static URL input;
 
@@ -39,47 +42,36 @@ public class Main {
     }
 
     public static void clearAllAndShowUploadMenu() {
-        if (combatMenu != null) combatMenu.dispose();
-        if (creatorMenu != null) creatorMenu.dispose();
+        Optional.ofNullable(combatMenu).ifPresent(Window::dispose);
+        Optional.ofNullable(creatorMenu).ifPresent(Window::dispose);
 
         SwingUtilities.invokeLater(() -> UploadMain.newInstance().setVisible(true));
     }
 
-    private static void uploadCampaignAndFinalizeEncounter() {
-        // 1. Load all Combatants into the GlobalList first
-        // This fills Combatants.INSTANCE.list
-        Combatants.init(input);
-
-        // 2. NOW load Scenarios.
-        // When Scenario.from() is called inside this method,
-        // Combatants.getEnemies() will actually have data!
-        Scenarios.init(input);
-
-        EncounterManager.setEncounter(Combatants.toBattle());
-        EncounterSelectionPopup.newInstance().setVisible(true);
-    }
-
     public static void closeCreatorAndOpenCombat(URL file) {
         creatorMenu.dispose();
-        runCombatEncounter(file);
-    }
-
-    public static void runCombatEncounter(@NonNull URL file) {
         input = file;
-        uploadCampaignAndFinalizeEncounter();
+        closeUploadAndRun(COMBAT, null);
     }
 
-    public static void runCampaignCreator(URL url) {
-        creatorMenu = CampaignCreatorMenu.newInstance(url);
+    public static void uploadCampaign(@NonNull URL file) {
+        input = file;
+        Combatants.init(input);
+        Scenarios.init(input);
+        EncounterManager.setEncounter(Combatants.toBattle());
     }
 
-    public static void finalizeAndStartCombat() {
-        SwingUtilities.invokeLater(() -> {
+    public static void closeUploadAndRun(@MagicConstant(intValues = {COMBAT, CREATOR}) int runMode, UploadMain source) {
+        if (runMode == COMBAT) {
             EncounterManager.confirmQueueFinalized();
             combatMenu = CombatMenu.newInstance();
             combatMenu.setVisible(true);
             refreshUI();
-        });
+        } else {
+            creatorMenu = CampaignCreatorMenu.newInstance();
+        }
+
+        Optional.ofNullable(source).ifPresent(Window::dispose);
     }
 
     public static void refreshUI() {
@@ -94,7 +86,8 @@ public class Main {
 
         if (EncounterManager.getEncounter().isEncounterOver()) {
             boolean isVictory = EncounterManager.getEncounter().isVictory();
-            CombatEndPopup.run(isVictory);
+            String endType = isVictory ? CombatEndPopup.VICTORY : CombatEndPopup.DEFEAT;
+            CombatEndPopup.run(endType);
             isCombatFinished = true;
         }
     }

@@ -1,7 +1,7 @@
 package _global_list;
 
 import combat_object.combatant.Combatant;
-import encounter_info.Encounter;
+import encounter.Encounter;
 import lombok.*;
 import lombok.experimental.*;
 import util.Filter;
