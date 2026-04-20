@@ -4,16 +4,17 @@ import combat_object.combatant.Combatant;
 import combat_object.combatant.PC;
 import combat_object.combatant.info.AbilityModifier;
 import combat_object.combatant.info.Stats;
-import format.ColorStyles;
-import swing.swing_comp.SwingComp;
-import swing.swing_comp.SwingPane;
+import format.swing_comp.SwingComp;
+import format.swing_comp.SwingPane;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.border.MatteBorder;
 import java.awt.*;
 
-import static swing.swing_comp.SwingPane.*;
+import static format.ColorStyles.*;
+import static format.swing_comp.SwingComp.*;
+import static format.swing_comp.SwingPane.*;
 
 public class StatTooltipWindow extends JWindow {
 
@@ -30,8 +31,8 @@ public class StatTooltipWindow extends JWindow {
         JPanel root = newArrangedAs(SwingPane.BORDER)
                 .borderCollect(
                         north(getHeader()), center(getBody())
-                ).withBackground(ColorStyles.BG_DEEP)
-                .withBorder(new LineBorder(ColorStyles.DIVIDER, 1))
+                ).withBackground(BG_DEEP)
+                .withBorder(new LineBorder(DIVIDER, 1))
                 .applied(this::setContentPane)
                 .component();
 
@@ -53,18 +54,18 @@ public class StatTooltipWindow extends JWindow {
 
     private JPanel getHeader() {
         JPanel header = newArrangedAs(VERTICAL_BOX)
-                .withBackground(ColorStyles.BG_DEEP)
-                .withPaddedMatteBorderOnSide(ColorStyles.DIVIDER, BOTTOM, 8, 12, 7, 12)
+                .withBackground(BG_DEEP)
+                .withPaddedMatteBorderOnSide(DIVIDER, BOTTOM, 8, 12, 7, 12)
                 .component();
 
-        label(combatant, Font.PLAIN, 13f, ColorStyles.TEXT_PRIMARY).in(header);
+        label(combatant, Font.PLAIN, 13f).in(header);
 
         String subtitle = combatant.isEnemy() ? "Enemy"
                 : (combatant instanceof PC pc
                 ? pc.getStats().getClass5e().toString() + " · Level " + pc.getStats().getLevel()
                 : "Ally");
 
-        label(subtitle, Font.PLAIN, 10f, ColorStyles.TEXT_MUTED).in(header);
+        label(subtitle, Font.PLAIN, 10f).muted().in(header);
 
         return header;
     }
@@ -73,7 +74,7 @@ public class StatTooltipWindow extends JWindow {
         JPanel statPanel = newArrangedAs(VERTICAL_BOX)
                 .collect(
                         sectionLabel("Combat"), getStatRow("AC", String.valueOf(combatant.getArmorClass()))
-                ).withBackground(ColorStyles.BG_DEEP)
+                ).withBackground(BG_DEEP)
                 .withEmptyBorder(4, 12, 8, 12)
                 .component();
 
@@ -98,34 +99,34 @@ public class StatTooltipWindow extends JWindow {
 
     private JPanel buildFooter() {
         JPanel footer = newArrangedAs(FLOW_LEFT)
-                .withBackground(ColorStyles.BG_DARK)
-                .withPaddedMatteBorderOnSide(ColorStyles.DIVIDER, TOP, 5, 12, 5, 12)
+                .withBackground(BG_DARK)
+                .withPaddedMatteBorderOnSide(DIVIDER, TOP, 5, 12, 5, 12)
                 .component();
 
-        label("HP unknown until defeated", Font.ITALIC, 10f, ColorStyles.TEXT_HINT).in(footer);
+        label("HP unknown until defeated", Font.ITALIC, 10f, FG_HINT).in(footer);
 
         return footer;
     }
 
     private SwingComp<JLabel> sectionLabel(String text) {
-        return label(text.toUpperCase(), Font.PLAIN, 9f, ColorStyles.TEXT_HINT)
+        return label(text.toUpperCase(), Font.PLAIN, 9f, FG_HINT)
                 .onLeft().withEmptyBorder(6, 0, 3, 0);
     }
 
     private SwingComp<JPanel> getStatRow(Object label, String value) {
-        return getStatRow(label, value, ColorStyles.TEXT_PRIMARY);
+        return getStatRow(label, value, FOREGROUND);
     }
 
     private SwingComp<JPanel> getStatRow(Object label, String value, Color valueColor) {
-        JLabel typeLabel = label(label, Font.PLAIN, 11f, ColorStyles.TEXT_MUTED).component();
+        JLabel typeLabel = label(label, Font.PLAIN, 11f).muted().component();
         JLabel valueLabel = label(value, Font.PLAIN, 11f, valueColor).component();
 
         return newArrangedAs(BORDER)
                 .borderCollect(
                         west(typeLabel), east(valueLabel)
-                ).withBackground(ColorStyles.BG_DEEP)
+                ).withBackground(BG_DEEP)
                 .onLeft()
                 .withMaximumSize(Integer.MAX_VALUE, 22)
-                .withBorder(new MatteBorder(0, 0, 1, 0, ColorStyles.BACKGROUND));
+                .withBorder(new MatteBorder(0, 0, 1, 0, BACKGROUND));
     }
 }

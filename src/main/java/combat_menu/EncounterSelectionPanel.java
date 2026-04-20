@@ -7,10 +7,10 @@ import combat_object.combatant.Combatant;
 import combat_object.combatant.NPC;
 import combat_object.scenario.Scenario;
 import format.ColorStyles;
+import format.swing_comp.SwingPane;
 import lombok.*;
 import lombok.experimental.*;
-import swing.custom_component.ValidatedField;
-import swing.swing_comp.SwingPane;
+import swing_custom.ValidatedField;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -22,12 +22,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static format.ColorStyles.*;
-import static swing.swing_comp.SwingComp.fluent;
-import static swing.swing_comp.SwingComp.*;
-import static swing.swing_comp.SwingPane.fluent;
-import static swing.swing_comp.SwingPane.*;
+import static format.swing_comp.SwingComp.fluent;
+import static format.swing_comp.SwingComp.*;
+import static format.swing_comp.SwingPane.fluent;
+import static format.swing_comp.SwingPane.*;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+@ExtensionMethod(util.Filter.class)
 public class EncounterSelectionPanel extends JPanel {
 
     static Color BG_CARD_ABS = new Color(0x1C, 0x1E, 0x24);
@@ -39,6 +40,7 @@ public class EncounterSelectionPanel extends JPanel {
     List<NPC> quickAdds = new ArrayList<>();
     List<CombatantCard> activeCards = new ArrayList<>();
     JComboBox<Scenario> scenarioCombo;
+    JButton quickCombatantButton;
     JPanel partyContainer, dynamicContainer;
     JButton beginButton;
 
@@ -70,10 +72,10 @@ public class EncounterSelectionPanel extends JPanel {
                         "Combat Encounter", scenarioCombo
                 ).withBackground(BG_DARK);
 
+        quickCombatantButton = button("Quick Combatant", BG_SURFACE, QuickCombatant::new).enabled(false).component();
+
         panelIn(topBar, BorderLayout.EAST).arrangedAs(FLOW)
-                .collect(
-                        button("Quick Combatant", BG_SURFACE, QuickCombatant::new).enabled(false), spacer(10, 0)
-                ).withBackground(BG_DARK);
+                .collect(quickCombatantButton, spacer(10, 0)).withBackground(BG_DARK);
 
         partyContainer = newArrangedAs(VERTICAL_BOX).transparent().component();
         dynamicContainer = newArrangedAs(VERTICAL_BOX).transparent().component();
@@ -118,10 +120,10 @@ public class EncounterSelectionPanel extends JPanel {
         if (scenario == null) return;
 
         ArrayList<NPC> friendlies = new ArrayList<>(scenario.list(true, false));
-        quickAdds.stream().filter(c -> !c.isEnemy()).forEach(friendlies::add);
+        friendlies.addAll(quickAdds.filteredByIsEnemy(false));
 
         ArrayList<NPC> enemies = new ArrayList<>(scenario.list(false, false));
-        quickAdds.stream().filter(NPC::isEnemy).forEach(enemies::add);
+        enemies.addAll(quickAdds.filteredByIsEnemy(true));
 
         if (!friendlies.isEmpty()) {
             dynamicContainer.add(sectionLabel("Allies", ColorStyles.FRIENDLY));
@@ -132,6 +134,7 @@ public class EncounterSelectionPanel extends JPanel {
 
         dynamicContainer.revalidate();
         dynamicContainer.repaint();
+        quickCombatantButton.setEnabled(true);
         beginButton.setEnabled(true);
 
         updatingScenario = false;
@@ -150,10 +153,10 @@ public class EncounterSelectionPanel extends JPanel {
                 .collect(Collectors.partitioningBy(Combatant::isEnemy));
 
         List<Combatant> friendlies = new ArrayList<>(activeCombatants.get(false));
-        quickAdds.stream().filter(c -> !c.isEnemy()).forEach(friendlies::add);
+        friendlies.addAll(quickAdds.filteredByIsEnemy(false));
 
         List<Combatant> enemies = new ArrayList<>(activeCombatants.get(true));
-        quickAdds.stream().filter(NPC::isEnemy).forEach(enemies::add);
+        enemies.addAll(quickAdds.filteredByIsEnemy(true));
 
         EncounterManager.getEncounter().setEnemies(enemies);
         EncounterManager.getEncounter().setFriendlies(friendlies);
@@ -199,8 +202,8 @@ public class EncounterSelectionPanel extends JPanel {
                     .withBackground(accent)
                     .component();
 
-            label(combatant, Font.BOLD, 14f, ColorStyles.TEXT_PRIMARY)
-                    .withEmptyBorder(0, 10, 0, 0).in(this, BorderLayout.CENTER);
+            label(combatant, Font.BOLD, 14f).withEmptyBorder(0, 10, 0, 0)
+                    .in(this, BorderLayout.CENTER);
 
             JPanel right = new JPanel(new GridBagLayout());
             right.setOpaque(false);
@@ -210,7 +213,7 @@ public class EncounterSelectionPanel extends JPanel {
             gbc.insets = new Insets(0, 8, 0, 0);
             gbc.anchor = GridBagConstraints.CENTER;
 
-            JLabel initLabel = label("Initiative", Font.PLAIN, 11f, ColorStyles.TEXT_MUTED).component();
+            JLabel initLabel = label("Initiative", Font.PLAIN, 11f, ColorStyles.FG_MUTED).component();
             right.add(initLabel, gbc);
 
             SpinnerNumberModel model = new SpinnerNumberModel(10, 1, 20, 1);
@@ -229,7 +232,7 @@ public class EncounterSelectionPanel extends JPanel {
             absentCheck = fluent(new JCheckBox("Absent"))
                     .applied(b -> b.addActionListener(e -> updateAbsentState()))
                     .withDerivedFont(Font.PLAIN, 11f)
-                    .withBackgroundAndForeground(BG_SURFACE, TEXT_MUTED)
+                    .withBackgroundAndForeground(BG_SURFACE, FG_MUTED)
                     .transparent()
                     .withoutPaintedFocus().component();
             if (showAbsent)
@@ -271,6 +274,7 @@ public class EncounterSelectionPanel extends JPanel {
     private class QuickCombatant extends JDialog {
         ValidatedField nameField, hpField, acField;
         JToggleButton enemyToggle;
+        JButton confirmButton;
 
         {
             setTitle("Quick Combatant");
@@ -280,31 +284,28 @@ public class EncounterSelectionPanel extends JPanel {
                     .withEmptyBorder(20, 20, 20, 20)
                     .withPreferredSize(350, 180);
 
-            nameField = new ValidatedField("Name");
+            nameField = new ValidatedField("Name", this::onValidation);
             enemyToggle = fluent(new JToggleButton("Friendly"))
                     .withAction(t -> {
                         t.setText(t.isSelected() ? "Enemy" : "Friendly");
                         t.setBackground(t.isSelected() ? ENEMY : FRIENDLY);
                     }).withPaddedBorder(new LineBorder(BACKGROUND, 4), 10, 10, 10, 10)
                     .withBackground(FRIENDLY)
-                    .withText(Font.BOLD, 16f, TEXT_HINT)
+                    .withText(Font.BOLD, 16f, FG_HINT)
                     .component();
-            hpField = new ValidatedField("Health");
-            acField = new ValidatedField("Armor Class");
+            hpField = new ValidatedField("Health", this::onValidation, 100);
+            acField = new ValidatedField("Armor Class", this::onValidation, 40);
 
             panelIn(this, BorderLayout.CENTER).arrangedAs(TWO_COLUMN, 15, 15)
                     .collect(nameField, enemyToggle, hpField, acField);
 
-            button("Quick Add", SUCCESS, this::addQuickCombatant).in(this, BorderLayout.SOUTH);
+            confirmButton = button("Quick Add", SUCCESS, this::addQuickCombatant).in(this, BorderLayout.SOUTH);
 
             pack();
             setVisible(true);
         }
 
         void addQuickCombatant() {
-            boolean valid = Stream.of(nameField, hpField, acField).allMatch(ValidatedField::isValid);
-            if (!valid) return;
-
             NPC quickAdd = NPC.builder()
                     .name(nameField.getValue())
                     .hp(hpField.getValue().toInt())
@@ -314,6 +315,11 @@ public class EncounterSelectionPanel extends JPanel {
             quickAdds.add(quickAdd);
             updateScenario();
             dispose();
+        }
+
+        void onValidation() {
+            boolean isValid = Stream.of(nameField, hpField, acField).allMatch(ValidatedField::isValid);
+            confirmButton.setEnabled(isValid);
         }
 
     }

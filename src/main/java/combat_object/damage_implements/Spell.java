@@ -14,11 +14,13 @@ import static input.Key.*;
 public class Spell extends Implement implements combat_object.CombatObject {
 
     private final Effect effect;
+    private final boolean requiresConcentration;
 
-    public Spell(String name, int numDice, int dieSize, AbilityModifier savingThrow, Effect effect) {
+    public Spell(String name, int numDice, int dieSize, AbilityModifier savingThrow, Effect effect, boolean requiresConcentration) {
         super(name, numDice, dieSize, savingThrow, name.startsWith("Manual"));
 
         this.effect = Objects.requireNonNullElse(effect, Effect.NONE);
+        this.requiresConcentration = requiresConcentration;
     }
 
     @Override public boolean effectEquals(Effect o) {
@@ -43,13 +45,14 @@ public class Spell extends Implement implements combat_object.CombatObject {
                 TxtReader.getNumDice((String) params.get(DMG)),
                 TxtReader.getDieSize((String) params.get(DMG)),
                 (AbilityModifier) params.get(STAT),
-                Objects.requireNonNullElse((Effect) params.get(EFFECT), Effect.NONE)
+                Objects.requireNonNullElse((Effect) params.get(EFFECT), Effect.NONE),
+                (boolean) params.get(CONCENTRATION)
         );
     }
 
     public static class ManualSpell extends Spell {
         public ManualSpell(String name) {
-            super(name, 1, 100, null, Effect.NONE);
+            super(name, 1, 100, null, Effect.NONE, false);
         }
     }
 

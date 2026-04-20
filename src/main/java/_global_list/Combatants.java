@@ -4,13 +4,12 @@ import combat_object.combatant.Combatant;
 import encounter.Encounter;
 import lombok.*;
 import lombok.experimental.*;
-import util.Filter;
 
 import java.net.URL;
 import java.util.List;
 
 @NoArgsConstructor
-@ExtensionMethod(Filter.class)
+@ExtensionMethod(util.Filter.class)
 public class Combatants extends GlobalList<Combatant> {
 
     private static final Combatants INSTANCE = new Combatants();
@@ -29,11 +28,11 @@ public class Combatants extends GlobalList<Combatant> {
     }
 
     public static List<Combatant> getFriendlies() {
-        return INSTANCE.list.stream().filter(c -> !c.isEnemy()).toList();
+        return INSTANCE.list.filteredByIsEnemy(false);
     }
 
     public static List<Combatant> getEnemies() {
-        return INSTANCE.list.stream().filter(Combatant::isEnemy).toList();
+        return INSTANCE.list.filteredByIsEnemy(true);
     }
 
 }

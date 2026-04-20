@@ -4,10 +4,8 @@ import __main.Main;
 import __main.manager.CombatManager;
 import combat_menu.encounter_info.HealthBarPanel;
 import lombok.experimental.*;
-import swing.custom_component.ValidatedField;
+import swing_custom.ValidatedField;
 import util.StringUtils;
-
-import javax.swing.*;
 
 @ExtensionMethod(StringUtils.class)
 public class HealFormPanel extends ActionFormPanel {
@@ -24,9 +22,9 @@ public class HealFormPanel extends ActionFormPanel {
     }
 
     @Override
-    protected void buildFields(JPanel container) {
-        amountField = addLabeledField(container, "Heal amount", "Enter amount…").field();
-        amountField.setValidator(s -> s.toInt() != Integer.MIN_VALUE);
+    protected void buildFields() {
+        amountField = addLabeledField(fieldsPanel, "Heal Amount", "Enter Heal Amount").field();
+        amountField.setValidator(s -> s.toInt() > 0);
     }
 
     @Override

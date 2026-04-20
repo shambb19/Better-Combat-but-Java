@@ -5,18 +5,17 @@ import combat_menu.action_panel.ActionPanel;
 import combat_menu.action_panel.form.ActionFormPanel;
 import combat_menu.encounter_info.EncounterListPanel;
 import combat_menu.encounter_info.HealthBarPanel;
+import format.swing_comp.SwingPane;
 import lombok.*;
 import lombok.experimental.*;
 import org.intellij.lang.annotations.MagicConstant;
-import swing.swing_comp.SwingPane;
 
 import javax.swing.*;
 import java.awt.*;
 
-import static swing.swing_comp.SwingPane.*;
+import static format.swing_comp.SwingPane.*;
 
 @FieldDefaults(makeFinal = true)
-@RequiredArgsConstructor(staticName = "newInstance")
 public class CombatMenu extends JFrame {
 
     public static String TITLE = "Combat" + Main.TITLE;
@@ -29,9 +28,9 @@ public class CombatMenu extends JFrame {
         setIconImage(__main.Main.getAppIcon().getImage());
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        setJMenuBar(CombatMenuBar.newInstance());
+        setJMenuBar(new CombatMenuBar());
 
-        InspirationBar excessInspirationBar = InspirationBar.newInstance();
+        InspirationBar excessInspirationBar = new InspirationBar();
 
         encounterListPanel.setPreferredSize(new Dimension(300, 0));
 
@@ -41,10 +40,19 @@ public class CombatMenu extends JFrame {
                         south(excessInspirationBar)
                 ).withEmptyBorder(10, 10, 10, 10);
 
-        pack();
-        setLocationRelativeTo(null);
-        setExtendedState(Frame.MAXIMIZED_BOTH);
-        setResizable(false);
+        GraphicsConfiguration config = getGraphicsConfiguration();
+        Rectangle bounds = config.getBounds();
+        Insets insets = Toolkit.getDefaultToolkit().getScreenInsets(config);
+
+        int SHADOW = 8;
+
+        int x = bounds.x + insets.left - SHADOW;
+        int y = bounds.y + insets.top;
+        int width = bounds.width - insets.left - insets.right + (SHADOW * 2);
+        int height = bounds.height - insets.top - insets.bottom + SHADOW;
+
+        setBounds(x, y, width, height);
+
         setVisible(true);
     }
 

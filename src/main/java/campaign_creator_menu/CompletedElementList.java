@@ -4,11 +4,10 @@ import combat_object.CombatObject;
 import combat_object.combatant.Combatant;
 import combat_object.combatant.NPC;
 import combat_object.scenario.Scenario;
-import format.ColorStyles;
+import format.swing_comp.SwingPane;
 import lombok.*;
 import lombok.experimental.*;
 import org.intellij.lang.annotations.MagicConstant;
-import swing.swing_comp.SwingPane;
 import util.Filter;
 import util.Message;
 
@@ -19,9 +18,10 @@ import java.awt.*;
 import java.util.List;
 import java.util.*;
 
-import static swing.swing_comp.SwingComp.button;
-import static swing.swing_comp.SwingPane.*;
-
+import static format.ColorStyles.SUCCESS;
+import static format.swing_comp.SwingComp.fluent;
+import static format.swing_comp.SwingComp.*;
+import static format.swing_comp.SwingPane.*;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class CompletedElementList<T extends CombatObject> extends JPanel {
@@ -64,11 +64,11 @@ public class CompletedElementList<T extends CombatObject> extends JPanel {
     private JPanel getPanel() {
         String labelText = labelNames.get(newOption);
 
-        JLabel label = label(labelText, Font.PLAIN, 18f, ColorStyles.TEXT_PRIMARY)
+        JLabel label = label(labelText, Font.PLAIN, 18f)
                 .withEmptyBorder(4, 4, 4, 4)
                 .enabled(false).component();
 
-        JButton withNew = button(newOption.getName(), ColorStyles.SUCCESS,
+        JButton withNew = button(newOption.getName(), SUCCESS,
                 () -> root.logEdit(newOption, true))
                 .withDerivedFont(Font.PLAIN, 13f)
                 .component();
@@ -151,11 +151,11 @@ public class CompletedElementList<T extends CombatObject> extends JPanel {
             list.clearSelection();
 
             if (selectedValue instanceof Scenario && parent.isNotEnoughForScenario()) {
-                Message.template("Add more Combatants!");
+                Message.showAsInfoMessage("Add more Combatants!");
                 return;
             }
 
-            int route = Message.editOrRemoveOption(selectedValue.toString());
+            int route = Message.showEditOrRemovePrompt(selectedValue.toString());
 
             if (route == Message.EDIT_OPTION)
                 root.logEdit(selectedValue, false);

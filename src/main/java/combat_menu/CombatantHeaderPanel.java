@@ -3,28 +3,31 @@ package combat_menu;
 import combat_object.combatant.Combatant;
 import combat_object.combatant.PC;
 import format.ColorStyles;
+import format.swing_comp.SwingPane;
 import lombok.*;
 import lombok.experimental.*;
-import swing.swing_comp.SwingComp;
-import swing.swing_comp.SwingPane;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 
 import static format.ColorStyles.*;
-import static swing.swing_comp.SwingComp.label;
-import static swing.swing_comp.SwingPane.*;
+import static format.swing_comp.SwingComp.label;
+import static format.swing_comp.SwingComp.spacer;
+import static format.swing_comp.SwingPane.*;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class CombatantHeaderPanel extends JPanel {
 
-    static Color BG_ENEMY = new Color(0x2A, 0x1E, 0x1E);
+    static int INSPIRATION_INDEX = 2;
+    static int HP_INDEX = 4;
 
     static int TRACK_H = 6;
     static int PIP_D = 10;
 
-    JLabel inspirationValue;
+    JPanel statRow;
+    @NonFinal JPanel inspirationChip;
+    @NonFinal JPanel hpChip;
     RollTrack rollTrack;
     JLabel rollCaption;
     @Getter Combatant combatant;
@@ -34,61 +37,59 @@ public class CombatantHeaderPanel extends JPanel {
     public CombatantHeaderPanel(Combatant combatant) {
         this.combatant = combatant;
 
-        SwingPane.fluent(this).arrangedAs(BORDER)
-                .withBackground((combatant.isEnemy()) ? BG_ENEMY : BACKGROUND)
-                .withEmptyBorder(20, 20, 20, 20);
-
-        JPanel stack = SwingPane.panelIn(this, BorderLayout.CENTER).arrangedAs(VERTICAL_BOX)
-                .transparent()
-                .component();
-
-        JPanel nameRow = row();
-        stack.add(nameRow);
-        stack.add(SwingComp.spacer(0, 10));
-
-        label(combatant, Font.PLAIN, 26f, ColorStyles.TEXT_PRIMARY)
-                .in(nameRow);
-        nameRow.add(SwingComp.spacer(12, 0));
+        fluent(this).arrangedAs(VERTICAL_BOX)
+                .withBackground((combatant.isEnemy()) ? UNKNOWN : BACKGROUND)
+                .withEmptyBorder(20, 20, 20, 20)
+                .onLeft();
 
         String classText = (combatant instanceof PC pc) ? pc.getStats().getClass5e().toString() :
                 (combatant.isEnemy() ? "Enemy" : "Ally");
 
-        nameRow.add(badge(classText));
-        nameRow.add(SwingComp.spacer(8, 0));
+        JPanel nameRow = row().collect(
+                label(combatant, Font.PLAIN, 26f, combatant.isEnemy() ? UNKNOWN : FOREGROUND),
+                spacer(12, 0), badge(classText), spacer(8, 0)
+        ).transparent().component();
 
-        JPanel statsRow = row();
-        stack.add(statsRow);
-        stack.add(SwingComp.spacer(0, 12));
+        inspirationChip = new JPanel();
+        hpChip = new JPanel();
 
-        statChip(statsRow, "Initiative", "+" + combatant.getInitiative());
-        statsRow.add(dividerLine());
-
-        inspirationValue = statChip(statsRow, "Inspiration used", combatant.getNumInspirationUsed() + " / 2");
-        statsRow.add(dividerLine());
-
-        JLabel hpValue = statChip(statsRow, "HP", combatant.getHealthBarString());
-        if (combatant.getHpRatio() < 0.35)
-            hpValue.setForeground(ColorStyles.CRITICAL);
-
-        JPanel rollRow = row();
-        stack.add(rollRow);
-
-        label("Roll luck", Font.PLAIN, 11f, ColorStyles.TEXT_MUTED)
-                .in(rollRow);
-        rollRow.add(SwingComp.spacer(12, 0));
+        statRow = row().collect(
+                statChip("Initiative", "+" + combatant.getInitiative(), false), dividerLine(),
+                inspirationChip, dividerLine(),
+                hpChip
+        ).transparent().component();
 
         rollTrack = new RollTrack();
-        rollRow.add(rollTrack);
-        rollRow.add(SwingComp.spacer(10, 0));
+        rollCaption = label("-", Font.PLAIN, 11f, FG_HINT).component();
 
-        rollCaption = label("-", Font.PLAIN, 11f, TEXT_HINT).in(rollRow);
+        JPanel rollRow = row().collect(
+                label("Roll Luck", Font.PLAIN, 11f, FG_MUTED), spacer(12, 0),
+                rollTrack, spacer(10, 0),
+                rollCaption
+        ).transparent().component();
+
+        fluent(this).collect(
+                nameRow, spacer(0, 10),
+                statRow, spacer(0, 12),
+                rollRow
+        );
+        // yet another absolutely heinous solution. Hey, as long as it works??
+        for (Component c : getComponents())
+            if (c instanceof JComponent j)
+                j.setAlignmentX(LEFT_ALIGNMENT);
 
         refresh();
     }
 
     public void refresh() {
-        inspirationValue.setText(combatant.getNumInspirationUsed() + " / 2");
-        inspirationValue.setForeground(combatant.getNumInspirationUsed() > 2 ? ColorStyles.CRITICAL : ColorStyles.TEXT_PRIMARY);
+        statRow.remove(inspirationChip);
+        int numInspirations = combatant.getNumInspirationUsed();
+        inspirationChip = statChip("Inspiration Used", numInspirations + " / 2", numInspirations > 2);
+        statRow.add(inspirationChip, INSPIRATION_INDEX);
+
+        statRow.remove(hpChip);
+        hpChip = statChip("HP", combatant.getHealthBarString(), combatant.getHpRatio() < 0.35);
+        statRow.add(hpChip, HP_INDEX);
 
         luck = combatant.getLuckScore();
 
@@ -96,7 +97,7 @@ public class CombatantHeaderPanel extends JPanel {
         String caption;
 
         if (luck == 0) {
-            c = ColorStyles.TEXT_HINT;
+            c = ColorStyles.FG_HINT;
             caption = "Too early to tell";
         } else if (luck >= 3.0) {
             c = ColorStyles.PERFECT;
@@ -119,26 +120,32 @@ public class CombatantHeaderPanel extends JPanel {
         });
     }
 
-    private static JPanel row() {
-        return newArrangedAs(HORIZONTAL_BOX).transparent().onLeft().component();
+    private static SwingPane row() {
+        return newArrangedAs(HORIZONTAL_BOX).transparent().onLeft().toPane();
     }
 
-    private static JLabel badge(String text) {
-        return label(text, Font.PLAIN, 11f, ColorStyles.TEXT_MUTED)
-                .withPaddedBorder(new LineBorder(DIVIDER, 1), 2, 8, 2, 8)
+    private JLabel badge(String text) {
+        Color fg = combatant.isEnemy() ? UNKNOWN : FG_MUTED;
+        Color border = combatant.isEnemy() ? UNKNOWN : DIVIDER;
+
+        return label(text, Font.PLAIN, 11f, fg)
+                .withPaddedBorder(new LineBorder(border, 1), 2, 8, 2, 8)
                 .component();
     }
 
-    private static JLabel statChip(JPanel parent, String labelText, String value) {
-        JPanel chip = SwingPane.panelIn(parent).arrangedAs(VERTICAL_BOX)
+    private static JPanel statChip(String labelText, String value, boolean criticalCondition) {
+        JPanel chip = newArrangedAs(VERTICAL_BOX)
                 .withEmptyBorder(20, 20, 20, 20)
                 .transparent().component();
 
-        label(labelText.toUpperCase(), Font.PLAIN, 10f, ColorStyles.TEXT_MUTED)
+        label(labelText.toUpperCase(), Font.PLAIN, 10f, ColorStyles.FG_MUTED)
                 .onLeft().in(chip);
 
-        return label(value, Font.BOLD, 14f, ColorStyles.TEXT_PRIMARY)
-                .onLeft().in(chip);
+        label(value, Font.BOLD, 14f, criticalCondition ? CRITICAL : FOREGROUND)
+                .onLeft()
+                .in(chip);
+
+        return chip;
     }
 
     private static Component dividerLine() {
@@ -148,7 +155,7 @@ public class CombatantHeaderPanel extends JPanel {
                 .withBackground(DIVIDER)
                 .component();
 
-        return SwingPane.newArrangedAs(BORDER)
+        return newArrangedAs(BORDER)
                 .borderCollect(center(d))
                 .transparent()
                 .withEmptyBorder(0, 10, 0, 10)
@@ -163,7 +170,7 @@ public class CombatantHeaderPanel extends JPanel {
         private double displayLuck = 0;
         private Color fillColor = ColorStyles.HEALTHY;
 
-        RollTrack() {
+        {
             setOpaque(false);
             setPreferredSize(new Dimension(200, PIP_D));
             setMaximumSize(new Dimension(Short.MAX_VALUE, PIP_D));

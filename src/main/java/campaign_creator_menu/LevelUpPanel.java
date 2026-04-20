@@ -6,7 +6,6 @@ import combat_object.combatant.info.AbilityModifier;
 import combat_object.damage_implements.Spell;
 import combat_object.damage_implements.Weapon;
 import encounter.Encounter;
-import format.ColorStyles;
 import lombok.*;
 import lombok.experimental.*;
 
@@ -16,12 +15,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static swing.swing_comp.SwingPane.*;
+import static format.ColorStyles.BACKGROUND;
+import static format.ColorStyles.SUCCESS;
+import static format.swing_comp.SwingComp.fluent;
+import static format.swing_comp.SwingComp.*;
+import static format.swing_comp.SwingPane.*;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+@ExtensionMethod(util.Filter.class)
 public class LevelUpPanel extends JPanel {
 
-    static String INSTRUCTIONS = "Edit any combatant information affected by the level-up. " +
+    static String INSTRUCTIONS = "Edit any combatant information on by the level-up. " +
             "Note that HP and proficiency bonus have been automatically increased by the standard amount " +
             "for the player's class and new level.";
 
@@ -40,12 +44,11 @@ public class LevelUpPanel extends JPanel {
         this.root = root;
         panelsMap = new HashMap<>();
 
-        party = encounter.getFriendlies().stream()
-                .filter(PC.class::isInstance).map(PC.class::cast).toList().toArray(new PC[0]);
+        party = encounter.getFriendlies().castTo(PC.class).toArray(new PC[0]);
 
         setLayout(new BorderLayout());
 
-        editingLabel = label("Editing " + party[0], Font.PLAIN, 18f, ColorStyles.TEXT_PRIMARY).onLeft().component();
+        editingLabel = label("Editing " + party[0]).withDerivedFont(Font.PLAIN, 18f).onLeft().component();
 
         progressBar = new JProgressBar(SwingConstants.HORIZONTAL, 0, party.length + 1);
         fluent(progressBar).withEmptyBorder(10, 10, 10, 10);
@@ -64,7 +67,7 @@ public class LevelUpPanel extends JPanel {
 
         add(cards, BorderLayout.CENTER);
 
-        button("Next", ColorStyles.SUCCESS, this::showNext)
+        button("Next", SUCCESS, this::showNext)
                 .withCancelOption(root::finishLevelUpProcess).in(this, BorderLayout.SOUTH);
     }
 
@@ -76,7 +79,7 @@ public class LevelUpPanel extends JPanel {
 
         for (AbilityModifier stat : AbilityModifier.values())
             if (!stat.equals(AbilityModifier.OPTION))
-                button(stat.name() + ": " + pc.getStats().get(stat), ColorStyles.BACKGROUND, null)
+                button(stat.name() + ": " + pc.getStats().get(stat), BACKGROUND, null)
                         .withAction(b -> {
                             pc.getStats().increment(stat);
                             b.setText(stat.name() + ": " + pc.getStats().get(stat));

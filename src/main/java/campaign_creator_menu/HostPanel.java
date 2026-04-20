@@ -2,14 +2,16 @@ package campaign_creator_menu;
 
 import campaign_creator_menu.input.CombatantInputPanel;
 import campaign_creator_menu.input.ScenarioInputPanel;
-import format.ColorStyles;
+import format.swing_comp.SwingPane;
 import org.intellij.lang.annotations.MagicConstant;
-import swing.swing_comp.SwingPane;
 
 import javax.swing.*;
 import java.awt.*;
 
-import static swing.swing_comp.SwingPane.*;
+import static format.ColorStyles.PERFECT;
+import static format.swing_comp.SwingComp.button;
+import static format.swing_comp.SwingComp.label;
+import static format.swing_comp.SwingPane.*;
 
 public class HostPanel extends JPanel {
 
@@ -30,8 +32,7 @@ public class HostPanel extends JPanel {
         cardLayout = new CardLayout();
         cards = new JPanel(cardLayout);
 
-        JLabel disabledPanel = label("Select a completed combatant or add a new one to continue.",
-                Font.PLAIN, 18f, ColorStyles.TEXT_PRIMARY)
+        JLabel disabledPanel = label("Select a completed combatant or add a new one to continue.", Font.PLAIN, 18f)
                 .enabled(false).component();
 
         cards.add(inputPanel, COMBATANT_INPUT);
@@ -41,7 +42,7 @@ public class HostPanel extends JPanel {
 
         cardLayout.show(cards, DISABLED);
 
-        levelUpButton = button("Level up party", ColorStyles.PERFECT, () -> changeInputPanel(LEVEL, true))
+        levelUpButton = button("Level up party", PERFECT, () -> changeInputPanel(LEVEL, true))
                 .component();
 
         panelIn(this).arrangedAs(BORDER).borderCollect(

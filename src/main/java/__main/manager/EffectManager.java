@@ -15,27 +15,32 @@ import static combat_object.damage_implements.Effect.*;
 @UtilityClass
 public class EffectManager {
 
-    private static final ArrayList<DealtEffect> EFFECTS = new ArrayList<>();
+    private static final List<DealtEffect> EFFECTS = new ArrayList<>();
 
     public void logEffect(Combatant affected, Combatant by, Implement implement) {
-        if (!(implement instanceof Spell spell) || spell.effectEquals(Effect.NONE)) return;
-        EFFECTS.add(new DealtEffect(affected, by, spell.getEffect()));
+        if (!(implement instanceof Spell spell)) return;
+
+        if (spell.isRequiresConcentration())
+            ConcentrationManager.startNewConcentration(by, affected, spell);
+
+        if (!spell.effectEquals(NONE))
+            EFFECTS.add(new DealtEffect(affected, by, spell.getEffect()));
     }
 
     public boolean hasEffect(Combatant query, Effect effect) {
         if (effect.equals(Effect.BONUS_DAMAGE))
             throw new ClassCastException("hasEffect in EffectManager: use isHexedBy for Effect.BONUS_DAMAGE");
 
-        return EFFECTS.stream().anyMatch(e -> e.affected().equals(query) && e.effect().equals(effect));
+        return EFFECTS.stream().anyMatch(e -> e.on().equals(query) && e.effect().equals(effect));
     }
 
     public boolean isHexedBy(Combatant targetQuery, Combatant byQuery) {
         return EFFECTS.stream().filter(e -> e.effect.equals(BONUS_DAMAGE))
-                .anyMatch(e -> e.affected.equals(targetQuery) && e.by.equals(byQuery));
+                .anyMatch(e -> e.on.equals(targetQuery) && e.by.equals(byQuery));
     }
 
     public void removeEffectOn(Combatant query, Effect effect) {
-        EFFECTS.removeIf(e -> e.affected.equals(query) && e.effect.equals(effect));
+        EFFECTS.removeIf(e -> e.on.equals(query) && e.effect.equals(effect));
     }
 
     public void logTurnEnd(Combatant query) {
@@ -49,12 +54,12 @@ public class EffectManager {
             EFFECTS.removeIf(e -> e.by.equals(query) && e.effect.equals(effect));
         }
         for (Effect effect : effectsOnCombatant) {
-            EFFECTS.removeIf(e -> e.affected.equals(query) && e.effect.equals(effect));
+            EFFECTS.removeIf(e -> e.on.equals(query) && e.effect.equals(effect));
         }
         for (Effect effect : effectsOnCombatantWithRoll) {
             if (!hasEffect(query, effect)) return;
             EFFECTS.removeIf(e -> {
-                int result = Message.getWithLoopUntilInt(
+                int result = Message.promptIntWithLoop(
                         "Roll and enter a saving throw to remove the effect " + effect.name() + " from " + query,
                         effect.name() + " Save Throw");
                 return result >= 10;
@@ -71,9 +76,9 @@ public class EffectManager {
     }
 
     public List<DealtEffect> getEffectsAsList() {
-        return EFFECTS.stream().toList();
+        return EFFECTS;
     }
 
-    public record DealtEffect(Combatant affected, Combatant by, Effect effect) {
+    public record DealtEffect(Combatant on, Combatant by, Effect effect) {
     }
 }

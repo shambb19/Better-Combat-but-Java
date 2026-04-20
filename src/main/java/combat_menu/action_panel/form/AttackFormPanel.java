@@ -9,23 +9,22 @@ import combat_object.damage_implements.Effect;
 import combat_object.damage_implements.Implement;
 import combat_object.damage_implements.Spell;
 import combat_object.damage_implements.Weapon;
-import format.ColorStyles;
 import lombok.*;
 import lombok.experimental.*;
-import swing.custom_component.ValidatedField;
+import swing_custom.ValidatedField;
 import util.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
 
 import static combat_object.damage_implements.Effect.*;
-import static swing.swing_comp.SwingComp.fluent;
-import static swing.swing_comp.SwingComp.*;
-import static swing.swing_comp.SwingPane.fluent;
-import static swing.swing_comp.SwingPane.*;
+import static format.ColorStyles.*;
+import static format.swing_comp.SwingComp.fluent;
+import static format.swing_comp.SwingComp.*;
+import static format.swing_comp.SwingPane.fluent;
+import static format.swing_comp.SwingPane.*;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @ExtensionMethod(StringUtils.class)
@@ -34,7 +33,8 @@ public class AttackFormPanel extends ActionFormPanel {
     static final Implement HEADER_WEAPON = new Weapon.ManualWeapon("── Weapons ──");
     static final Implement HEADER_SPELL = new Spell.ManualSpell("── Spells ──");
 
-    static final Effect[] ATTACK_EFFECTS = new Effect[]{POISON, FRIGHTEN, BLIND, PRONE, RESTRAIN};
+    static final Effect[] ATTACKER_EFFECTS = new Effect[]{POISON};
+    static final Effect[] TARGET_EFFECTS = new Effect[]{FRIGHTEN, BLIND, RESTRAIN};
 
     JComboBox<Implement> attackCombo;
     ValidatedField rollField;
@@ -67,29 +67,31 @@ public class AttackFormPanel extends ActionFormPanel {
     }
 
     @Override
-    protected void buildFields(JPanel container) {
-        attackCombo = addMixedCombo(container);
+    protected void buildFields() {
+        attackCombo = addMixedCombo(fieldsPanel);
 
-        LabeledField rollRow = addLabeledField(container, "Roll for hit", "Enter roll");
+        LabeledField rollRow = addLabeledField(fieldsPanel, "Roll for hit", "Enter Roll");
         rollFieldLabel = rollRow.label();
         rollField = rollRow.field();
-
         rollField.setVisible(false);
-
-        attackCombo.addActionListener(e -> onSelectionChanged());
-
         rollField.setValidator(s -> {
             int v = s.toInt();
-            if (v == Integer.MIN_VALUE) return false;
             return v > 0 && v <= 20;
         });
 
-        noticeConditions = new LinkedHashMap<>();
-        for (Effect e : ATTACK_EFFECTS) {
-            noticeConditions.put(e, EffectManager.hasEffect(attacker, e));
-        }
+        attackCombo.addActionListener(e -> onSelectionChanged());
 
-        addNotices(container);
+        addNotices();
+    }
+
+    @Override
+    protected void addNotices() {
+        for (Effect e : ATTACKER_EFFECTS)
+            noticeConditions.put(e, EffectManager.hasEffect(attacker, e));
+        for (Effect e : TARGET_EFFECTS)
+            noticeConditions.put(e, EffectManager.hasEffect(target, e));
+
+        super.addNotices();
     }
 
     @Override
@@ -109,6 +111,12 @@ public class AttackFormPanel extends ActionFormPanel {
         }
     }
 
+    @Override
+    protected void onTargetChanged() {
+        super.onTargetChanged();
+        addNotices();
+    }
+
     private void showMissResult(String reason) {
         buttonRow.setVisible(false);
 
@@ -121,7 +129,7 @@ public class AttackFormPanel extends ActionFormPanel {
 
         Timer drain = new Timer(20, null);
         drain.addActionListener(e -> {
-            if (System.currentTimeMillis() - startTime == DURATION) {
+            if (System.currentTimeMillis() - startTime >= DURATION) {
                 drain.stop();
                 CombatManager.finishAction();
             }
@@ -133,16 +141,16 @@ public class AttackFormPanel extends ActionFormPanel {
         JPanel banner = newArrangedAs(BORDER, 10, 0)
                 .withBackground(new Color(0x2A, 0x1E, 0x1E))
                 .withMaximumSize(Integer.MAX_VALUE, 56)
-                .withPaddedMatteBorderOnSide(new Color(0xe2, 0x4b, 0x4a), LEFT, 10, 12, 10, 10)
+                .withPaddedMatteBorderOnSide(ENEMY, LEFT, 10, 12, 10, 10)
                 .component();
 
-        label("✕", Font.PLAIN, 15f, new Color(0xE2, 0x4B, 0x4A)).in(banner, BorderLayout.WEST);
+        label("✕", Font.PLAIN, 15f, ENEMY).in(banner, BorderLayout.WEST);
 
         panelIn(banner, BorderLayout.CENTER).arrangedAs(VERTICAL_BOX)
                 .collect(
-                        label("Attack missed", Font.BOLD, 13f, new Color(0xE2, 0x4B, 0x4A)),
+                        label("Attack missed", Font.BOLD, 13f, ENEMY),
                         spacer(0, 2),
-                        label(reason, Font.PLAIN, 11f, new Color(0x6B, 0x70, 0x80))
+                        label(reason, Font.PLAIN, 11f).muted()
                 ).transparent();
 
         return banner;
@@ -157,8 +165,8 @@ public class AttackFormPanel extends ActionFormPanel {
 
     private JComboBox<Implement> addMixedCombo(JPanel container) {
         JComboBox<Implement> combo = fluent(new JComboBox<Implement>())
-                .withText(Font.PLAIN, 13f, ColorStyles.TEXT_SECTION)
-                .withBackground(ColorStyles.TRACK)
+                .withText(Font.PLAIN, 13f, FG_SECTION)
+                .withBackground(TRACK)
                 .applied(b -> {
                     b.setRenderer(new MixedComboRenderer());
                     b.setModel(new MixedComboModel());
@@ -208,20 +216,24 @@ public class AttackFormPanel extends ActionFormPanel {
                                                       int index, boolean selected, boolean focused) {
             super.getListCellRendererComponent(list, value, index, selected, focused);
 
-            boolean isHeader = value instanceof Implement
-                    && (value.equals(HEADER_WEAPON) || value.equals(HEADER_SPELL));
+            if (!(value instanceof Implement implement)) return this;
+
+            boolean isHeader = value.equals(HEADER_WEAPON) || value.equals(HEADER_SPELL);
 
             if (isHeader) {
                 fluent(this)
-                        .withText(Font.PLAIN, 11f, new Color(0x50, 0x55, 0x68))
-                        .withBackground(new Color(0x23, 0x26, 0x2e)).enabled(false);
-                setText(value.toString());
-            } else if (value instanceof Weapon w) {
+                        .withText(Font.PLAIN, 11f, FG_HINT)
+                        .withBackground(BG_SURFACE).enabled(false);
+                setText(implement.toString());
+            } else if (implement.isManual()) {
+                setText(implement.getName());
+                setForeground(FG_MUTED);
+            } else if (implement instanceof Weapon w) {
                 setText(w.getName());
-                setForeground(new Color(0xD8, 0xDC, 0xE8));
-            } else if (value instanceof Spell s) {
-                setText(s.getName() + (s.hasSave() ? "  [save]" : ""));
-                setForeground(new Color(0xAF, 0xA9, 0xEC)); // purple tint for spells
+                setForeground(FOREGROUND);
+            } else if (implement instanceof Spell s) {
+                setText(s.getName() + (s.hasSave() ? "  [Save]" : ""));
+                setForeground(SPELL);
             }
             return this;
         }

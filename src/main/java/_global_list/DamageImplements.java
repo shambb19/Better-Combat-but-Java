@@ -28,11 +28,11 @@ public class DamageImplements extends GlobalList<Implement> {
     }
 
     public static <T extends Implement> T get(String name, Class<T> type) {
-        return INSTANCE.list.matchingClass(type).firstWithToStringEquals(name);
+        return INSTANCE.list.castTo(type).firstWithToStringEquals(name);
     }
 
     public static <T extends Implement> List<T> toList(Class<T> type) {
-        return INSTANCE.list.matchingClass(type);
+        return INSTANCE.list.castTo(type);
     }
 
 }

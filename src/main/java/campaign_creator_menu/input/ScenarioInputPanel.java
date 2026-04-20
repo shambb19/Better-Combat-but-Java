@@ -4,19 +4,20 @@ import campaign_creator_menu.CampaignCreatorMenu;
 import campaign_creator_menu.CompletedElementsList;
 import combat_object.combatant.NPC;
 import combat_object.scenario.Scenario;
-import format.ColorStyles;
+import format.swing_comp.SwingPane;
 import lombok.*;
 import lombok.experimental.*;
-import swing.custom_component.ValidatedField;
-import swing.swing_comp.SwingComp;
-import swing.swing_comp.SwingPane;
+import swing_custom.ValidatedField;
 import util.Message;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.logging.Logger;
 
-import static swing.swing_comp.SwingPane.*;
+import static format.ColorStyles.SUCCESS;
+import static format.swing_comp.SwingComp.button;
+import static format.swing_comp.SwingComp.textArea;
+import static format.swing_comp.SwingPane.*;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class ScenarioInputPanel extends JPanel {
@@ -40,12 +41,11 @@ public class ScenarioInputPanel extends JPanel {
         friendlyPanel = new ListSelectionPanel<>(sibling.getFriendlyNPCs(), "Friendly NPCs");
         enemyPanel = new ListSelectionPanel<>(sibling.getEnemies(), "Enemies");
 
-        JTextArea label = SwingComp.textArea(LABEL_TEXT)
+        JTextArea label = textArea(LABEL_TEXT)
                 .withMaximumSize(Integer.MAX_VALUE, 60)
                 .component();
 
-        nameField = new ValidatedField("Scenario Name");
-        nameField.setValidator(s -> !s.isBlank());
+        nameField = new ValidatedField("Scenario Name", null);
         nameField.setPreferredSize(new Dimension(150, nameField.getPreferredSize().height));
 
         JPanel namePanel = SwingPane.newArrangedAs(SwingPane.FLOW).collect("Scenario Name", nameField).component();
@@ -57,7 +57,7 @@ public class ScenarioInputPanel extends JPanel {
         JPanel infoPanel = SwingPane.newArrangedAs(SwingPane.BORDER).borderCollect(
                 north(namePanel), center(listsContainer)).component();
 
-        JPanel okCancelPanel = SwingComp.button("Add Scenario", ColorStyles.SUCCESS, this::logAndGetScenario)
+        JPanel okCancelPanel = button("Add Scenario", SUCCESS, this::logAndGetScenario)
                 .withCancelOption(() -> root.setScenarioPanelEnabled(false))
                 .component();
 
@@ -71,7 +71,7 @@ public class ScenarioInputPanel extends JPanel {
             root.logScenarioCompleted(scenario);
             root.setScenarioPanelEnabled(false);
         } catch (Exception error) {
-            Message.error(error.getMessage() + "; check all fields are filled");
+            Message.showAsErrorMessage(error.getMessage() + "; check all fields are filled");
             Logger.getAnonymousLogger().severe("CombatantInputPanel.logAndGetCombatant: " + error.getMessage());
         }
     }

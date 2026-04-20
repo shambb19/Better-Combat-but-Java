@@ -13,7 +13,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Optional;
 
 import static util.TxtReader.withoutComments;
 
@@ -26,7 +29,7 @@ public class Reader5e {
         List<ItemBlock> blocks = getAllItemBlocks(lines);
 
         return blocks.stream()
-                .map(block -> createObject(block.header, block.params, instanceType))
+                .map(block -> createObject(block.header, block.params))
                 .filter(instanceType::isInstance)
                 .map(instanceType::cast)
                 .toList();
@@ -49,18 +52,7 @@ public class Reader5e {
         return blocks;
     }
 
-    private static <T extends CombatObject> Object createObject(String header, EnumMap<Key, Object> map, Class<T> instanceType) {
-        var headerClasses = Map.of(
-                ".party", PC.class, ".npc", NPC.class, ".enemy", NPC.class,
-                ".weapon", Weapon.class, ".spell", Spell.class,
-                ".scenario", Scenario.class
-        );
-        var targetClass = headerClasses.get(header);
-
-        if (targetClass == null || !instanceType.isAssignableFrom(targetClass)) {
-            return null;
-        }
-
+    private static Object createObject(String header, EnumMap<Key, Object> map) {
         return switch (header) {
             case ".party" -> PC.from(map);
             case ".npc" -> NPC.from(map, false);
@@ -95,8 +87,7 @@ public class Reader5e {
         return map;
     }
 
-    @Value
-    private static class ItemBlock {
+    @Value private static class ItemBlock {
         String header;
         EnumMap<Key, Object> params;
 

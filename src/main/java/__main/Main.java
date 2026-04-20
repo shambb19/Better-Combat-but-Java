@@ -22,6 +22,7 @@ public class Main {
 
     public static final String VERSION = "v4.4.0";
     public static final String TITLE = " || DnD Red Bull Edition " + VERSION;
+    public static final long START_TIME_MILLISECONDS;
 
     public static final int COMBAT = 0, CREATOR = 1;
 
@@ -34,6 +35,7 @@ public class Main {
 
     static {
         FlatSpacegrayIJTheme.setup();
+        START_TIME_MILLISECONDS = System.currentTimeMillis();
     }
 
     public static void main(String[] args) {
@@ -64,7 +66,7 @@ public class Main {
     public static void closeUploadAndRun(@MagicConstant(intValues = {COMBAT, CREATOR}) int runMode, UploadMain source) {
         if (runMode == COMBAT) {
             EncounterManager.confirmQueueFinalized();
-            combatMenu = CombatMenu.newInstance();
+            combatMenu = new CombatMenu();
             combatMenu.setVisible(true);
             refreshUI();
         } else {

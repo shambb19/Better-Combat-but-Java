@@ -2,39 +2,34 @@ package util;
 
 import lombok.experimental.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.stream.Stream;
 
 @ExtensionMethod(StringUtils.class)
 public class TxtReader {
 
     /**
-     * @param line any line of .txt code (name: Frodo, level: 6, effect: NONE, etc.)
-     * @return only the identifier for that line without the '=' (for example,
-     * "name: Frodo" would return "Frodo")
+     * Returns "key" from any "key: value" code line
      */
     public static String key(String line) {
-        return line.split(": ")[0].trim();
+        if (!line.contains(": ")) return line;
+        return line.substring(0, line.indexOf(": "));
     }
 
     /**
-     * @param line any line of .txt code (name: Frodo, level: 6, effect: NONE, etc.)
-     * @return only the value for that line (for example, "name: Frodo" would return "Frodo")
+     * Returns "value" from any "key: value" code line
      */
     public static String value(String line) {
-        if (line.indexOf(": ") != line.lastIndexOf(": "))
-            return line.substring(line.indexOf(": ") + 2).trim();
-        else
-            return line.split(": ")[1].trim();
+        return line.substring(line.indexOf(": ") + 2);
     }
 
     /**
-     * @param line A line of .txt code with the precondition that the value for its
-     *             key is a list (weapons, spells, stats, scenarios, etc.)
-     * @return A list of the elements of the line (with regex ", ") and with brackets
-     * removed (for example, "[Frodo, Samwise, Aragorn]" returns
-     * ["Frodo", "Samwise", "Aragorn"])
+     * Returns the values of code value array as String[]
+     * <p>
+     * i.e. "key: [a, b, c, d]"
+     * <p>
+     * returns
+     * <p>
+     * {"a", "b", "c", "d"}
      */
     public static String[] listTextAsArray(String line) {
         String str;
@@ -51,17 +46,10 @@ public class TxtReader {
      * @return The same line without comments (using the keys "//", "~", and "#")
      */
     public static String withoutComments(String line) {
-        ArrayList<Integer> commentIndexes = new ArrayList<>(List.of(
-                line.indexOf("//"), line.indexOf("~"), line.indexOf("#")
-        ));
-        commentIndexes.removeIf(index -> index < 0);
+        int firstCommentIndex = Stream.of("//", "~", "#")
+                .filter(line::contains).map(line::indexOf).sorted().findFirst().orElse(line.length());
 
-        if (!commentIndexes.isEmpty()) {
-            int stopIdx = Collections.min(commentIndexes);
-            return line.substring(0, stopIdx).trim();
-        }
-
-        return line.trim();
+        return line.substring(0, firstCommentIndex).trim();
     }
 
     /**

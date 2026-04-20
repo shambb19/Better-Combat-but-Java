@@ -3,10 +3,10 @@ package combat_menu.action_panel;
 import __main.manager.EncounterManager;
 import __main.manager.InspirationManager;
 import _global_list.Resource;
+import format.swing_comp.SwingPane;
 import lombok.*;
 import lombok.experimental.*;
 import org.intellij.lang.annotations.MagicConstant;
-import swing.swing_comp.SwingPane;
 import util.Locators;
 
 import javax.swing.*;
@@ -127,12 +127,12 @@ public class ActionButtons extends JPanel {
                 }
             } else if (buttonType.equals("Attack") || buttonType.equals("Heal")) {
                 if (!isButtonAvailable()) {
-                    toolTipText += "(No Actions Available)";
+                    toolTipText += " (No Actions Available)";
                     enabled = false;
                 } else if (turnStatus == BONUS_ACTION) {
                     highlightColor = GOLD;
                     backgroundColor = GOLD_TINT;
-                    toolTipText += "(Bonus Action)";
+                    toolTipText += " (Bonus Action)";
                 }
             } else if (buttonType.equals("Use Inspiration") && EncounterManager.getCurrentCombatant().isEnemy()) {
                 toolTipText = "Inspiration use is for the friendly team only";

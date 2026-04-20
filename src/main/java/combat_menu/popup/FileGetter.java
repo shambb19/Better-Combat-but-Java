@@ -30,7 +30,7 @@ public class FileGetter {
             try {
                 url = fileChooser.getSelectedFile().toURI().toURL();
             } catch (MalformedURLException e) {
-                Message.fileError(e);
+                Message.showFileErrorMessage(e);
             }
     }
 }

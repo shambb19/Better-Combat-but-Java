@@ -1,55 +1,55 @@
 package util;
 
-import format.ColorStyles;
 import lombok.*;
-import swing.swing_comp.SwingComp;
-import swing.swing_comp.SwingPane;
 
 import javax.swing.*;
 import javax.swing.border.MatteBorder;
 import java.awt.*;
+import java.util.Optional;
+
+import static format.ColorStyles.*;
+import static format.swing_comp.SwingComp.*;
+import static format.swing_comp.SwingPane.fluent;
+import static format.swing_comp.SwingPane.*;
 
 public class PopupPrompt extends JDialog {
-
-    private static final Color
-            BG_DIALOG = new Color(0x1E, 0x21, 0x28),
-            BG_BAR = new Color(0x19, 0x1C, 0x22),
-            BORDER = new Color(0x2A, 0x2E, 0x3A);
 
     protected JPanel contentArea;
     protected JPanel footer;
     @Getter private int result = -1;
 
-    private PopupPrompt(String title, String message, PromptButton... buttons) {
-        setModal(true);
+    private PopupPrompt(String title, String message) {
+        setModalityType(Dialog.DEFAULT_MODALITY_TYPE);
         setTitle(title);
         setUndecorated(true);
         setLayout(new BorderLayout());
-        setBackground(BG_DIALOG);
-        getRootPane().setBorder(BorderFactory.createLineBorder(BORDER, 1));
+        setBackground(BACKGROUND);
+        getRootPane().setBorder(BorderFactory.createLineBorder(TRACK, 1));
         setLocationRelativeTo(null);
 
-        JPanel topBar = SwingPane.panelIn(this, BorderLayout.NORTH).arrangedAs(SwingPane.FLOW_LEFT)
-                .withBackground(BG_BAR).component();
+        JPanel topBar = panelIn(this, BorderLayout.NORTH).arrangedAs(FLOW_LEFT)
+                .withBackground(BG_DARK).component();
 
-        SwingComp.label(title.toUpperCase(), Font.BOLD, 11f, ColorStyles.TEXT_MUTED).in(topBar);
+        label(title.toUpperCase(), Font.BOLD, 11f).muted().in(topBar);
 
-        contentArea = SwingPane.panelIn(this, BorderLayout.CENTER).arrangedAs(SwingPane.VERTICAL_BOX)
-                .withBackground(BG_DIALOG)
+        contentArea = panelIn(this, BorderLayout.CENTER).arrangedAs(VERTICAL_BOX)
+                .withBackground(BACKGROUND)
                 .withEmptyBorder(20, 20, 20, 20)
                 .component();
 
-        footer = SwingPane.panelIn(this, BorderLayout.SOUTH).arrangedAs(SwingPane.FLOW_RIGHT)
-                .withBackground(BG_BAR)
-                .withBorder(new MatteBorder(1, 0, 0, 0, BORDER))
+        footer = panelIn(this, BorderLayout.SOUTH).arrangedAs(FLOW_RIGHT, 5, 0)
+                .withBackground(BG_DARK)
+                .withBorder(new MatteBorder(1, 0, 0, 0, TRACK))
                 .component();
 
-        SwingComp.label("<html><body style='width: 300px'>" + message + "</body></html>",
-                        Font.PLAIN, 13f, ColorStyles.TEXT_PRIMARY)
-                .onLeft().in(contentArea);
+        label("<html><body style='width: 300px'>" + message + "</body></html>", Font.PLAIN, 13f).onLeft().in(contentArea);
+    }
 
-        for (PromptButton button : buttons) {
-            SwingComp.button(button.text, button.bg,
+    private PopupPrompt(String title, String message, ResultButton... buttons) {
+        this(title, message);
+
+        for (ResultButton button : buttons) {
+            button(button.text, button.bg,
                     () -> {
                         this.result = button.resultToSet;
                         dispose();
@@ -60,14 +60,51 @@ public class PopupPrompt extends JDialog {
         setVisible(true);
     }
 
-    public static PopupPrompt of(String title, String message, PromptButton... buttons) {
+    private PopupPrompt(String title, String message, ActionButton... buttons) {
+        this(title, message);
+
+        for (ActionButton button : buttons) {
+            Runnable action = () -> {
+                Optional.ofNullable(button.action).ifPresent(Runnable::run);
+                dispose();
+            };
+            button(button.text, button.bg, action).in(footer);
+        }
+
+        pack();
+        setVisible(true);
+    }
+
+    private PopupPrompt(String title, String message, JTextField field) {
+        this(title, message);
+
+        button("Submit", SUCCESS, this::dispose).in(footer);
+
+        fluent(contentArea).collect(spacer(0, 15), field);
+
+        contentArea.add(Box.createRigidArea(new Dimension(0, 15)));
+        contentArea.add(field);
+
+        pack();
+        setVisible(true);
+    }
+
+    public static PopupPrompt of(String title, String message, ResultButton... buttons) {
         return new PopupPrompt(title, message, buttons);
     }
 
-    @Value @AllArgsConstructor public static class PromptButton {
-        String text;
-        Color bg;
-        int resultToSet;
+    public static PopupPrompt of(String title, String message, ActionButton... buttons) {
+        return new PopupPrompt(title, message, buttons);
+    }
+
+    public static PopupPrompt ofInput(String title, String message, JTextField field) {
+        return new PopupPrompt(title, message, field);
+    }
+
+    public record ResultButton(String text, Color bg, int resultToSet) {
+    }
+
+    public record ActionButton(String text, Color bg, Runnable action) {
     }
 
 }

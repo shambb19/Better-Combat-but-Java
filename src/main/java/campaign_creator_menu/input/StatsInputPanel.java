@@ -3,17 +3,15 @@ package campaign_creator_menu.input;
 import combat_object.combatant.PC;
 import combat_object.combatant.info.AbilityModifier;
 import combat_object.combatant.info.Stats;
-import lombok.*;
+import format.swing_comp.SwingPane;
 import lombok.experimental.*;
-import swing.custom_component.ValidatedField;
-import swing.swing_comp.SwingPane;
+import swing_custom.ValidatedField;
 import util.StringUtils;
 
 import javax.swing.*;
 import java.util.HashMap;
 import java.util.Map;
 
-@NoArgsConstructor(staticName = "newInstance", force = true)
 @ExtensionMethod(StringUtils.class)
 public class StatsInputPanel extends JPanel {
 
@@ -33,8 +31,7 @@ public class StatsInputPanel extends JPanel {
     }
 
     private ValidatedField fieldTemplate(String name) {
-        ValidatedField inputField = new ValidatedField(name);
-        inputField.setValidator(s -> inputField.getValue().toInt() != Integer.MIN_VALUE);
+        ValidatedField inputField = new ValidatedField(name, null, 30);
 
         SwingPane.panelIn(this).collect(name + ":", inputField).arrangedAs(SwingPane.FLOW);
 

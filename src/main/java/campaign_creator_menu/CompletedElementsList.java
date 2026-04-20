@@ -5,16 +5,17 @@ import combat_object.combatant.NPC;
 import combat_object.combatant.PC;
 import combat_object.scenario.Scenario;
 import encounter.Encounter;
+import format.swing_comp.SwingPane;
 import lombok.*;
 import lombok.experimental.*;
-import swing.swing_comp.SwingPane;
 
 import javax.swing.*;
 import java.util.List;
 
-import static swing.swing_comp.SwingPane.FLOW;
+import static format.swing_comp.SwingPane.FLOW;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+@ExtensionMethod(util.Filter.class)
 public class CompletedElementsList extends JPanel {
 
     CompletedElementList<Combatant> friendlyPane, enemyPane;
@@ -41,11 +42,11 @@ public class CompletedElementsList extends JPanel {
     }
 
     public List<NPC> getFriendlyNPCs() {
-        return friendlyPane.toList().stream().filter(NPC.class::isInstance).map(NPC.class::cast).toList();
+        return friendlyPane.toList().castTo(NPC.class);
     }
 
     public List<NPC> getEnemies() {
-        return enemyPane.toList().stream().filter(NPC.class::isInstance).map(NPC.class::cast).toList();
+        return enemyPane.toList().castTo(NPC.class);
     }
 
     /**
@@ -61,7 +62,7 @@ public class CompletedElementsList extends JPanel {
     }
 
     public boolean isNotEnoughForScenario() {
-        boolean noPartyFound = friendlyPane.toList().stream().noneMatch(PC.class::isInstance);
+        boolean noPartyFound = friendlyPane.toList().castTo(PC.class).isEmpty();
 
         return enemyPane.toList().isEmpty() || noPartyFound;
     }

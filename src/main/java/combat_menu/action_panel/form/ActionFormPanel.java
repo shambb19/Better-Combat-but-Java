@@ -5,18 +5,21 @@ import __main.manager.EncounterManager;
 import combat_object.combatant.Combatant;
 import combat_object.damage_implements.Effect;
 import combat_object.damage_implements.Implement;
-import format.ColorStyles;
 import lombok.*;
 import lombok.experimental.*;
-import swing.custom_component.ValidatedField;
+import swing_custom.ValidatedField;
 
 import javax.swing.*;
 import javax.swing.border.MatteBorder;
 import java.awt.*;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static swing.swing_comp.SwingPane.*;
+import static format.ColorStyles.*;
+import static format.swing_comp.SwingComp.*;
+import static format.swing_comp.SwingPane.fluent;
+import static format.swing_comp.SwingPane.*;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PROTECTED)
 public abstract class ActionFormPanel extends JPanel {
@@ -25,7 +28,7 @@ public abstract class ActionFormPanel extends JPanel {
     JPanel fieldsPanel;
     JPanel buttonRow;
     JButton confirmButton, cancelButton;
-    @NonFinal Map<Effect, Boolean> noticeConditions;
+    Map<Effect, Boolean> noticeConditions = new LinkedHashMap<>();
 
     Combatant attacker;
     @NonFinal Combatant target;
@@ -35,15 +38,15 @@ public abstract class ActionFormPanel extends JPanel {
         this.target = target;
 
         fluent(this).arrangedAs(BORDER)
-                .withBackground(ColorStyles.BACKGROUND)
+                .withBackground(BACKGROUND)
                 .withEmptyBorder(16, 18, 14, 18);
 
         JPanel stack = panelIn(this, BorderLayout.NORTH).arrangedAs(VERTICAL_BOX).transparent().component();
 
-        selectionZone = label("No target selected", Font.ITALIC, 13f, ColorStyles.TEXT_MUTED).onLeft().component();
+        selectionZone = label("No target selected", Font.ITALIC, 13f, FG_MUTED).onLeft().component();
 
         fieldsPanel = newArrangedAs(VERTICAL_BOX).transparent().onLeft().component();
-        buildFields(fieldsPanel);
+        buildFields();
 
         buttonRow = newArrangedAs(FLOW_LEFT).transparent().onLeft().component();
 
@@ -55,9 +58,9 @@ public abstract class ActionFormPanel extends JPanel {
             }
         }
         confirmButton =
-                ConfirmCancel.styledButton(confirmLabel, ColorStyles.HEALTHY, new Color(0xD8, 0xF4, 0xEC), this::onConfirm);
+                ConfirmCancel.styledButton(confirmLabel, HEALTHY, new Color(0xD8, 0xF4, 0xEC), this::onConfirm);
         cancelButton =
-                ConfirmCancel.styledButton("Cancel", ColorStyles.TRACK, ColorStyles.TEXT_MUTED, this::onCancel);
+                ConfirmCancel.styledButton("Cancel", TRACK, FG_MUTED, this::onCancel);
 
         fluent(buttonRow).collect(confirmButton, spacer(8, 0), cancelButton);
 
@@ -74,24 +77,28 @@ public abstract class ActionFormPanel extends JPanel {
         this(confirmLabel, null);
     }
 
-    protected abstract void buildFields(JPanel container);
+    protected abstract void buildFields();
 
     protected void addNotice(Effect effect, JPanel container) {
         container.add(effect.noticePanel(target), 0);
     }
 
-    protected void addNotices(JPanel container) {
+    protected void addNotices() {
+        for (Component c : fieldsPanel.getComponents())
+            if (c instanceof Effect.NoticePanel n)
+                fieldsPanel.remove(n);
+
         SwingUtilities.invokeLater(() -> {
             AtomicInteger insertIdx = new AtomicInteger(0);
 
             noticeConditions.forEach((effect, condition) -> {
                 if (condition) {
-                    container.add(effect.noticePanel(target), insertIdx.getAndIncrement());
-                    container.add(Box.createRigidArea(new Dimension(0, 10)), insertIdx.getAndIncrement());
+                    fieldsPanel.add(effect.noticePanel(target), insertIdx.getAndIncrement());
+                    fieldsPanel.add(spacer(0, 10), insertIdx.getAndIncrement());
                 }
             });
-            container.revalidate();
-            container.repaint();
+            fieldsPanel.revalidate();
+            fieldsPanel.repaint();
         });
     }
 
@@ -117,7 +124,7 @@ public abstract class ActionFormPanel extends JPanel {
     protected void onTargetChanged() {
         selectionZone.setText(target.getName() + "  ·  " + target.getHealthBarString());
         selectionZone.setFont(selectionZone.getFont().deriveFont(Font.PLAIN, 13f));
-        selectionZone.setForeground(ColorStyles.TEXT_PRIMARY);
+        selectionZone.setForeground(FOREGROUND);
 
         JPanel header = (JPanel) selectionZone.getParent().getParent();
         header.setBorder(BorderFactory.createMatteBorder(0, 4, 0, 0, target.getCombatantColor()));
@@ -157,11 +164,11 @@ public abstract class ActionFormPanel extends JPanel {
                 .applied(p -> p.setPreferredSize(new Dimension(0, 52)))
                 .withMaximumSize(Integer.MAX_VALUE, 52)
                 .opaque()
-                .withBackground(ColorStyles.BG_SURFACE)
+                .withBackground(BG_SURFACE)
                 .withBorder(new MatteBorder(0, 4, 0, 0, Color.GRAY))
                 .component();
 
-        JLabel targetLabel = label("TARGET", Font.BOLD, 10f, ColorStyles.TEXT_MUTED).onLeft().component();
+        JLabel targetLabel = label("TARGET", Font.BOLD, 10f, FG_MUTED).onLeft().component();
 
         newArrangedAs(VERTICAL_BOX)
                 .collect(
@@ -174,7 +181,7 @@ public abstract class ActionFormPanel extends JPanel {
     }
 
     protected JPanel getAttackComboRow(JComboBox<Implement> comboBox) {
-        JLabel label = label("Select an attack", ColorStyles.TEXT_MUTED)
+        JLabel label = label("Select an attack", FG_MUTED)
                 .withPreferredSize(110, 0).component();
 
         return newArrangedAs(BORDER, 12, 0).borderCollect(

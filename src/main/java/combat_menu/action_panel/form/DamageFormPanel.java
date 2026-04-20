@@ -8,18 +8,15 @@ import combat_object.damage_implements.Implement;
 import format.ColorStyles;
 import lombok.*;
 import lombok.experimental.*;
-import swing.custom_component.ValidatedField;
+import swing_custom.ValidatedField;
 import util.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.LinkedHashMap;
 import java.util.Optional;
 
 import static combat_object.damage_implements.Effect.*;
-import static swing.swing_comp.SwingComp.label;
-import static swing.swing_comp.SwingComp.spacer;
-import static swing.swing_comp.SwingPane.*;
+import static format.swing_comp.SwingPane.*;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @ExtensionMethod(StringUtils.class)
@@ -54,27 +51,29 @@ public class DamageFormPanel extends ActionFormPanel {
     }
 
     @Override
-    protected void buildFields(JPanel container) {
-        LabeledField amountLF = addLabeledField(container, "Damage amount", "Enter amount...");
+    protected void buildFields() {
+        LabeledField amountLF = addLabeledField(fieldsPanel, "Damage Amount", "Enter Damage Amount");
         amountField = amountLF.field();
         amountField.setValidator(s -> {
             int v = s.toInt();
-            if (v == Integer.MIN_VALUE) return false;
-
             return v >= 0 && v <= calculateMaxDamage();
         });
 
         JCheckBox bonusCheck = styledCheckbox();
-        bonusCheck.addActionListener(e -> toggleBonusRow(bonusCheck.isSelected(), container));
+        bonusCheck.addActionListener(e -> toggleBonusRow(bonusCheck.isSelected(), fieldsPanel));
 
         bonusRow = buildBonusRow();
         bonusRow.setVisible(false);
 
-        fluent(container).collect(
+        fluent(fieldsPanel).collect(
                 spacer(0, 10), checkboxRow(bonusCheck), spacer(0, 6), bonusRow, spacer(0, 12)
         );
 
-        noticeConditions = new LinkedHashMap<>();
+        addNotices();
+    }
+
+    @Override
+    protected void addNotices() {
         SwingUtilities.invokeLater(() -> {
             noticeConditions.put(Effect.HALF_DAMAGE, attackFailed);
             noticeConditions.put(Effect.BONUS_DAMAGE, EffectManager.isHexedBy(target, attacker));
@@ -83,7 +82,7 @@ public class DamageFormPanel extends ActionFormPanel {
                 noticeConditions.put(e, implement.effectEquals(e));
             }
 
-            addNotices(container);
+            super.addNotices();
         });
     }
 
@@ -102,7 +101,7 @@ public class DamageFormPanel extends ActionFormPanel {
     @Override
     protected void refreshButtons() {
         super.refreshButtons();
-        cancelButton.setEnabled(false);
+        cancelButton.setVisible(false);
     }
 
     @Override
@@ -142,7 +141,7 @@ public class DamageFormPanel extends ActionFormPanel {
     private static JCheckBox styledCheckbox() {
         JCheckBox cb = new JCheckBox("Add bonus damage");
         cb.setFont(cb.getFont().deriveFont(Font.PLAIN, 12f));
-        cb.setForeground(ColorStyles.TEXT_MUTED);
+        cb.setForeground(ColorStyles.FG_MUTED);
         cb.setOpaque(false);
         cb.setFocusPainted(false);
         cb.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -172,7 +171,7 @@ public class DamageFormPanel extends ActionFormPanel {
 
         row.add(lbl, BorderLayout.WEST);
 
-        bonusField = new ValidatedField("0", this::refreshButtons);
+        bonusField = new ValidatedField("Enter Bonus Damage", this::refreshButtons);
         row.add(bonusField, BorderLayout.CENTER);
         return row;
     }

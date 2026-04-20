@@ -2,9 +2,10 @@ package combat_object.damage_implements;
 
 import __main.manager.EncounterManager;
 import combat_object.combatant.Combatant;
+import format.swing_comp.SwingComp;
+import format.swing_comp.SwingPane;
 import lombok.*;
-import swing.swing_comp.SwingComp;
-import swing.swing_comp.SwingPane;
+import lombok.experimental.*;
 
 import javax.swing.*;
 import javax.swing.border.MatteBorder;
@@ -83,15 +84,18 @@ public enum Effect {
         return noticeComponents.title;
     }
 
+    @ExtensionMethod(util.StringUtils.class)
     public static class NoticePanel extends JPanel {
         public NoticePanel(Effect effect, Combatant target) {
             if (effect.noticeComponents == null)
                 throw new IllegalStateException("Effect " + effect.name() + " does not have an associated notice.");
 
-            String subtitle = effect.noticeComponents.getSubtitle(EncounterManager.getCurrentCombatant(), target);
+            NoticeComponents components = effect.noticeComponents;
+
+            String subtitle = components.subtitle.infoString(EncounterManager.getCurrentCombatant(), target);
 
             SwingPane.fluent(this).arrangedAs(SwingPane.BORDER, 15, 0)
-                    .withBackground(effect.noticeComponents.getBackground())
+                    .withBackground(components.getBackground())
                     .withPaddedBorder(new MatteBorder(0, 4, 0, 0, effect.noticeComponents.getAccent()),
                             10, 12, 10, 12)
                     .withMaximumSize(Integer.MAX_VALUE, 60)
@@ -101,11 +105,11 @@ public enum Effect {
                     .arrangedAs(SwingPane.VERTICAL_BOX).transparent().component();
 
             JLabel titleLabel =
-                    SwingComp.label(effect.noticeComponents.getTitle(), Font.BOLD, 12f, effect.noticeComponents.getForeground())
-                            .component();
+                    SwingComp.label(components.getTitle(), Font.BOLD, 12f, components.getForeground())
+                            .onLeft().transparent().component();
 
-            JLabel subLabel = SwingComp.label(subtitle, Font.PLAIN, 11f, effect.noticeComponents.getForegroundDim())
-                    .component();
+            JLabel subLabel = SwingComp.label(subtitle, Font.PLAIN, 11f, components.getForegroundDim())
+                    .onLeft().transparent().component();
 
             SwingPane.fluent(textCol).collect(
                     Box.createVerticalGlue(), titleLabel, SwingComp.spacer(0, 2),
@@ -114,6 +118,7 @@ public enum Effect {
         }
     }
 
+    @ExtensionMethod(util.StringUtils.class)
     static final class Colors {
         static final Color BG_PURPLE = new Color(0x22, 0x1E, 0x2E),
                 FG_PURPLE = new Color(0xAF, 0xA9, 0xEC),
@@ -165,28 +170,5 @@ public enum Effect {
         Color background, accent, foreground, foregroundDim;
         String title;
         String subtitle;
-
-        String getSubtitle(Combatant attacker, Combatant target) {
-            final String ATTACKER = "..attacker..";
-            final String TARGET = "..target..";
-
-            StringBuilder builder = new StringBuilder(subtitle);
-
-            class Replacer {
-                void replaceKey(final String key, Combatant combatant) {
-                    while (builder.toString().contains(key)) {
-                        int idxKey = subtitle.indexOf(key);
-                        int idxKeyEnd = idxKey + key.length();
-                        builder.replace(idxKey, idxKeyEnd, combatant.getName());
-                    }
-                }
-            }
-            Replacer r = new Replacer();
-
-            r.replaceKey(ATTACKER, attacker);
-            r.replaceKey(TARGET, target);
-
-            return builder.toString();
-        }
     }
 }

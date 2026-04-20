@@ -10,10 +10,10 @@ import combat_menu.action_panel.form.InspirationFormPanel;
 import combat_object.combatant.Combatant;
 import combat_object.damage_implements.Implement;
 import format.ColorStyles;
+import format.swing_comp.SwingPane;
 import lombok.*;
 import lombok.experimental.*;
 import org.intellij.lang.annotations.MagicConstant;
-import swing.swing_comp.SwingPane;
 
 import javax.swing.*;
 import java.awt.*;
@@ -126,7 +126,7 @@ public class ActionPanel extends JPanel {
 
     public void promptDamageAmount(Implement implement, Combatant target, boolean attackSucceeded) {
         Component existing = Arrays.asList(formPanel.getComponents())
-                .matchingCondition(c -> c.getName() != null)
+                .filteredBy(c -> c.getName() != null)
                 .firstWithToStringEquals(DAMAGE_AMOUNT_OPTION);
 
         Optional.ofNullable(existing).ifPresent(formPanel::remove);

@@ -4,17 +4,18 @@ import __main.manager.EncounterManager;
 import combat_menu.action_panel.form.ActionFormPanel;
 import combat_object.combatant.Combatant;
 import format.ColorStyles;
+import format.swing_comp.SwingComp;
+import format.swing_comp.SwingPane;
 import lombok.*;
+import lombok.experimental.*;
 import org.intellij.lang.annotations.MagicConstant;
-import swing.swing_comp.SwingComp;
-import swing.swing_comp.SwingPane;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@lombok.experimental.FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class EncounterListPanel extends JPanel {
 
     List<HealthBarPanel> allPanels = new ArrayList<>();
@@ -38,7 +39,7 @@ public class EncounterListPanel extends JPanel {
     }
 
     private JLabel getSectionLabel(String sectionName) {
-        return SwingComp.label(sectionName.toUpperCase(), Font.BOLD, 12f, ColorStyles.TEXT_SECTION)
+        return SwingComp.label(sectionName.toUpperCase(), Font.BOLD, 12f, ColorStyles.FG_SECTION)
                 .onLeft().withEmptyBorder(10, 15, 5, 0).in(this);
     }
 

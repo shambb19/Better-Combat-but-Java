@@ -44,7 +44,7 @@ public class CampaignWriter {
             return getWrittenFile(fileName, isSentToDownloads);
         } catch (IOException e) {
             Logger.getAnonymousLogger().severe("getUrl in CampaignWriter: Could not create or save file");
-            Message.fileError(e);
+            Message.showFileErrorMessage(e);
             return null;
         }
     }
@@ -74,7 +74,7 @@ public class CampaignWriter {
                 code.addAll(c.toTxt());
         });
 
-        enemySource.matchingCondition(enemy -> enemy.getLifeStatus().isConscious())
+        enemySource.filteredBy(enemy -> enemy.getLifeStatus().isConscious())
                 .forEach(enemy -> code.addAll(enemy.toTxt()));
     }
 

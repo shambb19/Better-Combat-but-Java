@@ -14,7 +14,7 @@ public class Scenarios extends GlobalList<Scenario> {
     }
 
     public static java.util.List<Scenario> toList() {
-        return INSTANCE.list.matchingClass(Scenario.class);
+        return INSTANCE.list.castTo(Scenario.class);
     }
 
 }

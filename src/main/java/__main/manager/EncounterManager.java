@@ -6,10 +6,12 @@ import combat_object.combatant.PC;
 import combat_object.combatant.info.LifeStatus;
 import combat_object.damage_implements.Effect;
 import encounter.Encounter;
+import format.ColorStyles;
 import lombok.*;
 import lombok.experimental.*;
 import util.Filter;
 import util.Message;
+import util.PopupPrompt;
 
 import javax.swing.*;
 import java.util.Comparator;
@@ -27,7 +29,7 @@ public class EncounterManager {
     }
 
     public List<PC> getParty() {
-        return Filter.matchingClass(encounter.getFriendlies(), PC.class);
+        return Filter.castTo(encounter.getFriendlies(), PC.class);
     }
 
     public List<Combatant> getFriendlies() {
@@ -115,15 +117,24 @@ public class EncounterManager {
             boolean canTakeTurn = true;
             if (!status.isConscious()) {
                 if (status.isAlive()) {
-                    int saveRoll = Message.getDeathSaveRoll();
+                    int saveRoll = Message.promptDeathSaveRoll();
                     status.rollDeathSave(saveRoll);
                 }
                 canTakeTurn = false;
             }
             if (EffectManager.hasEffect(currentCombatant, Effect.BANISH)) {
-                Message.template(currentCombatant + "'s turn was skipped because they are banished to another realm.");
+                Message.showAsInfoMessage(currentCombatant + "'s turn was skipped because they are banished to another realm.");
                 EffectManager.removeEffectOn(currentCombatant, Effect.BANISH);
                 canTakeTurn = false;
+            }
+            if (ConcentrationManager.isCombatantConcentrating(currentCombatant)) {
+                String message = currentCombatant + " is currently using a spell that requires concentration. " +
+                        "Taking any actions will end this spell's effects.";
+                Message.showActionPrompt(message,
+                        new PopupPrompt.ActionButton[]{
+                                new PopupPrompt.ActionButton("Take New Action", ColorStyles.SUCCESS, null),
+                                new PopupPrompt.ActionButton("Continue Concentrating", ColorStyles.CONCENTRATION, this::endCurrentTurn)
+                        });
             }
 
             if (canTakeTurn)

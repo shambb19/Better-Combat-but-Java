@@ -4,10 +4,10 @@ import __main.manager.EncounterManager;
 import combat_menu.action_panel.form.ActionFormPanel;
 import combat_object.combatant.Combatant;
 import format.ColorStyles;
+import format.swing_comp.SwingPane;
 import lombok.experimental.*;
 import org.intellij.lang.annotations.MagicConstant;
-import swing.custom_component.RoundPanel;
-import swing.swing_comp.SwingPane;
+import swing_custom.RoundPanel;
 import util.Locators;
 
 import javax.swing.*;
@@ -17,9 +17,9 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Optional;
 
-import static swing.swing_comp.SwingComp.label;
-import static swing.swing_comp.SwingPane.BORDER;
-import static swing.swing_comp.SwingPane.panelIn;
+import static format.swing_comp.SwingComp.label;
+import static format.swing_comp.SwingPane.BORDER;
+import static format.swing_comp.SwingPane.panelIn;
 
 @FieldDefaults(makeFinal = true)
 public class HealthBarPanel extends JPanel {

@@ -31,7 +31,8 @@ public enum Key {
 
     DMG,
     STAT(value -> enumNameSearch(value, AbilityModifier.class)),
-    EFFECT(value -> enumNameSearch(value, Effect.class));
+    EFFECT(value -> enumNameSearch(value, Effect.class)),
+    CONCENTRATION(value -> value.trim().equals("true"));
 
     private static final Map<String, Key> LOOKUP =
             Arrays.stream(values())

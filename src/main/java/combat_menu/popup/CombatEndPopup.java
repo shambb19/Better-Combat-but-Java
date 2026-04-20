@@ -7,6 +7,7 @@ import input.CampaignWriter;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
 import util.Message;
+import util.PopupPrompt;
 
 import javax.swing.*;
 import javax.swing.border.MatteBorder;
@@ -15,12 +16,11 @@ import java.net.URL;
 import java.util.function.Consumer;
 
 import static format.ColorStyles.*;
-import static swing.swing_comp.SwingComp.fluent;
-import static swing.swing_comp.SwingComp.*;
-import static swing.swing_comp.SwingPane.*;
-import static util.Message.confirmIf;
-import static util.Message.template;
+import static format.swing_comp.SwingComp.fluent;
+import static format.swing_comp.SwingComp.*;
+import static format.swing_comp.SwingPane.*;
 
+@lombok.experimental.ExtensionMethod({util.StringUtils.class, util.Message.class})
 public class CombatEndPopup extends JDialog {
 
     public static final String VICTORY = "VICTORY", DEFEAT = "DEFEAT", QUIT = "ENDED EARLY";
@@ -36,7 +36,7 @@ public class CombatEndPopup extends JDialog {
         getRootPane().setBorder(BorderFactory.createLineBorder(TRACK, 1));
 
         String title = "Quit";
-        Color titleForeground = TEXT_PRIMARY;
+        Color titleForeground = FOREGROUND;
         if (endType.equals(VICTORY)) {
             title = "Victory";
             titleForeground = HEALTHY;
@@ -58,7 +58,7 @@ public class CombatEndPopup extends JDialog {
         panelIn(this, BorderLayout.CENTER).arrangedAs(VERTICAL_BOX)
                 .collect(
                         getEndMessage(endType), spacer(0, 24),
-                        label("OPTIONS", Font.BOLD, 10f, TEXT_MUTED).onLeft(),
+                        label("OPTIONS", Font.BOLD, 10f, FG_MUTED).onLeft(),
                         createActionButton("Level Up the Party", SUCCESS, this::levelUp), spacer(0, 10),
                         createActionButton("Download Updated .txt File", TRACK, b -> download()), spacer(0, 10),
                         createActionButton("Quit Program", CRITICAL, b -> quit("quit"))
@@ -103,10 +103,10 @@ public class CombatEndPopup extends JDialog {
         final String message = "Level up successful! As of " + Main.VERSION + ", only proficiency bonuses " +
                 "and hp are handled internally. All other changes (stats, etc.) need to be manually entered " +
                 "in the Campaign Creator for now. If you buy Braden a Red Bull he might fix that :P";
-        template(message);
+        message.showAsInfoMessage();
 
         fluent(button).enabled(false)
-                .withBackgroundAndForeground(TRACK, TEXT_MUTED)
+                .withBackgroundAndForeground(TRACK, FG_MUTED)
                 .applied(b -> b.setText("Party Level Increased"));
     }
 
@@ -114,19 +114,25 @@ public class CombatEndPopup extends JDialog {
         URL savedFile = CampaignWriter.ofFullCampaign().getUrl("Campaign Post Encounter", true);
 
         if (savedFile != null)
-            template("Successfully saved to Downloads");
+            "Successfully saved to Downloads".showAsInfoMessage();
         else
-            Message.error("Could not download file");
+            "Could not download file".showAsErrorMessage();
     }
 
     public static void quit(@MagicConstant(stringValues = {"quit", "restart"}) String mode) {
-        if (confirmIf(mode + " and lose all progress") == JOptionPane.OK_OPTION) {
-            Message.template("Goodbye! Thanks for playing :)");
-
-            if (mode.equals("quit"))
+        Runnable onQuit = () -> {
+            if (mode.equals("quit")) {
+                "Goodbye! Thanks for playing :)".showAsInfoMessage();
                 System.exit(0);
-            else
+            } else {
                 Main.clearAllAndShowUploadMenu();
-        }
+            }
+        };
+
+        Message.showActionPrompt("Are you sure you would like to " + mode + "? You will lose all progress.",
+                new PopupPrompt.ActionButton[]{
+                        new PopupPrompt.ActionButton(mode.capitalized(), CRITICAL, onQuit),
+                        new PopupPrompt.ActionButton("Continue", SUCCESS, null)
+                });
     }
 }

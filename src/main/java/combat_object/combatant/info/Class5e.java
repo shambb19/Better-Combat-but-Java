@@ -1,13 +1,14 @@
 package combat_object.combatant.info;
 
 import lombok.*;
+import lombok.experimental.*;
 import util.StringUtils;
 
 import static combat_object.combatant.info.AbilityModifier.*;
 
 @Getter
 @AllArgsConstructor
-@lombok.experimental.FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public enum Class5e {
 
     BARBARIAN(null, 7),

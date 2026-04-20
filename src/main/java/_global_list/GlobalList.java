@@ -14,7 +14,7 @@ public class GlobalList<T extends combat_object.CombatObject> {
             var inputs = Reader5e.getInstancesFromCode(url, type);
             list.addAll(inputs);
         } catch (java.io.IOException e) {
-            Message.fileError(e);
+            Message.showFileErrorMessage(e);
         }
     }
 

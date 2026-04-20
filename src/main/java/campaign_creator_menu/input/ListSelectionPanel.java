@@ -6,9 +6,8 @@ import combat_object.combatant.PC;
 import combat_object.damage_implements.Implement;
 import combat_object.damage_implements.Spell;
 import combat_object.damage_implements.Weapon;
-import format.ColorStyles;
-import swing.custom_component.ValidatedField;
-import swing.swing_comp.SwingPane;
+import format.swing_comp.SwingPane;
+import swing_custom.ValidatedField;
 import util.Filter;
 import util.Message;
 
@@ -20,9 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
-import static swing.swing_comp.SwingPane.*;
-import static util.Message.getWithLoopUntilInt;
-import static util.Message.template;
+import static format.swing_comp.SwingPane.*;
 
 public class ListSelectionPanel<T> extends JPanel {
 
@@ -52,10 +49,10 @@ public class ListSelectionPanel<T> extends JPanel {
         availableList = new ImplementListPane<>(sourceWithoutManual, this, true);
         selectedList = new ImplementListPane<>(null, this, false);
 
-        searchBar = new ValidatedField(name);
+        searchBar = new ValidatedField(name, null);
         searchBar.setValidator(availableList::logSearch);
 
-        JLabel selectedLabel = label("Selected " + name + ":", Font.PLAIN, 13f, ColorStyles.TEXT_PRIMARY)
+        JLabel selectedLabel = label("Selected " + name + ":", Font.PLAIN, 13f)
                 .withEmptyBorder(10, 10, 10, 10).component();
 
         panelIn(this).arrangedAs(BORDER).borderCollect(
@@ -66,7 +63,7 @@ public class ListSelectionPanel<T> extends JPanel {
     }
 
     public List<T> getSelected() {
-        return Filter.matchingCondition(selectedList.getList(), Objects::nonNull);
+        return Filter.filteredBy(selectedList.getList(), Objects::nonNull);
     }
 
     public HashMap<String, Integer> getSelectedScenario() {
@@ -204,14 +201,14 @@ public class ListSelectionPanel<T> extends JPanel {
             NPC npc = (NPC) selection;
 
             String name = npc.getName();
-            int input = Message.editOrRemoveOption(name);
+            int input = Message.showEditOrRemovePrompt(name);
             if (input == 1)
                 root.swapWithOtherList(list.getSelectedValue());
             else if (input == 0) {
-                int qty = getWithLoopUntilInt("Set quantity of " + name + ".", "Quantity");
+                int qty = Message.promptIntWithLoop("Set quantity of " + name + ".", "Quantity");
                 scenarioQtyList.put(npc.getName(), qty);
 
-                template("Quantity of " + name + " set to " + qty + ".");
+                Message.showAsInfoMessage("Quantity of " + name + " set to " + qty + ".");
             }
         }
 

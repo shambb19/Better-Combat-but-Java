@@ -25,14 +25,14 @@ public class Scenario implements combat_object.CombatObject {
     public ArrayList<NPC> list(boolean isFriendlies, boolean isSingleOccurrences) {
         HashMap<String, Integer> team = isFriendlies ? with : against;
         List<NPC> source = isFriendlies
-                ? Combatants.getFriendlies().matchingClass(NPC.class)
-                : Combatants.getEnemies().matchingClass(NPC.class);
+                ? Combatants.getFriendlies().castTo(NPC.class)
+                : Combatants.getEnemies().castTo(NPC.class);
 
         ArrayList<NPC> list = new ArrayList<>();
         team.forEach((npcName, qty) -> {
             NPC template = Locators.getWithNameFromDirectory(source, npcName);
             if (template == null) {
-                Message.template("Scenario.list: could not find NPC '" + npcName + "'");
+                Message.showAsErrorMessage("Scenario.list: could not find NPC '" + npcName + "'");
                 return;
             }
             if (isSingleOccurrences || qty == 1) {

@@ -53,7 +53,7 @@ public abstract class Combatant implements CombatObject {
     public void damage(int damage) {
         hp = Math.max(0, hp - damage);
         if (hp == 0)
-            lifeStatus.setStatus(LifeStatus.UNCONSCIOUS);
+            lifeStatus.setDefeated(this);
     }
 
     public void heal(int healthRegained) {

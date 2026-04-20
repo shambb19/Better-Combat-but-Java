@@ -1,5 +1,7 @@
 package combat_object.combatant.info;
 
+import __main.manager.ConcentrationManager;
+import combat_object.combatant.Combatant;
 import lombok.*;
 import org.intellij.lang.annotations.MagicConstant;
 
@@ -7,7 +9,7 @@ public class LifeStatus {
 
     public static final int ALIVE = 0, UNCONSCIOUS = 1, DEAD = 2;
 
-    @Getter @Setter @MagicConstant(valuesFromClass = LifeStatus.class) private int status = ALIVE;
+    @Getter @MagicConstant(valuesFromClass = LifeStatus.class) private int status = ALIVE;
     private int successes = 0, fails = 0;
 
     public void rollDeathSave(int d20Roll) {
@@ -20,6 +22,14 @@ public class LifeStatus {
         else if (fails == 3) status = DEAD;
 
         __main.Main.refreshUI();
+    }
+
+    public void setDefeated(Combatant combatant) {
+        if (combatant.isEnemy())
+            status = DEAD;
+        else
+            status = UNCONSCIOUS;
+        ConcentrationManager.breakConcentration(combatant);
     }
 
     public boolean isConscious() {

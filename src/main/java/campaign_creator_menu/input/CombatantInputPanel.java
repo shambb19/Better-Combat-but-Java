@@ -9,11 +9,10 @@ import combat_object.combatant.info.Class5e;
 import combat_object.combatant.info.Stats;
 import combat_object.damage_implements.Spell;
 import combat_object.damage_implements.Weapon;
-import format.ColorStyles;
+import format.swing_comp.SwingComp;
 import lombok.*;
 import lombok.experimental.*;
-import swing.custom_component.ValidatedField;
-import swing.swing_comp.SwingComp;
+import swing_custom.ValidatedField;
 import util.StringUtils;
 
 import javax.swing.*;
@@ -21,11 +20,13 @@ import java.awt.*;
 import java.util.List;
 import java.util.Objects;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
-import static swing.swing_comp.SwingComp.fluent;
-import static swing.swing_comp.SwingComp.*;
-import static swing.swing_comp.SwingPane.fluent;
-import static swing.swing_comp.SwingPane.*;
+import static format.ColorStyles.*;
+import static format.swing_comp.SwingComp.fluent;
+import static format.swing_comp.SwingComp.*;
+import static format.swing_comp.SwingPane.fluent;
+import static format.swing_comp.SwingPane.*;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @ExtensionMethod(StringUtils.class)
@@ -34,12 +35,13 @@ public class CombatantInputPanel extends JPanel {
     CampaignCreatorMenu root;
     JLabel formModeLabel = new JLabel("New Combatant");
     ValidatedField
-            nameField = new ValidatedField("Name"),
-            maxHpField = new ValidatedField("Max HP"),
-            acField = new ValidatedField("Armor Class"),
-            curHpField = new ValidatedField("Current HP"),
-            levelField = new ValidatedField("Level");
-    StatsInputPanel statPanel = StatsInputPanel.newInstance();
+            nameField = new ValidatedField("Name", this::onChange),
+            maxHpField = new ValidatedField("Max HP", this::onChange, 100),
+            acField = new ValidatedField("Armor Class", this::onChange, 40),
+            curHpField = new ValidatedField("Current HP", this::onChange, 100),
+            levelField = new ValidatedField("Level", this::onChange, 20);
+
+    StatsInputPanel statPanel = new StatsInputPanel();
     ListSelectionPanel<Weapon> weaponPanel = new ListSelectionPanel<>(DamageImplements.toList(Weapon.class), "Weapons");
     ListSelectionPanel<Spell> spellPanel = new ListSelectionPanel<>(DamageImplements.toList(Spell.class), "Spells");
     @NonFinal JButton confirmButton;
@@ -48,9 +50,6 @@ public class CombatantInputPanel extends JPanel {
 
     public CombatantInputPanel(CampaignCreatorMenu root) {
         this.root = root;
-
-        List.of(maxHpField, acField, curHpField, levelField)
-                .forEach(f -> f.setValidator(s -> f.getValue().toInt() != Integer.MIN_VALUE));
 
         fluent(nameField).withPreferredSize(150, nameField.getPreferredSize().height);
 
@@ -72,7 +71,7 @@ public class CombatantInputPanel extends JPanel {
 
     private JPanel getModeRow() {
         return newArrangedAs(FLOW_LEFT)
-                .collect(fluent(formModeLabel).withText(Font.BOLD, 13f, ColorStyles.TEXT_PRIMARY))
+                .collect(fluent(formModeLabel).withDerivedFont(Font.BOLD, 13f))
                 .component();
     }
 
@@ -125,13 +124,18 @@ public class CombatantInputPanel extends JPanel {
     }
 
     private void buildSouthPanel() {
-        confirmButton = button("Create", ColorStyles.SUCCESS, this::logAndGetCombatant).component();
+        confirmButton = button("Create", SUCCESS, this::logAndGetCombatant).component();
 
         panelIn(this, BorderLayout.SOUTH).arrangedAs(FLOW_LEFT)
                 .collect(
                         confirmButton, spacer(8, 0),
-                        button("Cancel", ColorStyles.CRITICAL, () -> root.setInputPanelEnabled(false))
+                        button("Cancel", CRITICAL, () -> root.setInputPanelEnabled(false))
                 );
+    }
+
+    private void onChange() {
+        boolean isValidInput = Stream.of(nameField, maxHpField, curHpField, acField, levelField).allMatch(ValidatedField::isValid);
+        confirmButton.setEnabled(isValidInput);
     }
 
     public void openNew(boolean isEnemy) {
@@ -139,7 +143,7 @@ public class CombatantInputPanel extends JPanel {
 
         typeBox.setSelectedItem(isEnemy ? CombatantType.NPC_ENEMY : CombatantType.PC);
         formModeLabel.setText("New Combatant");
-        formModeLabel.setForeground(ColorStyles.TEXT_PRIMARY);
+        formModeLabel.setForeground(FOREGROUND);
         confirmButton.setText("Create");
 
         clearAllFields();
@@ -192,7 +196,7 @@ public class CombatantInputPanel extends JPanel {
         root.setInputPanelEnabled(true);
 
         formModeLabel.setText("Editing: " + selection);
-        formModeLabel.setForeground(ColorStyles.EQUATOR);
+        formModeLabel.setForeground(EQUATOR);
         confirmButton.setText("Save Changes");
 
         if (selection instanceof NPC)

@@ -10,9 +10,23 @@ import combat_object.damage_implements.Spell;
 import lombok.experimental.*;
 
 import javax.swing.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
 
 @UtilityClass
+@ExtensionMethod(util.StringUtils.class)
 public class CombatManager {
+
+    public static final Function<Integer, String> DAMAGE_NOTICE =
+            dmg -> "..attacker.. dealt " + dmg + " damage to ..target..";
+
+    public static final Function<Integer, String> HEAL_NOTICE =
+            amt -> "..attacker.. healed ..target.. for " + amt + " HP";
+
+    public static final String DEFEATED_NOTICE = "..target.. was defeated by ..attacker..";
+
+    List<String> ACTION_LOG = new ArrayList<>();
 
     public void confirmButtonStates() {
         SwingUtilities.invokeLater(() -> {
@@ -29,7 +43,7 @@ public class CombatManager {
     }
 
     public boolean logAttack(Combatant target, int roll, Implement implement) {
-        Combatant attacker = EncounterManager.getCurrentCombatant();
+        Combatant attacker = getAttacker();
 
         boolean autoHits = implement instanceof Spell s && s.doesNotRequireAttackRoll();
 
@@ -78,7 +92,7 @@ public class CombatManager {
 
     public void logDamage(Combatant target, Implement implement,
                           int roll, int bonus) {
-        Combatant attacker = EncounterManager.getCurrentCombatant();
+        Combatant attacker = getAttacker();
 
         if (!implement.isManual())
             attacker.logRoll(roll, implement.getNumDice(), implement.getDieSize());
@@ -91,15 +105,33 @@ public class CombatManager {
         }
         target.damage(roll + bonus);
 
+        if (target.getLifeStatus().isConscious())
+            logAction(DAMAGE_NOTICE.apply(roll + bonus), attacker, target);
+        else
+            logAction(DEFEATED_NOTICE, attacker, target);
+
         finishAction();
     }
 
     public void logHeal(Combatant target, int amount) {
         target.heal(amount);
+        logAction(HEAL_NOTICE.apply(amount), getAttacker(), target);
         finishAction();
+    }
+
+    private void logAction(String str, Combatant attacker, Combatant target) {
+        ACTION_LOG.add(str.infoString(attacker, target));
+    }
+
+    public List<String> getActionLog() {
+        return ACTION_LOG;
     }
 
     private ActionPanel getActionPanel() {
         return Main.getCombatMenu().getActionPanel();
+    }
+
+    private Combatant getAttacker() {
+        return EncounterManager.getCurrentCombatant();
     }
 }

@@ -2,10 +2,10 @@ package combat_menu.action_panel.form;
 
 import __main.manager.InspirationManager;
 import format.ColorStyles;
+import format.swing_comp.SwingComp;
+import format.swing_comp.SwingPane;
 import lombok.*;
 import lombok.experimental.*;
-import swing.swing_comp.SwingComp;
-import swing.swing_comp.SwingPane;
 
 import javax.swing.*;
 import java.awt.*;
@@ -27,13 +27,13 @@ public class InspirationFormPanel extends JPanel {
 
         JPanel header = SwingPane.panelIn(this, BorderLayout.NORTH).arrangedAs(SwingPane.VERTICAL_BOX)
                 .collect(
-                        SwingComp.label("Excess Inspiration", TEXT_MUTED).onLeft(), SwingComp.spacer(0, 3)
+                        SwingComp.label("Excess Inspiration", FG_MUTED).onLeft(), SwingComp.spacer(0, 3)
                 )
                 .transparent()
                 .withEmptyBorder(0, 0, 16, 0)
                 .component();
 
-        SwingComp.label("Roll 1d4 and select your result", Font.PLAIN, 11f, TEXT_HINT)
+        SwingComp.label("Roll 1d4 and select your result", Font.PLAIN, 11f, ColorStyles.FG_HINT)
                 .onLeft()
                 .in(header);
 
@@ -49,10 +49,9 @@ public class InspirationFormPanel extends JPanel {
         DieButton btn = new DieButton();
 
         btn.setLayout(new BorderLayout());
-        btn.setForeground(ColorStyles.TEXT_PRIMARY);
+        btn.setForeground(ColorStyles.FOREGROUND);
 
-        JLabel numLabel = SwingComp.label(value)
-                .withDerivedFont(Font.PLAIN, 28f)
+        JLabel numLabel = SwingComp.label(value, Font.PLAIN, 28f)
                 .component();
         btn.add(numLabel, BorderLayout.CENTER);
 
