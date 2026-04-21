@@ -5,12 +5,12 @@ import combat_object.combatant.info.AbilityModifier;
 import lombok.*;
 import lombok.experimental.*;
 
-@Getter
-@AllArgsConstructor
+@EqualsAndHashCode(callSuper = true) @Getter
+@Data
+@SuperBuilder
 @FieldDefaults(makeFinal = true, level = AccessLevel.PROTECTED)
 public abstract class Implement extends CombatObject {
 
-    String name;
     int numDice, dieSize;
     AbilityModifier stat;
     boolean isManual;

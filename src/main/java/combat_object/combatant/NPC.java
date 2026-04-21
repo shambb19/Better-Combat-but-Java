@@ -1,7 +1,6 @@
 package combat_object.combatant;
 
 import __main.exception.InvalidParameterException;
-import _global_list.Combatants;
 import format.ColorStyles;
 import input.Key;
 import util.TxtReader;
@@ -42,15 +41,11 @@ public class NPC extends Combatant {
 
     public static NPC from(EnumMap<Key, Object> params, boolean isEnemy) {
         params.forEach((key, value) -> {
-            if (!key.isValid(value)) throw new InvalidParameterException("CombatObject$NPC", key, value);
+            if (!key.isValid(value)) throw new InvalidParameterException("NPC", key, value);
         });
 
-        String name = (String) params.get(NAME);
-        if (Combatants.getNames().contains(name))
-            throw new InvalidParameterException("CombatObject$NPC", "name", name, "unique name");
-
         return NPC.create(
-                name,
+                (String) params.get(NAME),
                 TxtReader.getHp((String) params.get(HP)),
                 (int) params.get(AC),
                 isEnemy

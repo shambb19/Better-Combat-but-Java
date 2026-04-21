@@ -12,9 +12,9 @@ import java.util.List;
 @ExtensionMethod(Filter.class)
 public class DamageImplements extends GlobalList<Implement> {
 
-    public static Weapon MANUAL_WEAPON = new Weapon.ManualWeapon("Manual");
-    public static Spell MANUAL_HIT = new Spell.ManualSpell("Manual with Hit Roll");
-    public static Spell MANUAL_SAVE = new Spell.ManualSpell("Manual with Save Throw");
+    public static Weapon MANUAL_WEAPON = Weapon.createManual("Manual");
+    public static Spell MANUAL_HIT = Spell.createManual("Manual with Hit Roll");
+    public static Spell MANUAL_SAVE = Spell.createManual("Manual with Save Throw");
 
     private static final DamageImplements INSTANCE = new DamageImplements();
 

@@ -26,7 +26,6 @@ public abstract class Combatant extends CombatObject {
     @Builder.Default final Stats stats = Stats.defaultStats();
     @Builder.Default final ArrayList<Weapon> weapons = new ArrayList<>();
     @Builder.Default final ArrayList<Spell> spells = new ArrayList<>();
-    final String name;
     int armorClass;
     int maxHp;
     int hp;

@@ -1,7 +1,6 @@
 package combat_object.combatant;
 
 import __main.exception.InvalidParameterException;
-import _global_list.Combatants;
 import combat_object.combatant.info.Stats;
 import combat_object.damage_implements.Spell;
 import combat_object.damage_implements.Weapon;
@@ -63,14 +62,10 @@ public class PC extends Combatant {
         int maxHp = TxtReader.getHp((String) params.get(HP));
         int hp = TxtReader.getHpCur((String) params.get(HP));
 
-        if (hp > maxHp) throw new InvalidParameterException("CombatObject$PC", "hp", hp, "hp <= hpMax");
-
-        String name = (String) params.get(NAME);
-        if (Combatants.getNames().contains(name))
-            throw new InvalidParameterException("CombatObject$NPC", "name", name, "unique name");
+        if (hp > maxHp) throw new InvalidParameterException("PC", "hp", hp, "hp <= hpMax");
 
         return PC.builder()
-                .name(name)
+                .name((String) params.get(NAME))
                 .maxHp(maxHp)
                 .hp(hp)
                 .isEnemy(false)

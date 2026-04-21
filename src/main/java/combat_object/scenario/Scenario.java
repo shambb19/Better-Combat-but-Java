@@ -19,10 +19,43 @@ import static input.Key.*;
 @EqualsAndHashCode(callSuper = true) @Value
 @ExtensionMethod(Filter.class)
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+@SuperBuilder
 public class Scenario extends CombatObject {
 
-    @ToString.Include String name;
     HashMap<String, Integer> with, against;
+
+    public static Scenario create(String name, HashMap<String, Integer> with, HashMap<String, Integer> against) {
+        return builder()
+                .name(name)
+                .with(with)
+                .against(against)
+                .build();
+    }
+
+    public static Scenario from(EnumMap<Key, Object> params) {
+        params.forEach((key, value) -> {
+            if (!key.isValid(value)) throw new InvalidParameterException("Scenario", key, value);
+        });
+
+        String name = (String) params.get(NAME);
+
+        class Helper {
+            HashMap<String, Integer> namesFromString(String list) {
+                HashMap<String, Integer> result = new HashMap<>();
+                if (list == null) return result;
+                for (String str : TxtReader.listTextAsArray(list))
+                    result.put(TxtReader.getName(str), TxtReader.getQty(str));
+
+                return result;
+            }
+        }
+        Helper $Helper = new Helper();
+
+        var with = $Helper.namesFromString((String) params.get(WITH));
+        var against = $Helper.namesFromString((String) params.get(AGAINST));
+
+        return create(name, with, against);
+    }
 
     public ArrayList<NPC> list(boolean isFriendlies, boolean isSingleOccurrences) {
         HashMap<String, Integer> team = isFriendlies ? with : against;
@@ -65,35 +98,6 @@ public class Scenario extends CombatObject {
         txt.add(Helper.formattedLine("against", against));
         txt.add("");
         return txt;
-    }
-
-    public static Scenario from(EnumMap<Key, Object> params) {
-        params.forEach((key, value) -> {
-            if (!key.isValid(value)) throw new InvalidParameterException("CombatObject$Scenario", key, value);
-        });
-
-        String name = (String) params.get(NAME);
-
-        class Helper {
-            HashMap<String, Integer> namesFromString(String list) {
-                HashMap<String, Integer> result = new HashMap<>();
-                if (list == null) return result;
-                for (String str : TxtReader.listTextAsArray(list))
-                    result.put(TxtReader.getName(str), TxtReader.getQty(str));
-
-                for (String name : result.keySet())
-                    if (!Combatants.getNames().contains(name))
-                        throw new InvalidParameterException("CombatObject$Scenario", "npc", name, "defined npc");
-
-                return result;
-            }
-        }
-        Helper $Helper = new Helper();
-
-        var with = $Helper.namesFromString((String) params.get(WITH));
-        var against = $Helper.namesFromString((String) params.get(AGAINST));
-
-        return new Scenario(name, with, against);
     }
 
     @Override

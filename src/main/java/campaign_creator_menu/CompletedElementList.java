@@ -32,7 +32,7 @@ public class CompletedElementList<T extends CombatObject> extends JPanel {
     public static final Combatant ENEMY_NEW = NPC.create(
             "New Enemy", -1, -1, true
     );
-    public static final Scenario SCENARIO_NEW = new Scenario(
+    public static final Scenario SCENARIO_NEW = Scenario.create(
             "New Scenario", new HashMap<>(), new HashMap<>()
     );
 

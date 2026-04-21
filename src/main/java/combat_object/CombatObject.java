@@ -1,8 +1,11 @@
 package combat_object;
 
-@lombok.experimental.SuperBuilder
+import lombok.*;
+import lombok.experimental.*;
+
+@Getter @SuperBuilder @AllArgsConstructor
 public abstract class CombatObject {
 
-    public abstract String getName();
+    protected final String name;
 
 }

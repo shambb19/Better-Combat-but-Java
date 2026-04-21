@@ -27,10 +27,6 @@ public class Combatants extends GlobalList<Combatant> {
         );
     }
 
-    public static List<String> getNames() {
-        return INSTANCE.stream().map(Combatant::getName).toList();
-    }
-
     public static List<Combatant> getFriendlies() {
         return INSTANCE.list.filteredByIsEnemy(false);
     }

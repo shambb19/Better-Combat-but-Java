@@ -21,7 +21,7 @@ import static util.TxtReader.listTextAsArray;
 public enum Key {
 
     NAME("non-blank String", String::valueOf, o -> o instanceof String s && !s.isBlank()),
-    HP("int >= 1", Integer::parseInt, o -> o instanceof Integer i && i > 0),
+    HP("int/int with int > 0", String::valueOf, null),
     AC("int on [1, 30]", Integer::parseInt, o -> o instanceof Integer i && i > 0 && i <= 30),
     LEVEL("int on [1, 20]", Integer::parseInt, o -> o instanceof Integer i && i > 0 && i <= 20),
     CLASS("valid 5e class", value -> enumNameSearch(value, Class5e.class), Class5e.class::isInstance),
@@ -33,7 +33,7 @@ public enum Key {
     AGAINST("valid list of defined combatants", String::valueOf, null),
 
     DMG("String in ndn format", String::valueOf, null),
-    STAT("valid stat object", value -> enumNameSearch(value, AbilityModifier.class), AbilityModifier.class::isInstance),
+    STAT("valid stat object or null", value -> enumNameSearch(value, AbilityModifier.class), null),
     EFFECT("valid effect (see Effect.java)", value -> enumNameSearch(value, Effect.class), Effect.class::isInstance),
     CONCENTRATION("boolean", value -> value.trim().equals("true"), Boolean.class::isInstance);
 

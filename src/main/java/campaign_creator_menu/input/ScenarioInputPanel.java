@@ -67,7 +67,7 @@ public class ScenarioInputPanel extends JPanel {
 
     private void logAndGetScenario() {
         try {
-            Scenario scenario = new Scenario(nameField.getValue(), friendlyPanel.getSelectedScenario(), enemyPanel.getSelectedScenario());
+            Scenario scenario = Scenario.create(nameField.getValue(), friendlyPanel.getSelectedScenario(), enemyPanel.getSelectedScenario());
             root.logScenarioCompleted(scenario);
             root.setScenarioPanelEnabled(false);
         } catch (Exception error) {

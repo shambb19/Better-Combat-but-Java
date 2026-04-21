@@ -30,8 +30,8 @@ import static format.swing_comp.SwingPane.*;
 @ExtensionMethod(StringUtils.class)
 public class AttackFormPanel extends ActionFormPanel {
 
-    static final Implement HEADER_WEAPON = new Weapon.ManualWeapon("── Weapons ──");
-    static final Implement HEADER_SPELL = new Spell.ManualSpell("── Spells ──");
+    static final Implement HEADER_WEAPON = Weapon.createManual("── Weapons ──");
+    static final Implement HEADER_SPELL = Spell.createManual("── Spells ──");
 
     static final Effect[] ATTACKER_EFFECTS = new Effect[]{POISON};
     static final Effect[] TARGET_EFFECTS = new Effect[]{FRIGHTEN, BLIND, RESTRAIN};
