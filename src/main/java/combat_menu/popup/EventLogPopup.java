@@ -1,7 +1,6 @@
 package combat_menu.popup;
 
 import __main.manager.CombatManager;
-import util.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -32,17 +31,19 @@ public class EventLogPopup extends JDialog {
     private JPanel getLogPanel() {
         JPanel panel = newArrangedAs(ONE_COLUMN, 0, 10).component();
 
-        for (String notice : CombatManager.getActionLog()) {
+        for (CombatManager.LoggedAction notice : CombatManager.getActionLog()) {
             JPanel eventPanel = panelIn(panel).arrangedAs(FLOW_LEFT, 10, 0).component();
 
-            label(StringUtils.gameTimeString(), Font.PLAIN, 11f).muted().in(eventPanel);
+            label(notice.getTimeLogged(), Font.PLAIN, 11f).muted().in(eventPanel);
 
-            if (notice.contains("heal"))
-                label(notice, Font.PLAIN, 12f, HEALTHY).in(eventPanel);
-            else if (notice.contains("damage"))
-                label(notice, Font.PLAIN, 12f, UNKNOWN).in(eventPanel);
-            else if (notice.contains("defeated"))
-                label(notice, Font.BOLD, 14f, CRITICAL).in(eventPanel);
+            String logMessage = notice.getLogMessage();
+
+            if (logMessage.contains("heal"))
+                label(logMessage, Font.PLAIN, 12f, HEALTHY).in(eventPanel);
+            else if (logMessage.contains("damage"))
+                label(logMessage, Font.PLAIN, 12f, UNKNOWN).in(eventPanel);
+            else if (logMessage.contains("defeated"))
+                label(logMessage, Font.BOLD, 14f, CRITICAL).in(eventPanel);
         }
 
         return panel;

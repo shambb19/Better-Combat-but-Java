@@ -1,6 +1,8 @@
 package combat_object.scenario;
 
+import __main.exception.InvalidParameterException;
 import _global_list.Combatants;
+import combat_object.CombatObject;
 import combat_object.combatant.NPC;
 import input.Key;
 import lombok.*;
@@ -14,10 +16,10 @@ import java.util.*;
 
 import static input.Key.*;
 
-@Value
+@EqualsAndHashCode(callSuper = true) @Value
 @ExtensionMethod(Filter.class)
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-public class Scenario implements combat_object.CombatObject {
+public class Scenario extends CombatObject {
 
     @ToString.Include String name;
     HashMap<String, Integer> with, against;
@@ -66,20 +68,30 @@ public class Scenario implements combat_object.CombatObject {
     }
 
     public static Scenario from(EnumMap<Key, Object> params) {
+        params.forEach((key, value) -> {
+            if (!key.isValid(value)) throw new InvalidParameterException("CombatObject$Scenario", key, value);
+        });
+
         String name = (String) params.get(NAME);
 
-        @lombok.experimental.Helper class Helper {
-            static HashMap<String, Integer> namesFromString(String list) {
+        class Helper {
+            HashMap<String, Integer> namesFromString(String list) {
                 HashMap<String, Integer> result = new HashMap<>();
                 if (list == null) return result;
                 for (String str : TxtReader.listTextAsArray(list))
                     result.put(TxtReader.getName(str), TxtReader.getQty(str));
+
+                for (String name : result.keySet())
+                    if (!Combatants.getNames().contains(name))
+                        throw new InvalidParameterException("CombatObject$Scenario", "npc", name, "defined npc");
+
                 return result;
             }
         }
+        Helper $Helper = new Helper();
 
-        var with = Helper.namesFromString((String) params.get(WITH));
-        var against = Helper.namesFromString((String) params.get(AGAINST));
+        var with = $Helper.namesFromString((String) params.get(WITH));
+        var against = $Helper.namesFromString((String) params.get(AGAINST));
 
         return new Scenario(name, with, against);
     }

@@ -56,6 +56,8 @@ public class Stats {
      * @return The value of the attacker's attack bonus for spells.
      */
     public int spellAttackBonus() {
+        if (class5e.getSpellMod() == null) return 0;
+
         return mod(class5e.getSpellMod()) + proficiencyBonus;
     }
 
@@ -64,10 +66,12 @@ public class Stats {
      * calculations, and adding proficiency bonus if present.
      */
     public int mod(AbilityModifier stat) {
-        return (stats.get(stat) - 10) / 2;
+        return Math.floorDiv(get(stat) - 10, 2);
     }
 
     public int saveDc() {
+        if (class5e.getSpellMod() == null) return 0;
+
         return 8 + mod(class5e.getSpellMod()) + proficiencyBonus;
     }
 

@@ -1,5 +1,7 @@
 package combat_object;
 
-public interface CombatObject {
-    String getName();
+public abstract class CombatObject {
+
+    public abstract String getName();
+
 }

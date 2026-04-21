@@ -17,9 +17,9 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Random;
 
-@SuperBuilder @Data
+@EqualsAndHashCode(callSuper = true) @SuperBuilder @Data
 @FieldDefaults(level = AccessLevel.PROTECTED)
-public abstract class Combatant implements CombatObject {
+public abstract class Combatant extends CombatObject {
 
     @Builder.Default final LifeStatus lifeStatus = new LifeStatus();
     @Builder.Default final RollTracker rollTracker = new RollTracker();
@@ -51,12 +51,16 @@ public abstract class Combatant implements CombatObject {
     }
 
     public void damage(int damage) {
+        if (damage <= 0) throw new IndexOutOfBoundsException("Combatant.damage: hp val >= 0 expected");
+
         hp = Math.max(0, hp - damage);
         if (hp == 0)
             lifeStatus.setDefeated(this);
     }
 
     public void heal(int healthRegained) {
+        if (healthRegained <= 0) throw new IndexOutOfBoundsException("Combatant.heal: hp val >= 0 expected");
+
         hp = Math.min(maxHp, hp + healthRegained);
     }
 

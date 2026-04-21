@@ -1,5 +1,7 @@
 package combat_object.combatant;
 
+import __main.exception.InvalidParameterException;
+import _global_list.Combatants;
 import combat_object.combatant.info.Stats;
 import combat_object.damage_implements.Spell;
 import combat_object.damage_implements.Weapon;
@@ -16,7 +18,7 @@ import java.util.Objects;
 import static input.Key.*;
 
 @lombok.experimental.SuperBuilder
-public class PC extends Combatant implements combat_object.CombatObject {
+public class PC extends Combatant {
 
     public static PC create(String name, int hpMax, int armorClass, Stats stats, List<Weapon> weapons, List<Spell> spells) {
         return PC.builder()
@@ -39,9 +41,6 @@ public class PC extends Combatant implements combat_object.CombatObject {
         return ColorStyles.PARTY;
     }
 
-    /**
-     * @return the lines of text for this combatant to be logged in a .txt file for its party.
-     */
     @Override
     public ArrayList<String> toTxt() {
         ArrayList<String> txt = super.toTxt();
@@ -57,10 +56,23 @@ public class PC extends Combatant implements combat_object.CombatObject {
 
     @SuppressWarnings("unchecked")
     public static PC from(EnumMap<Key, Object> params) {
+        params.forEach((key, value) -> {
+            if (!key.isValid(value)) throw new InvalidParameterException("CombatObject$PC", key, value);
+        });
+
+        int maxHp = TxtReader.getHp((String) params.get(HP));
+        int hp = TxtReader.getHpCur((String) params.get(HP));
+
+        if (hp > maxHp) throw new InvalidParameterException("CombatObject$PC", "hp", hp, "hp <= hpMax");
+
+        String name = (String) params.get(NAME);
+        if (Combatants.getNames().contains(name))
+            throw new InvalidParameterException("CombatObject$NPC", "name", name, "unique name");
+
         return PC.builder()
-                .name((String) params.get(NAME))
-                .maxHp(TxtReader.getHp((String) params.get(HP)))
-                .hp(TxtReader.getHpCur((String) params.get(HP)))
+                .name(name)
+                .maxHp(maxHp)
+                .hp(hp)
                 .isEnemy(false)
                 .armorClass((int) params.get(AC))
                 .stats(Stats.from(params.get(STATS), params.get(CLASS), params.get(LEVEL)))

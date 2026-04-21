@@ -7,6 +7,7 @@ import combat_object.damage_implements.Spell;
 import combat_object.damage_implements.Weapon;
 import combat_object.scenario.Scenario;
 import lombok.*;
+import util.Message;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -26,13 +27,19 @@ public class Reader5e {
         @Cleanup BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8));
         List<String> lines = reader.lines().toList();
 
-        List<ItemBlock> blocks = getAllItemBlocks(lines);
+        if (lines.isEmpty()) throw new IOException("Reader5e.getInstancesFromCode: empty file");
 
-        return blocks.stream()
-                .map(block -> createObject(block.header, block.params))
-                .filter(instanceType::isInstance)
-                .map(instanceType::cast)
-                .toList();
+        List<ItemBlock> blocks = getAllItemBlocks(lines);
+        List<T> result = new ArrayList<>();
+
+        for (ItemBlock block : blocks) {
+            CombatObject obj = createObject(block.header, block.params);
+
+            if (instanceType.isInstance(obj)) {
+                result.add(instanceType.cast(obj));
+            }
+        }
+        return result;
     }
 
     private static List<ItemBlock> getAllItemBlocks(List<String> lines) {
@@ -52,7 +59,7 @@ public class Reader5e {
         return blocks;
     }
 
-    private static Object createObject(String header, EnumMap<Key, Object> map) {
+    private static CombatObject createObject(String header, EnumMap<Key, Object> map) throws IOException {
         return switch (header) {
             case ".party" -> PC.from(map);
             case ".npc" -> NPC.from(map, false);
@@ -60,7 +67,7 @@ public class Reader5e {
             case ".weapon" -> Weapon.from(map);
             case ".spell" -> Spell.from(map);
             case ".scenario" -> Scenario.from(map);
-            default -> null;
+            default -> throw new IOException("Reader5e.createObject: unexpected header token \"" + header + "\"");
         };
     }
 
@@ -70,6 +77,7 @@ public class Reader5e {
             getInstancesFromCode(file, CombatObject.class);
             return true;
         } catch (Exception e) {
+            Message.showAsErrorMessage(e.getMessage());
             return false;
         }
     }
@@ -77,8 +85,7 @@ public class Reader5e {
     private static EnumMap<Key, Object> toMap(List<String> params) {
         EnumMap<Key, Object> map = new EnumMap<>(Key.class);
 
-        params.stream()
-                .skip(1)
+        params.stream().skip(1)
                 .forEach(param -> {
                     Key key = Key.get(param);
                     Optional.ofNullable(key).ifPresent(k -> map.put(k, Key.value(param)));
@@ -92,8 +99,8 @@ public class Reader5e {
         EnumMap<Key, Object> params;
 
         ItemBlock(List<String> lines) {
-            this.header = withoutComments(lines.getFirst());
-            this.params = toMap(lines);
+            header = withoutComments(lines.getFirst());
+            params = toMap(lines);
         }
     }
 

@@ -2,14 +2,14 @@ package combat_menu;
 
 import __main.manager.InspirationManager;
 import format.ColorStyles;
-import format.swing_comp.SwingComp;
 import format.swing_comp.SwingPane;
 import lombok.*;
 import swing_custom.AnimatedBar;
 import util.Message;
 
 import javax.swing.*;
-import java.awt.*;
+
+import static format.swing_comp.SwingPane.*;
 
 @NoArgsConstructor
 public class InspirationBar extends JPanel implements InspirationManager.Listener {
@@ -20,11 +20,11 @@ public class InspirationBar extends JPanel implements InspirationManager.Listene
         InspirationManager.MANAGER.addListener(this);
 
         SwingPane.fluent(this).arrangedAs(SwingPane.BORDER, 10, 0)
+                .borderCollect(
+                        west(label("Excess Inspiration 1d4 Points", ColorStyles.FG_MUTED)),
+                        center(bar)
+                )
                 .withPreferredSize(0, 40);
-
-        SwingComp.label("Excess Inspiration 1d4 Points", ColorStyles.FG_MUTED).in(this, BorderLayout.WEST);
-
-        add(bar, BorderLayout.CENTER);
     }
 
     @Override

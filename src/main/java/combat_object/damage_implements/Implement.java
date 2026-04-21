@@ -1,5 +1,6 @@
 package combat_object.damage_implements;
 
+import combat_object.CombatObject;
 import combat_object.combatant.info.AbilityModifier;
 import lombok.*;
 import lombok.experimental.*;
@@ -7,7 +8,7 @@ import lombok.experimental.*;
 @Getter
 @AllArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PROTECTED)
-public class Implement implements combat_object.CombatObject {
+public abstract class Implement extends CombatObject {
 
     String name;
     int numDice, dieSize;

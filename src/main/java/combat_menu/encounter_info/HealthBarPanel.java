@@ -18,8 +18,7 @@ import java.awt.event.MouseListener;
 import java.util.Optional;
 
 import static format.swing_comp.SwingComp.label;
-import static format.swing_comp.SwingPane.BORDER;
-import static format.swing_comp.SwingPane.panelIn;
+import static format.swing_comp.SwingPane.*;
 
 @FieldDefaults(makeFinal = true)
 public class HealthBarPanel extends JPanel {
@@ -103,12 +102,15 @@ public class HealthBarPanel extends JPanel {
     public void endActionState() {
         if (combatant == EncounterManager.getCurrentCombatant()) {
             accentBar.setBackground(ColorStyles.HEALTHY);
-            nameLabel.setForeground(new Color(0xc8, 0xcc, 0xd8));
             setBackground(ROW_TURN);
+            nameLabel.setForeground(new Color(0xc8, 0xcc, 0xd8));
         } else {
             accentBar.setBackground(ColorStyles.TRACK);
-            nameLabel.setForeground(new Color(0xc8, 0xcc, 0xd8));
             setBackground(ColorStyles.BACKGROUND);
+            if (combatant.getLifeStatus().isConscious())
+                nameLabel.setForeground(new Color(0xc8, 0xcc, 0xd8));
+            else
+                fluent(nameLabel).muted();
         }
     }
 
@@ -132,6 +134,8 @@ public class HealthBarPanel extends JPanel {
 
             @Override
             public void mouseEntered(MouseEvent e) {
+                if (!combatant.getLifeStatus().isAlive()) return;
+
                 Optional.ofNullable(activeTooltip).ifPresent(Window::dispose);
 
                 Window owner = SwingUtilities.getWindowAncestor(HealthBarPanel.this);

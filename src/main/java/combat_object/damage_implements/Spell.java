@@ -1,5 +1,6 @@
 package combat_object.damage_implements;
 
+import __main.exception.InvalidParameterException;
 import combat_object.combatant.info.AbilityModifier;
 import input.Key;
 import lombok.*;
@@ -11,7 +12,7 @@ import java.util.Objects;
 import static input.Key.*;
 
 @Getter
-public class Spell extends Implement implements combat_object.CombatObject {
+public class Spell extends Implement {
 
     private final Effect effect;
     private final boolean requiresConcentration;
@@ -40,6 +41,10 @@ public class Spell extends Implement implements combat_object.CombatObject {
     }
 
     public static Spell from(EnumMap<Key, Object> params) {
+        params.forEach((key, value) -> {
+            if (!key.isValid(value)) throw new InvalidParameterException("CombatObject$Spell", key, value);
+        });
+
         return new Spell(
                 (String) params.get(NAME),
                 TxtReader.getNumDice((String) params.get(DMG)),

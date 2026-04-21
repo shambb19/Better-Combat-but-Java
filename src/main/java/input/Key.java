@@ -11,6 +11,7 @@ import lombok.*;
 import util.TxtReader;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static util.Locators.enumNameSearch;
@@ -19,29 +20,33 @@ import static util.TxtReader.listTextAsArray;
 @AllArgsConstructor
 public enum Key {
 
-    NAME, HP,
-    AC(Integer::parseInt),
-    LEVEL(Integer::parseInt),
-    CLASS(value -> enumNameSearch(value, Class5e.class)),
-    STATS,
-    WEAPONS(value -> ImplementDecoder.implement(value, Weapon.class)),
-    SPELLS(value -> ImplementDecoder.implement(value, Spell.class)),
+    NAME("non-blank String", String::valueOf, o -> o instanceof String s && !s.isBlank()),
+    HP("int >= 1", Integer::parseInt, o -> o instanceof Integer i && i > 0),
+    AC("int on [1, 30]", Integer::parseInt, o -> o instanceof Integer i && i > 0 && i <= 30),
+    LEVEL("int on [1, 20]", Integer::parseInt, o -> o instanceof Integer i && i > 0 && i <= 20),
+    CLASS("valid 5e class", value -> enumNameSearch(value, Class5e.class), Class5e.class::isInstance),
+    STATS("properly formatted stat line", String::valueOf, null),
+    WEAPONS("valid list of 5e weapons", value -> ImplementDecoder.implement(value, Weapon.class), null),
+    SPELLS("valid list of 5e weapons", value -> ImplementDecoder.implement(value, Spell.class), null),
 
-    WITH, AGAINST,
+    WITH("valid list of defined combatants", String::valueOf, null),
+    AGAINST("valid list of defined combatants", String::valueOf, null),
 
-    DMG,
-    STAT(value -> enumNameSearch(value, AbilityModifier.class)),
-    EFFECT(value -> enumNameSearch(value, Effect.class)),
-    CONCENTRATION(value -> value.trim().equals("true"));
+    DMG("String in ndn format", String::valueOf, null),
+    STAT("valid stat object", value -> enumNameSearch(value, AbilityModifier.class), AbilityModifier.class::isInstance),
+    EFFECT("valid effect (see Effect.java)", value -> enumNameSearch(value, Effect.class), Effect.class::isInstance),
+    CONCENTRATION("boolean", value -> value.trim().equals("true"), Boolean.class::isInstance);
 
     private static final Map<String, Key> LOOKUP =
             Arrays.stream(values())
                     .collect(Collectors.toMap(k -> k.name().toLowerCase(), k -> k));
 
+    @Getter private final String requirement;
     private final ParameterFactory parameterFactory;
+    private final Function<Object, Boolean> validator;
 
-    Key() {
-        parameterFactory = String::valueOf;
+    public boolean isValid(Object query) {
+        return validator == null || validator.apply(query);
     }
 
     public static Object value(String line) {

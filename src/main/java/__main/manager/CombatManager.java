@@ -7,7 +7,9 @@ import combat_object.combatant.info.AbilityModifier;
 import combat_object.damage_implements.Effect;
 import combat_object.damage_implements.Implement;
 import combat_object.damage_implements.Spell;
+import lombok.*;
 import lombok.experimental.*;
+import util.StringUtils;
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -18,15 +20,15 @@ import java.util.function.Function;
 @ExtensionMethod(util.StringUtils.class)
 public class CombatManager {
 
-    public static final Function<Integer, String> DAMAGE_NOTICE =
+    public static final Function<Integer, String> DAMAGE_MESSAGE =
             dmg -> "..attacker.. dealt " + dmg + " damage to ..target..";
 
-    public static final Function<Integer, String> HEAL_NOTICE =
+    public static final Function<Integer, String> HEAL_MESSAGE =
             amt -> "..attacker.. healed ..target.. for " + amt + " HP";
 
-    public static final String DEFEATED_NOTICE = "..target.. was defeated by ..attacker..";
+    public static final String DEFEATED_MESSAGE = "..target.. was defeated by ..attacker..";
 
-    List<String> ACTION_LOG = new ArrayList<>();
+    List<LoggedAction> ACTION_LOG = new ArrayList<>();
 
     public void confirmButtonStates() {
         SwingUtilities.invokeLater(() -> {
@@ -69,6 +71,7 @@ public class CombatManager {
                     getActionPanel().promptDamageAmount(implement, target, hit));
         }
 
+        Main.getCombatMenu().endActionState();
         Main.refreshUI();
         return continues;
     }
@@ -106,24 +109,25 @@ public class CombatManager {
         target.damage(roll + bonus);
 
         if (target.getLifeStatus().isConscious())
-            logAction(DAMAGE_NOTICE.apply(roll + bonus), attacker, target);
+            logAction(DAMAGE_MESSAGE.apply(roll + bonus), attacker, target);
         else
-            logAction(DEFEATED_NOTICE, attacker, target);
+            logAction(DEFEATED_MESSAGE, attacker, target);
 
         finishAction();
     }
 
     public void logHeal(Combatant target, int amount) {
         target.heal(amount);
-        logAction(HEAL_NOTICE.apply(amount), getAttacker(), target);
+        logAction(HEAL_MESSAGE.apply(amount), getAttacker(), target);
         finishAction();
     }
 
     private void logAction(String str, Combatant attacker, Combatant target) {
-        ACTION_LOG.add(str.infoString(attacker, target));
+        String logMessage = str.infoString(attacker, target);
+        ACTION_LOG.add(new LoggedAction(logMessage));
     }
 
-    public List<String> getActionLog() {
+    public List<LoggedAction> getActionLog() {
         return ACTION_LOG;
     }
 
@@ -133,5 +137,15 @@ public class CombatManager {
 
     private Combatant getAttacker() {
         return EncounterManager.getCurrentCombatant();
+    }
+
+    @Value public static class LoggedAction {
+        String logMessage;
+        String timeLogged;
+
+        public LoggedAction(String logMessage) {
+            this.logMessage = logMessage;
+            timeLogged = StringUtils.gameTimeString();
+        }
     }
 }
