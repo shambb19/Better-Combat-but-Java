@@ -37,9 +37,8 @@ public class CombatantHeaderPanel extends JPanel {
     public CombatantHeaderPanel(Combatant combatant) {
         this.combatant = combatant;
 
-        fluent(this).arrangedAs(VERTICAL_BOX)
+        fluent(this).arrangedAs(VERTICAL_BOX).spaced()
                 .withBackground((combatant.isEnemy()) ? UNKNOWN : BACKGROUND)
-                .withEmptyBorder(20, 20, 20, 20)
                 .onLeft();
 
         String classText = (combatant instanceof PC pc) ? pc.getStats().getClass5e().toString() :
@@ -63,7 +62,7 @@ public class CombatantHeaderPanel extends JPanel {
         rollCaption = label("-", Font.PLAIN, 11f, FG_HINT).component();
 
         JPanel rollRow = row().collect(
-                label("Roll Luck", Font.PLAIN, 11f, FG_MUTED), spacer(12, 0),
+                label("Roll Luck", 11f).muted(), spacer(12, 0),
                 rollTrack, spacer(10, 0),
                 rollCaption
         ).transparent().component();
@@ -134,16 +133,11 @@ public class CombatantHeaderPanel extends JPanel {
     }
 
     private static JPanel statChip(String labelText, String value, boolean criticalCondition) {
-        JPanel chip = newArrangedAs(VERTICAL_BOX)
-                .withEmptyBorder(20, 20, 20, 20)
-                .transparent().component();
+        JPanel chip = newArrangedAs(VERTICAL_BOX).spaced().transparent().component();
 
-        label(labelText.toUpperCase(), Font.PLAIN, 10f, ColorStyles.FG_MUTED)
-                .onLeft().in(chip);
+        label(labelText.toUpperCase(), 10f).muted().onLeft().in(chip);
 
-        label(value, Font.BOLD, 14f, criticalCondition ? CRITICAL : FOREGROUND)
-                .onLeft()
-                .in(chip);
+        label(value, Font.BOLD, 14f, criticalCondition ? CRITICAL : FOREGROUND).onLeft().in(chip);
 
         return chip;
     }
@@ -155,8 +149,7 @@ public class CombatantHeaderPanel extends JPanel {
                 .withBackground(DIVIDER)
                 .component();
 
-        return newArrangedAs(BORDER)
-                .borderCollect(center(d))
+        return newBorderPanel(center(d))
                 .transparent()
                 .withEmptyBorder(0, 10, 0, 10)
                 .withMaximumSize(21, 28)

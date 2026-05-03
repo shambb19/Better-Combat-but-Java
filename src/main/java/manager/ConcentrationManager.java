@@ -1,28 +1,29 @@
-package __main.manager;
+package manager;
 
 import combat_object.combatant.Combatant;
 import combat_object.damage_implements.Effect;
 import combat_object.damage_implements.Spell;
 import lombok.experimental.*;
+import util.Filterable;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@UtilityClass
-@ExtensionMethod(util.Filter.class)
-public class ConcentrationManager {
+@UtilityClass public class ConcentrationManager {
 
     private static final List<Concentration> CONCENTRATIONS = new ArrayList<>();
 
     public void startNewConcentration(Combatant by, Combatant on, Spell spell) {
+        if (!spell.isRequiresConcentration()) return;
+
         Concentration concentration = new Concentration(by, on, spell);
         breakConcentration(by);
         CONCENTRATIONS.add(concentration);
     }
 
     public void breakConcentration(Combatant by) {
-        Concentration concentration = CONCENTRATIONS.filteredBy(c -> c.by.equals(by)).stream()
-                .findFirst().orElse(null);
+        Concentration concentration = Filterable.of(CONCENTRATIONS)
+                .filteredBy(c -> c.by.equals(by)).firstOrNull();
 
         if (concentration == null) return;
 

@@ -1,6 +1,5 @@
 package __main;
 
-import __main.manager.EncounterManager;
 import _global_list.Combatants;
 import _global_list.DamageImplements;
 import _global_list.Resource;
@@ -10,6 +9,7 @@ import com.formdev.flatlaf.intellijthemes.FlatSpacegrayIJTheme;
 import combat_menu.CombatMenu;
 import combat_menu.popup.CombatEndPopup;
 import lombok.*;
+import manager.EncounterManager;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,12 +24,10 @@ public class Main {
     public static final String TITLE = " || DnD Red Bull Edition " + VERSION;
     public static final long START_TIME_MILLISECONDS;
 
-    public static final int COMBAT = 0, CREATOR = 1;
+    public static final int COMBAT = 0, CREATOR = 1, UPLOAD = 2;
 
-    private static URL input;
-
-    private static CampaignCreatorMenu creatorMenu;
     @Getter private static CombatMenu combatMenu;
+    @Getter private static CampaignCreatorMenu creatorMenu;
 
     private static boolean isCombatFinished = false;
 
@@ -40,56 +38,40 @@ public class Main {
 
     public static void main(String[] args) {
         DamageImplements.init();
-        clearAllAndShowUploadMenu();
+        closeAndSwitch(null, UPLOAD);
     }
 
-    public static void clearAllAndShowUploadMenu() {
-        Optional.ofNullable(combatMenu).ifPresent(Window::dispose);
-        Optional.ofNullable(creatorMenu).ifPresent(Window::dispose);
-
-        SwingUtilities.invokeLater(() -> UploadMain.newInstance().setVisible(true));
+    public static void closeCombat() {
+        combatMenu.dispose();
     }
 
-    public static void closeCreatorAndOpenCombat(URL file) {
-        creatorMenu.dispose();
-        input = file;
-        closeUploadAndRun(COMBAT, null);
+    public static void closeAndSwitch(Window toClose, @MagicConstant(intValues = {COMBAT, CREATOR, UPLOAD}) int toOpen) {
+        Runnable onOpen = switch (toOpen) {
+            case COMBAT -> () -> {
+                EncounterManager.confirmQueueFinalized();
+                combatMenu = new CombatMenu();
+                refreshUI();
+            };
+            case CREATOR -> () -> creatorMenu = new CampaignCreatorMenu();
+            case UPLOAD -> UploadMain::new;
+            default -> throw new IndexOutOfBoundsException("Main.closeAndSwitch: unexpected toOpen int " + toOpen);
+        };
+        SwingUtilities.invokeLater(onOpen);
+
+        Optional.ofNullable(toClose).ifPresent(Window::dispose);
     }
 
     public static void uploadCampaign(@NonNull URL file) {
-        input = file;
-        Combatants.init(input);
-        Scenarios.init(input);
+        Combatants.init(file);
+        Scenarios.init(file);
         EncounterManager.setEncounter(Combatants.toBattle());
     }
 
-    public static void closeUploadAndRun(@MagicConstant(intValues = {COMBAT, CREATOR}) int runMode, UploadMain source) {
-        if (runMode == COMBAT) {
-            EncounterManager.confirmQueueFinalized();
-            combatMenu = new CombatMenu();
-            combatMenu.setVisible(true);
-            refreshUI();
-        } else {
-            creatorMenu = CampaignCreatorMenu.newInstance();
-        }
-
-        Optional.ofNullable(source).ifPresent(Window::dispose);
-    }
-
     public static void refreshUI() {
-        if (combatMenu == null) return;
+        Optional.ofNullable(combatMenu).ifPresent(CombatMenu::update);
 
-        combatMenu.update();
-        checkVictoryConditions();
-    }
-
-    public static void checkVictoryConditions() {
-        if (isCombatFinished) return;
-
-        if (EncounterManager.getEncounter().isEncounterOver()) {
-            boolean isVictory = EncounterManager.getEncounter().isVictory();
-            String endType = isVictory ? CombatEndPopup.VICTORY : CombatEndPopup.DEFEAT;
-            CombatEndPopup.run(endType);
+        if (!isCombatFinished && EncounterManager.getEncounter().isEncounterOver()) {
+            CombatEndPopup.fireCombatEndedNaturally();
             isCombatFinished = true;
         }
     }

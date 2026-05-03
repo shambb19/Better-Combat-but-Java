@@ -5,7 +5,7 @@ import campaign_creator_menu.ColoredTxtDisplay;
 import combat_menu.EncounterSelectionPanel;
 import combat_menu.popup.FileGetter;
 import format.swing_comp.SwingPane;
-import input.Reader5e;
+import input.CampaignReader;
 import lombok.*;
 import lombok.experimental.*;
 import org.jetbrains.annotations.NotNull;
@@ -27,8 +27,7 @@ import static format.swing_comp.SwingComp.*;
 import static format.swing_comp.SwingPane.*;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@NoArgsConstructor(staticName = "newInstance", force = true)
-public class UploadMain extends JFrame {
+public class UploadMain extends MainFrame {
 
     private static final String INSTRUCTIONS =
             "Select a file from the options below. The native file includes " +
@@ -46,27 +45,9 @@ public class UploadMain extends JFrame {
 
     {
         setTitle("Campaign File Selection" + Main.TITLE);
-        setIconImage(__main.Main.getAppIcon().getImage());
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-
-        setResizable(false);
-        setBackground(BACKGROUND);
 
         SwingPane.fluent(this).arrangedAs(BORDER).borderCollect(
                 west(buildSidebar()), center(buildPreview()));
-
-        GraphicsConfiguration config = getGraphicsConfiguration();
-        Rectangle bounds = config.getBounds();
-        Insets insets = Toolkit.getDefaultToolkit().getScreenInsets(config);
-
-        int SHADOW = 8;
-
-        int x = bounds.x + insets.left - SHADOW;
-        int y = bounds.y + insets.top;
-        int width = bounds.width - insets.left - insets.right + (SHADOW * 2);
-        int height = bounds.height - insets.top - insets.bottom + SHADOW;
-
-        setBounds(x, y, width, height);
 
         setVisible(true);
     }
@@ -76,7 +57,7 @@ public class UploadMain extends JFrame {
 
         combatButton = uploadButton("Start", () -> {
             Main.uploadCampaign(currentFile);
-            scrollPane.setViewportView(EncounterSelectionPanel.newInstance(this));
+            scrollPane.setViewportView(new EncounterSelectionPanel(this));
             for (Component c : sidebar.getComponents())
                 c.setEnabled(c instanceof JLabel);
         });
@@ -84,7 +65,7 @@ public class UploadMain extends JFrame {
 
         creatorButton = uploadButton("Edit", () -> {
             Main.uploadCampaign(currentFile);
-            Main.closeUploadAndRun(Main.CREATOR, this);
+            Main.closeAndSwitch(this, Main.CREATOR);
         });
         creatorButton.setEnabled(false);
 
@@ -120,30 +101,20 @@ public class UploadMain extends JFrame {
     }
 
     private JButton uploadButton(String label, Runnable action) {
-        JButton button = button(label, BG_SURFACE, action)
-                .applied(b -> b.setHorizontalAlignment(SwingConstants.LEFT))
+        return button(label, BG_SURFACE, action)
+                .withMouseMoveListener(
+                        b -> b.setBackground(DIVIDER),
+                        b -> b.setBackground(BG_SURFACE)
+                ).applied(b -> b.setHorizontalAlignment(SwingConstants.LEFT))
                 .onLeft()
                 .withMaximumSize(221, 34)
                 .component();
-
-        button.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseEntered(java.awt.event.MouseEvent e) {
-                button.setBackground(new Color(0x2E, 0x32, 0x40));
-            }
-
-            @Override
-            public void mouseExited(java.awt.event.MouseEvent e) {
-                button.setBackground(BG_SURFACE);
-            }
-        });
-        return button;
     }
 
     private void onInputChange(URL input) {
         currentFile = input;
 
-        boolean valid = Reader5e.fileCompiles(currentFile);
+        boolean valid = CampaignReader.fileCompiles(currentFile);
 
         Color background, foreground;
         String text;
@@ -205,8 +176,7 @@ public class UploadMain extends JFrame {
     }
 
     private static JLabel centeredLabel() {
-        return label("A new campaign file will be generated on save.", Font.PLAIN, 13f, FG_MUTED)
-                .component();
+        return label("A new campaign file will be generated on save.", 13f).muted().component();
     }
 
     private JPanel buildPreview() {
@@ -244,18 +214,13 @@ public class UploadMain extends JFrame {
                 .applied(f -> f.setEditable(false))
                 .component();
 
-        scrollPane = scrollPane(buildEmptyState()).withBorder(null)
-                .applied(p -> p.getViewport().setBackground(BACKGROUND))
+        scrollPane = textArea("No file loaded; select an option from the left")
+                .withText(Font.PLAIN, 20f, FG_HINT)
+                .applied(a -> a.setAlignmentY(Component.CENTER_ALIGNMENT))
+                .toScroller()
                 .in(preview, BorderLayout.CENTER);
 
         return preview;
-    }
-
-    private JTextArea buildEmptyState() {
-        return textArea("No file loaded; select an option from the left")
-                .withText(Font.PLAIN, 20f, FG_HINT)
-                .applied(a -> a.setAlignmentY(Component.CENTER_ALIGNMENT))
-                .component();
     }
 
 }

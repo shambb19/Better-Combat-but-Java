@@ -1,6 +1,6 @@
 package combat_menu.popup;
 
-import __main.manager.CombatManager;
+import manager.CombatManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,20 +10,13 @@ import static format.swing_comp.SwingComp.label;
 import static format.swing_comp.SwingComp.scrollPane;
 import static format.swing_comp.SwingPane.*;
 
-public class EventLogPopup extends JDialog {
+public class EventLogPopup extends Popup {
 
     {
         setTitle("Event Log");
 
-        fluent(this).withEmptyBorder(20, 20, 20, 20);
+        fluent(this).collect(scrollPane(getLogPanel())).spaced();
 
-        scrollPane(getLogPanel()).in(this);
-
-        setIconImage(__main.Main.getAppIcon().getImage());
-        setModal(false);
-        setAlwaysOnTop(true);
-        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
         pack();
         setVisible(true);
     }
@@ -34,7 +27,7 @@ public class EventLogPopup extends JDialog {
         for (CombatManager.LoggedAction notice : CombatManager.getActionLog()) {
             JPanel eventPanel = panelIn(panel).arrangedAs(FLOW_LEFT, 10, 0).component();
 
-            label(notice.getTimeLogged(), Font.PLAIN, 11f).muted().in(eventPanel);
+            label(notice.getTimeLogged(), 11f).muted().in(eventPanel);
 
             String logMessage = notice.getLogMessage();
 

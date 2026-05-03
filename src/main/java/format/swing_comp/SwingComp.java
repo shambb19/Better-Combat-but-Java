@@ -1,8 +1,7 @@
 package format.swing_comp;
 
 import _global_list.Resource;
-import boilerplate.SourceVal;
-import format.ColorStyles;
+import boilerplate.FilteredVals;
 import lombok.*;
 import lombok.experimental.*;
 import org.intellij.lang.annotations.MagicConstant;
@@ -16,6 +15,8 @@ import java.awt.event.MouseEvent;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import static format.ColorStyles.*;
+
 @Getter
 @Data
 @SuppressWarnings("UnusedReturnValue")
@@ -27,19 +28,15 @@ public class SwingComp<E extends JComponent> {
 
     protected SwingComp(E component) {
         this.component = component;
-        component.setForeground(ColorStyles.FOREGROUND);
+        component.setForeground(FOREGROUND);
         if (component.isOpaque()) {
-            component.setBackground(ColorStyles.BACKGROUND);
+            component.setBackground(BACKGROUND);
         }
         component.setAlignmentX(Component.CENTER_ALIGNMENT);
         Optional.ofNullable(component.getFont()).ifPresent(f -> component.setFont(f.deriveFont(Font.PLAIN, 12f)));
     }
 
-    public static SwingComp<JLabel> label(Object text, @SourceVal.Fonts int style, float size) {
-        return label(text).withDerivedFont(style, size);
-    }
-
-    public SwingComp<E> withDerivedFont(@SourceVal.Fonts int type, float size) {
+    public SwingComp<E> withDerivedFont(@FilteredVals.Fonts int type, float size) {
         component.setFont(component.getFont().deriveFont(type, size));
         return this;
     }
@@ -57,19 +54,60 @@ public class SwingComp<E extends JComponent> {
         return new SwingComp<>(new JLabel(String.valueOf(text)));
     }
 
+    public static SwingComp<JLabel> label(Object text, float size) {
+        return label(text, Font.PLAIN, size);
+    }
+
+    public static SwingComp<JLabel> label(Object text, @FilteredVals.Fonts int style, float size) {
+        return label(text).withDerivedFont(style, size);
+    }
+
     public static SwingComp<JLabel> label(
-            Object text, @SourceVal.Fonts int style, float size, Color fg
+            Object text, @FilteredVals.Fonts int style, float size, @FilteredVals.Color Color fg
     ) {
         return label(text).withDerivedFont(style, size).withForeground(fg);
     }
 
-    public SwingComp<E> withForeground(Color foreground) {
+    public SwingComp<E> withForeground(@FilteredVals.Color Color foreground) {
         component.setForeground(foreground);
         return this;
     }
 
-    public static SwingComp<JLabel> label(Object text, Color fg) {
+    public static SwingComp<JLabel> label(Object text, @FilteredVals.Color Color fg) {
         return label(text).withForeground(fg);
+    }
+
+    /**
+     * <blockquote><pre>
+     *     {@code
+     *     // preset with the following:
+     *     setFont(getFont().deriveFont(Font.PLAIN, 12f));
+     *     setFocusPainted(false);
+     *     setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
+     *     setOpaque(true);
+     *     setBorder(new CompoundBorder(new LineBorder(param$bg, 1), 7, 10, 7, 10);
+     *     setBackground(param$bg)
+     *     setBackground(ColorStyles.BACKGROUND);
+     *     setForeground(ColorStyles.TEXT_PRIMARY);
+     *     // a mouse listener to add a 1 thickness LineBorder with color ColorStyles.TEXT_MUTED
+     *     // on mouse entry that is removed on mouse exit
+     *     }
+     * </pre></blockquote>
+     */
+    public static SwingComp<JButton> button(Object textOrIcon, @FilteredVals.Color Color bg, Runnable actionListener) {
+        JButton button = switch (textOrIcon) {
+            case String s -> new JButton(s);
+            case Resource icon -> {
+                Image image = new ImageIcon(icon.getUrl()).getImage().getScaledInstance(80, 80, Image.SCALE_SMOOTH);
+                Image resized = image.getScaledInstance(80, 80, Image.SCALE_SMOOTH);
+                yield new JButton(new ImageIcon(resized));
+            }
+            default -> throw new ClassCastException("SwingComp.button: String or Resource expected");
+        };
+
+        return SwingComp.fluent(button)
+                .withBackground(bg)
+                .applied(b -> Optional.ofNullable(actionListener).ifPresent(a -> b.addActionListener(e -> a.run())));
     }
 
     public static <T> SwingComp<JComboBox<T>> comboBox(T[] contents) {
@@ -80,6 +118,7 @@ public class SwingComp<E extends JComponent> {
         JScrollPane pane = new JScrollPane(contents);
         pane.getVerticalScrollBar().setUnitIncrement(16);
         pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        pane.getViewport().setBackground(BACKGROUND);
         return new SwingComp<>(pane).withBorder(BorderFactory.createEmptyBorder());
     }
 
@@ -98,13 +137,17 @@ public class SwingComp<E extends JComponent> {
         return new SwingComp<>(textArea).withBackground(null);
     }
 
-    public SwingComp<E> withBackground(Color background) {
+    public SwingComp<E> withBackground(@FilteredVals.Color Color background) {
         component.setBackground(background);
         return this;
     }
 
     public static Component spacer(int x, int y) {
         return Box.createRigidArea(new Dimension(x, y));
+    }
+
+    public static Component glue() {
+        return Box.createVerticalGlue();
     }
 
     public SwingPane toPane() {
@@ -121,14 +164,14 @@ public class SwingComp<E extends JComponent> {
         return in(panel, null);
     }
 
-    public E in(JPanel panel, @SourceVal.Border String location) {
+    public E in(JPanel panel, @FilteredVals.Border String location) {
         panel.add(component, location);
         panel.revalidate();
         panel.repaint();
         return component;
     }
 
-    public E in(RootPaneContainer container, @SourceVal.Border String location) {
+    public E in(RootPaneContainer container, @FilteredVals.Border String location) {
         container.getContentPane().add(component, location);
         return component;
     }
@@ -144,7 +187,7 @@ public class SwingComp<E extends JComponent> {
     }
 
     public SwingComp<E> withPaddedMatteBorderOnSide(
-            Color accentColor,
+            @FilteredVals.Color Color accentColor,
             @MagicConstant(intValues = {TOP, LEFT, BOTTOM, RIGHT}) int matteLocation,
             int top, int left, int bottom, int right
     ) {
@@ -162,29 +205,30 @@ public class SwingComp<E extends JComponent> {
         return this;
     }
 
+    public SwingComp<E> withEmptyBorder(int sideLength) {
+        return withEmptyBorder(sideLength, sideLength, sideLength, sideLength);
+    }
+
     public SwingComp<E> withEmptyBorder(int top, int left, int bottom, int right) {
         component.setBorder(new EmptyBorder(top, left, bottom, right));
         return this;
     }
 
     public SwingComp<E> withLabeledBorder(String label) {
-        component.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createEtchedBorder(), label, TitledBorder.LEFT, TitledBorder.TOP
-        ));
-        return this;
+        return withBorder(new TitledBorder(BorderFactory.createEtchedBorder(), label, TitledBorder.LEFT, TitledBorder.TOP));
     }
 
-    public SwingComp<E> withText(@SourceVal.Fonts int type, float size, Color fg) {
+    public SwingComp<E> withText(@FilteredVals.Fonts int type, float size, @FilteredVals.Color Color fg) {
         component.setFont(component.getFont().deriveFont(type, size));
         return withForeground(fg);
     }
 
-    public SwingComp<E> withBackgroundAndForeground(Color bg, Color fg) {
+    public SwingComp<E> withBackgroundAndForeground(@FilteredVals.Color Color bg, @FilteredVals.Color Color fg) {
         return withBackground(bg).withForeground(fg);
     }
 
     public SwingComp<E> muted() {
-        component.setForeground(ColorStyles.FG_MUTED);
+        component.setForeground(FG_MUTED);
         return this;
     }
 
@@ -192,6 +236,19 @@ public class SwingComp<E extends JComponent> {
         if (!(component instanceof AbstractButton button))
             throw new ClassCastException("SwingComp.withAction$Consumer: AbstractButton expected");
         button.addActionListener(e -> action.accept(component));
+        return this;
+    }
+
+    public SwingComp<E> withMouseMoveListener(Consumer<E> onEnter, Consumer<E> onExit) {
+        component.addMouseListener(new MouseAdapter() {
+            @Override public void mouseEntered(MouseEvent e) {
+                onEnter.accept(component);
+            }
+
+            @Override public void mouseExited(MouseEvent e) {
+                onExit.accept(component);
+            }
+        });
         return this;
     }
 
@@ -215,40 +272,7 @@ public class SwingComp<E extends JComponent> {
     public SwingComp<JPanel> withCancelOption(Runnable onCancel) {
         if (!(component instanceof JButton)) throw new ClassCastException();
 
-        return SwingPane.newArrangedAs(SwingPane.FLOW).collect(component, button("Cancel", ColorStyles.CRITICAL, onCancel));
-    }
-
-    /**
-     * <blockquote><pre>
-     *     {@code
-     *     // preset with the following:
-     *     setFont(getFont().deriveFont(Font.PLAIN, 12f));
-     *     setFocusPainted(false);
-     *     setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
-     *     setOpaque(true);
-     *     setBorder(new CompoundBorder(new LineBorder(param$bg, 1), 7, 10, 7, 10);
-     *     setBackground(param$bg)
-     *     setBackground(ColorStyles.BACKGROUND);
-     *     setForeground(ColorStyles.TEXT_PRIMARY);
-     *     // a mouse listener to add a 1 thickness LineBorder with color ColorStyles.TEXT_MUTED
-     *     // on mouse entry that is removed on mouse exit
-     *     }
-     * </pre></blockquote>
-     */
-    public static SwingComp<JButton> button(Object textOrIcon, Color bg, Runnable actionListener) {
-        JButton button = switch (textOrIcon) {
-            case String s -> new JButton(s);
-            case Resource icon -> {
-                Image image = new ImageIcon(icon.getUrl()).getImage().getScaledInstance(80, 80, Image.SCALE_SMOOTH);
-                Image resized = image.getScaledInstance(80, 80, Image.SCALE_SMOOTH);
-                yield new JButton(new ImageIcon(resized));
-            }
-            default -> throw new ClassCastException("SwingComp.button: String or Resource expected");
-        };
-
-        return SwingComp.fluent(button)
-                .withBackground(bg)
-                .applied(b -> Optional.ofNullable(actionListener).ifPresent(a -> b.addActionListener(e -> a.run())));
+        return SwingPane.newArrangedAs(SwingPane.FLOW).collect(component, button("Cancel", CRITICAL, onCancel));
     }
 
     public SwingComp<E> applied(Consumer<E> action) {
@@ -256,13 +280,17 @@ public class SwingComp<E extends JComponent> {
         return this;
     }
 
+    public SwingComp<JScrollPane> toScroller() {
+        return scrollPane(component);
+    }
+
     public static <T extends JComponent> SwingComp<T> fluent(T component) {
         SwingComp<T> comp = new SwingComp<>(component);
 
         return switch (component) {
-            case JTextComponent ignored -> comp.withForegroundAndCaretColor(ColorStyles.FOREGROUND);
+            case JTextComponent ignored -> comp.withForegroundAndCaretColor(FOREGROUND);
             case AbstractButton ignored -> comp.withoutPaintedFocus().opaque()
-                    .withPaddedBorder(new LineBorder(ColorStyles.BACKGROUND, 1), 7, 10, 7, 10)
+                    .withPaddedBorder(new LineBorder(BACKGROUND, 1), 7, 10, 7, 10)
                     .applied(b -> {
                         b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                         addAbstractButtonMouseListenerTo((AbstractButton) b);
@@ -271,7 +299,7 @@ public class SwingComp<E extends JComponent> {
         };
     }
 
-    public SwingComp<E> withForegroundAndCaretColor(Color color) {
+    public SwingComp<E> withForegroundAndCaretColor(@FilteredVals.Color Color color) {
         if (!(component instanceof JTextComponent t))
             throw new ClassCastException("SwingComp.withForegroundAndCaretColor: JTextComponent required");
         t.setForeground(color);
@@ -303,9 +331,9 @@ public class SwingComp<E extends JComponent> {
                 if (b.getClientProperty("hoverActive") != null) return;
                 b.putClientProperty("hoverActive", true);
 
-                Color lineColor = b.getBackground().equals(ColorStyles.SUCCESS)
-                        ? ColorStyles.FG_MUTED
-                        : ColorStyles.SELECTION;
+                Color lineColor = b.getBackground().equals(SUCCESS)
+                        ? FG_MUTED
+                        : SELECTION;
 
                 Insets insets = standardBorder.getBorderInsets(b);
                 Border innerBorder = BorderFactory.createEmptyBorder(

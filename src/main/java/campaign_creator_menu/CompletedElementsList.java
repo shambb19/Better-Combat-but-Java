@@ -8,6 +8,7 @@ import encounter.Encounter;
 import format.swing_comp.SwingPane;
 import lombok.*;
 import lombok.experimental.*;
+import util.Filterable;
 
 import javax.swing.*;
 import java.util.List;
@@ -15,16 +16,15 @@ import java.util.List;
 import static format.swing_comp.SwingPane.FLOW;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-@ExtensionMethod(util.Filter.class)
 public class CompletedElementsList extends JPanel {
 
     CompletedElementList<Combatant> friendlyPane, enemyPane;
     CompletedElementList<Scenario> scenarioPane;
 
-    public CompletedElementsList(Encounter input, CampaignCreatorMenu root) {
-        friendlyPane = new CompletedElementList<>(input.getFriendlies(), CompletedElementList.FRIENDLY_NEW, this, root);
-        enemyPane = new CompletedElementList<>(input.getEnemies(), CompletedElementList.ENEMY_NEW, this, root);
-        scenarioPane = new CompletedElementList<>(input.getScenarios(), CompletedElementList.SCENARIO_NEW, this, root);
+    public CompletedElementsList(Encounter input) {
+        friendlyPane = new CompletedElementList<>(input.getFriendlies(), CompletedElementList.FRIENDLY_NEW, this);
+        enemyPane = new CompletedElementList<>(input.getEnemies(), CompletedElementList.ENEMY_NEW, this);
+        scenarioPane = new CompletedElementList<>(input.getScenarios(), CompletedElementList.SCENARIO_NEW, this);
 
         SwingPane.fluent(this).arrangedAs(FLOW, 10, 0)
                 .collect(friendlyPane, enemyPane, scenarioPane)
@@ -42,11 +42,11 @@ public class CompletedElementsList extends JPanel {
     }
 
     public List<NPC> getFriendlyNPCs() {
-        return friendlyPane.toList().castTo(NPC.class);
+        return Filterable.of(friendlyPane.toList()).castToAsList(NPC.class);
     }
 
     public List<NPC> getEnemies() {
-        return enemyPane.toList().castTo(NPC.class);
+        return Filterable.of(enemyPane.toList()).castToAsList(NPC.class);
     }
 
     /**
@@ -62,7 +62,7 @@ public class CompletedElementsList extends JPanel {
     }
 
     public boolean isNotEnoughForScenario() {
-        boolean noPartyFound = friendlyPane.toList().castTo(PC.class).isEmpty();
+        boolean noPartyFound = Filterable.of(friendlyPane.toList()).castToAsList(PC.class).isEmpty();
 
         return enemyPane.toList().isEmpty() || noPartyFound;
     }

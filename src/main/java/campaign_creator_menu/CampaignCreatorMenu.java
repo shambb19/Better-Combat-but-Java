@@ -1,6 +1,7 @@
 package campaign_creator_menu;
 
 import __main.Main;
+import __main.MainFrame;
 import _global_list.Combatants;
 import campaign_creator_menu.input.CombatantInputPanel;
 import campaign_creator_menu.input.ScenarioInputPanel;
@@ -8,15 +9,13 @@ import combat_object.CombatObject;
 import combat_object.combatant.Combatant;
 import combat_object.scenario.Scenario;
 import encounter.Encounter;
-import format.ColorStyles;
 import lombok.*;
 import lombok.experimental.*;
 
 import javax.swing.*;
-import java.awt.*;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-public class CampaignCreatorMenu extends JFrame {
+public class CampaignCreatorMenu extends MainFrame {
 
     public static final String TITLE = "Campaign Creator" + Main.TITLE;
 
@@ -27,41 +26,19 @@ public class CampaignCreatorMenu extends JFrame {
     ScenarioInputPanel scenarioPanel;
     DownloadDocDisplayPanel displayPanel;
 
-    public static CampaignCreatorMenu newInstance() {
-        return new CampaignCreatorMenu();
-    }
-
-    private CampaignCreatorMenu() {
+    public CampaignCreatorMenu() {
         setTitle(TITLE);
-        setIconImage(__main.Main.getAppIcon().getImage());
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-
-        setResizable(false);
-        setBackground(ColorStyles.BACKGROUND);
 
         Encounter encounter = Combatants.toBattle();
 
-        completedList = new CompletedElementsList(encounter, this);
-        inputPanel = new CombatantInputPanel(this);
-        scenarioPanel = new ScenarioInputPanel(completedList, this);
-        LevelUpPanel levelUpPanel = new LevelUpPanel(encounter, this);
+        completedList = new CompletedElementsList(encounter);
+        inputPanel = new CombatantInputPanel();
+        scenarioPanel = new ScenarioInputPanel(completedList);
+        LevelUpPanel levelUpPanel = new LevelUpPanel(encounter);
         displayPanel = new DownloadDocDisplayPanel(encounter);
         hostPanel = new HostPanel(inputPanel, scenarioPanel, levelUpPanel, completedList, displayPanel);
 
         add(hostPanel);
-
-        GraphicsConfiguration config = getGraphicsConfiguration();
-        Rectangle bounds = config.getBounds();
-        Insets insets = Toolkit.getDefaultToolkit().getScreenInsets(config);
-
-        int SHADOW = 8;
-
-        int x = bounds.x + insets.left - SHADOW;
-        int y = bounds.y + insets.top;
-        int width = bounds.width - insets.left - insets.right + (SHADOW * 2);
-        int height = bounds.height - insets.top - insets.bottom + SHADOW;
-
-        setBounds(x, y, width, height);
 
         setVisible(true);
     }

@@ -1,8 +1,8 @@
 package combat_menu.popup;
 
-import __main.manager.ConcentrationManager;
-import __main.manager.EffectManager;
 import combat_object.combatant.Combatant;
+import manager.ConcentrationManager;
+import manager.EffectManager;
 import util.Message;
 
 import javax.swing.*;
@@ -14,7 +14,7 @@ import static format.swing_comp.SwingComp.*;
 import static format.swing_comp.SwingPane.fluent;
 import static format.swing_comp.SwingPane.*;
 
-public class SpellManagerPopup extends JDialog {
+public class SpellManagerPopup extends Popup {
 
     private final JPanel effectsList;
 
@@ -25,18 +25,11 @@ public class SpellManagerPopup extends JDialog {
         JPanel concentrationsList = getConcentrationPanel();
         effectsList = getEffectPanel();
 
-        JPanel scrollContents = newArrangedAs(ONE_COLUMN)
-                .collect(
-                        concentrationsList, effectsList, Box.createVerticalGlue()
-                ).component();
+        newArrangedAs(ONE_COLUMN)
+                .collect(concentrationsList, effectsList, glue())
+                .toScroller()
+                .in(this);
 
-        scrollPane(scrollContents).in(this);
-
-        setIconImage(__main.Main.getAppIcon().getImage());
-        setModal(false);
-        setAlwaysOnTop(true);
-        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
         pack();
         setVisible(true);
     }
@@ -46,8 +39,8 @@ public class SpellManagerPopup extends JDialog {
 
         panelIn(panel).arrangedAs(SINGLE_ROW, 15, 0).collect(
                 new JLabel(),
-                label("Concentrating", Font.PLAIN, 13f),
-                label("Target", Font.PLAIN, 13f),
+                label("Concentrating", 13f),
+                label("Target", 13f),
                 new JLabel()
         );
 

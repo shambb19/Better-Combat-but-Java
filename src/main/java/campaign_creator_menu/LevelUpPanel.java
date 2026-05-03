@@ -1,5 +1,6 @@
 package campaign_creator_menu;
 
+import __main.Main;
 import campaign_creator_menu.input.ListSelectionPanel;
 import combat_object.combatant.PC;
 import combat_object.combatant.info.AbilityModifier;
@@ -8,6 +9,7 @@ import combat_object.damage_implements.Weapon;
 import encounter.Encounter;
 import lombok.*;
 import lombok.experimental.*;
+import util.Filterable;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,14 +24,11 @@ import static format.swing_comp.SwingComp.*;
 import static format.swing_comp.SwingPane.*;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-@ExtensionMethod(util.Filter.class)
 public class LevelUpPanel extends JPanel {
 
     static String INSTRUCTIONS = "Edit any combatant information on by the level-up. " +
             "Note that HP and proficiency bonus have been automatically increased by the standard amount " +
             "for the player's class and new level.";
-
-    CampaignCreatorMenu root;
 
     JLabel editingLabel;
     JProgressBar progressBar;
@@ -40,21 +39,19 @@ public class LevelUpPanel extends JPanel {
     Map<PC, SelectionPanels> panelsMap;
     @NonFinal int partyIndex = 0;
 
-    public LevelUpPanel(Encounter encounter, CampaignCreatorMenu root) {
-        this.root = root;
+    public LevelUpPanel(Encounter encounter) {
         panelsMap = new HashMap<>();
 
-        party = encounter.getFriendlies().castTo(PC.class).toArray(new PC[0]);
+        party = Filterable.of(encounter.getFriendlies()).castTo(PC.class).toArray();
 
         setLayout(new BorderLayout());
 
-        editingLabel = label("Editing " + party[0]).withDerivedFont(Font.PLAIN, 18f).onLeft().component();
+        editingLabel = label("Editing " + party[0], 18f).onLeft().component();
 
         progressBar = new JProgressBar(SwingConstants.HORIZONTAL, 0, party.length + 1);
-        fluent(progressBar).withEmptyBorder(10, 10, 10, 10);
+        fluent(progressBar).withEmptyBorder(10);
 
-        JPanel labelBarPanel = newArrangedAs(BORDER).borderCollect(
-                west(editingLabel), center(progressBar)).component();
+        JPanel labelBarPanel = newBorderPanel(west(editingLabel), center(progressBar)).component();
 
         panelIn(this, BorderLayout.NORTH).arrangedAs(VERTICAL_BOX)
                 .collect(textArea(INSTRUCTIONS).withDerivedFont(Font.PLAIN, 15f), labelBarPanel);
@@ -68,7 +65,7 @@ public class LevelUpPanel extends JPanel {
         add(cards, BorderLayout.CENTER);
 
         button("Next", SUCCESS, this::showNext)
-                .withCancelOption(root::finishLevelUpProcess).in(this, BorderLayout.SOUTH);
+                .withCancelOption(Main.getCreatorMenu()::finishLevelUpProcess).in(this, BorderLayout.SOUTH);
     }
 
     private JPanel panelFor(PC pc) {
@@ -119,7 +116,7 @@ public class LevelUpPanel extends JPanel {
             partyMember.getWeapons().addAll(newWeapons);
             partyMember.getSpells().addAll(newSpells);
         }
-        root.finishLevelUpProcess();
+        Main.getCreatorMenu().finishLevelUpProcess();
     }
 
     private record SelectionPanels(ListSelectionPanel<Weapon> weaponPanel, ListSelectionPanel<Spell> spellPanel) {

@@ -5,6 +5,7 @@ import combat_object.CombatObject;
 import combat_object.combatant.Combatant;
 import combat_object.scenario.Scenario;
 import encounter.Encounter;
+import exception.CampaignSaveError;
 import format.swing_comp.SwingComp;
 import format.swing_comp.SwingPane;
 import input.CampaignWriter;
@@ -49,7 +50,10 @@ public class DownloadDocDisplayPanel extends JPanel {
         SwingComp<JButton> download = button("Download", SUCCESS, this::download);
         SwingComp<JButton> clipboard = button("Copy to clipboard", SUCCESS, this::clipboardCopy);
         SwingComp<JButton> start = button("Start combat (this campaign)", SUCCESS,
-                () -> Main.closeCreatorAndOpenCombat(download()));
+                () -> {
+                    Main.uploadCampaign(download());
+                    Main.closeAndSwitch(Main.getCreatorMenu(), Main.COMBAT);
+                });
 
         Stream.of(download, clipboard, start)
                 .forEach(b -> b.withBackgroundAndForeground(SUCCESS, FOREGROUND));
@@ -114,7 +118,7 @@ public class DownloadDocDisplayPanel extends JPanel {
             "Successfully saved to Downloads".showAsInfoMessage();
             return savedFile;
         } else {
-            return null;
+            throw new CampaignSaveError("Campaign could not be downloaded.");
         }
     }
 

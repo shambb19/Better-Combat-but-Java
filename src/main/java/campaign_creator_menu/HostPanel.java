@@ -26,8 +26,7 @@ public class HostPanel extends JPanel {
             CombatantInputPanel inputPanel, ScenarioInputPanel scenarioPanel, LevelUpPanel levelPanel,
             CompletedElementsList completedList, DownloadDocDisplayPanel displayPanel
     ) {
-        SwingPane.fluent(this).arrangedAs(TWO_COLUMN, 10, 10)
-                .withEmptyBorder(10, 10, 10, 10);
+        SwingPane.fluent(this).arrangedAs(TWO_COLUMN, 10, 10).withEmptyBorder(10);
 
         cardLayout = new CardLayout();
         cards = new JPanel(cardLayout);

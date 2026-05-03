@@ -7,7 +7,7 @@ import combat_object.combatant.PC;
 import combat_object.scenario.Scenario;
 import lombok.*;
 import lombok.experimental.*;
-import util.Filter;
+import util.Filterable;
 import util.Message;
 
 import java.io.File;
@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-@ExtensionMethod(Filter.class)
+@ExtensionMethod(util.Filterable.class)
 @RequiredArgsConstructor
 public class CampaignWriter {
 
@@ -52,9 +52,9 @@ public class CampaignWriter {
     private URL getWrittenFile(String fileName, boolean isSentToDownloads) throws IOException {
         File file;
         if (isSentToDownloads) {
-            int numRand = (int) (Math.random() * 1000);
             File directory = new File(System.getProperty("user.home"), "Downloads");
 
+            int numRand = (int) (Math.random() * 1000);
             file = new File(directory, fileName + LocalDate.now() + " " + numRand + ".txt");
         } else {
             file = File.createTempFile("campaignParam", ".txt");
@@ -74,10 +74,15 @@ public class CampaignWriter {
                 code.addAll(c.toTxt());
         });
 
-        enemySource.filteredBy(enemy -> enemy.getLifeStatus().isConscious())
+        Filterable.of(enemySource).filteredBy(enemy -> enemy.getLifeStatus().isConscious())
                 .forEach(enemy -> code.addAll(enemy.toTxt()));
     }
 
+    /*
+        Yet again the Claude torture test identified a bug I can't replicate.
+        This supposedly doesn't include scenarios in campaign writing, but I
+        have not noticed this issue.
+     */
     private void writeScenarios() {
         scenarioSource.forEach(scenario -> code.addAll(scenario.toTxt()));
     }

@@ -1,4 +1,4 @@
-package __main.manager;
+package manager;
 
 import __main.Main;
 import combat_menu.action_panel.ActionPanel;
@@ -9,7 +9,7 @@ import combat_object.damage_implements.Implement;
 import combat_object.damage_implements.Spell;
 import lombok.*;
 import lombok.experimental.*;
-import util.StringUtils;
+import util.StringUtil;
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.function.Function;
 
 @UtilityClass
-@ExtensionMethod(util.StringUtils.class)
+@ExtensionMethod(StringUtil.class)
 public class CombatManager {
 
     public static final Function<Integer, String> DAMAGE_MESSAGE =
@@ -145,7 +145,7 @@ public class CombatManager {
 
         public LoggedAction(String logMessage) {
             this.logMessage = logMessage;
-            timeLogged = StringUtils.gameTimeString();
+            timeLogged = StringUtil.gameTimeString();
         }
     }
 }

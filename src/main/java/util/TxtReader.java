@@ -1,35 +1,36 @@
 package util;
 
+import exception.InvalidSyntaxError;
 import lombok.experimental.*;
 
-import java.util.stream.Stream;
+import java.util.Arrays;
 
-@ExtensionMethod(StringUtils.class)
+@ExtensionMethod(StringUtil.class)
 public class TxtReader {
+
+    private static final String[] COMMENT_INITIALIZERS = {"//", "~", "#"};
 
     /**
      * Returns "key" from any "key: value" code line
      */
     public static String key(String line) {
-        if (!line.contains(": ")) return line;
-        return line.substring(0, line.indexOf(": "));
+        if (!line.contains(":")) throw new InvalidSyntaxError(false, "no delimiter found in " + line);
+        return line.substring(0, line.indexOf(":"));
     }
 
     /**
      * Returns "value" from any "key: value" code line
      */
     public static String value(String line) {
-        return line.substring(line.indexOf(": ") + 2);
+        if (!line.contains(":")) throw new InvalidSyntaxError(false, "no delimiter found");
+
+        int valueStartIdx = line.contains(": ") ? 2 : 1;
+        return line.substring(line.indexOf(":") + valueStartIdx);
     }
 
     /**
      * Returns the values of code value array as String[]
-     * <p>
-     * i.e. "key: [a, b, c, d]"
-     * <p>
-     * returns
-     * <p>
-     * {"a", "b", "c", "d"}
+     * <p>i.e. "key: [a, b, c, d]"<p>returns<p>{"a", "b", "c", "d"}
      */
     public static String[] listTextAsArray(String line) {
         String str;
@@ -41,12 +42,16 @@ public class TxtReader {
         return withoutComments(str).split(", ");
     }
 
+    public static boolean isComments(String line) {
+        return Arrays.stream(COMMENT_INITIALIZERS).anyMatch(line.trim()::startsWith);
+    }
+
     /**
      * @param line Any line of .txt code
      * @return The same line without comments (using the keys "//", "~", and "#")
      */
     public static String withoutComments(String line) {
-        int firstCommentIndex = Stream.of("//", "~", "#")
+        int firstCommentIndex = Arrays.stream(COMMENT_INITIALIZERS)
                 .filter(line::contains).map(line::indexOf).sorted().findFirst().orElse(line.length());
 
         return line.substring(0, firstCommentIndex).trim();

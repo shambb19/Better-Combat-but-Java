@@ -1,8 +1,8 @@
 package combat_object.combatant.info;
 
-import __main.manager.ConcentrationManager;
 import combat_object.combatant.Combatant;
 import lombok.*;
+import manager.ConcentrationManager;
 import org.intellij.lang.annotations.MagicConstant;
 
 public class LifeStatus {
@@ -15,8 +15,10 @@ public class LifeStatus {
     public void rollDeathSave(int d20Roll) {
         if (d20Roll > 20 || d20Roll < 1) throw new IndexOutOfBoundsException();
 
-        if (d20Roll >= 10) successes++;
-        else fails++;
+        if (d20Roll == 20) successes = 3;
+        else if (d20Roll >= 10) successes++;
+        else if (d20Roll > 1) fails++;
+        else fails += 2;
 
         if (successes == 3) status = ALIVE;
         else if (fails == 3) status = DEAD;

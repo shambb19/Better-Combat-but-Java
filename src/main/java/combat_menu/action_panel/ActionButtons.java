@@ -1,11 +1,10 @@
 package combat_menu.action_panel;
 
-import __main.manager.EncounterManager;
-import __main.manager.InspirationManager;
 import _global_list.Resource;
-import format.swing_comp.SwingPane;
 import lombok.*;
 import lombok.experimental.*;
+import manager.EncounterManager;
+import manager.InspirationManager;
 import org.intellij.lang.annotations.MagicConstant;
 import util.Locators;
 
@@ -13,14 +12,15 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.List;
 
 import static _global_list.Resource.*;
 import static combat_menu.action_panel.ActionPanel.ATTACK_OPTION;
 import static combat_menu.action_panel.ActionPanel.HEAL_OPTION;
 import static format.ColorStyles.*;
+import static format.swing_comp.SwingComp.fluent;
+import static format.swing_comp.SwingPane.ONE_COLUMN;
+import static format.swing_comp.SwingPane.fluent;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @ExtensionMethod(ActionButtons.class)
@@ -36,10 +36,10 @@ public class ActionButtons extends JPanel {
     int turnStatus;
     ActionButton activeButton = null;
 
-    private ActionButtons(ActionPanel root) {
+    public ActionButtons(ActionPanel root) {
         this.root = root;
 
-        SwingPane.fluent(this).arrangedAs(SwingPane.ONE_COLUMN);
+        fluent(this).arrangedAs(ONE_COLUMN);
 
         attackButton = new ActionButton("Attack", ATTACK_BUTTON, () -> onTurnAction(ATTACK_OPTION));
         healButton = new ActionButton("Heal", HEAL_BUTTON, () -> onTurnAction(HEAL_OPTION));
@@ -59,10 +59,6 @@ public class ActionButtons extends JPanel {
         List.of(attackButton, healButton, inspirationButton, endTurnButton).forEach(ActionButton::refreshState);
         revalidate();
         repaint();
-    }
-
-    public static ActionButtons newInstance(ActionPanel root) {
-        return new ActionButtons(root);
     }
 
     public void logActionChange(@MagicConstant(intValues = {CONFIRM, CANCEL, NEW_TURN}) int changeType) {
@@ -96,20 +92,40 @@ public class ActionButtons extends JPanel {
                 runnable.run();
             });
 
-            addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseEntered(MouseEvent e) {
-                    if (activeButton == null && isButtonAvailable()) addHighlight(SELECTION);
-                }
-
-                @Override
-                public void mouseExited(MouseEvent e) {
-                    if (!ActionButton.this.equals(activeButton)) refreshState();
-                }
-            });
+            fluent(this)
+                    .withAction(b -> {
+                        b.addHighlight(SELECTION);
+                        runnable.run();
+                    }).withMouseMoveListener(
+                            b -> {
+                                if (activeButton == null && isButtonAvailable())
+                                    addHighlight(SELECTION);
+                            },
+                            b -> {
+                                if (!ActionButton.this.equals(activeButton))
+                                    refreshState();
+                            }
+                    );
 
             ActionButtons.this.add(this);
             refreshState();
+        }
+
+        private void addHighlight(Color color) {
+            setBorder(BorderFactory.createCompoundBorder(
+                    new MatteBorder(0, 0, 0, 6, color),
+                    new EmptyBorder(10, 15, 10, 15)
+            ));
+        }
+
+        private boolean isButtonAvailable() {
+            boolean isAnyTargets = !Locators.getTargetList(buttonType.equals("Attack")).isEmpty();
+            return switch (buttonType) {
+                case "Attack", "Heal" -> isAnyTargets && turnStatus != DONE;
+                case "Use Inspiration" -> !EncounterManager.getCurrentCombatant().isEnemy();
+                case "End Turn" -> true;
+                default -> false;
+            };
         }
 
         void refreshState() {
@@ -147,23 +163,6 @@ public class ActionButtons extends JPanel {
                 addHighlight(TEXT_LOCKED);
                 setBackground(BG_LOCKED);
             }
-        }
-
-        private boolean isButtonAvailable() {
-            boolean isAnyTargets = !Locators.getTargetList(buttonType.equals("Attack")).isEmpty();
-            return switch (buttonType) {
-                case "Attack", "Heal" -> isAnyTargets && turnStatus != DONE;
-                case "Use Inspiration" -> !EncounterManager.getCurrentCombatant().isEnemy();
-                case "End Turn" -> true;
-                default -> false;
-            };
-        }
-
-        private void addHighlight(Color color) {
-            setBorder(BorderFactory.createCompoundBorder(
-                    new MatteBorder(0, 0, 0, 6, color),
-                    new EmptyBorder(10, 15, 10, 15)
-            ));
         }
     }
 }

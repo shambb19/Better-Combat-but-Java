@@ -1,7 +1,7 @@
 package combat_object.damage_implements;
 
-import __main.exception.InvalidParameterException;
 import combat_object.combatant.info.AbilityModifier;
+import exception.InvalidParameterException;
 import input.Key;
 import lombok.*;
 import lombok.experimental.*;
@@ -12,8 +12,7 @@ import java.util.Objects;
 
 import static input.Key.*;
 
-@Getter
-@SuperBuilder
+@Getter @SuperBuilder
 public class Spell extends Implement {
 
     @Builder.Default private final Effect effect = Effect.NONE;

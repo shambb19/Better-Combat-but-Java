@@ -6,20 +6,19 @@ import combat_object.combatant.info.Stats;
 import format.swing_comp.SwingPane;
 import lombok.experimental.*;
 import swing_custom.ValidatedField;
-import util.StringUtils;
+import util.StringUtil;
 
 import javax.swing.*;
 import java.util.HashMap;
 import java.util.Map;
 
-@ExtensionMethod(StringUtils.class)
+@ExtensionMethod(StringUtil.class)
 public class StatsInputPanel extends JPanel {
 
     private final Map<ValidatedField, AbilityModifier> statMap = new HashMap<>();
 
     {
-        SwingPane.fluent(this).arrangedAs(SwingPane.ONE_COLUMN)
-                .withEmptyBorder(20, 20, 20, 20);
+        SwingPane.fluent(this).arrangedAs(SwingPane.ONE_COLUMN).spaced();
 
         for (AbilityModifier stat : AbilityModifier.values()) {
             if (stat.equals(AbilityModifier.OPTION)) continue;

@@ -1,6 +1,5 @@
 package boilerplate;
 
-import format.swing_comp.SwingPane;
 import org.intellij.lang.annotations.MagicConstant;
 
 import java.awt.*;
@@ -11,15 +10,15 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.SOURCE)
 @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.LOCAL_VARIABLE, ElementType.METHOD})
-public @interface SourceVal {
-
+public @interface FilteredVals {
     @MagicConstant(intValues = {Font.PLAIN, Font.BOLD, Font.ITALIC}) @interface Fonts {
     }
-
     @MagicConstant(valuesFromClass = BorderLayout.class) @interface Border {
     }
 
-    @MagicConstant(valuesFromClass = SwingPane.class) @interface Pane {
+    @MagicConstant(valuesFromClass = format.swing_comp.SwingPane.class) @interface Pane {
     }
 
+    @MagicConstant(valuesFromClass = format.ColorStyles.class) @interface Color {
+    }
 }

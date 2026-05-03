@@ -1,5 +1,6 @@
 package campaign_creator_menu;
 
+import __main.Main;
 import combat_object.CombatObject;
 import combat_object.combatant.Combatant;
 import combat_object.combatant.NPC;
@@ -8,15 +9,16 @@ import format.swing_comp.SwingPane;
 import lombok.*;
 import lombok.experimental.*;
 import org.intellij.lang.annotations.MagicConstant;
-import util.Filter;
 import util.Message;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.*;
+import java.util.Map;
 
 import static format.ColorStyles.SUCCESS;
 import static format.swing_comp.SwingComp.fluent;
@@ -24,6 +26,7 @@ import static format.swing_comp.SwingComp.*;
 import static format.swing_comp.SwingPane.*;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+@ExtensionMethod(util.Filterable.class)
 public class CompletedElementList<T extends CombatObject> extends JPanel {
 
     public static final Combatant FRIENDLY_NEW = NPC.create(
@@ -42,19 +45,16 @@ public class CompletedElementList<T extends CombatObject> extends JPanel {
             SCENARIO_NEW, "Scenarios:"
     );
 
-    CampaignCreatorMenu root;
     ScrollPane<T> list;
     T newOption;
 
     public CompletedElementList(
             List<T> contents,
             @MagicConstant(valuesFromClass = CompletedElementList.class) T newOption,
-            CompletedElementsList parent,
-            CampaignCreatorMenu root
+            CompletedElementsList parent
     ) {
-        this.root = root;
         this.newOption = newOption;
-        list = new ScrollPane<>(parent, root);
+        list = new ScrollPane<>(parent);
 
         SwingPane.fluent(this).collect(getPanel()).arrangedAs(SINGLE_ROW);
 
@@ -64,19 +64,15 @@ public class CompletedElementList<T extends CombatObject> extends JPanel {
     private JPanel getPanel() {
         String labelText = labelNames.get(newOption);
 
-        JLabel label = label(labelText, Font.PLAIN, 18f)
-                .withEmptyBorder(4, 4, 4, 4)
-                .enabled(false).component();
+        JLabel label = label(labelText, 18f).withEmptyBorder(4).enabled(false).component();
 
-        JButton withNew = button(newOption.getName(), SUCCESS,
-                () -> root.logEdit(newOption, true))
-                .withDerivedFont(Font.PLAIN, 13f)
-                .component();
+        JButton withNew =
+                button(newOption.getName(), SUCCESS,
+                        () -> Main.getCreatorMenu().logEdit(newOption, true))
+                        .withDerivedFont(Font.PLAIN, 13f)
+                        .component();
 
-        return newArrangedAs(BORDER, 0, 4)
-                .borderCollect(
-                        north(label), center(list), south(withNew)
-                ).component();
+        return newBorderPanel(0, 4, north(label), center(list), south(withNew)).component();
     }
 
     public void add(T item) {
@@ -95,24 +91,23 @@ public class CompletedElementList<T extends CombatObject> extends JPanel {
         return collection;
     }
 
+    @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
     static class ScrollPane<T extends CombatObject> extends JScrollPane {
 
-        private final CompletedElementsList parent;
-        private final CampaignCreatorMenu root;
+        CompletedElementsList parent;
 
-        private final JList<T> list;
-        private final DefaultListModel<T> model;
-        private final ListSelectionListener listener;
+        JList<T> list;
+        DefaultListModel<T> model;
+        ListSelectionListener listener;
 
-        public ScrollPane(CompletedElementsList parent, CampaignCreatorMenu root) {
+        public ScrollPane(CompletedElementsList parent) {
             this.parent = parent;
-            this.root = root;
 
             model = new DefaultListModel<>();
 
             list = fluent(new JList<>(model))
                     .applied(l -> l.setSelectionMode(ListSelectionModel.SINGLE_SELECTION))
-                    .withEmptyBorder(4, 4, 4, 4).component();
+                    .withEmptyBorder(4).component();
 
             listener = this::logSelection;
             list.addListSelectionListener(listener);
@@ -123,8 +118,7 @@ public class CompletedElementList<T extends CombatObject> extends JPanel {
         @SuppressWarnings("unchecked")
         public void add(T element) {
             doWithoutListener(() -> {
-                List<T> modelList = (List<T>) (Object) Arrays.asList(model.toArray());
-                T existingVersion = Filter.firstWithToStringEquals(modelList, element.toString());
+                T existingVersion = ((T[]) model.toArray()).of().firstWithToStringEquals(element.toString());
 
                 model.removeElement(existingVersion);
                 model.addElement(element);
@@ -158,7 +152,7 @@ public class CompletedElementList<T extends CombatObject> extends JPanel {
             int route = Message.showEditOrRemovePrompt(selectedValue.toString());
 
             if (route == Message.EDIT_OPTION)
-                root.logEdit(selectedValue, false);
+                Main.getCreatorMenu().logEdit(selectedValue, false);
             else if (route == Message.REMOVE_OPTION)
                 remove(selectedValue);
         }

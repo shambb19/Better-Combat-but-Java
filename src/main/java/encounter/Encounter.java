@@ -28,7 +28,7 @@ import java.util.List;
         int healthSumMax = enemies.stream().mapToInt(Combatant::getMaxHp).sum();
         int healthSumFinal = enemies.stream().mapToInt(Combatant::getHp).sum();
 
-        return (100 * (1 - (healthSumFinal / healthSumMax))) + "%";
+        return (int) (100 * (1.0 - (double) healthSumFinal / healthSumMax)) + "%";
     }
 
 }

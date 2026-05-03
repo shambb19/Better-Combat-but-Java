@@ -6,8 +6,7 @@ import lombok.*;
 import lombok.experimental.*;
 
 @EqualsAndHashCode(callSuper = true) @Getter
-@Data
-@SuperBuilder
+@Data @SuperBuilder
 @FieldDefaults(makeFinal = true, level = AccessLevel.PROTECTED)
 public abstract class Implement extends CombatObject {
 
@@ -16,8 +15,7 @@ public abstract class Implement extends CombatObject {
     boolean isManual;
 
     public String damageString() {
-        if (isManual()) return "";
-        return numDice + "d" + dieSize;
+        return util.StringUtil.stringIfElseBlank(numDice + "d" + dieSize, !isManual);
     }
 
     public boolean effectEquals(Effect o) {

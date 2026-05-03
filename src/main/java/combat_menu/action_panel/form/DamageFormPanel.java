@@ -1,15 +1,15 @@
 package combat_menu.action_panel.form;
 
-import __main.manager.CombatManager;
-import __main.manager.EffectManager;
 import combat_object.combatant.Combatant;
 import combat_object.damage_implements.Effect;
 import combat_object.damage_implements.Implement;
 import format.ColorStyles;
 import lombok.*;
 import lombok.experimental.*;
+import manager.CombatManager;
+import manager.EffectManager;
 import swing_custom.ValidatedField;
-import util.StringUtils;
+import util.StringUtil;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,14 +19,14 @@ import static combat_object.damage_implements.Effect.*;
 import static format.swing_comp.SwingPane.*;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@ExtensionMethod(StringUtils.class)
+@ExtensionMethod(StringUtil.class)
 public class DamageFormPanel extends ActionFormPanel {
 
     static final Effect[] DAMAGE_EFFECTS = new Effect[]
             {
-                    ADVANTAGE_SOON, ILLUSION, BLIND, DIFFICULT_TERRAIN,
-                    DISADVANTAGE_ATTACK, FORCED_MOVE, FRIGHTEN, BANISH,
-                    PRONE, PULL, RESTRAIN, TRACKING, STAT_DROP
+                    POISON, ADVANTAGE_SOON, ILLUSION, BLIND, TRACKING,
+                    DIFFICULT_TERRAIN, DISADVANTAGE_ATTACK, FORCED_MOVE,
+                    FRIGHTEN, BANISH, PRONE, PULL, RESTRAIN, STAT_DROP, HEAL_SELF
             };
 
     final Implement implement;
@@ -50,8 +50,7 @@ public class DamageFormPanel extends ActionFormPanel {
         refreshButtons();
     }
 
-    @Override
-    protected void buildFields() {
+    @Override protected void buildFields() {
         LabeledField amountLF = addLabeledField(fieldsPanel, "Damage Amount", "Enter Damage Amount");
         amountField = amountLF.field();
         amountField.setValidator(s -> {
@@ -72,8 +71,7 @@ public class DamageFormPanel extends ActionFormPanel {
         addNotices();
     }
 
-    @Override
-    protected void addNotices() {
+    @Override protected void addNotices() {
         SwingUtilities.invokeLater(() -> {
             noticeConditions.put(Effect.HALF_DAMAGE, attackFailed);
             noticeConditions.put(Effect.BONUS_DAMAGE, EffectManager.isHexedBy(target, attacker));
@@ -86,8 +84,7 @@ public class DamageFormPanel extends ActionFormPanel {
         });
     }
 
-    @Override
-    protected void onConfirm() {
+    @Override protected void onConfirm() {
         if (!isInputValid()) return;
 
         int base = amountField.getValue().toInt();
@@ -98,14 +95,12 @@ public class DamageFormPanel extends ActionFormPanel {
         }
     }
 
-    @Override
-    protected void refreshButtons() {
+    @Override protected void refreshButtons() {
         super.refreshButtons();
         cancelButton.setVisible(false);
     }
 
-    @Override
-    protected boolean isInputValid() {
+    @Override protected boolean isInputValid() {
         if (amountField == null || !amountField.isValid()) return false;
         if (bonusRow != null && bonusRow.isVisible())
             return bonusField != null && bonusField.isValid();

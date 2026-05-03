@@ -1,6 +1,5 @@
 package combat_object.combatant;
 
-import __main.manager.EffectManager;
 import combat_object.CombatObject;
 import combat_object.combatant.info.AbilityModifier;
 import combat_object.combatant.info.LifeStatus;
@@ -12,6 +11,7 @@ import combat_object.damage_implements.Weapon;
 import format.ColorStyles;
 import lombok.*;
 import lombok.experimental.*;
+import manager.EffectManager;
 
 import java.awt.*;
 import java.util.ArrayList;

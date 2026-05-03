@@ -1,9 +1,9 @@
 package combat_menu;
 
-import __main.manager.InspirationManager;
 import format.ColorStyles;
 import format.swing_comp.SwingPane;
 import lombok.*;
+import manager.InspirationManager;
 import swing_custom.AnimatedBar;
 import util.Message;
 
@@ -27,22 +27,17 @@ public class InspirationBar extends JPanel implements InspirationManager.Listene
                 .withPreferredSize(0, 40);
     }
 
-    @Override
-    public void onCountChanged(int used, int max) {
+    @Override public void onCountChanged(int used, int max) {
     }
 
-    @Override
-    public void onBarChanged(int total, int max) {
+    @Override public void onBarChanged(int total, int max) {
         SwingUtilities.invokeLater(() -> bar.animateTo((float) total / max));
     }
 
-    @Override
-    public void onBarReset() {
+    @Override public void onBarReset() {
         SwingUtilities.invokeLater(() -> {
             bar.animateTo(1f, () -> bar.animateTo(0f));
             Message.showAsInfoMessage("Excess inspiration pool has reached 10. DM, do with this what you wish! Spooky");
         });
     }
-
-
 }

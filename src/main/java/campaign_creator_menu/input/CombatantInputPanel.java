@@ -1,5 +1,6 @@
 package campaign_creator_menu.input;
 
+import __main.Main;
 import _global_list.DamageImplements;
 import campaign_creator_menu.CampaignCreatorMenu;
 import combat_object.combatant.Combatant;
@@ -9,11 +10,14 @@ import combat_object.combatant.info.Class5e;
 import combat_object.combatant.info.Stats;
 import combat_object.damage_implements.Spell;
 import combat_object.damage_implements.Weapon;
+import exception.InvalidParameterException;
+import exception.InvalidSyntaxError;
+import format.ColorStyles;
 import format.swing_comp.SwingComp;
+import format.swing_comp.SwingPane;
 import lombok.*;
 import lombok.experimental.*;
 import swing_custom.ValidatedField;
-import util.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -29,7 +33,7 @@ import static format.swing_comp.SwingPane.fluent;
 import static format.swing_comp.SwingPane.*;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-@ExtensionMethod(StringUtils.class)
+@ExtensionMethod(util.StringUtil.class)
 public class CombatantInputPanel extends JPanel {
 
     CampaignCreatorMenu root;
@@ -48,23 +52,23 @@ public class CombatantInputPanel extends JPanel {
     @NonFinal JComboBox<CombatantType> typeBox;
     @NonFinal JComboBox<Class5e> classBox;
 
-    public CombatantInputPanel(CampaignCreatorMenu root) {
-        this.root = root;
+    public CombatantInputPanel() {
+        root = Main.getCreatorMenu();
 
         fluent(nameField).withPreferredSize(150, nameField.getPreferredSize().height);
 
-        fluent(this).arrangedAs(BORDER, 5, 5).withLabeledBorder("Combatant Input");
+        fluent(this).arrangedAs(SwingPane.BORDER, 5, 5).withLabeledBorder("Combatant Input");
 
-        panelIn(this, BorderLayout.NORTH).arrangedAs(VERTICAL_BOX)
-                .collect(
-                        getModeRow(), spacer(0, 8),
-                        getNameRow(), spacer(0, 6),
-                        getVitalsRow(),
-                        getPcRow(), spacer(0, 10)
-                );
+        JPanel northPanel = newArrangedAs(VERTICAL_BOX).collect(
+                getModeRow(), spacer(0, 8),
+                getNameRow(), spacer(0, 6),
+                getVitalsRow(),
+                getPcRow(), spacer(0, 10)
+        ).component();
 
-        buildCenterPanel();
-        buildSouthPanel();
+        fluent(this).borderCollect(
+                north(northPanel), center(getCenterPanel()), south(getSouthPanel())
+        );
 
         refreshFieldVisibility();
     }
@@ -116,21 +120,20 @@ public class CombatantInputPanel extends JPanel {
                 .applied(p -> p.setName("pcRow")).component();
     }
 
-    private void buildCenterPanel() {
-        panelIn(this, BorderLayout.CENTER).arrangedAs(BORDER)
-                .borderCollect(
-                        west(statPanel), center(newArrangedAs(SINGLE_ROW).collect(weaponPanel, spellPanel).component())
-                ).applied(p -> p.setName("centerPanel"));
+    private JPanel getCenterPanel() {
+        return newBorderPanel(
+                west(statPanel), center(newArrangedAs(SINGLE_ROW).collect(weaponPanel, spellPanel))
+        ).applied(p -> p.setName("centerPanel")).component();
     }
 
-    private void buildSouthPanel() {
+    private JPanel getSouthPanel() {
         confirmButton = button("Create", SUCCESS, this::logAndGetCombatant).component();
 
-        panelIn(this, BorderLayout.SOUTH).arrangedAs(FLOW_LEFT)
+        return newArrangedAs(FLOW_LEFT)
                 .collect(
                         confirmButton, spacer(8, 0),
                         button("Cancel", CRITICAL, () -> root.setInputPanelEnabled(false))
-                );
+                ).component();
     }
 
     private void onChange() {
@@ -143,7 +146,7 @@ public class CombatantInputPanel extends JPanel {
 
         typeBox.setSelectedItem(isEnemy ? CombatantType.NPC_ENEMY : CombatantType.PC);
         formModeLabel.setText("New Combatant");
-        formModeLabel.setForeground(FOREGROUND);
+        formModeLabel.setForeground(ColorStyles.FOREGROUND);
         confirmButton.setText("Create");
 
         clearAllFields();
@@ -226,13 +229,12 @@ public class CombatantInputPanel extends JPanel {
 
     public void logAndGetCombatant() {
         try {
-            String name = nameField.getValue().trim();
+            String name = nameField.withoutWhitespace();
             int maxHp = maxHpField.getValue().toInt();
             int ac = acField.getValue().toInt();
             CombatantType type = selectedType();
 
-            if (name.isEmpty())
-                throw new IllegalArgumentException("Name cannot be empty");
+            if (name.isEmpty()) throw new InvalidParameterException("Combatant", "name", "null", "non-blank String");
 
             if (type.isNpc()) {
                 NPC npc = NPC.create(name, maxHp, ac, type.isEnemy());
@@ -244,7 +246,7 @@ public class CombatantInputPanel extends JPanel {
                 Class5e class5e = (Class5e) classBox.getSelectedItem();
 
                 if (class5e == null)
-                    throw new IllegalArgumentException("Class must be selected for a Player Character");
+                    throw new InvalidParameterException("Combatant", "class", "null", "valid 5e class");
 
                 Stats stats = new Stats(class5e, level);
                 statPanel.addTo(stats);
@@ -257,9 +259,9 @@ public class CombatantInputPanel extends JPanel {
 
                 root.logCombatantCompleted(pc);
             }
-
             resetAndClose();
-
+        } catch (InvalidSyntaxError e) {
+            throw e;
         } catch (Exception e) {
             String msg = Objects.requireNonNullElse(e.getMessage(), "Error check all fields are filled");
 

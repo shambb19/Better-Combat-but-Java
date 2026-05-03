@@ -1,13 +1,14 @@
 package combat_object.scenario;
 
-import __main.exception.InvalidParameterException;
 import _global_list.Combatants;
 import combat_object.CombatObject;
+import combat_object.combatant.Combatant;
 import combat_object.combatant.NPC;
+import exception.InvalidParameterException;
 import input.Key;
 import lombok.*;
 import lombok.experimental.*;
-import util.Filter;
+import util.Filterable;
 import util.Locators;
 import util.Message;
 import util.TxtReader;
@@ -17,7 +18,6 @@ import java.util.*;
 import static input.Key.*;
 
 @EqualsAndHashCode(callSuper = true) @Value
-@ExtensionMethod(Filter.class)
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @SuperBuilder
 public class Scenario extends CombatObject {
@@ -59,9 +59,11 @@ public class Scenario extends CombatObject {
 
     public ArrayList<NPC> list(boolean isFriendlies, boolean isSingleOccurrences) {
         HashMap<String, Integer> team = isFriendlies ? with : against;
-        List<NPC> source = isFriendlies
-                ? Combatants.getFriendlies().castTo(NPC.class)
-                : Combatants.getEnemies().castTo(NPC.class);
+
+        Filterable<Combatant> sourceFilterable = isFriendlies
+                ? Filterable.of(Combatants.getFriendlies())
+                : Filterable.of(Combatants.getEnemies());
+        List<NPC> source = sourceFilterable.castToAsList(NPC.class);
 
         ArrayList<NPC> list = new ArrayList<>();
         team.forEach((npcName, qty) -> {

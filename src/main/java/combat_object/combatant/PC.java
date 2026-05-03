@@ -1,9 +1,9 @@
 package combat_object.combatant;
 
-import __main.exception.InvalidParameterException;
 import combat_object.combatant.info.Stats;
 import combat_object.damage_implements.Spell;
 import combat_object.damage_implements.Weapon;
+import exception.InvalidParameterException;
 import format.ColorStyles;
 import input.Key;
 import util.TxtReader;

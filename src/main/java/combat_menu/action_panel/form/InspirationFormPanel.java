@@ -1,11 +1,11 @@
 package combat_menu.action_panel.form;
 
-import __main.manager.InspirationManager;
 import format.ColorStyles;
 import format.swing_comp.SwingComp;
 import format.swing_comp.SwingPane;
 import lombok.*;
 import lombok.experimental.*;
+import manager.InspirationManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,10 +15,7 @@ import java.awt.event.MouseEvent;
 import static format.ColorStyles.*;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-@NoArgsConstructor(staticName = "newInstance")
 public class InspirationFormPanel extends JPanel {
-
-    static final Color FG_HINT = new Color(0x60, 0x58, 0x68);
 
     {
         SwingPane.fluent(this).arrangedAs(SwingPane.BORDER)
@@ -51,7 +48,7 @@ public class InspirationFormPanel extends JPanel {
         btn.setLayout(new BorderLayout());
         btn.setForeground(ColorStyles.FOREGROUND);
 
-        JLabel numLabel = SwingComp.label(value, Font.PLAIN, 28f)
+        JLabel numLabel = SwingComp.label(value, 28f)
                 .component();
         btn.add(numLabel, BorderLayout.CENTER);
 

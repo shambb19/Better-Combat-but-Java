@@ -1,5 +1,6 @@
 package campaign_creator_menu.input;
 
+import __main.Main;
 import campaign_creator_menu.CampaignCreatorMenu;
 import campaign_creator_menu.CompletedElementsList;
 import combat_object.combatant.NPC;
@@ -34,8 +35,8 @@ public class ScenarioInputPanel extends JPanel {
     ListSelectionPanel<NPC> friendlyPanel;
     ListSelectionPanel<NPC> enemyPanel;
 
-    public ScenarioInputPanel(CompletedElementsList sibling, CampaignCreatorMenu root) {
-        this.root = root;
+    public ScenarioInputPanel(CompletedElementsList sibling) {
+        this.root = Main.getCreatorMenu();
         this.sibling = sibling;
 
         friendlyPanel = new ListSelectionPanel<>(sibling.getFriendlyNPCs(), "Friendly NPCs");
@@ -50,12 +51,11 @@ public class ScenarioInputPanel extends JPanel {
 
         JPanel namePanel = SwingPane.newArrangedAs(SwingPane.FLOW).collect("Scenario Name", nameField).component();
 
-        JPanel listsContainer = SwingPane.newArrangedAs(SwingPane.ONE_COLUMN, 0, 20)
-                .collect(friendlyPanel, enemyPanel, Box.createVerticalGlue())
+        JPanel listsContainer = newArrangedAs(SwingPane.ONE_COLUMN, 0, 20)
+                .collect(friendlyPanel, enemyPanel, glue())
                 .component();
 
-        JPanel infoPanel = SwingPane.newArrangedAs(SwingPane.BORDER).borderCollect(
-                north(namePanel), center(listsContainer)).component();
+        JPanel infoPanel = newBorderPanel(north(namePanel), center(listsContainer)).component();
 
         JPanel okCancelPanel = button("Add Scenario", SUCCESS, this::logAndGetScenario)
                 .withCancelOption(() -> root.setScenarioPanelEnabled(false))

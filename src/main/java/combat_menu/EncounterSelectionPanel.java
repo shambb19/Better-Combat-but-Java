@@ -2,7 +2,6 @@ package combat_menu;
 
 import __main.Main;
 import __main.UploadMain;
-import __main.manager.EncounterManager;
 import combat_object.combatant.Combatant;
 import combat_object.combatant.NPC;
 import combat_object.scenario.Scenario;
@@ -10,7 +9,9 @@ import format.ColorStyles;
 import format.swing_comp.SwingPane;
 import lombok.*;
 import lombok.experimental.*;
+import manager.EncounterManager;
 import swing_custom.ValidatedField;
+import util.Filterable;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -28,7 +29,6 @@ import static format.swing_comp.SwingPane.fluent;
 import static format.swing_comp.SwingPane.*;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-@ExtensionMethod(util.Filter.class)
 public class EncounterSelectionPanel extends JPanel {
 
     static Color BG_CARD_ABS = new Color(0x1C, 0x1E, 0x24);
@@ -44,11 +44,7 @@ public class EncounterSelectionPanel extends JPanel {
     JPanel partyContainer, dynamicContainer;
     JButton beginButton;
 
-    public static EncounterSelectionPanel newInstance(UploadMain root) {
-        return new EncounterSelectionPanel(root);
-    }
-
-    private EncounterSelectionPanel(UploadMain root) {
+    public EncounterSelectionPanel(UploadMain root) {
         this.root = root;
 
         fluent(this).arrangedAs(BORDER).withBorder(new LineBorder(TRACK, 1));
@@ -80,16 +76,12 @@ public class EncounterSelectionPanel extends JPanel {
         partyContainer = newArrangedAs(VERTICAL_BOX).transparent().component();
         dynamicContainer = newArrangedAs(VERTICAL_BOX).transparent().component();
 
-        JPanel scrollContent = newArrangedAs(TWO_COLUMN, 15, 0)
+        newArrangedAs(TWO_COLUMN, 15, 0)
                 .collect(partyContainer, dynamicContainer)
                 .transparent()
                 .withEmptyBorder(8, 12, 12, 12)
-                .component();
-
-        scrollPane(scrollContent)
-                .withBorder(null)
+                .toScroller()
                 .withPreferredSize(500, 520)
-                .applied(s -> s.getViewport().setBackground(ColorStyles.BACKGROUND))
                 .in(this, BorderLayout.CENTER);
 
         JPanel footer = panelIn(this, BorderLayout.SOUTH).arrangedAs(FLOW_RIGHT, 12, 8)
@@ -120,10 +112,10 @@ public class EncounterSelectionPanel extends JPanel {
         if (scenario == null) return;
 
         ArrayList<NPC> friendlies = new ArrayList<>(scenario.list(true, false));
-        friendlies.addAll(quickAdds.filteredByIsEnemy(false));
+        friendlies.addAll(Filterable.of(quickAdds).filteredByAsList(c -> !c.isEnemy()));
 
         ArrayList<NPC> enemies = new ArrayList<>(scenario.list(false, false));
-        enemies.addAll(quickAdds.filteredByIsEnemy(true));
+        enemies.addAll(Filterable.of(quickAdds).filteredByAsList(Combatant::isEnemy));
 
         if (!friendlies.isEmpty()) {
             dynamicContainer.add(sectionLabel("Allies", ColorStyles.FRIENDLY));
@@ -153,15 +145,15 @@ public class EncounterSelectionPanel extends JPanel {
                 .collect(Collectors.partitioningBy(Combatant::isEnemy));
 
         List<Combatant> friendlies = new ArrayList<>(activeCombatants.get(false));
-        friendlies.addAll(quickAdds.filteredByIsEnemy(false));
+        friendlies.addAll(Filterable.of(quickAdds).filteredByAsList(c -> !c.isEnemy()));
 
         List<Combatant> enemies = new ArrayList<>(activeCombatants.get(true));
-        enemies.addAll(quickAdds.filteredByIsEnemy(true));
+        enemies.addAll(Filterable.of(quickAdds).filteredByAsList(Combatant::isEnemy));
 
         EncounterManager.getEncounter().setEnemies(enemies);
         EncounterManager.getEncounter().setFriendlies(friendlies);
 
-        Main.closeUploadAndRun(Main.COMBAT, root);
+        Main.closeAndSwitch(root, Main.COMBAT);
     }
 
     private void initializeParty() {
@@ -181,7 +173,6 @@ public class EncounterSelectionPanel extends JPanel {
 
     @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
     private static class CombatantCard extends JPanel {
-
         Combatant combatant;
         JSpinner spinner;
         JCheckBox absentCheck;
@@ -213,7 +204,7 @@ public class EncounterSelectionPanel extends JPanel {
             gbc.insets = new Insets(0, 8, 0, 0);
             gbc.anchor = GridBagConstraints.CENTER;
 
-            JLabel initLabel = label("Initiative", Font.PLAIN, 11f, ColorStyles.FG_MUTED).component();
+            JLabel initLabel = label("Initiative", 11f).muted().component();
             right.add(initLabel, gbc);
 
             SpinnerNumberModel model = new SpinnerNumberModel(10, 1, 20, 1);
@@ -230,24 +221,23 @@ public class EncounterSelectionPanel extends JPanel {
             right.add(spinner, gbc);
 
             absentCheck = fluent(new JCheckBox("Absent"))
-                    .applied(b -> b.addActionListener(e -> updateAbsentState()))
+                    .withAction(b -> updateAbsentState())
                     .withDerivedFont(Font.PLAIN, 11f)
                     .withBackgroundAndForeground(BG_SURFACE, FG_MUTED)
-                    .transparent()
-                    .withoutPaintedFocus().component();
+                    .transparent().component();
             if (showAbsent)
                 right.add(absentCheck, gbc);
         }
 
-        private static void setForegroundAlpha(Container c, float alpha) {
-            for (Component child : c.getComponents()) {
+        private static void setForegroundAlpha(Container container, float alpha) {
+            for (Component child : container.getComponents()) {
                 if (child instanceof JLabel l) {
                     Color fg = l.getForeground();
                     l.setForeground(new Color(
                             fg.getRed(), fg.getGreen(), fg.getBlue(),
                             Math.round(255 * alpha)));
                 }
-                if (child instanceof Container cont) setForegroundAlpha(cont, alpha);
+                if (child instanceof Container c) setForegroundAlpha(c, alpha);
             }
         }
 
@@ -270,7 +260,7 @@ public class EncounterSelectionPanel extends JPanel {
     }
 
     @FieldDefaults(makeFinal = true)
-    @ExtensionMethod(util.StringUtils.class)
+    @ExtensionMethod(util.StringUtil.class)
     private class QuickCombatant extends JDialog {
         ValidatedField nameField, hpField, acField;
         JToggleButton enemyToggle;
@@ -280,11 +270,10 @@ public class EncounterSelectionPanel extends JPanel {
             setTitle("Quick Combatant");
             setLocationRelativeTo(scenarioCombo);
 
-            fluent(this).arrangedAs(BORDER, 0, 15)
-                    .withEmptyBorder(20, 20, 20, 20)
-                    .withPreferredSize(350, 180);
+            fluent(this).arrangedAs(BORDER, 0, 15).spaced().withPreferredSize(350, 180);
 
             nameField = new ValidatedField("Name", this::onValidation);
+
             enemyToggle = fluent(new JToggleButton("Friendly"))
                     .withAction(t -> {
                         t.setText(t.isSelected() ? "Enemy" : "Friendly");

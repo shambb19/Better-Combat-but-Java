@@ -2,6 +2,7 @@ package swing_custom;
 
 import format.ColorStyles;
 import format.swing_comp.SwingPane;
+import util.StringUtil;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -11,7 +12,7 @@ import java.util.function.Predicate;
 import static format.swing_comp.SwingComp.fluent;
 import static format.swing_comp.SwingPane.newArrangedAs;
 
-@lombok.experimental.ExtensionMethod(util.StringUtils.class)
+@lombok.experimental.ExtensionMethod(StringUtil.class)
 public class ValidatedField extends JPanel {
 
     private final JTextField field;
@@ -90,9 +91,7 @@ public class ValidatedField extends JPanel {
     }
 
     public String getValue() {
-        if (field == null) return "";
-
-        return field.getText().trim();
+        return field.withoutWhitespace().stringIfElseBlank(field != null);
     }
 
     public void setValidator(Predicate<String> v) {

@@ -3,7 +3,7 @@ package combat_object.combatant.info;
 import lombok.*;
 import lombok.experimental.*;
 import util.Locators;
-import util.StringUtils;
+import util.StringUtil;
 import util.TxtReader;
 
 import java.util.ArrayList;
@@ -14,7 +14,7 @@ import static util.TxtReader.listTextAsArray;
 
 @Getter
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@ExtensionMethod(StringUtils.class)
+@ExtensionMethod(StringUtil.class)
 public class Stats {
 
     final Class5e class5e;
@@ -28,8 +28,6 @@ public class Stats {
 
         for (AbilityModifier stat : AbilityModifier.values())
             stats.put(stat, 10);
-
-        stats.put(OPTION, Math.max(stats.get(STR), stats.get(DEX)));
 
         updateProficiency();
     }
@@ -124,6 +122,8 @@ public class Stats {
 
             stats.put(stat, value);
         }
+
+        stats.put(OPTION, Math.max(stats.get(STR), stats.get(DEX)));
 
         return stats;
     }

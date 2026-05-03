@@ -1,6 +1,7 @@
 package combat_menu;
 
 import __main.Main;
+import __main.MainFrame;
 import combat_menu.action_panel.ActionPanel;
 import combat_menu.action_panel.form.ActionFormPanel;
 import combat_menu.encounter_info.EncounterListPanel;
@@ -10,13 +11,17 @@ import lombok.*;
 import lombok.experimental.*;
 import org.intellij.lang.annotations.MagicConstant;
 
-import javax.swing.*;
 import java.awt.*;
 
 import static format.swing_comp.SwingPane.*;
 
 @FieldDefaults(makeFinal = true)
-public class CombatMenu extends JFrame {
+/*
+    The Claude torture test says this will cause irreparable crashes if anything is called before
+    the menu is initialized. But idk when tf I'd ever want to run this headless, so I've elected
+    to ignore that bit of warning until it becomes a problem.
+ */
+public class CombatMenu extends MainFrame {
 
     public static String TITLE = "Combat" + Main.TITLE;
 
@@ -25,8 +30,6 @@ public class CombatMenu extends JFrame {
 
     {
         setTitle(TITLE);
-        setIconImage(__main.Main.getAppIcon().getImage());
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         setJMenuBar(new CombatMenuBar());
 
@@ -38,20 +41,7 @@ public class CombatMenu extends JFrame {
                 .borderCollect(
                         center(actionPanel), east(encounterListPanel),
                         south(excessInspirationBar)
-                ).withEmptyBorder(10, 10, 10, 10);
-
-        GraphicsConfiguration config = getGraphicsConfiguration();
-        Rectangle bounds = config.getBounds();
-        Insets insets = Toolkit.getDefaultToolkit().getScreenInsets(config);
-
-        int SHADOW = 8;
-
-        int x = bounds.x + insets.left - SHADOW;
-        int y = bounds.y + insets.top;
-        int width = bounds.width - insets.left - insets.right + (SHADOW * 2);
-        int height = bounds.height - insets.top - insets.bottom + SHADOW;
-
-        setBounds(x, y, width, height);
+                ).withEmptyBorder(10);
 
         setVisible(true);
     }

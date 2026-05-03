@@ -6,7 +6,9 @@ import combat_object.combatant.PC;
 import combat_object.damage_implements.Spell;
 import combat_object.damage_implements.Weapon;
 import combat_object.scenario.Scenario;
+import exception.InvalidParameterException;
 import lombok.*;
+import util.Filterable;
 import util.Message;
 
 import java.io.BufferedReader;
@@ -18,10 +20,11 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static util.TxtReader.withoutComments;
 
-public class Reader5e {
+public class CampaignReader {
 
     public static <T extends CombatObject> List<T> getInstancesFromCode(URL url, Class<T> instanceType) throws IOException {
         @Cleanup BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8));
@@ -30,16 +33,9 @@ public class Reader5e {
         if (lines.isEmpty()) throw new IOException("Reader5e.getInstancesFromCode: empty file");
 
         List<ItemBlock> blocks = getAllItemBlocks(lines);
-        List<T> result = new ArrayList<>();
 
-        for (ItemBlock block : blocks) {
-            CombatObject obj = createObject(block.header, block.params);
-
-            if (instanceType.isInstance(obj)) {
-                result.add(instanceType.cast(obj));
-            }
-        }
-        return result;
+        Stream<CombatObject> stream = blocks.stream().map(CampaignReader::createObject);
+        return Filterable.of(stream).castToAsList(instanceType);
     }
 
     private static List<ItemBlock> getAllItemBlocks(List<String> lines) {
@@ -59,7 +55,10 @@ public class Reader5e {
         return blocks;
     }
 
-    private static CombatObject createObject(String header, EnumMap<Key, Object> map) throws IOException {
+    private static CombatObject createObject(ItemBlock block) {
+        String header = block.header;
+        EnumMap<Key, Object> map = block.params;
+
         return switch (header) {
             case ".party" -> PC.from(map);
             case ".npc" -> NPC.from(map, false);
@@ -67,7 +66,8 @@ public class Reader5e {
             case ".weapon" -> Weapon.from(map);
             case ".spell" -> Spell.from(map);
             case ".scenario" -> Scenario.from(map);
-            default -> throw new IOException("Reader5e.createObject: unexpected header token \"" + header + "\"");
+            default ->
+                    throw new InvalidParameterException("CampaignReader.createObject", "header", header, "valid item header");
         };
     }
 

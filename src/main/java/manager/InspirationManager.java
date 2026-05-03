@@ -1,4 +1,4 @@
-package __main.manager;
+package manager;
 
 import __main.Main;
 import combat_menu.action_panel.ActionPanel;
@@ -25,6 +25,8 @@ public class InspirationManager {
     }
 
     public void useInspiration() {
+        if (EncounterManager.getQueue() == null) return;
+
         EncounterManager.getCurrentCombatant().useInspiration();
 
         usedCount++;

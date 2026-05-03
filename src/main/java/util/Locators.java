@@ -1,14 +1,12 @@
 package util;
 
-import __main.manager.EffectManager;
-import __main.manager.EncounterManager;
 import combat_object.combatant.Combatant;
 import combat_object.damage_implements.Effect;
+import manager.EffectManager;
+import manager.EncounterManager;
 
-import java.util.Arrays;
 import java.util.List;
 
-@lombok.experimental.ExtensionMethod(Filter.class)
 public class Locators {
 
     public static List<Combatant> getTargetList(boolean isForDamage) {
@@ -25,11 +23,11 @@ public class Locators {
     }
 
     public static <T> T getWithNameFromDirectory(List<T> source, Object obj) {
-        return source.firstWithToStringEquals(obj.toString());
+        return Filterable.of(source).firstWithToStringEquals(String.valueOf(obj));
     }
 
     public static <T extends Enum<T>> T enumNameSearch(String name, Class<T> enumClass) {
-        return Arrays.asList(enumClass.getEnumConstants()).firstWithToStringEquals(name);
+        return Filterable.of(enumClass.getEnumConstants()).firstWithToStringEquals(name);
     }
 
 }

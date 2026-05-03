@@ -1,7 +1,7 @@
 package combat_object.damage_implements;
 
-import __main.exception.InvalidParameterException;
 import combat_object.combatant.info.AbilityModifier;
+import exception.InvalidParameterException;
 import input.Key;
 import lombok.experimental.*;
 import util.TxtReader;

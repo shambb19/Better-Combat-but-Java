@@ -32,9 +32,8 @@ public class PopupPrompt extends JDialog {
 
         label(title.toUpperCase(), Font.BOLD, 11f).muted().in(topBar);
 
-        contentArea = panelIn(this, BorderLayout.CENTER).arrangedAs(VERTICAL_BOX)
+        contentArea = panelIn(this, BorderLayout.CENTER).arrangedAs(VERTICAL_BOX).spaced()
                 .withBackground(BACKGROUND)
-                .withEmptyBorder(20, 20, 20, 20)
                 .component();
 
         footer = panelIn(this, BorderLayout.SOUTH).arrangedAs(FLOW_RIGHT, 5, 0)

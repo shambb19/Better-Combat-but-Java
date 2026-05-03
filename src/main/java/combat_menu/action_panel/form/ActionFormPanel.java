@@ -1,12 +1,12 @@
 package combat_menu.action_panel.form;
 
-import __main.manager.CombatManager;
-import __main.manager.EncounterManager;
 import combat_object.combatant.Combatant;
 import combat_object.damage_implements.Effect;
 import combat_object.damage_implements.Implement;
 import lombok.*;
 import lombok.experimental.*;
+import manager.CombatManager;
+import manager.EncounterManager;
 import swing_custom.ValidatedField;
 
 import javax.swing.*;
@@ -132,19 +132,18 @@ public abstract class ActionFormPanel extends JPanel {
     }
 
     protected LabeledField addLabeledField(JPanel container, String labelText, String placeholder) {
+        JLabel label = label(labelText).muted()
+                .withPreferredSize(110, 0).component();
+
+        ValidatedField field = new ValidatedField(placeholder, this::refreshButtons);
+
         JPanel row = newArrangedAs(BORDER, 12, 0)
+                .collect(label, field)
                 .transparent()
                 .onLeft()
                 .withMaximumSize(Integer.MAX_VALUE, 52)
                 .withEmptyBorder(12, 0, 4, 0)
                 .component();
-
-        JLabel label = label(labelText).muted()
-                .withPreferredSize(110, 0)
-                .in(row, BorderLayout.WEST);
-
-        ValidatedField field = new ValidatedField(placeholder, this::refreshButtons);
-        row.add(field, BorderLayout.CENTER);
 
         fluent(container).collect(row, spacer(0, 10));
 
@@ -161,7 +160,6 @@ public abstract class ActionFormPanel extends JPanel {
     protected JPanel getTargetSelectionPanel() {
         JPanel targetHeader = newArrangedAs(BORDER)
                 .withPreferredSize(0, 52)
-                .applied(p -> p.setPreferredSize(new Dimension(0, 52)))
                 .withMaximumSize(Integer.MAX_VALUE, 52)
                 .opaque()
                 .withBackground(BG_SURFACE)
@@ -181,12 +179,10 @@ public abstract class ActionFormPanel extends JPanel {
     }
 
     protected JPanel getAttackComboRow(JComboBox<Implement> comboBox) {
-        JLabel label = label("Select an attack", FG_MUTED)
-                .withPreferredSize(110, 0).component();
+        JLabel label = label("Select an attack", FG_MUTED).withPreferredSize(110, 0).component();
 
-        return newArrangedAs(BORDER, 12, 0).borderCollect(
-                        west(label), center(comboBox)
-                ).transparent()
+        return newBorderPanel(12, 0, west(label), center(comboBox))
+                .transparent()
                 .onLeft()
                 .withPreferredSize(Integer.MAX_VALUE, 52)
                 .component();

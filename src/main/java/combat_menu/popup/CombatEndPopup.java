@@ -1,10 +1,9 @@
 package combat_menu.popup;
 
 import __main.Main;
-import __main.manager.EncounterManager;
 import combat_object.combatant.PC;
 import input.CampaignWriter;
-import org.intellij.lang.annotations.MagicConstant;
+import manager.EncounterManager;
 import org.jetbrains.annotations.NotNull;
 import util.Message;
 import util.PopupPrompt;
@@ -20,31 +19,32 @@ import static format.swing_comp.SwingComp.fluent;
 import static format.swing_comp.SwingComp.*;
 import static format.swing_comp.SwingPane.*;
 
-@lombok.experimental.ExtensionMethod({util.StringUtils.class, util.Message.class})
-public class CombatEndPopup extends JDialog {
+@lombok.experimental.ExtensionMethod({util.StringUtil.class, util.Message.class})
+public class CombatEndPopup extends Popup {
 
-    public static final String VICTORY = "VICTORY", DEFEAT = "DEFEAT", QUIT = "ENDED EARLY";
+    public static void fireCombatEndedNaturally() {
+        boolean isVictory = EncounterManager.getEncounter().isVictory();
+        String endType = isVictory ? "Victory" : "Defeat";
 
-    public static void run(@MagicConstant(valuesFromClass = CombatEndPopup.class) String endType) {
-        Main.getCombatMenu().dispose();
-        new CombatEndPopup(endType).setVisible(true);
+        new CombatEndPopup(endType);
     }
 
-    private CombatEndPopup(@MagicConstant(valuesFromClass = CombatEndPopup.class) String endType) {
+    public static void fireQuit() {
+        new CombatEndPopup("Quit");
+    }
+
+    private CombatEndPopup(String endType) {
         getContentPane().setBackground(BACKGROUND);
         setLayout(new BorderLayout());
         getRootPane().setBorder(BorderFactory.createLineBorder(TRACK, 1));
 
-        String title = "Quit";
         Color titleForeground = FOREGROUND;
-        if (endType.equals(VICTORY)) {
-            title = "Victory";
+        if (endType.equals("VICTORY")) {
             titleForeground = HEALTHY;
-        } else if (endType.equals(DEFEAT)) {
-            title = "Defeat";
+        } else if (endType.equals("DEFEAT")) {
             titleForeground = CRITICAL;
         }
-        setTitle(title);
+        setTitle(endType);
 
         // top bar with the title text (victory or defeat or whatever)
         panelIn(this, BorderLayout.NORTH).arrangedAs(FLOW_LEFT, 15, 12)
@@ -61,26 +61,22 @@ public class CombatEndPopup extends JDialog {
                         label("OPTIONS", Font.BOLD, 10f, FG_MUTED).onLeft(),
                         createActionButton("Level Up the Party", SUCCESS, this::levelUp), spacer(0, 10),
                         createActionButton("Download Updated .txt File", TRACK, b -> download()), spacer(0, 10),
-                        createActionButton("Quit Program", CRITICAL, b -> quit("quit"))
-                )
-                .withEmptyBorder(20, 20, 20, 20);
+                        createActionButton("Quit Program", CRITICAL, b -> quit())
+                ).spaced();
 
-        setIconImage(__main.Main.getAppIcon().getImage());
-        setModal(false);
-        setAlwaysOnTop(true);
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
         pack();
+
+        Main.closeCombat();
         setVisible(true);
     }
 
     @NotNull
-    private static JLabel getEndMessage(@MagicConstant(valuesFromClass = CombatEndPopup.class) String endType) {
+    private static JLabel getEndMessage(String endType) {
         String percentToVictory = EncounterManager.getEncounter().percentToVictory();
         String msg = switch (endType) {
-            case VICTORY -> "Victory! You have won this combat.";
-            case DEFEAT -> "You have been defeated. You were " + percentToVictory + " of the way to victory.";
-            case QUIT -> "You have quit early. Lame.";
+            case "Victory" -> "Victory! You have won this combat.";
+            case "Defeat" -> "You have been defeated. You were " + percentToVictory + " of the way to victory.";
+            case "Quit" -> "You have quit early. Lame.";
             default -> throw new ClassCastException("CombatEndPopup.getEndMessage: unexpected String endType");
         };
 
@@ -119,19 +115,21 @@ public class CombatEndPopup extends JDialog {
             "Could not download file".showAsErrorMessage();
     }
 
-    public static void quit(@MagicConstant(stringValues = {"quit", "restart"}) String mode) {
-        Runnable onQuit = () -> {
-            if (mode.equals("quit")) {
-                "Goodbye! Thanks for playing :)".showAsInfoMessage();
-                System.exit(0);
-            } else {
-                Main.clearAllAndShowUploadMenu();
-            }
-        };
+    public static void quit() {
+        promptAction("quit", () -> {
+            "Goodbye! Thanks for playing :)".showAsInfoMessage();
+            System.exit(0);
+        });
+    }
 
+    public static void restart() {
+        promptAction("restart", () -> Main.closeAndSwitch(null, Main.UPLOAD));
+    }
+
+    public static void promptAction(String mode, Runnable runnable) {
         Message.showActionPrompt("Are you sure you would like to " + mode + "? You will lose all progress.",
                 new PopupPrompt.ActionButton[]{
-                        new PopupPrompt.ActionButton(mode.capitalized(), CRITICAL, onQuit),
+                        new PopupPrompt.ActionButton(mode.capitalized(), CRITICAL, runnable),
                         new PopupPrompt.ActionButton("Continue", SUCCESS, null)
                 });
     }

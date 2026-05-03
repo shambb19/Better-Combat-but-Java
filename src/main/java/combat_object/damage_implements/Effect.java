@@ -1,15 +1,18 @@
 package combat_object.damage_implements;
 
-import __main.manager.EncounterManager;
 import combat_object.combatant.Combatant;
-import format.swing_comp.SwingComp;
-import format.swing_comp.SwingPane;
 import lombok.*;
 import lombok.experimental.*;
+import manager.EncounterManager;
+import util.StringUtil;
 
 import javax.swing.*;
 import javax.swing.border.MatteBorder;
 import java.awt.*;
+
+import static format.swing_comp.SwingComp.*;
+import static format.swing_comp.SwingPane.fluent;
+import static format.swing_comp.SwingPane.*;
 
 @AllArgsConstructor
 public enum Effect {
@@ -33,6 +36,7 @@ public enum Effect {
             "This spell bypasses armor class and saving throws. ..target.. takes the damage automatically.")),
     BLIND(Colors.purple("Blinded",
             "..target.. cannot see and automatically fails any ability check that requires sight.")),
+    // TODO implement DAMAGE_OVER_TIME
     DAMAGE_OVER_TIME(Colors.red("Damage Over Time",
             "..target.. takes ongoing damage on subsequent turns.")),
     DIFFICULT_TERRAIN(Colors.green("Difficult Terrain",
@@ -61,6 +65,7 @@ public enum Effect {
     // released 4.5.0
     BANISH(Colors.purple("Banished",
             "..target.. is banished to another plane of existence if reduced to 50 hit points or fewer")),
+    // TODO implement CHARMED
     CHARMED(Colors.purple("Charmed",
             "..target.. is magically compelled by ..attacker.. and cannot disobey. Kinky")),
     PENALTY_ATTACK(Colors.amber("Muddled Mind",
@@ -84,7 +89,7 @@ public enum Effect {
         return noticeComponents.title;
     }
 
-    @ExtensionMethod(util.StringUtils.class)
+    @ExtensionMethod(StringUtil.class)
     public static class NoticePanel extends JPanel {
         public NoticePanel(Effect effect, Combatant target) {
             if (effect.noticeComponents == null)
@@ -94,31 +99,30 @@ public enum Effect {
 
             String subtitle = components.subtitle.infoString(EncounterManager.getCurrentCombatant(), target);
 
-            SwingPane.fluent(this).arrangedAs(SwingPane.BORDER, 15, 0)
+            fluent(this).arrangedAs(BORDER, 15, 0)
                     .withBackground(components.getBackground())
                     .withPaddedBorder(new MatteBorder(0, 4, 0, 0, effect.noticeComponents.getAccent()),
                             10, 12, 10, 12)
                     .withMaximumSize(Integer.MAX_VALUE, 60)
                     .onLeft();
 
-            JPanel textCol = SwingPane.panelIn(this, BorderLayout.CENTER)
-                    .arrangedAs(SwingPane.VERTICAL_BOX).transparent().component();
+            JPanel textCol = panelIn(this, BorderLayout.CENTER)
+                    .arrangedAs(VERTICAL_BOX).transparent().component();
 
             JLabel titleLabel =
-                    SwingComp.label(components.getTitle(), Font.BOLD, 12f, components.getForeground())
+                    label(components.getTitle(), Font.BOLD, 12f, components.getForeground())
                             .onLeft().transparent().component();
 
-            JLabel subLabel = SwingComp.label(subtitle, Font.PLAIN, 11f, components.getForegroundDim())
+            JLabel subLabel = label(subtitle, Font.PLAIN, 11f, components.getForegroundDim())
                     .onLeft().transparent().component();
 
-            SwingPane.fluent(textCol).collect(
-                    Box.createVerticalGlue(), titleLabel, SwingComp.spacer(0, 2),
-                    subLabel, Box.createVerticalGlue()
+            fluent(textCol).collect(
+                    glue(), titleLabel, spacer(0, 2), subLabel, glue()
             );
         }
     }
 
-    @ExtensionMethod(util.StringUtils.class)
+    @ExtensionMethod(StringUtil.class)
     static final class Colors {
         static final Color BG_PURPLE = new Color(0x22, 0x1E, 0x2E),
                 FG_PURPLE = new Color(0xAF, 0xA9, 0xEC),

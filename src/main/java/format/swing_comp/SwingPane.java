@@ -1,9 +1,10 @@
 package format.swing_comp;
 
-import boilerplate.SourceVal;
+import boilerplate.FilteredVals;
 import lombok.*;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 public class SwingPane extends SwingComp<JPanel> {
@@ -23,7 +24,7 @@ public class SwingPane extends SwingComp<JPanel> {
         return panelIn(panel, null);
     }
 
-    public static SwingPane panelIn(JPanel panel, @SourceVal String location) {
+    public static SwingPane panelIn(JPanel panel, @FilteredVals String location) {
         JPanel pane = new JPanel();
         panel.add(pane, location);
         return new SwingPane(pane);
@@ -33,23 +34,31 @@ public class SwingPane extends SwingComp<JPanel> {
         return panelIn(container, null);
     }
 
-    public static SwingPane panelIn(RootPaneContainer container, @SourceVal String location) {
+    public static SwingPane panelIn(RootPaneContainer container, @FilteredVals String location) {
         return panelIn((JPanel) container.getContentPane(), location);
     }
 
-    public static SwingPane newArrangedAs(@SourceVal.Pane int layout) {
+    public static SwingPane newArrangedAs(@FilteredVals.Pane int layout) {
         return newArrangedAs(layout, 0, 0);
     }
 
-    public static SwingPane newArrangedAs(@SourceVal.Pane int layout, int hgap, int vgap) {
+    public static SwingPane newArrangedAs(@FilteredVals.Pane int layout, int hgap, int vgap) {
         return new SwingPane(new JPanel()).arrangedAs(layout, hgap, vgap);
     }
 
-    public SwingPane arrangedAs(@SourceVal.Pane int layout) {
+    public static SwingPane newBorderPanel(BorderComponent... components) {
+        return newArrangedAs(BORDER).borderCollect(components);
+    }
+
+    public static SwingPane newBorderPanel(int hgap, int vgap, BorderComponent... components) {
+        return newArrangedAs(BORDER, hgap, vgap).borderCollect(components);
+    }
+
+    public SwingPane arrangedAs(@FilteredVals.Pane int layout) {
         return arrangedAs(layout, 0, 0);
     }
 
-    public SwingPane arrangedAs(@SourceVal.Pane int layout, int hgap, int vgap) {
+    public SwingPane arrangedAs(@FilteredVals.Pane int layout, int hgap, int vgap) {
         LayoutManager manager = switch (layout) {
             case BORDER -> new BorderLayout(hgap, vgap);
             case VERTICAL_BOX -> new BoxLayout(component, BoxLayout.Y_AXIS);
@@ -122,6 +131,14 @@ public class SwingPane extends SwingComp<JPanel> {
         return new SwingPane((JPanel) container.getContentPane());
     }
 
+    /**
+     * Functionally identical to:<p>withEmptyBorder(20, 20, 20, 20);</p>
+     */
+    public SwingPane spaced() {
+        component.setBorder(new EmptyBorder(20, 20, 20, 20));
+        return this;
+    }
+
     private static Component getComponent(Object comp) {
         return switch (comp) {
             case String s -> new JLabel(s);
@@ -139,7 +156,7 @@ public class SwingPane extends SwingComp<JPanel> {
     }
 
     @Value public static class BorderComponent {
-        @SourceVal.Border String location;
+        @FilteredVals.Border String location;
         Component component;
     }
 

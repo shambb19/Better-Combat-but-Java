@@ -1,9 +1,9 @@
 package util;
 
-import __main.manager.EncounterManager;
 import combat_menu.CombatMenu;
 import format.swing_comp.SwingComp;
 import lombok.experimental.*;
+import manager.EncounterManager;
 import org.intellij.lang.annotations.MagicConstant;
 import util.PopupPrompt.ResultButton;
 
@@ -15,7 +15,7 @@ import static format.ColorStyles.*;
 import static util.PopupPrompt.of;
 import static util.PopupPrompt.ofInput;
 
-@ExtensionMethod(StringUtils.class)
+@ExtensionMethod(StringUtil.class)
 public class Message {
 
     public static final int CANCEL_OPTION = 2, REMOVE_OPTION = 1, EDIT_OPTION = 0;

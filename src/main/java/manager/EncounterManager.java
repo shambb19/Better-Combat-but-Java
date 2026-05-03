@@ -1,4 +1,4 @@
-package __main.manager;
+package manager;
 
 import __main.Main;
 import combat_object.combatant.Combatant;
@@ -9,7 +9,7 @@ import encounter.Encounter;
 import format.ColorStyles;
 import lombok.*;
 import lombok.experimental.*;
-import util.Filter;
+import util.Filterable;
 import util.Message;
 import util.PopupPrompt;
 
@@ -29,7 +29,7 @@ public class EncounterManager {
     }
 
     public List<PC> getParty() {
-        return Filter.castTo(encounter.getFriendlies(), PC.class);
+        return Filterable.of(encounter.getFriendlies()).castToAsList(PC.class);
     }
 
     public List<Combatant> getFriendlies() {

@@ -1,24 +1,20 @@
 package combat_menu.action_panel.form;
 
 import __main.Main;
-import __main.manager.CombatManager;
 import combat_menu.encounter_info.HealthBarPanel;
 import lombok.experimental.*;
+import manager.CombatManager;
 import swing_custom.ValidatedField;
-import util.StringUtils;
+import util.StringUtil;
 
-@ExtensionMethod(StringUtils.class)
+@ExtensionMethod(StringUtil.class)
 public class HealFormPanel extends ActionFormPanel {
 
     private ValidatedField amountField;
 
-    private HealFormPanel() {
+    public HealFormPanel() {
         super("Apply Heal");
         Main.getCombatMenu().setActionMode(HealthBarPanel.HEAL, this);
-    }
-
-    public static HealFormPanel newInstance() {
-        return new HealFormPanel();
     }
 
     @Override

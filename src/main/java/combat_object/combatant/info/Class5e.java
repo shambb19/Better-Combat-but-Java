@@ -2,7 +2,7 @@ package combat_object.combatant.info;
 
 import lombok.*;
 import lombok.experimental.*;
-import util.StringUtils;
+import util.StringUtil;
 
 import static combat_object.combatant.info.AbilityModifier.*;
 
@@ -29,7 +29,7 @@ public enum Class5e {
 
     @Override
     public String toString() {
-        return StringUtils.capitalized(name());
+        return StringUtil.capitalized(name());
     }
 
 }

@@ -1,13 +1,12 @@
 package combat_menu.encounter_info;
 
-import __main.manager.EncounterManager;
 import combat_menu.action_panel.form.ActionFormPanel;
 import combat_object.combatant.Combatant;
-import format.ColorStyles;
 import format.swing_comp.SwingPane;
+import lombok.*;
 import lombok.experimental.*;
+import manager.EncounterManager;
 import org.intellij.lang.annotations.MagicConstant;
-import swing_custom.RoundPanel;
 import util.Locators;
 
 import javax.swing.*;
@@ -17,6 +16,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Optional;
 
+import static format.ColorStyles.*;
 import static format.swing_comp.SwingComp.label;
 import static format.swing_comp.SwingPane.*;
 
@@ -48,23 +48,22 @@ public class HealthBarPanel extends JPanel {
         this.combatant = combatant;
 
         SwingPane.fluent(this).arrangedAs(BORDER, 10, 0)
-                .withEmptyBorder(5, 0, 5, 10)
-                .withBackground(ColorStyles.BACKGROUND);
+                .withEmptyBorder(5, 0, 5, 10);
 
         accentBar = panelIn(this, BorderLayout.WEST)
                 .withPreferredSize(ACCENT_WIDTH, 0)
-                .withBackground(ColorStyles.TRACK)
+                .withBackground(TRACK)
                 .component();
 
-        nameLabel = label(combatant, new Color(0xC8, 0xcc, 0xd8))
+        nameLabel = label(combatant)
                 .withEmptyBorder(0, 10, 0, 0)
                 .in(this, BorderLayout.CENTER);
 
-        barTrack = new RoundPanel(BAR_HEIGHT / 2, ColorStyles.TRACK);
+        barTrack = new RoundPanel(BAR_HEIGHT / 2, TRACK);
         barTrack.setLayout(null);
         barTrack.setPreferredSize(new Dimension(BAR_WIDTH, BAR_HEIGHT));
 
-        barFill = new RoundPanel(BAR_HEIGHT / 2, ColorStyles.HEALTHY);
+        barFill = new RoundPanel(BAR_HEIGHT / 2, HEALTHY);
         barFill.setBounds(0, 0, 0, BAR_HEIGHT);
         barTrack.add(barFill);
 
@@ -101,14 +100,14 @@ public class HealthBarPanel extends JPanel {
 
     public void endActionState() {
         if (combatant == EncounterManager.getCurrentCombatant()) {
-            accentBar.setBackground(ColorStyles.HEALTHY);
+            accentBar.setBackground(HEALTHY);
             setBackground(ROW_TURN);
-            nameLabel.setForeground(new Color(0xc8, 0xcc, 0xd8));
+            nameLabel.setForeground(FOREGROUND);
         } else {
-            accentBar.setBackground(ColorStyles.TRACK);
-            setBackground(ColorStyles.BACKGROUND);
+            accentBar.setBackground(TRACK);
+            setBackground(BACKGROUND);
             if (combatant.getLifeStatus().isConscious())
-                nameLabel.setForeground(new Color(0xc8, 0xcc, 0xd8));
+                nameLabel.setForeground(FOREGROUND);
             else
                 fluent(nameLabel).muted();
         }
@@ -120,9 +119,9 @@ public class HealthBarPanel extends JPanel {
         boolean isValidTarget = Locators.getTargetList(mode == ATTACK).contains(combatant);
 
         if (isValidTarget) {
-            accentBar.setBackground(ColorStyles.EQUATOR);
-            nameLabel.setForeground(ColorStyles.EQUATOR);
-            setBackground(ColorStyles.BACKGROUND);
+            accentBar.setBackground(EQUATOR);
+            nameLabel.setForeground(EQUATOR);
+            setBackground(BACKGROUND);
         } else {
             endActionState();
         }
@@ -130,35 +129,31 @@ public class HealthBarPanel extends JPanel {
     }
 
     private void installStatTooltip() {
-        barTrack.addMouseListener(new MouseAdapter() {
+        fluent(barTrack).withMouseMoveListener(
+                p -> { // onEnter
+                    if (!combatant.getLifeStatus().isAlive()) return;
 
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                if (!combatant.getLifeStatus().isAlive()) return;
+                    Optional.ofNullable(activeTooltip).ifPresent(Window::dispose);
 
-                Optional.ofNullable(activeTooltip).ifPresent(Window::dispose);
+                    Window owner = SwingUtilities.getWindowAncestor(HealthBarPanel.this);
+                    activeTooltip = new StatTooltipWindow(owner, combatant);
 
-                Window owner = SwingUtilities.getWindowAncestor(HealthBarPanel.this);
-                activeTooltip = new StatTooltipWindow(owner, combatant);
+                    Point barOnScreen = p.getLocationOnScreen();
+                    int tx = barOnScreen.x - activeTooltip.getWidth() - 8;
+                    int ty = barOnScreen.y + (p.getHeight() - activeTooltip.getHeight()) / 2;
 
-                Point barOnScreen = barTrack.getLocationOnScreen();
-                int tx = barOnScreen.x - activeTooltip.getWidth() - 8;
-                int ty = barOnScreen.y + (barTrack.getHeight() - activeTooltip.getHeight()) / 2;
+                    if (tx < 0) tx = barOnScreen.x + p.getWidth() + 8;
 
-                if (tx < 0) tx = barOnScreen.x + barTrack.getWidth() + 8;
-
-                activeTooltip.setLocation(tx, ty);
-                activeTooltip.setVisible(true);
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                if (activeTooltip != null) {
-                    activeTooltip.dispose();
-                    activeTooltip = null;
+                    activeTooltip.setLocation(tx, ty);
+                    activeTooltip.setVisible(true);
+                },
+                p -> { // onExit
+                    if (activeTooltip != null) {
+                        activeTooltip.dispose();
+                        activeTooltip = null;
+                    }
                 }
-            }
-        });
+        );
     }
 
     private void setActionSelectionState(boolean isSelectable, ActionFormPanel dest) {
@@ -174,4 +169,52 @@ public class HealthBarPanel extends JPanel {
             removeMouseListener(actionSelectionListener);
     }
 
+    @RequiredArgsConstructor static class RoundPanel extends JPanel {
+        private final int radius;
+        @NonNull private Color background;
+        private Timer timer;
+
+        {
+            setOpaque(false);
+        }
+
+        public void setFill(Color c) {
+            background = c;
+            repaint();
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(background);
+            g2.fillRoundRect(0, 0, getWidth(), getHeight(), radius * 2, radius * 2);
+            g2.dispose();
+        }
+
+        public void fireSlideAdjust(int targetWidth, int height, JComponent track) {
+            if (timer != null && timer.isRunning()) {
+                timer.stop();
+            }
+
+            timer = new Timer(16, e -> {
+                int current = getWidth();
+
+                if (current == targetWidth) {
+                    ((Timer) e.getSource()).stop();
+                    return;
+                }
+
+                int diff = Math.abs(targetWidth - current);
+                int step = Math.max(1, diff / 6);
+                int next = current < targetWidth ? current + step : current - step;
+
+                setBounds(0, 0, next, height);
+
+                Optional.ofNullable(track).ifPresent(Component::repaint);
+            });
+
+            timer.start();
+        }
+    }
 }

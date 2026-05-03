@@ -1,0 +1,71 @@
+.gun
+name: Palm Pistol
+hit: 6/20
+misfire: 1
+reload: 1
+cover: 2
+heavy: false
+
+.gun
+name: Pistol
+hit: 4/16
+misfire: 1
+reload: 4
+cover: 4
+heavy: false
+
+.gun
+name: Pepperbox
+hit: 4/18
+misfire: 2
+reload: 6
+cover: 4
+heavy: false
+
+.gun
+name: Musket
+hit: 8/10
+misfire: 2
+reload: 1
+cover: 6
+heavy: true
+
+.gun
+name: Dreyse Rifle
+hit: 8/8
+misfire: 3
+reload:
+cover: 8
+heavy: true
+
+.gun
+name: Bad News
+hit: 12/6
+misfire: 3
+reload: 1
+cover: 12
+heavy: true
+
+.gun
+name: Blunderbuss
+hit: 4
+misfire: 2
+reload: 1
+cover: 2
+heavy: false
+
+.gun
+name: Shotgun
+hit: 4
+misfire: 1
+reload:
+cover: 4
+heavy: true
+
+.gun
+name: Hand Mortar
+hit: 2/18
+misfire: 3
+reload: 1
+cover: 12
+heavy: false

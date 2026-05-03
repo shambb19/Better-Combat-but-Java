@@ -1,8 +1,6 @@
 package combat_menu.action_panel.form;
 
 import __main.Main;
-import __main.manager.CombatManager;
-import __main.manager.EffectManager;
 import _global_list.DamageImplements;
 import combat_menu.encounter_info.HealthBarPanel;
 import combat_object.damage_implements.Effect;
@@ -11,8 +9,10 @@ import combat_object.damage_implements.Spell;
 import combat_object.damage_implements.Weapon;
 import lombok.*;
 import lombok.experimental.*;
+import manager.CombatManager;
+import manager.EffectManager;
 import swing_custom.ValidatedField;
-import util.StringUtils;
+import util.StringUtil;
 
 import javax.swing.*;
 import java.awt.*;
@@ -27,13 +27,13 @@ import static format.swing_comp.SwingPane.fluent;
 import static format.swing_comp.SwingPane.*;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@ExtensionMethod(StringUtils.class)
+@ExtensionMethod(StringUtil.class)
 public class AttackFormPanel extends ActionFormPanel {
 
     static final Implement HEADER_WEAPON = Weapon.createManual("── Weapons ──");
     static final Implement HEADER_SPELL = Spell.createManual("── Spells ──");
 
-    static final Effect[] ATTACKER_EFFECTS = new Effect[]{POISON};
+    static final Effect[] ATTACKER_EFFECTS = new Effect[]{POISON, ADVANTAGE_SOON};
     static final Effect[] TARGET_EFFECTS = new Effect[]{FRIGHTEN, BLIND, RESTRAIN};
 
     JComboBox<Implement> attackCombo;
@@ -41,7 +41,7 @@ public class AttackFormPanel extends ActionFormPanel {
     JLabel rollFieldLabel;
 
 
-    private AttackFormPanel() {
+    public AttackFormPanel() {
         super("Use Weapon");
 
         populateComboBox();
@@ -62,12 +62,7 @@ public class AttackFormPanel extends ActionFormPanel {
         attackCombo.addItem(DamageImplements.MANUAL_SAVE);
     }
 
-    public static AttackFormPanel newInstance() {
-        return new AttackFormPanel();
-    }
-
-    @Override
-    protected void buildFields() {
+    @Override protected void buildFields() {
         attackCombo = addMixedCombo(fieldsPanel);
 
         LabeledField rollRow = addLabeledField(fieldsPanel, "Roll for hit", "Enter Roll");
@@ -84,8 +79,7 @@ public class AttackFormPanel extends ActionFormPanel {
         addNotices();
     }
 
-    @Override
-    protected void addNotices() {
+    @Override protected void addNotices() {
         for (Effect e : ATTACKER_EFFECTS)
             noticeConditions.put(e, EffectManager.hasEffect(attacker, e));
         for (Effect e : TARGET_EFFECTS)
@@ -94,8 +88,7 @@ public class AttackFormPanel extends ActionFormPanel {
         super.addNotices();
     }
 
-    @Override
-    protected void onConfirm() {
+    @Override protected void onConfirm() {
         Implement implement = Objects.requireNonNull((Implement) attackCombo.getSelectedItem());
         int roll = rollField.getValue().toInt();
 
@@ -111,10 +104,15 @@ public class AttackFormPanel extends ActionFormPanel {
         }
     }
 
-    @Override
-    protected void onTargetChanged() {
+    @Override protected void onTargetChanged() {
         super.onTargetChanged();
         addNotices();
+    }
+
+    @Override protected boolean isInputValid() {
+        Object selected = attackCombo.getSelectedItem();
+        if (selected == null || selected instanceof String) return false;
+        return rollField.isVisible() && rollField.isValid();
     }
 
     private void showMissResult(String reason) {
@@ -150,17 +148,10 @@ public class AttackFormPanel extends ActionFormPanel {
                 .collect(
                         label("Attack missed", Font.BOLD, 13f, ENEMY),
                         spacer(0, 2),
-                        label(reason, Font.PLAIN, 11f).muted()
+                        label(reason, 11f).muted()
                 ).transparent();
 
         return banner;
-    }
-
-    @Override
-    protected boolean isInputValid() {
-        Object selected = attackCombo.getSelectedItem();
-        if (selected == null || selected instanceof String) return false;
-        return rollField.isVisible() && rollField.isValid();
     }
 
     private JComboBox<Implement> addMixedCombo(JPanel container) {
@@ -211,8 +202,7 @@ public class AttackFormPanel extends ActionFormPanel {
     }
 
     private static class MixedComboRenderer extends DefaultListCellRenderer {
-        @Override
-        public Component getListCellRendererComponent(JList<?> list, Object value,
+        @Override public Component getListCellRendererComponent(JList<?> list, Object value,
                                                       int index, boolean selected, boolean focused) {
             super.getListCellRendererComponent(list, value, index, selected, focused);
 
@@ -232,7 +222,8 @@ public class AttackFormPanel extends ActionFormPanel {
                 setText(w.getName());
                 setForeground(FOREGROUND);
             } else if (implement instanceof Spell s) {
-                setText(s.getName() + (s.hasSave() ? "  [Save]" : ""));
+                String text = s.getName() + " [Save]".stringIfElseBlank(s.hasSave());
+                setText(text);
                 setForeground(SPELL);
             }
             return this;
@@ -240,8 +231,7 @@ public class AttackFormPanel extends ActionFormPanel {
     }
 
     private static class MixedComboModel extends DefaultComboBoxModel<Implement> {
-        @Override
-        public void setSelectedItem(Object item) {
+        @Override public void setSelectedItem(Object item) {
             if (item instanceof Implement s &&
                     (s.equals(HEADER_WEAPON) || s.equals(HEADER_SPELL))) return;
             super.setSelectedItem(item);

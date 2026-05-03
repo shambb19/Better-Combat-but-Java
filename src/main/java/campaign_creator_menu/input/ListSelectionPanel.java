@@ -6,9 +6,9 @@ import combat_object.combatant.PC;
 import combat_object.damage_implements.Implement;
 import combat_object.damage_implements.Spell;
 import combat_object.damage_implements.Weapon;
-import format.swing_comp.SwingPane;
+import lombok.experimental.*;
 import swing_custom.ValidatedField;
-import util.Filter;
+import util.Filterable;
 import util.Message;
 
 import javax.swing.*;
@@ -41,8 +41,6 @@ public class ListSelectionPanel<T> extends JPanel {
     }
 
     public ListSelectionPanel(List<T> sourceList, String name) {
-        SwingPane.fluent(this).arrangedAs(SINGLE_ROW, 20, 0);
-
         ArrayList<T> sourceWithoutManual = new ArrayList<>(sourceList);
         sourceWithoutManual.removeIf(item -> item.toString().startsWith("Manual"));
 
@@ -52,18 +50,17 @@ public class ListSelectionPanel<T> extends JPanel {
         searchBar = new ValidatedField(name, null);
         searchBar.setValidator(availableList::logSearch);
 
-        JLabel selectedLabel = label("Selected " + name + ":", Font.PLAIN, 13f)
-                .withEmptyBorder(10, 10, 10, 10).component();
+        JLabel selectedLabel = label("Selected " + name + ":", 13f).withEmptyBorder(10).component();
 
-        panelIn(this).arrangedAs(BORDER).borderCollect(
-                north(searchBar), center(availableList));
-
-        panelIn(this).arrangedAs(BORDER).borderCollect(
-                north(selectedLabel), center(selectedList));
+        fluent(this).arrangedAs(SINGLE_ROW, 20, 0)
+                .collect(
+                        newBorderPanel(north(searchBar), center(availableList)),
+                        newBorderPanel(north(selectedLabel), center(selectedList))
+                );
     }
 
     public List<T> getSelected() {
-        return Filter.filteredBy(selectedList.getList(), Objects::nonNull);
+        return Filterable.of(selectedList.getList()).filteredByAsList(Objects::nonNull);
     }
 
     public HashMap<String, Integer> getSelectedScenario() {
@@ -100,6 +97,7 @@ public class ListSelectionPanel<T> extends JPanel {
         availableList.updateSourceList(newSource);
     }
 
+    @ExtensionMethod(util.StringUtil.class)
     static class ImplementListPane<T> extends JScrollPane {
 
         private final ListSelectionPanel<T> root;
@@ -166,16 +164,12 @@ public class ListSelectionPanel<T> extends JPanel {
 
         @SuppressWarnings("unchecked")
         public boolean logSearch(String search) {
-            String searchFormatted = search.toLowerCase().replace(" ", "");
+            String searchFormatted = search.withoutWhitespace();
 
             implementList.clear();
 
             var implementsMatchingSearch = allImplements.stream()
-                    .filter(item -> {
-                        String itemFormatted = item.toString().toLowerCase().replace(" ", "");
-                        return itemFormatted.contains(searchFormatted);
-                    })
-                    .toList();
+                    .filter(item -> item.withoutWhitespace().contains(searchFormatted)).toList();
 
             implementList.addAll(implementsMatchingSearch);
 

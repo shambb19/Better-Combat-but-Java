@@ -8,6 +8,7 @@ import combat_object.damage_implements.Implement;
 import combat_object.damage_implements.Spell;
 import combat_object.damage_implements.Weapon;
 import lombok.*;
+import lombok.experimental.*;
 import util.TxtReader;
 
 import java.util.*;
@@ -18,6 +19,7 @@ import static util.Locators.enumNameSearch;
 import static util.TxtReader.listTextAsArray;
 
 @AllArgsConstructor
+@ExtensionMethod(util.TxtReader.class)
 public enum Key {
 
     NAME("non-blank String", String::valueOf, o -> o instanceof String s && !s.isBlank()),
@@ -57,11 +59,13 @@ public enum Key {
     }
 
     public static boolean lineStartsWithKey(String str) {
-        return get(str) != null;
+        if (str.isComments() || str.isBlank()) return false;
+
+        return get(str.toLowerCase()) != null;
     }
 
     public static Key get(String str) {
-        return LOOKUP.get(TxtReader.key(str));
+        return LOOKUP.get(str.key());
     }
 
     static final class ImplementDecoder {

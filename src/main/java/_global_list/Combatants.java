@@ -3,13 +3,12 @@ package _global_list;
 import combat_object.combatant.Combatant;
 import encounter.Encounter;
 import lombok.*;
-import lombok.experimental.*;
+import util.Filterable;
 
 import java.net.URL;
 import java.util.List;
 
 @NoArgsConstructor
-@ExtensionMethod(util.Filter.class)
 public class Combatants extends GlobalList<Combatant> {
 
     private static final Combatants INSTANCE = new Combatants();
@@ -28,11 +27,11 @@ public class Combatants extends GlobalList<Combatant> {
     }
 
     public static List<Combatant> getFriendlies() {
-        return INSTANCE.list.filteredByIsEnemy(false);
+        return Filterable.of(INSTANCE.list).filteredByAsList(c -> !c.isEnemy());
     }
 
     public static List<Combatant> getEnemies() {
-        return INSTANCE.list.filteredByIsEnemy(true);
+        return Filterable.of(INSTANCE.list).filteredByAsList(Combatant::isEnemy);
     }
 
 }

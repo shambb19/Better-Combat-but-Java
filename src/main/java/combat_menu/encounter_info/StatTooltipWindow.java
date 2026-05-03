@@ -5,7 +5,6 @@ import combat_object.combatant.PC;
 import combat_object.combatant.info.AbilityModifier;
 import combat_object.combatant.info.Stats;
 import format.swing_comp.SwingComp;
-import format.swing_comp.SwingPane;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -28,10 +27,8 @@ public class StatTooltipWindow extends JWindow {
 
         setBackground(new Color(0, 0, 0, 0));
 
-        JPanel root = newArrangedAs(SwingPane.BORDER)
-                .borderCollect(
-                        north(getHeader()), center(getBody())
-                ).withBackground(BG_DEEP)
+        JPanel root = newBorderPanel(north(getHeader()), center(getBody()))
+                .withBackground(BG_DEEP)
                 .withBorder(new LineBorder(DIVIDER, 1))
                 .applied(this::setContentPane)
                 .component();
@@ -58,14 +55,14 @@ public class StatTooltipWindow extends JWindow {
                 .withPaddedMatteBorderOnSide(DIVIDER, BOTTOM, 8, 12, 7, 12)
                 .component();
 
-        label(combatant, Font.PLAIN, 13f).in(header);
+        label(combatant, 13f).in(header);
 
         String subtitle = combatant.isEnemy() ? "Enemy"
                 : (combatant instanceof PC pc
                 ? pc.getStats().getClass5e().toString() + " · Level " + pc.getStats().getLevel()
                 : "Ally");
 
-        label(subtitle, Font.PLAIN, 10f).muted().in(header);
+        label(subtitle, 10f).muted().in(header);
 
         return header;
     }
@@ -118,13 +115,11 @@ public class StatTooltipWindow extends JWindow {
     }
 
     private SwingComp<JPanel> getStatRow(Object label, String value, Color valueColor) {
-        JLabel typeLabel = label(label, Font.PLAIN, 11f).muted().component();
+        JLabel typeLabel = label(label, 11f).muted().component();
         JLabel valueLabel = label(value, Font.PLAIN, 11f, valueColor).component();
 
-        return newArrangedAs(BORDER)
-                .borderCollect(
-                        west(typeLabel), east(valueLabel)
-                ).withBackground(BG_DEEP)
+        return newBorderPanel(west(typeLabel), east(valueLabel))
+                .withBackground(BG_DEEP)
                 .onLeft()
                 .withMaximumSize(Integer.MAX_VALUE, 22)
                 .withBorder(new MatteBorder(0, 0, 1, 0, BACKGROUND));

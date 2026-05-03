@@ -1,6 +1,6 @@
 package combat_object.combatant;
 
-import __main.exception.InvalidParameterException;
+import exception.InvalidParameterException;
 import format.ColorStyles;
 import input.Key;
 import util.TxtReader;

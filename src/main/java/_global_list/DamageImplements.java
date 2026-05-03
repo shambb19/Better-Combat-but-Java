@@ -4,12 +4,11 @@ import combat_object.damage_implements.Implement;
 import combat_object.damage_implements.Spell;
 import combat_object.damage_implements.Weapon;
 import lombok.experimental.*;
-import util.Filter;
 
 import java.util.List;
 
 @FieldDefaults(makeFinal = true)
-@ExtensionMethod(Filter.class)
+@ExtensionMethod(util.Filterable.class)
 public class DamageImplements extends GlobalList<Implement> {
 
     public static Weapon MANUAL_WEAPON = Weapon.createManual("Manual");
@@ -28,11 +27,11 @@ public class DamageImplements extends GlobalList<Implement> {
     }
 
     public static <T extends Implement> T get(String name, Class<T> type) {
-        return INSTANCE.list.castTo(type).firstWithToStringEquals(name);
+        return INSTANCE.list.of().castTo(type).firstWithToStringEquals(name);
     }
 
     public static <T extends Implement> List<T> toList(Class<T> type) {
-        return INSTANCE.list.castTo(type);
+        return INSTANCE.list.of().castToAsList(type);
     }
 
 }

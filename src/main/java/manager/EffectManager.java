@@ -1,4 +1,4 @@
-package __main.manager;
+package manager;
 
 import combat_object.combatant.Combatant;
 import combat_object.damage_implements.Effect;
@@ -9,6 +9,7 @@ import util.Message;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import static combat_object.damage_implements.Effect.*;
 
@@ -28,8 +29,10 @@ public class EffectManager {
     }
 
     public boolean hasEffect(Combatant query, Effect effect) {
-        if (effect.equals(Effect.BONUS_DAMAGE))
-            throw new ClassCastException("hasEffect in EffectManager: use isHexedBy for Effect.BONUS_DAMAGE");
+        if (effect.equals(BONUS_DAMAGE)) {
+            Logger.getAnonymousLogger().warning("EffectManager.hasEffect: use isHexedBy for Effect.BONUS_DAMAGE");
+            return false;
+        }
 
         return EFFECTS.stream().anyMatch(e -> e.on().equals(query) && e.effect().equals(effect));
     }
@@ -44,11 +47,10 @@ public class EffectManager {
     }
 
     public void logTurnEnd(Combatant query) {
-        final List<Effect> effectsDealtByCombatant = List.of(ADVANTAGE_SOON, PENALTY_SAVE);
-        final List<Effect> effectsOnCombatant = List.of(POISON, DISADVANTAGE_ATTACK);
-        final List<Effect> effectsOnCombatantWithRoll = List.of(
-                BLIND, DAMAGE_OVER_TIME, FRIGHTEN, RESTRAIN, PENALTY_ATTACK, RANDOM_ACTION, STUNNED
-        );
+        final Effect[] effectsDealtByCombatant = {ADVANTAGE_SOON, PENALTY_SAVE};
+        final Effect[] effectsOnCombatant = {POISON, DISADVANTAGE_ATTACK};
+        final Effect[] effectsOnCombatantWithRoll =
+                {BLIND, DAMAGE_OVER_TIME, FRIGHTEN, RESTRAIN, PENALTY_ATTACK, RANDOM_ACTION, STUNNED};
 
         for (Effect effect : effectsDealtByCombatant) {
             EFFECTS.removeIf(e -> e.by.equals(query) && e.effect.equals(effect));
