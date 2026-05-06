@@ -1,680 +1,561 @@
-.spell
-name: Acid Splash
+.spell Acid Splash
 dmg: 1d6
 +stat: dex
 
-.spell
-name: Booming Blade
+.spell Booming Blade
 dmg: 1d8
 
-.spell
-name: Chill Touch
+.spell Chill Touch
 dmg: 1d8
 +effect: HEAL_BLOCK
 
-.spell
-name: Create Bonfire
+.spell Create Bonfire
 dmg: 1d8
 +stat: dex
 +concentration
 
-.spell
-name: Eldritch Blast
+.spell Eldritch Blast
 dmg: 1d10
 
-.spell
-name: Fire Bolt
+.spell Fire Bolt
 dmg: 1d10
 
-.spell
-name: Frostbite
+.spell Frostbite
 dmg: 1d6
 +stat: con
 +effect: DISADVANTAGE_ATTACK
 
-.spell
-name: Green-Flame Blade
+.spell Green-Flame Blade
 dmg: 1d8
 
-.spell
-name: Infestation
+.spell Infestation
 dmg: 1d6
 +stat: con
 +effect: FORCED_MOVE
 
-.spell
-name: Lightning Lure
+.spell Lightning Lure
 dmg: 1d8
 +stat: str
 +effect: PULL
 
-.spell
-name: Magic Stone
+.spell Magic Stone
 dmg: 1d6
 
-.spell
-name: Mind Sliver
+.spell Mind Sliver
 dmg: 1d6
 +stat: int
 +effect: PENALTY_SAVE
 
-.spell
-name: Poison Spray
+.spell Poison Spray
 dmg: 1d12
 +stat: con
 +effect: POISON
 
-.spell
-name: Primal Savagery
+.spell Primal Savagery
 dmg: 1d10
 
-.spell
-name: Produce Flame
+.spell Produce Flame
 dmg: 1d8
 
-.spell
-name: Ray of Frost
+.spell Ray of Frost
 dmg: 1d8
 
-.spell
-name: Sacred Flame
+.spell Sacred Flame
 dmg: 1d8
 +stat: dex
 
-.spell
-name: Shocking Grasp
+.spell Shocking Grasp
 dmg: 1d8
 
-.spell
-name: Starry Wisp
+.spell Starry Wisp
 dmg: 1d8
 
-.spell
-name: Sword Burst
+.spell Sword Burst
 dmg: 1d6
 +stat: dex
 
-.spell
-name: Thorn Whip
+.spell Thorn Whip
 dmg: 1d6
 +effect: PULL
 
-.spell
-name: Thunderclap
+.spell Thunderclap
 dmg: 1d6
 +stat: con
 
-.spell
-name: Toll the Dead
+.spell Toll the Dead
 dmg: 1d8
 +stat: wis
 +effect: FULL_HP_OPTION
 
-.spell
-name: Vicious Mockery
+.spell Vicious Mockery
 dmg: 1d4
 +stat: wis
 +effect: DISADVANTAGE_ATTACK
 
-.spell
-name: Word of Radiance
+.spell Word of Radiance
 dmg: 1d6
 +stat: con
 
-.spell
-name: Absorb Elements
+.spell Absorb Elements
 dmg: 1d6
 
-.spell
-name: Arms of Hadar
+.spell Arms of Hadar
 dmg: 2d6
 +stat: str
 
-.spell
-name: Burning Hands
+.spell Burning Hands
 dmg: 3d6
 +stat: dex
 +effect: HALF_DAMAGE
 
-.spell
-name: Catapult
+.spell Catapult
 dmg: 3d8
 +stat: dex
 
-.spell
-name: Chaos Bolt
+.spell Chaos Bolt
 dmg: 2d8
 
-.spell
-name: Chromatic Orb
+.spell Chromatic Orb
 dmg: 3d8
 
-.spell
-name: Dissonant Whispers
+.spell Dissonant Whispers
 dmg: 3d6
 +stat: wis
 +effect: FORCED_MOVE
 
-.spell
-name: Divine Favor
+.spell Divine Favor
 dmg: 1d4
 +effect: BONUS_DAMAGE
 +concentration
 
-.spell
-name: Earth Tremor
+.spell Earth Tremor
 dmg: 1d6
 +stat: dex
 +effect: PRONE
 
-.spell
-name: Ensnaring Strike
+.spell Ensnaring Strike
 dmg: 1d6
 +stat: str
 +effect: RESTRAIN
 +concentration
 
-.spell
-name: Guiding Bolt
+.spell Guiding Bolt
 dmg: 4d6
 +effect: ADVANTAGE_SOON
 
-.spell
-name: Hail of Thorns
+.spell Hail of Thorns
 dmg: 1d10
 +stat: dex
 +effect: HALF_DAMAGE
 +concentration
 
-.spell
-name: Hellish Rebuke
+.spell Hellish Rebuke
 dmg: 2d10
 +stat: dex
 +effect: HALF_DAMAGE
 
-.spell
-name: Hex
+.spell Hex
 dmg: 1d6
 +stat: wis
 +effect: BONUS_DAMAGE
 +concentration
 
-.spell
-name: Hunter's Mark
+.spell Hunter's Mark
 dmg: 1d6
 +effect: BONUS_DAMAGE
 +concentration
 
-.spell
-name: Ice Knife
+.spell Ice Knife
 dmg: 1d10
 +stat: dex
 
-.spell
-name: Inflict Wounds
+.spell Inflict Wounds
 dmg: 3d10
 
-.spell
-name: Jim's Magic Missile
+.spell Jim's Magic Missile
 dmg: 2d4
 
-.spell
-name: Magic Missile
+.spell Magic Missile
 dmg: 1d4
 +effect: AUTO_HIT
 
-.spell
-name: Ray of Sickness
+.spell Ray of Sickness
 dmg: 2d8
 +stat: con
 +effect: POISON
 
-.spell
-name: Searing Smite
+.spell Searing Smite
 dmg: 1d6
 +stat: con
 +effect: DAMAGE_OVER_TIME
 +concentration
 
-.spell
-name: Thunderous Smite
+.spell Thunderous Smite
 dmg: 2d6
 +stat: str
 +effect: PRONE
 +concentration
 
-.spell
-name: Thunder Wave
+.spell Thunder Wave
 dmg: 2d8
 +stat: con
 +effect: HALF_DAMAGE
 
-.spell
-name: Witch Bolt
+.spell Witch Bolt
 dmg: 1d12
 +effect: DAMAGE_OVER_TIME
 +concentration
 
-.spell
-name: Wrathful Smite
+.spell Wrathful Smite
 dmg: 1d6
 +stat: wis
 +effect: FRIGHTEN
 +concentration
 
-.spell
-name: Zephyr Strike
+.spell Zephyr Strike
 dmg: 1d8
 +effect: ADVANTAGE_SOON
 +concentration
 
-.spell
-name: Aganazzar's Scorcher
+.spell Aganazzar's Scorcher
 dmg: 3d8
 +stat: dex
 +effect: HALF_DAMAGE
 
-.spell
-name: Branding Smite
+.spell Branding Smite
 dmg: 2d6
 +effect: TRACKING
 +concentration
 
-.spell
-name: Cloud of Daggers
+.spell Cloud of Daggers
 dmg: 4d4
 +effect: AUTO_HIT
 +concentration
 
-.spell
-name: Dragon's Breath
+.spell Dragon's Breath
 dmg: 3d6
 +stat: dex
 +effect: HALF_DAMAGE
 +concentration
 
-.spell
-name: Flame Blade
+.spell Flame Blade
 dmg: 3d6
 +concentration
 
-.spell
-name: Flaming Sphere
+.spell Flaming Sphere
 dmg: 2d6
 +stat: dex
 +effect: HALF_DAMAGE
 +concentration
 
-.spell
-name: Heat Metal
+.spell Heat Metal
 dmg: 2d8
 +effect: DISADVANTAGE_ATTACK
 +concentration
 
-.spell
-name: Maximilian's Earthen Grasp
+.spell Maximilian's Earthen Grasp
 dmg: 2d6
 +stat: str
 +effect: RESTRAIN
 +concentration
 
-.spell
-name: Melf's Acid Arrow
+.spell Melf's Acid Arrow
 dmg: 4d4
 +effect: DAMAGE_OVER_TIME
 
-.spell
-name: Mind Spike
+.spell Mind Spike
 dmg: 3d8
 +stat: wis
 +effect: TRACKING
 +concentration
 
-.spell
-name: Moonbeam
+.spell Moonbeam
 dmg: 2d10
 +stat: con
 +effect: HALF_DAMAGE
 +concentration
 
-.spell
-name: Phantasmal Force
+.spell Phantasmal Force
 dmg: 1d6
 +stat: int
 +effect: ILLUSION
 +concentration
 
-.spell
-name: Scorching Ray
+.spell Scorching Ray
 dmg: 2d6
 
-.spell
-name: Shadow Blade
+.spell Shadow Blade
 dmg: 2d8
 +concentration
 
-.spell
-name: Shatter
+.spell Shatter
 dmg: 3d8
 +stat: con
 +effect: HALF_DAMAGE
 
-.spell
-name: Snilloc's Snowball Swarm
+.spell Snilloc's Snowball Swarm
 dmg: 3d6
 +stat: dex
 +effect: HALF_DAMAGE
 
-.spell
-name: Spiritual Weapon
+.spell Spiritual Weapon
 dmg: 1d8
 
-.spell
-name: Tasha's Mind Whip
+.spell Tasha's Mind Whip
 dmg: 3d6
 +stat: int
 
-.spell
-name: Blinding Smite
+.spell Blinding Smite
 dmg: 3d8
 +stat: con
 +effect: BLIND
 +concentration
 
-.spell
-name: Call Lightning
+.spell Call Lightning
 dmg: 3d10
 +stat: dex
 +effect: HALF_DAMAGE
 +concentration
 
-.spell
-name: Erupting Earth
+.spell Erupting Earth
 dmg: 3d12
 +stat: dex
 +effect: DIFFICULT_TERRAIN
 
-.spell
-name: Fireball
+.spell Fireball
 dmg: 8d6
 +stat: dex
 +effect: HALF_DAMAGE
 
-.spell
-name: Lightning Bolt
+.spell Lightning Bolt
 dmg: 8d6
 +stat: dex
 +effect: HALF_DAMAGE
 
-.spell
-name: Melf's Minute Meteors
+.spell Melf's Minute Meteors
 dmg: 2d6
 +stat: dex
 +effect: HALF_DAMAGE
 +concentration
 
-.spell
-name: Spirit Guardians
+.spell Spirit Guardians
 dmg: 3d8
 +stat: wis
 +effect: HALF_DAMAGE
 +concentration
 
-.spell
-name: Tidal Wave
+.spell Tidal Wave
 dmg: 4d8
 +stat: dex
 +effect: PRONE
 
-.spell
-name: Vampiric Touch
+.spell Vampiric Touch
 dmg: 3d6
 +effect: HEAL_SELF
 +concentration
 
-.spell
-name: Blight
+.spell Blight
 dmg: 8d8
 +stat: con
 +effect: HALF_DAMAGE
 
-.spell
-name: Ice Storm
+.spell Ice Storm
 dmg: 2d8
 +stat: dex
 +effect: DIFFICULT_TERRAIN
 
-.spell
-name: Phantasmal Killer
+.spell Phantasmal Killer
 dmg: 4d10
 +stat: wis
 +effect: FRIGHTEN
 +concentration
 
-.spell
-name: Sickening Radiance
+.spell Sickening Radiance
 dmg: 4d10
 +stat: con
 +concentration
 
-.spell
-name: Staggering Smite
+.spell Staggering Smite
 dmg: 4d6
 +stat: wis
 +effect: DISADVANTAGE_ATTACK
 +concentration
 
-.spell
-name: Storm Sphere
+.spell Storm Sphere
 dmg: 2d6
 +stat: str
 +effect: DIFFICULT_TERRAIN
 +concentration
 
-.spell
-name: Vitriolic Sphere
+.spell Vitriolic Sphere
 dmg: 5d4
 +stat: dex
 +effect: DAMAGE_OVER_TIME
 
-.spell
-name: Wall of Fire
+.spell Wall of Fire
 dmg: 5d8
 +stat: dex
 +effect: HALF_DAMAGE
 +concentration
 
-.spell
-name: Banishing Smite
+.spell Banishing Smite
 dmg: 5d10
 +effect: BANISH
 +concentration
 
-.spell
-name: Cloud Kill
+.spell Cloud Kill
 dmg: 5d8
 +stat: con
 +effect: HALF_DAMAGE
 +concentration
 
-.spell
-name: Cone of Cold
+.spell Cone of Cold
 dmg: 8d8
 +stat: con
 +effect: HALF_DAMAGE
 
-.spell
-name: Destructive Wave
+.spell Destructive Wave
 dmg: 5d6
 +stat: con
 +effect: PRONE
 
-.spell
-name: Enervation
+.spell Enervation
 dmg: 4d8
 +stat: dex
 +effect: HEAL_SELF
 +concentration
 
-.spell
-name: Flame Strike
+.spell Flame Strike
 dmg: 4d6
 +stat: dex
 +effect: HALF_DAMAGE
 
-.spell
-name: Geas
+.spell Geas
 dmg: 5d10
 +stat: wis
-+effect: CHARMED
 
-.spell
-name: Immolation
+.spell Immolation
 dmg: 8d6
 +stat: dex
 +effect: DAMAGE_OVER_TIME
 +concentration
 
-.spell
-name: Negative Energy Flood
+.spell Negative Energy Flood
 dmg: 5d12
 +stat: con
 +effect: HALF_DAMAGE
 
-.spell
-name: Steel Wind Strike
+.spell Steel Wind Strike
 dmg: 6d10
 
-.spell
-name: Synaptic Static
+.spell Synaptic Static
 dmg: 8d6
 +stat: int
 +effect: PENALTY_ATTACK
 
-.spell
-name: Chain Lightning
+.spell Chain Lightning
 dmg: 10d8
 +stat: dex
 +effect: HALF_DAMAGE
 
-.spell
-name: Disintegrate
+.spell Disintegrate
 dmg: 10d6
 +stat: dex
 
-.spell
-name: Harm
+.spell Harm
 dmg: 14d6
 +stat: con
 +effect: HEAL_BLOCK
 
-.spell
-name: Mental Prison
+.spell Mental Prison
 dmg: 5d10
 +stat: int
 +effect: RESTRAIN
 +concentration
 
-.spell
-name: Otiluke's Freezing Sphere
+.spell Otiluke's Freezing Sphere
 dmg: 10d6
 +stat: con
 +effect: HALF_DAMAGE
 
-.spell
-name: Sunbeam
+.spell Sunbeam
 dmg: 6d8
 +stat: con
 +effect: BLIND
 +concentration
 
-.spell
-name: Crown of Stars
+.spell Crown of Stars
 dmg: 4d12
 
-.spell
-name: Delayed Blast Fireball
+.spell Delayed Blast Fireball
 dmg: 12d6
 +stat: dex
 +effect: HALF_DAMAGE
 +concentration
 
-.spell
-name: Finger of Death
+.spell Finger of Death
 dmg: 7d8
 +stat: con
 +effect: HALF_DAMAGE
 
-.spell
-name: Fire Storm
+.spell Fire Storm
 dmg: 7d10
 +stat: dex
 +effect: HALF_DAMAGE
 
-.spell
-name: Prismatic Spray
+.spell Prismatic Spray
 dmg: 10d6
 +stat: dex
 +effect: RANDOM_ACTION
 
-.spell
-name: Abi-Dalzim's Horrid Wilting
+.spell Abi-Dalzim's Horrid Wilting
 dmg: 12d8
 +stat: con
 +effect: HALF_DAMAGE
 
-.spell
-name: Feeble Mind
+.spell Feeble Mind
 dmg: 4d6
 +stat: int
 +effect: STAT_DROP
 
-.spell
-name: Illusory Dragon
+.spell Illusory Dragon
 dmg: 7d6
 +stat: int
 +effect: HALF_DAMAGE
 +concentration
 
-.spell
-name: Reality Break
+.spell Reality Break
 dmg: 10d12
 +stat: wis
 +effect: RANDOM_ACTION
 +concentration
 
-.spell
-name: Sunburst
+.spell Sunburst
 dmg: 12d6
 +stat: con
 +effect: BLIND
 
-.spell
-name: Blade of Disaster
+.spell Blade of Disaster
 dmg: 4d12
 +concentration
 
-.spell
-name: Meteor Swarm
+.spell Meteor Swarm
 dmg: 20d6
 +stat: dex
 +effect: HALF_DAMAGE
 
-.spell
-name: Psychic Scream
+.spell Psychic Scream
 dmg: 14d6
 +stat: int
 +effect: STUNNED
 
-.spell
-name: Ravenous Void
+.spell Ravenous Void
 dmg: 5d10
 +stat: str
 +effect: FORCED_MOVE
 +concentration
 
-.spell
-name: Time Ravage
+.spell Time Ravage
 dmg: 10d12
 +stat: con
 +effect: HALF_DAMAGE

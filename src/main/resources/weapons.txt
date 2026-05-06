@@ -1,80 +1,64 @@
-.weapon
-name: Club
+.weapon Club
 dmg: 1d4
 stat: str
 
-.weapon
-name: Dagger
+.weapon Dagger
 dmg: 1d4
 stat: option
 
-.weapon
-name: Greatclub
+.weapon Greatclub
 dmg: 1d8
 stat: str
 
-.weapon
-name: Handaxe
+.weapon Handaxe
 dmg: 1d6
 stat: str
 
-.weapon
-name: Javelin
+.weapon Javelin
 dmg: 1d6
 stat: str
 
-.weapon
-name: Light Hammer
+.weapon Light Hammer
 dmg: 1d4
 stat: str
 
-.weapon
-name: Mace
+.weapon Mace
 dmg: 1d6
 stat: str
 
-.weapon
-name: Quarterstaff
+.weapon Quarterstaff
 dmg: 1d6
 stat: str
 
-.weapon
-name: Sickle
+.weapon Sickle
 dmg: 1d4
 stat: str
 
-.weapon
-name: Spear
+.weapon Spear
 dmg: 1d6
 stat: str
 
-.weapon
-name: Light Crossbow
+.weapon Light Crossbow
 dmg: 1d8
 stat: dex
 
-.weapon
-name: Dart
+.weapon Dart
 dmg: 1d4
 stat: option
 
-.weapon
-name: Shortbow
+.weapon Shortbow
 dmg: 1d6
 stat: dex
 
-.weapon
-name: Sling
+.weapon Sling
 dmg: 1d4
 stat: dex
 
-.weapon
-name: Battleaxe
+.weapon Battleaxe
 dmg: 1d8
 stat: str
 
-.weapon
-name: Flail
+.weapon Flail
 dmg: 1d8
 stat: str
 
@@ -83,97 +67,78 @@ name: Glaive
 dmg: 1d10
 stat: str
 
-.weapon
-name: Greataxe
+.weapon Greataxe
 dmg: 1d12
 stat: str
 
-.weapon
-name: Greatsword
+.weapon Greatsword
 dmg: 2d6
 stat: str
 
-.weapon
-name: Halberd
+.weapon Halberd
 dmg: 1d10
 stat: str
 
-.weapon
-name: Lance
+.weapon Lance
 dmg: 1d12
 stat: str
 
-.weapon
-name: Longsword
+.weapon Longsword
 dmg: 1d8
 stat: str
 
-.weapon
-name: Maul
+.weapon Maul
 dmg: 2d6
 stat: str
 
-.weapon
-name: Morningstar
+.weapon Morningstar
 dmg: 1d8
 stat: str
 
-.weapon
-name: Pike
+.weapon Pike
 dmg: 1d10
 stat: str
 
-.weapon
-name: Rapier
+.weapon Rapier
 dmg: 1d8
 stat: option
 
-.weapon
-name: Scimitar
+.weapon Scimitar
 dmg: 1d6
 stat: option
 
-.weapon
-name: Shortsword
+.weapon Shortsword
 dmg: 1d6
 stat: option
 
-.weapon
-name: Trident
+.weapon Trident
 dmg: 1d6
 stat: str
 
-.weapon
-name: War Pick
+.weapon War Pick
 dmg: 1d8
 stat: str
 
-.weapon
-name: Warhammer
+.weapon Warhammer
 dmg: 1d8
 stat: str
 
-.weapon
-name: Whip
+.weapon Whip
 dmg: 1d4
 stat: option
 
-.weapon
-name: Blowgun
+.weapon Blowgun
 dmg: 1d1
 stat: dex
 
-.weapon
-name: Hand Crossbow
+.weapon Hand Crossbow
 dmg: 1d6
 stat: dex
 
-.weapon
-name: Heavy Crossbow
+.weapon Heavy Crossbow
 dmg: 1d10
 stat: dex
 
-.weapon
-name: Longbow
+.weapon Longbow
 dmg: 1d8
 stat: dex
