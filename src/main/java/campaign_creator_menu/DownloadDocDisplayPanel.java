@@ -6,11 +6,11 @@ import combat_object.combatant.Combatant;
 import combat_object.scenario.Scenario;
 import encounter.Encounter;
 import exception.CampaignSaveError;
-import format.swing_comp.SwingComp;
-import format.swing_comp.SwingPane;
 import input.CampaignWriter;
 import lombok.*;
 import lombok.experimental.*;
+import swing.fluent.SwingComp;
+import swing.fluent.SwingPane;
 import util.Locators;
 import util.Message;
 
@@ -23,11 +23,11 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.stream.Stream;
 
-import static format.ColorStyles.FOREGROUND;
-import static format.ColorStyles.SUCCESS;
-import static format.swing_comp.SwingComp.button;
-import static format.swing_comp.SwingComp.scrollPane;
-import static format.swing_comp.SwingPane.*;
+import static swing.ColorStyles.FOREGROUND;
+import static swing.ColorStyles.SUCCESS;
+import static swing.fluent.SwingComp.button;
+import static swing.fluent.SwingComp.scrollPane;
+import static swing.fluent.SwingPane.*;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @ExtensionMethod(util.Message.class)

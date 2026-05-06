@@ -5,12 +5,12 @@ import __main.UploadMain;
 import combat_object.combatant.Combatant;
 import combat_object.combatant.NPC;
 import combat_object.scenario.Scenario;
-import format.ColorStyles;
-import format.swing_comp.SwingPane;
 import lombok.*;
 import lombok.experimental.*;
 import manager.EncounterManager;
-import swing_custom.ValidatedField;
+import swing.ColorStyles;
+import swing.custom.ValidatedField;
+import swing.fluent.SwingPane;
 import util.Filterable;
 
 import javax.swing.*;
@@ -22,11 +22,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static format.ColorStyles.*;
-import static format.swing_comp.SwingComp.fluent;
-import static format.swing_comp.SwingComp.*;
-import static format.swing_comp.SwingPane.fluent;
-import static format.swing_comp.SwingPane.*;
+import static swing.ColorStyles.*;
+import static swing.fluent.SwingComp.fluent;
+import static swing.fluent.SwingComp.*;
+import static swing.fluent.SwingPane.fluent;
+import static swing.fluent.SwingPane.*;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class EncounterSelectionPanel extends JPanel {

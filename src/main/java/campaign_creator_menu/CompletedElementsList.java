@@ -5,15 +5,15 @@ import combat_object.combatant.NPC;
 import combat_object.combatant.PC;
 import combat_object.scenario.Scenario;
 import encounter.Encounter;
-import format.swing_comp.SwingPane;
 import lombok.*;
 import lombok.experimental.*;
+import swing.fluent.SwingPane;
 import util.Filterable;
 
 import javax.swing.*;
 import java.util.List;
 
-import static format.swing_comp.SwingPane.FLOW;
+import static swing.fluent.SwingPane.FLOW;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class CompletedElementsList extends JPanel {

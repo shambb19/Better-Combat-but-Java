@@ -1,6 +1,6 @@
-package __main;
+package swing.custom;
 
-import format.ColorStyles;
+import swing.ColorStyles;
 
 import javax.swing.*;
 import java.awt.*;

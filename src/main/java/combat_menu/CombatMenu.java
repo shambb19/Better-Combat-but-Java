@@ -1,19 +1,19 @@
 package combat_menu;
 
 import __main.Main;
-import __main.MainFrame;
 import combat_menu.action_panel.ActionPanel;
 import combat_menu.action_panel.form.ActionFormPanel;
 import combat_menu.encounter_info.EncounterListPanel;
 import combat_menu.encounter_info.HealthBarPanel;
-import format.swing_comp.SwingPane;
 import lombok.*;
 import lombok.experimental.*;
 import org.intellij.lang.annotations.MagicConstant;
+import swing.custom.MainFrame;
+import swing.fluent.SwingPane;
 
 import java.awt.*;
 
-import static format.swing_comp.SwingPane.*;
+import static swing.fluent.SwingPane.*;
 
 @FieldDefaults(makeFinal = true)
 /*

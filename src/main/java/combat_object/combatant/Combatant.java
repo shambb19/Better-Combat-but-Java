@@ -4,17 +4,16 @@ import combat_object.CombatObject;
 import combat_object.combatant.info.AbilityModifier;
 import combat_object.combatant.info.LifeStatus;
 import combat_object.combatant.info.Stats;
-import combat_object.damage_implements.Effect;
-import combat_object.damage_implements.Implement;
-import combat_object.damage_implements.Spell;
-import combat_object.damage_implements.Weapon;
-import format.ColorStyles;
+import combat_object.implement.*;
 import lombok.*;
 import lombok.experimental.*;
 import manager.EffectManager;
+import swing.ColorStyles;
+import util.Filterable;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 @EqualsAndHashCode(callSuper = true) @SuperBuilder @Data
@@ -24,11 +23,9 @@ public abstract class Combatant extends CombatObject {
     @Builder.Default final LifeStatus lifeStatus = new LifeStatus();
     @Builder.Default final RollTracker rollTracker = new RollTracker();
     @Builder.Default final Stats stats = Stats.defaultStats();
-    @Builder.Default final ArrayList<Weapon> weapons = new ArrayList<>();
-    @Builder.Default final ArrayList<Spell> spells = new ArrayList<>();
+    @Builder.Default final ArrayList<Implement> implementList = new ArrayList<>();
     int armorClass;
-    int maxHp;
-    int hp;
+    int maxHp, hp;
     final boolean isEnemy;
     @Builder.Default protected int initiative = 0;
     @Builder.Default protected int numInspirationUsed = 0;
@@ -47,6 +44,10 @@ public abstract class Combatant extends CombatObject {
 
     public double getHpRatio() {
         return (double) hp / maxHp;
+    }
+
+    public <T extends Implement> List<T> getImplements(Class<T> type) {
+        return Filterable.of(implementList).castToAsList(type);
     }
 
     public void damage(int damage) {
@@ -119,7 +120,8 @@ public abstract class Combatant extends CombatObject {
         return switch (implement) {
             case Weapon w -> stats.getProficiencyBonus() + stats.mod(w.getStat());
             case Spell ignored -> stats.spellAttackBonus();
-            default -> throw new ClassCastException("Combatant.attackBonus: somehow not Weapon or Spell");
+            case Gun ignored -> 0;
+            default -> throw new ClassCastException("Combatant.attackBonus: Weapon, Spell, or Gun expected");
         };
     }
 

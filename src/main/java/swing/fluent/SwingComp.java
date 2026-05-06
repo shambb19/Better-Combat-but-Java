@@ -1,4 +1,4 @@
-package format.swing_comp;
+package swing.fluent;
 
 import _global_list.Resource;
 import boilerplate.FilteredVals;
@@ -15,7 +15,7 @@ import java.awt.event.MouseEvent;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import static format.ColorStyles.*;
+import static swing.ColorStyles.*;
 
 @Getter
 @Data
@@ -108,6 +108,19 @@ public class SwingComp<E extends JComponent> {
         return SwingComp.fluent(button)
                 .withBackground(bg)
                 .applied(b -> Optional.ofNullable(actionListener).ifPresent(a -> b.addActionListener(e -> a.run())));
+    }
+
+    public static SwingComp<JToggleButton> toggleButton(
+            String text1, @FilteredVals.Color Color color1, // unselected
+            String text2, @FilteredVals.Color Color color2 // selected
+    ) {
+        JToggleButton button = new JToggleButton(text1, false);
+        return fluent(button)
+                .withBackground(color1)
+                .withAction(b -> {
+                    b.setText(b.isSelected() ? text2 : text1);
+                    b.setBackground(b.isSelected() ? color2 : color1);
+                });
     }
 
     public static <T> SwingComp<JComboBox<T>> comboBox(T[] contents) {

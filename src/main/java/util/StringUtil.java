@@ -11,6 +11,8 @@ import javax.swing.*;
 public class StringUtil {
 
     public int toInt(String string) {
+        if (string.isEmpty()) return 0;
+
         try {
             return Integer.parseInt(withoutWhitespace(string));
         } catch (NumberFormatException ignored) {

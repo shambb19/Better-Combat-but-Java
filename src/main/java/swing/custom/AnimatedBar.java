@@ -1,8 +1,8 @@
-package swing_custom;
+package swing.custom;
 
-import format.ColorStyles;
 import lombok.*;
 import lombok.experimental.*;
+import swing.ColorStyles;
 
 import javax.swing.*;
 import java.awt.*;

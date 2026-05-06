@@ -1,825 +1,680 @@
 .spell
 name: Acid Splash
 dmg: 1d6
-stat: dex
-effect: NONE
-concentration: false
++stat: dex
 
 .spell
 name: Booming Blade
 dmg: 1d8
-stat: none
-effect: NONE
-concentration: false
 
 .spell
 name: Chill Touch
 dmg: 1d8
-stat: none
-effect: HEAL_BLOCK
-concentration: false
++effect: HEAL_BLOCK
 
 .spell
 name: Create Bonfire
 dmg: 1d8
-stat: dex
-effect: NONE
-concentration: true
++stat: dex
++concentration
 
 .spell
 name: Eldritch Blast
 dmg: 1d10
-stat: none
-effect: NONE
-concentration: false
 
 .spell
 name: Fire Bolt
 dmg: 1d10
-stat: none
-effect: NONE
-concentration: false
 
 .spell
 name: Frostbite
 dmg: 1d6
-stat: con
-effect: DISADVANTAGE_ATTACK
-concentration: false
++stat: con
++effect: DISADVANTAGE_ATTACK
 
 .spell
 name: Green-Flame Blade
 dmg: 1d8
-stat: none
-effect: NONE
-concentration: false
 
 .spell
 name: Infestation
 dmg: 1d6
-stat: con
-effect: FORCED_MOVE
-concentration: false
++stat: con
++effect: FORCED_MOVE
 
 .spell
 name: Lightning Lure
 dmg: 1d8
-stat: str
-effect: PULL
-concentration: false
++stat: str
++effect: PULL
 
 .spell
 name: Magic Stone
 dmg: 1d6
-stat: none
-effect: NONE
-concentration: false
 
 .spell
 name: Mind Sliver
 dmg: 1d6
-stat: int
-effect: PENALTY_SAVE
-concentration: false
++stat: int
++effect: PENALTY_SAVE
 
 .spell
 name: Poison Spray
 dmg: 1d12
-stat: con
-effect: POISON
-concentration: false
++stat: con
++effect: POISON
 
 .spell
 name: Primal Savagery
 dmg: 1d10
-stat: none
-effect: NONE
-concentration: false
 
 .spell
 name: Produce Flame
 dmg: 1d8
-stat: none
-effect: NONE
-concentration: false
 
 .spell
 name: Ray of Frost
 dmg: 1d8
-stat: none
-effect: NONE
-concentration: false
 
 .spell
 name: Sacred Flame
 dmg: 1d8
-stat: dex
-effect: NONE
-concentration: false
++stat: dex
 
 .spell
 name: Shocking Grasp
 dmg: 1d8
-stat: none
-effect: NONE
-concentration: false
 
 .spell
 name: Starry Wisp
 dmg: 1d8
-stat: none
-effect: NONE
-concentration: false
 
 .spell
 name: Sword Burst
 dmg: 1d6
-stat: dex
-effect: NONE
-concentration: false
++stat: dex
 
 .spell
 name: Thorn Whip
 dmg: 1d6
-stat: none
-effect: PULL
-concentration: false
++effect: PULL
 
 .spell
 name: Thunderclap
 dmg: 1d6
-stat: con
-effect: NONE
-concentration: false
++stat: con
 
 .spell
 name: Toll the Dead
 dmg: 1d8
-stat: wis
-effect: FULL_HP_OPTION
-concentration: false
++stat: wis
++effect: FULL_HP_OPTION
 
 .spell
 name: Vicious Mockery
 dmg: 1d4
-stat: wis
-effect: DISADVANTAGE_ATTACK
-concentration: false
++stat: wis
++effect: DISADVANTAGE_ATTACK
 
 .spell
 name: Word of Radiance
 dmg: 1d6
-stat: con
-effect: NONE
-concentration: false
++stat: con
 
 .spell
 name: Absorb Elements
 dmg: 1d6
-stat: none
-effect: NONE
-concentration: false
 
 .spell
 name: Arms of Hadar
 dmg: 2d6
-stat: str
-effect: NONE
-concentration: false
++stat: str
 
 .spell
 name: Burning Hands
 dmg: 3d6
-stat: dex
-effect: HALF_DAMAGE
-concentration: false
++stat: dex
++effect: HALF_DAMAGE
 
 .spell
 name: Catapult
 dmg: 3d8
-stat: dex
-effect: NONE
-concentration: false
++stat: dex
 
 .spell
 name: Chaos Bolt
 dmg: 2d8
-stat: none
-effect: NONE
-concentration: false
 
 .spell
 name: Chromatic Orb
 dmg: 3d8
-stat: none
-effect: NONE
-concentration: false
 
 .spell
 name: Dissonant Whispers
 dmg: 3d6
-stat: wis
-effect: FORCED_MOVE
-concentration: false
++stat: wis
++effect: FORCED_MOVE
 
 .spell
 name: Divine Favor
 dmg: 1d4
-stat: none
-effect: BONUS_DAMAGE
-concentration: true
++effect: BONUS_DAMAGE
++concentration
 
 .spell
 name: Earth Tremor
 dmg: 1d6
-stat: dex
-effect: PRONE
-concentration: false
++stat: dex
++effect: PRONE
 
 .spell
 name: Ensnaring Strike
 dmg: 1d6
-stat: str
-effect: RESTRAIN
-concentration: true
++stat: str
++effect: RESTRAIN
++concentration
 
 .spell
 name: Guiding Bolt
 dmg: 4d6
-stat: none
-effect: ADVANTAGE_SOON
-concentration: false
++effect: ADVANTAGE_SOON
 
 .spell
 name: Hail of Thorns
 dmg: 1d10
-stat: dex
-effect: HALF_DAMAGE
-concentration: true
++stat: dex
++effect: HALF_DAMAGE
++concentration
 
 .spell
 name: Hellish Rebuke
 dmg: 2d10
-stat: dex
-effect: HALF_DAMAGE
-concentration: false
++stat: dex
++effect: HALF_DAMAGE
 
 .spell
 name: Hex
 dmg: 1d6
-stat: wis
-effect: BONUS_DAMAGE
-concentration: true
++stat: wis
++effect: BONUS_DAMAGE
++concentration
 
 .spell
 name: Hunter's Mark
 dmg: 1d6
-stat: none
-effect: BONUS_DAMAGE
-concentration: true
++effect: BONUS_DAMAGE
++concentration
 
 .spell
 name: Ice Knife
 dmg: 1d10
-stat: dex
-effect: NONE
-concentration: false
++stat: dex
 
 .spell
 name: Inflict Wounds
 dmg: 3d10
-stat: none
-effect: NONE
-concentration: false
 
 .spell
 name: Jim's Magic Missile
 dmg: 2d4
-stat: none
-effect: NONE
-concentration: false
 
 .spell
 name: Magic Missile
 dmg: 1d4
-stat: none
-effect: AUTO_HIT
-concentration: false
++effect: AUTO_HIT
 
 .spell
 name: Ray of Sickness
 dmg: 2d8
-stat: con
-effect: POISON
-concentration: false
++stat: con
++effect: POISON
 
 .spell
 name: Searing Smite
 dmg: 1d6
-stat: con
-effect: DAMAGE_OVER_TIME
-concentration: true
++stat: con
++effect: DAMAGE_OVER_TIME
++concentration
 
 .spell
 name: Thunderous Smite
 dmg: 2d6
-stat: str
-effect: PRONE
-concentration: true
++stat: str
++effect: PRONE
++concentration
 
 .spell
 name: Thunder Wave
 dmg: 2d8
-stat: con
-effect: HALF_DAMAGE
-concentration: false
++stat: con
++effect: HALF_DAMAGE
 
 .spell
 name: Witch Bolt
 dmg: 1d12
-stat: none
-effect: DAMAGE_OVER_TIME
-concentration: true
++effect: DAMAGE_OVER_TIME
++concentration
 
 .spell
 name: Wrathful Smite
 dmg: 1d6
-stat: wis
-effect: FRIGHTEN
-concentration: true
++stat: wis
++effect: FRIGHTEN
++concentration
 
 .spell
 name: Zephyr Strike
 dmg: 1d8
-stat: none
-effect: ADVANTAGE_SOON
-concentration: true
++effect: ADVANTAGE_SOON
++concentration
 
 .spell
 name: Aganazzar's Scorcher
 dmg: 3d8
-stat: dex
-effect: HALF_DAMAGE
-concentration: false
++stat: dex
++effect: HALF_DAMAGE
 
 .spell
 name: Branding Smite
 dmg: 2d6
-stat: none
-effect: TRACKING
-concentration: true
++effect: TRACKING
++concentration
 
 .spell
 name: Cloud of Daggers
 dmg: 4d4
-stat: none
-effect: AUTO_HIT
-concentration: true
++effect: AUTO_HIT
++concentration
 
 .spell
 name: Dragon's Breath
 dmg: 3d6
-stat: dex
-effect: HALF_DAMAGE
-concentration: true
++stat: dex
++effect: HALF_DAMAGE
++concentration
 
 .spell
 name: Flame Blade
 dmg: 3d6
-stat: none
-effect: NONE
-concentration: true
++concentration
 
 .spell
 name: Flaming Sphere
 dmg: 2d6
-stat: dex
-effect: HALF_DAMAGE
-concentration: true
++stat: dex
++effect: HALF_DAMAGE
++concentration
 
 .spell
 name: Heat Metal
 dmg: 2d8
-stat: none
-effect: DISADVANTAGE_ATTACK
-concentration: true
++effect: DISADVANTAGE_ATTACK
++concentration
 
 .spell
 name: Maximilian's Earthen Grasp
 dmg: 2d6
-stat: str
-effect: RESTRAIN
-concentration: true
++stat: str
++effect: RESTRAIN
++concentration
 
 .spell
 name: Melf's Acid Arrow
 dmg: 4d4
-stat: none
-effect: DAMAGE_OVER_TIME
-concentration: false
++effect: DAMAGE_OVER_TIME
 
 .spell
 name: Mind Spike
 dmg: 3d8
-stat: wis
-effect: TRACKING
-concentration: true
++stat: wis
++effect: TRACKING
++concentration
 
 .spell
 name: Moonbeam
 dmg: 2d10
-stat: con
-effect: HALF_DAMAGE
-concentration: true
++stat: con
++effect: HALF_DAMAGE
++concentration
 
 .spell
 name: Phantasmal Force
 dmg: 1d6
-stat: int
-effect: ILLUSION
-concentration: true
++stat: int
++effect: ILLUSION
++concentration
 
 .spell
 name: Scorching Ray
 dmg: 2d6
-stat: none
-effect: NONE
-concentration: false
 
 .spell
 name: Shadow Blade
 dmg: 2d8
-stat: none
-effect: NONE
-concentration: true
++concentration
 
 .spell
 name: Shatter
 dmg: 3d8
-stat: con
-effect: HALF_DAMAGE
-concentration: false
++stat: con
++effect: HALF_DAMAGE
 
 .spell
 name: Snilloc's Snowball Swarm
 dmg: 3d6
-stat: dex
-effect: HALF_DAMAGE
-concentration: false
++stat: dex
++effect: HALF_DAMAGE
 
 .spell
 name: Spiritual Weapon
 dmg: 1d8
-stat: none
-effect: NONE
-concentration: false
 
 .spell
 name: Tasha's Mind Whip
 dmg: 3d6
-stat: int
-effect: NONE
-concentration: false
++stat: int
 
 .spell
 name: Blinding Smite
 dmg: 3d8
-stat: con
-effect: BLIND
-concentration: true
++stat: con
++effect: BLIND
++concentration
 
 .spell
 name: Call Lightning
 dmg: 3d10
-stat: dex
-effect: HALF_DAMAGE
-concentration: true
++stat: dex
++effect: HALF_DAMAGE
++concentration
 
 .spell
 name: Erupting Earth
 dmg: 3d12
-stat: dex
-effect: DIFFICULT_TERRAIN
-concentration: false
++stat: dex
++effect: DIFFICULT_TERRAIN
 
 .spell
 name: Fireball
 dmg: 8d6
-stat: dex
-effect: HALF_DAMAGE
-concentration: false
++stat: dex
++effect: HALF_DAMAGE
 
 .spell
 name: Lightning Bolt
 dmg: 8d6
-stat: dex
-effect: HALF_DAMAGE
-concentration: false
++stat: dex
++effect: HALF_DAMAGE
 
 .spell
 name: Melf's Minute Meteors
 dmg: 2d6
-stat: dex
-effect: HALF_DAMAGE
-concentration: true
++stat: dex
++effect: HALF_DAMAGE
++concentration
 
 .spell
 name: Spirit Guardians
 dmg: 3d8
-stat: wis
-effect: HALF_DAMAGE
-concentration: true
++stat: wis
++effect: HALF_DAMAGE
++concentration
 
 .spell
 name: Tidal Wave
 dmg: 4d8
-stat: dex
-effect: PRONE
-concentration: false
++stat: dex
++effect: PRONE
 
 .spell
 name: Vampiric Touch
 dmg: 3d6
-stat: none
-effect: HEAL_SELF
-concentration: true
++effect: HEAL_SELF
++concentration
 
 .spell
 name: Blight
 dmg: 8d8
-stat: con
-effect: HALF_DAMAGE
-concentration: false
++stat: con
++effect: HALF_DAMAGE
 
 .spell
 name: Ice Storm
 dmg: 2d8
-stat: dex
-effect: DIFFICULT_TERRAIN
-concentration: false
++stat: dex
++effect: DIFFICULT_TERRAIN
 
 .spell
 name: Phantasmal Killer
 dmg: 4d10
-stat: wis
-effect: FRIGHTEN
-concentration: true
++stat: wis
++effect: FRIGHTEN
++concentration
 
 .spell
 name: Sickening Radiance
 dmg: 4d10
-stat: con
-effect: NONE
-concentration: true
++stat: con
++concentration
 
 .spell
 name: Staggering Smite
 dmg: 4d6
-stat: wis
-effect: DISADVANTAGE_ATTACK
-concentration: true
++stat: wis
++effect: DISADVANTAGE_ATTACK
++concentration
 
 .spell
 name: Storm Sphere
 dmg: 2d6
-stat: str
-effect: DIFFICULT_TERRAIN
-concentration: true
++stat: str
++effect: DIFFICULT_TERRAIN
++concentration
 
 .spell
 name: Vitriolic Sphere
 dmg: 5d4
-stat: dex
-effect: DAMAGE_OVER_TIME
-concentration: false
++stat: dex
++effect: DAMAGE_OVER_TIME
 
 .spell
 name: Wall of Fire
 dmg: 5d8
-stat: dex
-effect: HALF_DAMAGE
-concentration: true
++stat: dex
++effect: HALF_DAMAGE
++concentration
 
 .spell
 name: Banishing Smite
 dmg: 5d10
-stat: none
-effect: BANISH
-concentration: true
++effect: BANISH
++concentration
 
 .spell
 name: Cloud Kill
 dmg: 5d8
-stat: con
-effect: HALF_DAMAGE
-concentration: true
++stat: con
++effect: HALF_DAMAGE
++concentration
 
 .spell
 name: Cone of Cold
 dmg: 8d8
-stat: con
-effect: HALF_DAMAGE
-concentration: false
++stat: con
++effect: HALF_DAMAGE
 
 .spell
 name: Destructive Wave
 dmg: 5d6
-stat: con
-effect: PRONE
-concentration: false
++stat: con
++effect: PRONE
 
 .spell
 name: Enervation
 dmg: 4d8
-stat: dex
-effect: HEAL_SELF
-concentration: true
++stat: dex
++effect: HEAL_SELF
++concentration
 
 .spell
 name: Flame Strike
 dmg: 4d6
-stat: dex
-effect: HALF_DAMAGE
-concentration: false
++stat: dex
++effect: HALF_DAMAGE
 
 .spell
 name: Geas
 dmg: 5d10
-stat: wis
-effect: CHARMED
-concentration: false
++stat: wis
++effect: CHARMED
 
 .spell
 name: Immolation
 dmg: 8d6
-stat: dex
-effect: DAMAGE_OVER_TIME
-concentration: true
++stat: dex
++effect: DAMAGE_OVER_TIME
++concentration
 
 .spell
 name: Negative Energy Flood
 dmg: 5d12
-stat: con
-effect: HALF_DAMAGE
-concentration: false
++stat: con
++effect: HALF_DAMAGE
 
 .spell
 name: Steel Wind Strike
 dmg: 6d10
-stat: none
-effect: NONE
-concentration: false
 
 .spell
 name: Synaptic Static
 dmg: 8d6
-stat: int
-effect: PENALTY_ATTACK
-concentration: false
++stat: int
++effect: PENALTY_ATTACK
 
 .spell
 name: Chain Lightning
 dmg: 10d8
-stat: dex
-effect: HALF_DAMAGE
-concentration: false
++stat: dex
++effect: HALF_DAMAGE
 
 .spell
 name: Disintegrate
 dmg: 10d6
-stat: dex
-effect: NONE
-concentration: false
++stat: dex
 
 .spell
 name: Harm
 dmg: 14d6
-stat: con
-effect: HEAL_BLOCK
-concentration: false
++stat: con
++effect: HEAL_BLOCK
 
 .spell
 name: Mental Prison
 dmg: 5d10
-stat: int
-effect: RESTRAIN
-concentration: true
++stat: int
++effect: RESTRAIN
++concentration
 
 .spell
 name: Otiluke's Freezing Sphere
 dmg: 10d6
-stat: con
-effect: HALF_DAMAGE
-concentration: false
++stat: con
++effect: HALF_DAMAGE
 
 .spell
 name: Sunbeam
 dmg: 6d8
-stat: con
-effect: BLIND
-concentration: true
++stat: con
++effect: BLIND
++concentration
 
 .spell
 name: Crown of Stars
 dmg: 4d12
-stat: none
-effect: NONE
-concentration: false
 
 .spell
 name: Delayed Blast Fireball
 dmg: 12d6
-stat: dex
-effect: HALF_DAMAGE
-concentration: true
++stat: dex
++effect: HALF_DAMAGE
++concentration
 
 .spell
 name: Finger of Death
 dmg: 7d8
-stat: con
-effect: HALF_DAMAGE
-concentration: false
++stat: con
++effect: HALF_DAMAGE
 
 .spell
 name: Fire Storm
 dmg: 7d10
-stat: dex
-effect: HALF_DAMAGE
-concentration: false
++stat: dex
++effect: HALF_DAMAGE
 
 .spell
 name: Prismatic Spray
 dmg: 10d6
-stat: dex
-effect: RANDOM_ACTION
-concentration: false
++stat: dex
++effect: RANDOM_ACTION
 
 .spell
 name: Abi-Dalzim's Horrid Wilting
 dmg: 12d8
-stat: con
-effect: HALF_DAMAGE
-concentration: false
++stat: con
++effect: HALF_DAMAGE
 
 .spell
 name: Feeble Mind
 dmg: 4d6
-stat: int
-effect: STAT_DROP
-concentration: false
++stat: int
++effect: STAT_DROP
 
 .spell
 name: Illusory Dragon
 dmg: 7d6
-stat: int
-effect: HALF_DAMAGE
-concentration: true
++stat: int
++effect: HALF_DAMAGE
++concentration
 
 .spell
 name: Reality Break
 dmg: 10d12
-stat: wis
-effect: RANDOM_ACTION
-concentration: true
++stat: wis
++effect: RANDOM_ACTION
++concentration
 
 .spell
 name: Sunburst
 dmg: 12d6
-stat: con
-effect: BLIND
-concentration: false
++stat: con
++effect: BLIND
 
 .spell
 name: Blade of Disaster
 dmg: 4d12
-stat: none
-effect: NONE
-concentration: true
++concentration
 
 .spell
 name: Meteor Swarm
 dmg: 20d6
-stat: dex
-effect: HALF_DAMAGE
-concentration: false
++stat: dex
++effect: HALF_DAMAGE
 
 .spell
 name: Psychic Scream
 dmg: 14d6
-stat: int
-effect: STUNNED
-concentration: false
++stat: int
++effect: STUNNED
 
 .spell
 name: Ravenous Void
 dmg: 5d10
-stat: str
-effect: FORCED_MOVE
-concentration: true
++stat: str
++effect: FORCED_MOVE
++concentration
 
 .spell
 name: Time Ravage
 dmg: 10d12
-stat: con
-effect: HALF_DAMAGE
-concentration: false
++stat: con
++effect: HALF_DAMAGE

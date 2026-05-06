@@ -1,7 +1,7 @@
 package util;
 
 import combat_object.combatant.Combatant;
-import combat_object.damage_implements.Effect;
+import combat_object.implement.Effect;
 import manager.EffectManager;
 import manager.EncounterManager;
 

@@ -1,10 +1,10 @@
-package combat_object.damage_implements;
+package combat_object.implement;
 
 import combat_object.combatant.info.AbilityModifier;
 import exception.InvalidParameterException;
 import input.Key;
+import input.TextReader;
 import lombok.experimental.*;
-import util.TxtReader;
 
 import java.util.EnumMap;
 
@@ -21,9 +21,9 @@ public class Weapon extends Implement {
         String name = (String) params.get(NAME);
 
         return Weapon.builder()
-                .name(name)
-                .numDice(TxtReader.getNumDice((String) params.get(DMG)))
-                .dieSize(TxtReader.getDieSize((String) params.get(DMG)))
+                .name((String) params.get(NAME))
+                .numDice(TextReader.getNumDice((String) params.get(DMG)))
+                .dieSize(TextReader.getDieSize((String) params.get(DMG)))
                 .stat((AbilityModifier) params.get(STAT))
                 .isManual(name != null && name.startsWith("Manual"))
                 .build();

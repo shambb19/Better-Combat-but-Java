@@ -11,14 +11,11 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.LOCAL_VARIABLE, ElementType.METHOD})
 public @interface FilteredVals {
-    @MagicConstant(intValues = {Font.PLAIN, Font.BOLD, Font.ITALIC}) @interface Fonts {
-    }
-    @MagicConstant(valuesFromClass = BorderLayout.class) @interface Border {
-    }
+    @MagicConstant(intValues = {Font.PLAIN, Font.BOLD, Font.ITALIC}) @interface Fonts {}
 
-    @MagicConstant(valuesFromClass = format.swing_comp.SwingPane.class) @interface Pane {
-    }
+    @MagicConstant(valuesFromClass = BorderLayout.class) @interface Border {}
 
-    @MagicConstant(valuesFromClass = format.ColorStyles.class) @interface Color {
-    }
+    @MagicConstant(valuesFromClass = swing.fluent.SwingPane.class) @interface Pane {}
+
+    @MagicConstant(valuesFromClass = swing.ColorStyles.class) @interface Color {}
 }

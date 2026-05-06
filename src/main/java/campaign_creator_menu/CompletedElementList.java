@@ -5,10 +5,10 @@ import combat_object.CombatObject;
 import combat_object.combatant.Combatant;
 import combat_object.combatant.NPC;
 import combat_object.scenario.Scenario;
-import format.swing_comp.SwingPane;
 import lombok.*;
 import lombok.experimental.*;
 import org.intellij.lang.annotations.MagicConstant;
+import swing.fluent.SwingPane;
 import util.Message;
 
 import javax.swing.*;
@@ -20,10 +20,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static format.ColorStyles.SUCCESS;
-import static format.swing_comp.SwingComp.fluent;
-import static format.swing_comp.SwingComp.*;
-import static format.swing_comp.SwingPane.*;
+import static swing.ColorStyles.SUCCESS;
+import static swing.fluent.SwingComp.fluent;
+import static swing.fluent.SwingComp.*;
+import static swing.fluent.SwingPane.*;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @ExtensionMethod(util.Filterable.class)

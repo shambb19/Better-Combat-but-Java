@@ -1,7 +1,7 @@
 package campaign_creator_menu;
 
+import input.TextReader;
 import lombok.experimental.*;
-import util.TxtReader;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -14,16 +14,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static format.ColorStyles.*;
-import static util.TxtReader.value;
+import static input.TextReader.value;
+import static swing.ColorStyles.*;
 
-@ExtensionMethod(TxtReader.class)
+@ExtensionMethod(TextReader.class)
 public class ColoredTxtDisplay extends JTextPane {
 
     private ArrayList<String> lines;
 
     public ColoredTxtDisplay(ArrayList<String> lines) {
         this.lines = lines;
+
+        setFocusable(false);
 
         setBorder(new EmptyBorder(new Insets(10, 10, 10, 10)));
         setMargin(new Insets(5, 5, 5, 5));
@@ -33,14 +35,18 @@ public class ColoredTxtDisplay extends JTextPane {
 
     public void setLines(List<String> lines) {
         this.lines = new ArrayList<>(lines);
-        this.lines.replaceAll(TxtReader::withoutComments);
+        this.lines.replaceAll(TextReader::withoutComments);
         addLines();
     }
 
     public void addLines() {
         setText("");
 
-        for (String line : lines) {
+        List<String> remaining = TextReader.extractConfigBlock(lines, block ->
+                block.forEach(l -> appendToPane(l + "\n", l.startsWith("config") ? CONFIG : VALUE))
+        );
+
+        for (String line : remaining) {
             Color lineType = getLineType(line);
 
             if (lineType.equals(PARAMETER))
@@ -92,14 +98,11 @@ public class ColoredTxtDisplay extends JTextPane {
     }
 
     private Color getLineType(String line) {
-        if (line.isBlank())
-            return EMPTY;
-        else if (line.startsWith("stats"))
-            return STAT_PARAMETER;
-        else if (line.startsWith("//") || line.startsWith("~") || line.startsWith("#"))
-            return COMMENT;
+        if (line.isBlank()) return EMPTY;
+        if (line.startsWith("stats")) return STAT_PARAMETER;
+        if (line.startsWith("//") || line.startsWith("~") || line.startsWith("#")) return COMMENT;
 
-        return switch (line) {
+        return switch (line.getHeader()) {
             case ".party" -> PARTY;
             case ".npc" -> FRIENDLY;
             case ".enemy" -> ENEMY;

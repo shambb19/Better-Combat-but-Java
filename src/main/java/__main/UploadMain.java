@@ -3,12 +3,13 @@ package __main;
 import _global_list.Resource;
 import campaign_creator_menu.ColoredTxtDisplay;
 import combat_menu.EncounterSelectionPanel;
-import combat_menu.popup.FileGetter;
-import format.swing_comp.SwingPane;
 import input.CampaignReader;
 import lombok.*;
 import lombok.experimental.*;
 import org.jetbrains.annotations.NotNull;
+import popup.FileGetter;
+import swing.custom.MainFrame;
+import swing.fluent.SwingPane;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -21,10 +22,10 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static format.ColorStyles.*;
-import static format.swing_comp.SwingComp.fluent;
-import static format.swing_comp.SwingComp.*;
-import static format.swing_comp.SwingPane.*;
+import static swing.ColorStyles.*;
+import static swing.fluent.SwingComp.fluent;
+import static swing.fluent.SwingComp.*;
+import static swing.fluent.SwingPane.*;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UploadMain extends MainFrame {
@@ -78,7 +79,8 @@ public class UploadMain extends MainFrame {
                         sectionLabel("Upload Options"), spacer(0, 3),
                         uploadButton("New Campaign", () -> onInputChange(null)),
                         uploadButton("Upload Existing (.txt)", () -> onInputChange(FileGetter.getUrl(this))),
-                        uploadButton("Load Kyreun Starter", () -> onInputChange(Resource.STARTER_CODE.getUrl())),
+                        uploadButton("Load Kyreun Starter", () -> onInputChange(Resource.STARTER_STANDARD.getUrl())),
+                        uploadButton("Load Steampunk Starter", () -> onInputChange(Resource.STARTER_STEAMPUNK.getUrl())),
                         spacer(0, 7),
                         sectionLabel("Run mode"), spacer(0, 3),
                         combatButton, creatorButton

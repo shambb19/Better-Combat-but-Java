@@ -4,16 +4,16 @@ import combat_object.combatant.Combatant;
 import combat_object.combatant.PC;
 import combat_object.combatant.info.AbilityModifier;
 import combat_object.combatant.info.Stats;
-import format.swing_comp.SwingComp;
+import swing.fluent.SwingComp;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.border.MatteBorder;
 import java.awt.*;
 
-import static format.ColorStyles.*;
-import static format.swing_comp.SwingComp.*;
-import static format.swing_comp.SwingPane.*;
+import static swing.ColorStyles.*;
+import static swing.fluent.SwingComp.*;
+import static swing.fluent.SwingPane.*;
 
 public class StatTooltipWindow extends JWindow {
 

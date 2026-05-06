@@ -5,20 +5,20 @@ import campaign_creator_menu.CampaignCreatorMenu;
 import campaign_creator_menu.CompletedElementsList;
 import combat_object.combatant.NPC;
 import combat_object.scenario.Scenario;
-import format.swing_comp.SwingPane;
 import lombok.*;
 import lombok.experimental.*;
-import swing_custom.ValidatedField;
+import swing.custom.ValidatedField;
+import swing.fluent.SwingPane;
 import util.Message;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.logging.Logger;
 
-import static format.ColorStyles.SUCCESS;
-import static format.swing_comp.SwingComp.button;
-import static format.swing_comp.SwingComp.textArea;
-import static format.swing_comp.SwingPane.*;
+import static swing.ColorStyles.SUCCESS;
+import static swing.fluent.SwingComp.button;
+import static swing.fluent.SwingComp.textArea;
+import static swing.fluent.SwingPane.*;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class ScenarioInputPanel extends JPanel {

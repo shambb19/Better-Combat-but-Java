@@ -1,4 +1,4 @@
-package combat_menu.popup;
+package popup;
 
 import util.Message;
 

@@ -3,15 +3,14 @@ package combat_menu.action_panel.form;
 import __main.Main;
 import _global_list.DamageImplements;
 import combat_menu.encounter_info.HealthBarPanel;
-import combat_object.damage_implements.Effect;
-import combat_object.damage_implements.Implement;
-import combat_object.damage_implements.Spell;
-import combat_object.damage_implements.Weapon;
+import combat_object.implement.*;
+import config.Config;
 import lombok.*;
 import lombok.experimental.*;
 import manager.CombatManager;
 import manager.EffectManager;
-import swing_custom.ValidatedField;
+import swing.custom.ValidatedField;
+import util.Filterable;
 import util.StringUtil;
 
 import javax.swing.*;
@@ -19,19 +18,16 @@ import java.awt.*;
 import java.util.List;
 import java.util.Objects;
 
-import static combat_object.damage_implements.Effect.*;
-import static format.ColorStyles.*;
-import static format.swing_comp.SwingComp.fluent;
-import static format.swing_comp.SwingComp.*;
-import static format.swing_comp.SwingPane.fluent;
-import static format.swing_comp.SwingPane.*;
+import static combat_object.implement.Effect.*;
+import static swing.ColorStyles.*;
+import static swing.fluent.SwingComp.fluent;
+import static swing.fluent.SwingComp.*;
+import static swing.fluent.SwingPane.fluent;
+import static swing.fluent.SwingPane.*;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @ExtensionMethod(StringUtil.class)
 public class AttackFormPanel extends ActionFormPanel {
-
-    static final Implement HEADER_WEAPON = Weapon.createManual("── Weapons ──");
-    static final Implement HEADER_SPELL = Spell.createManual("── Spells ──");
 
     static final Effect[] ATTACKER_EFFECTS = new Effect[]{POISON, ADVANTAGE_SOON};
     static final Effect[] TARGET_EFFECTS = new Effect[]{FRIGHTEN, BLIND, RESTRAIN};
@@ -49,17 +45,24 @@ public class AttackFormPanel extends ActionFormPanel {
     }
 
     private void populateComboBox() {
-        List<Weapon> weapons = attacker.getWeapons();
-        List<Spell> spells = attacker.getSpells();
+        for (Class<? extends Implement> c : Config.getRuleset().getAllowedImplementClasses()) {
+            Implement header = DamageImplements.createHeader(c);
 
-        attackCombo.addItem(HEADER_WEAPON);
-        weapons.forEach(attackCombo::addItem);
-        attackCombo.addItem(DamageImplements.MANUAL_WEAPON);
+            List<?> implementList = attacker.getImplements(c);
 
-        attackCombo.addItem(HEADER_SPELL);
-        spells.forEach(attackCombo::addItem);
-        attackCombo.addItem(DamageImplements.MANUAL_HIT);
-        attackCombo.addItem(DamageImplements.MANUAL_SAVE);
+            if (c.isInstance(Gun.class))
+                implementList = Filterable.of(implementList).castTo(Gun.class)
+                        .filteredByAsList(g -> {
+                            if (g.isHeavy()) return attacker.getHp() > 2;
+                            return true;
+                        });
+
+            // FIXME guns not adding properly here
+
+            attackCombo.addItem(header);
+            implementList.forEach(i -> attackCombo.addItem((Implement) i));
+            DamageImplements.getManualEntries(c).forEach(attackCombo::addItem);
+        }
     }
 
     @Override protected void buildFields() {
@@ -171,19 +174,35 @@ public class AttackFormPanel extends ActionFormPanel {
         Object selected = attackCombo.getSelectedItem();
         clearNotices(fieldsPanel);
 
-        if (selected == null || selected instanceof String) {
-            rollField.setVisible(false);
-            rollField.clear();
-            refreshButtons();
-            return;
-        }
-
-        if (selected instanceof Spell spell && spell.effectEquals(Effect.AUTO_HIT)) {
-            rollField.setVisible(false);
-            confirmButton.setEnabled(true);
-            confirmButton.setText("Cast Spell");
-            addNotice(spell.getEffect(), fieldsPanel);
-            return;
+        switch (selected) {
+            case null -> {
+                rollField.setVisible(false);
+                rollField.clear();
+                refreshButtons();
+                return;
+            }
+            case String ignored -> {
+                rollField.setVisible(false);
+                rollField.clear();
+                refreshButtons();
+                return;
+            }
+            case Spell spell when spell.effectEquals(Effect.AUTO_HIT) -> {
+                rollField.setVisible(false);
+                confirmButton.setEnabled(true);
+                confirmButton.setText("Cast Spell");
+                addNotice(spell.getEffect(), fieldsPanel);
+                return;
+            }
+            case Gun gun -> {
+                boolean hasDisadvantage = (gun.isHeavy() && attacker.getHp() <= 4) || attacker.getHp() <= 2;
+                if (hasDisadvantage) {
+                    confirmButton.setText("Fire");
+                    addNotice(DISADVANTAGE, fieldsPanel);
+                }
+            }
+            default -> {
+            }
         }
 
         String rollFieldText;
@@ -208,7 +227,7 @@ public class AttackFormPanel extends ActionFormPanel {
 
             if (!(value instanceof Implement implement)) return this;
 
-            boolean isHeader = value.equals(HEADER_WEAPON) || value.equals(HEADER_SPELL);
+            boolean isHeader = implement.getName().startsWith("──");
 
             if (isHeader) {
                 fluent(this)
@@ -232,8 +251,8 @@ public class AttackFormPanel extends ActionFormPanel {
 
     private static class MixedComboModel extends DefaultComboBoxModel<Implement> {
         @Override public void setSelectedItem(Object item) {
-            if (item instanceof Implement s &&
-                    (s.equals(HEADER_WEAPON) || s.equals(HEADER_SPELL))) return;
+            // this is also disgusting, but I'm too lazy to implement something more robust, and it should work so ¯\_(ツ)_/¯
+            if (item instanceof Implement s && s.getName().startsWith("──")) return;
             super.setSelectedItem(item);
         }
     }

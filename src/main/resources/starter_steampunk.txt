@@ -1,61 +1,51 @@
-~Steampunk Campaign - Test Code
-~Party: 4 members, cleric is the only spellcasting class
-~Weapons: melee + guns only (no spells except cleric)
+config<<start
+ruleset.steampunk
+damage.hide
+config<<end
 
 .party
 name: Valdris Coyne
-hp: 35/35
-ac: 16
 level: 4
 class: cleric
 stats: [STR: 11, DEX: 10, CON: 15, INT: 12, WIS: 18, CHA: 8]
-weapons: [Mace, Hand Mortar]
-spells: [Guiding Bolt, Sacred Flame, Toll the Dead, Starry Wisp]
+weapons: [Mace]
+guns: [Hand Mortar]
 
 .party
 name: Hetta Bronn
-hp: 36/36
-ac: 15
 level: 4
 class: fighter
 stats: [STR: 17, DEX: 10, CON: 16, INT: 9, WIS: 11, CHA: 8]
-weapons: [Musket, Longsword, Handaxe]
+weapons: [Longsword, Handaxe]
+guns: [Musket]
 
 .party
 name: Castor Finch
-hp: 28/28
-ac: 13
 level: 4
 class: rogue
 stats: [STR: 9, DEX: 17, CON: 12, INT: 14, WIS: 13, CHA: 12]
-weapons: [Pepperbox, Dagger, Shortsword]
+weapons: [Dagger, Shortsword]
+guns: [Pepperbox]
 
 .party
 name: Rula Vant
-hp: 30/30
-ac: 14
 level: 4
 class: ranger
 stats: [STR: 13, DEX: 15, CON: 13, INT: 10, WIS: 14, CHA: 9]
-weapons: [Dreyse Rifle, Pistol, Shortsword]
+weapons: [Shortsword]
+guns: [Dreyse Rifle, Pistol]
 
-~Test enemies - multiple types for scenario variety
-
-.enemy
+.enemy<special
 name: Clockwork Drone
-hp: 14/14
-ac: 13
+hp: 14
 
-.enemy
+.enemy<special
 name: Ironclad Enforcer
-hp: 28/28
-ac: 16
+hp: 28
 
 .enemy
 name: Smog Lurker
-hp: 18/18
-ac: 11
 
-.scenario ~test scenario, steampunk multi-enemy engagement
+.scenario
 name: Gasworks Ambush
 against: [Clockwork Drone_4, Smog Lurker_2, Ironclad Enforcer_1]

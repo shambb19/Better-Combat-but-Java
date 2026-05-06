@@ -1,4 +1,4 @@
-package combat_object.damage_implements;
+package combat_object.implement;
 
 import combat_object.CombatObject;
 import combat_object.combatant.info.AbilityModifier;

@@ -1,11 +1,11 @@
-package combat_object.damage_implements;
+package combat_object.implement;
 
 import combat_object.combatant.info.AbilityModifier;
 import exception.InvalidParameterException;
 import input.Key;
+import input.TextReader;
 import lombok.*;
 import lombok.experimental.*;
-import util.TxtReader;
 
 import java.util.EnumMap;
 import java.util.Objects;
@@ -13,6 +13,7 @@ import java.util.Objects;
 import static input.Key.*;
 
 @Getter @SuperBuilder
+@ExtensionMethod(TextReader.class)
 public class Spell extends Implement {
 
     @Builder.Default private final Effect effect = Effect.NONE;
@@ -44,11 +45,11 @@ public class Spell extends Implement {
 
         return Spell.builder()
                 .name(name)
-                .numDice(TxtReader.getNumDice((String) params.get(DMG)))
-                .dieSize(TxtReader.getDieSize((String) params.get(DMG)))
+                .numDice(TextReader.getNumDice((String) params.get(DMG)))
+                .dieSize(TextReader.getDieSize((String) params.get(DMG)))
                 .stat((AbilityModifier) params.get(STAT))
                 .effect((Effect) params.get(EFFECT))
-                .requiresConcentration((boolean) params.get(CONCENTRATION))
+                .requiresConcentration(params.get(CONCENTRATION).booleanFromOptionalPresence())
                 .isManual(name != null && name.startsWith("Manual"))
                 .build();
     }

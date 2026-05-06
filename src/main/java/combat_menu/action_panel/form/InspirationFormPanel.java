@@ -1,18 +1,18 @@
 package combat_menu.action_panel.form;
 
-import format.ColorStyles;
-import format.swing_comp.SwingComp;
-import format.swing_comp.SwingPane;
 import lombok.*;
 import lombok.experimental.*;
 import manager.InspirationManager;
+import swing.ColorStyles;
+import swing.fluent.SwingComp;
+import swing.fluent.SwingPane;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import static format.ColorStyles.*;
+import static swing.ColorStyles.*;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class InspirationFormPanel extends JPanel {

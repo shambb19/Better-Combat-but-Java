@@ -1,12 +1,16 @@
-package util;
+package input;
 
+import config.Config;
+import config.ruleset.Ruleset;
 import exception.InvalidSyntaxError;
 import lombok.experimental.*;
+import util.Locators;
 
-import java.util.Arrays;
+import java.util.*;
+import java.util.function.Consumer;
 
-@ExtensionMethod(StringUtil.class)
-public class TxtReader {
+@ExtensionMethod(util.StringUtil.class)
+public class TextReader {
 
     private static final String[] COMMENT_INITIALIZERS = {"//", "~", "#"};
 
@@ -14,14 +18,20 @@ public class TxtReader {
      * Returns "key" from any "key: value" code line
      */
     public static String key(String line) {
+        if (line.startsWith("+")) return line.substring(1);
+
         if (!line.contains(":")) throw new InvalidSyntaxError(false, "no delimiter found in " + line);
-        return line.substring(0, line.indexOf(":"));
+
+        int startIndex = line.startsWith("+") ? 1 : 0;
+        return line.substring(startIndex, line.indexOf(":"));
     }
 
     /**
      * Returns "value" from any "key: value" code line
      */
     public static String value(String line) {
+        if (line.startsWith("+")) return "true";
+
         if (!line.contains(":")) throw new InvalidSyntaxError(false, "no delimiter found");
 
         int valueStartIdx = line.contains(": ") ? 2 : 1;
@@ -74,10 +84,13 @@ public class TxtReader {
     }
 
     /**
-     * @param fullString A hp value in traditional hp notation cur/max (i.e. 6/10)
+     * @param param A hp value in traditional hp notation cur/max (i.e. 6/10)
      * @return the maximum hp value as int (for example, "6/10" returns 10)
      */
-    public static int getHp(String fullString) {
+    public static int beforeSlash(Object param) {
+        if (!(param instanceof String fullString))
+            throw new ClassCastException("TxtReader.beforeSlash: String expected");
+
         if (!fullString.contains("/"))
             return fullString.toInt();
         else
@@ -85,14 +98,33 @@ public class TxtReader {
     }
 
     /**
-     * @param fullString A hp value in traditional hp notation cur/max (i.e. 6/10)
+     * @param param A hp value in traditional hp notation cur/max (i.e. 6/10)
      * @return the current hp value as int (for example, "6/10" returns 6)
      */
-    public static int getHpCur(String fullString) {
+    public static int afterSlash(Object param) {
+        if (!(param instanceof String fullString))
+            throw new ClassCastException("TxtReader.afterSlash: String expected");
+
         if (!fullString.contains("/"))
             return fullString.toInt();
         else
             return fullString.split("/")[0].toInt();
+    }
+
+    public static int getHp(Object param, boolean isMaximum) {
+        if (param == null) {
+            if (Config.getRuleset().equals(Ruleset.STANDARD_RULESET))
+                throw new InvalidSyntaxError(true, "absent hp line");
+            return 8;
+        }
+
+        if (!(param instanceof String line)) throw new ClassCastException("TxtReader.getHp: String expected");
+
+        if (!line.contains("/")) return line.toInt();
+
+        String[] hpStrings = line.split("/");
+        String hp = isMaximum ? hpStrings[1] : hpStrings[0];
+        return hp.toInt();
     }
 
     /**
@@ -116,6 +148,52 @@ public class TxtReader {
 
         String num = fullString.substring(fullString.indexOf("_") + 1);
         return num.toInt();
+    }
+
+    public static boolean booleanFromOptionalPresence(Object value) {
+        if (value == null) return false;
+        return (boolean) value;
+    }
+
+    public static ArrayList<String> extractConfigBlock(List<String> lines, Consumer<List<String>> onExtracted) {
+        final String OPEN_TOKEN = "config<<start";
+        final String CLOSE_TOKEN = "config<<end";
+
+        List<String> blockLines = new ArrayList<>();
+        ArrayList<String> remaining = new ArrayList<>();
+        boolean inBlock = false;
+
+        for (String line : lines) {
+            if (line.trim().equals(OPEN_TOKEN)) {
+                inBlock = true;
+                blockLines.add(line);
+            } else if (inBlock) {
+                blockLines.add(line);
+                if (line.trim().equals(CLOSE_TOKEN))
+                    inBlock = false;
+            } else {
+                remaining.add(line);
+            }
+        }
+
+        if (!blockLines.isEmpty())
+            onExtracted.accept(blockLines);
+
+        return remaining;
+    }
+
+    public static String getHeader(String line) {
+        return withoutComments(line).split("<")[0];
+    }
+
+    public static Set<Tag> getTags(String line) {
+        String[] headerAndTags = withoutComments(line).split("<");
+        Set<Tag> tags = new HashSet<>(Set.of());
+        for (int i = 1; i < headerAndTags.length; i++) {
+            Tag tag = Locators.enumNameSearch(headerAndTags[i], Tag.class);
+            tags.add(tag);
+        }
+        return tags;
     }
 
 }

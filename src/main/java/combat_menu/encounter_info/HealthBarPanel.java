@@ -2,11 +2,11 @@ package combat_menu.encounter_info;
 
 import combat_menu.action_panel.form.ActionFormPanel;
 import combat_object.combatant.Combatant;
-import format.swing_comp.SwingPane;
 import lombok.*;
 import lombok.experimental.*;
 import manager.EncounterManager;
 import org.intellij.lang.annotations.MagicConstant;
+import swing.fluent.SwingPane;
 import util.Locators;
 
 import javax.swing.*;
@@ -16,9 +16,9 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Optional;
 
-import static format.ColorStyles.*;
-import static format.swing_comp.SwingComp.label;
-import static format.swing_comp.SwingPane.*;
+import static swing.ColorStyles.*;
+import static swing.fluent.SwingComp.label;
+import static swing.fluent.SwingPane.*;
 
 @FieldDefaults(makeFinal = true)
 public class HealthBarPanel extends JPanel {

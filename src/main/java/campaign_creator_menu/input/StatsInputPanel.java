@@ -3,9 +3,9 @@ package campaign_creator_menu.input;
 import combat_object.combatant.PC;
 import combat_object.combatant.info.AbilityModifier;
 import combat_object.combatant.info.Stats;
-import format.swing_comp.SwingPane;
 import lombok.experimental.*;
-import swing_custom.ValidatedField;
+import swing.custom.ValidatedField;
+import swing.fluent.SwingPane;
 import util.StringUtil;
 
 import javax.swing.*;

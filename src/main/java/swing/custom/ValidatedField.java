@@ -1,21 +1,23 @@
-package swing_custom;
+package swing.custom;
 
-import format.ColorStyles;
-import format.swing_comp.SwingPane;
+import config.Config;
+import swing.ColorStyles;
+import swing.fluent.SwingPane;
 import util.StringUtil;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
+import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.util.function.Predicate;
 
-import static format.swing_comp.SwingComp.fluent;
-import static format.swing_comp.SwingPane.newArrangedAs;
+import static swing.fluent.SwingComp.fluent;
+import static swing.fluent.SwingPane.newArrangedAs;
 
 @lombok.experimental.ExtensionMethod(StringUtil.class)
 public class ValidatedField extends JPanel {
 
-    private final JTextField field;
+    private final JTextComponent field;
     private final JPanel bar;
     private Predicate<String> validator = s -> !s.isBlank();
 
@@ -29,7 +31,9 @@ public class ValidatedField extends JPanel {
     }
 
     public ValidatedField(String placeholder, Runnable onChange) {
-        field = fluent(new JTextField())
+        JTextComponent inputField = Config.isDamageHidden() ? new JPasswordField() : new JTextField();
+
+        field = fluent(inputField)
                 .withBackground(ColorStyles.TRACK)
                 .withDerivedFont(Font.PLAIN, 13f)
                 .withPaddedBorder(new LineBorder(ColorStyles.DIVIDER, 1), 5, 8, 5, 8)

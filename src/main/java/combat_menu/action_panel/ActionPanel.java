@@ -7,7 +7,7 @@ import combat_menu.action_panel.form.DamageFormPanel;
 import combat_menu.action_panel.form.HealFormPanel;
 import combat_menu.action_panel.form.InspirationFormPanel;
 import combat_object.combatant.Combatant;
-import combat_object.damage_implements.Implement;
+import combat_object.implement.Implement;
 import lombok.*;
 import lombok.experimental.*;
 import manager.EncounterManager;
@@ -19,8 +19,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static format.ColorStyles.TRACK;
-import static format.swing_comp.SwingPane.*;
+import static swing.ColorStyles.TRACK;
+import static swing.fluent.SwingPane.*;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @ExtensionMethod(util.Filterable.class)

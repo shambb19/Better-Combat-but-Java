@@ -2,16 +2,16 @@ package campaign_creator_menu;
 
 import campaign_creator_menu.input.CombatantInputPanel;
 import campaign_creator_menu.input.ScenarioInputPanel;
-import format.swing_comp.SwingPane;
 import org.intellij.lang.annotations.MagicConstant;
+import swing.fluent.SwingPane;
 
 import javax.swing.*;
 import java.awt.*;
 
-import static format.ColorStyles.PERFECT;
-import static format.swing_comp.SwingComp.button;
-import static format.swing_comp.SwingComp.label;
-import static format.swing_comp.SwingPane.*;
+import static swing.ColorStyles.PERFECT;
+import static swing.fluent.SwingComp.button;
+import static swing.fluent.SwingComp.label;
+import static swing.fluent.SwingPane.*;
 
 public class HostPanel extends JPanel {
 

@@ -3,11 +3,10 @@ package campaign_creator_menu.input;
 import _global_list.DamageImplements;
 import combat_object.combatant.NPC;
 import combat_object.combatant.PC;
-import combat_object.damage_implements.Implement;
-import combat_object.damage_implements.Spell;
-import combat_object.damage_implements.Weapon;
+import combat_object.implement.Implement;
+import config.Config;
 import lombok.experimental.*;
-import swing_custom.ValidatedField;
+import swing.custom.ValidatedField;
 import util.Filterable;
 import util.Message;
 
@@ -19,8 +18,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
-import static format.swing_comp.SwingPane.*;
+import static swing.fluent.SwingPane.*;
 
+// TODO fix this class for implement scalability
 public class ListSelectionPanel<T> extends JPanel {
 
     private final ImplementListPane<T> availableList, selectedList;
@@ -32,10 +32,11 @@ public class ListSelectionPanel<T> extends JPanel {
     ) {
         ListSelectionPanel<S> selectionPanel = new ListSelectionPanel<>(DamageImplements.toList(sourceType), name);
 
-        for (Weapon weapon : referenceCombatant.getWeapons())
-            selectionPanel.swapWithOtherList((S) weapon);
-        for (Spell spell : referenceCombatant.getSpells())
-            selectionPanel.swapWithOtherList((S) spell);
+        for (Class<? extends Implement> c : Config.getRuleset().getAllowedImplementClasses()) {
+            for (Implement implement : referenceCombatant.getImplements(c)) {
+                selectionPanel.swapWithOtherList((S) implement);
+            }
+        }
 
         return selectionPanel;
     }

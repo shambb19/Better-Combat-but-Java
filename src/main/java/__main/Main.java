@@ -7,11 +7,11 @@ import _global_list.Scenarios;
 import campaign_creator_menu.CampaignCreatorMenu;
 import com.formdev.flatlaf.intellijthemes.FlatSpacegrayIJTheme;
 import combat_menu.CombatMenu;
-import combat_menu.popup.CombatEndPopup;
 import lombok.*;
 import manager.EncounterManager;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
+import popup.CombatEndPopup;
 
 import javax.swing.*;
 import java.awt.*;

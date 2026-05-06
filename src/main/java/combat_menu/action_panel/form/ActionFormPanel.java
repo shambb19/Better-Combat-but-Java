@@ -1,13 +1,13 @@
 package combat_menu.action_panel.form;
 
 import combat_object.combatant.Combatant;
-import combat_object.damage_implements.Effect;
-import combat_object.damage_implements.Implement;
+import combat_object.implement.Effect;
+import combat_object.implement.Implement;
 import lombok.*;
 import lombok.experimental.*;
 import manager.CombatManager;
 import manager.EncounterManager;
-import swing_custom.ValidatedField;
+import swing.custom.ValidatedField;
 
 import javax.swing.*;
 import javax.swing.border.MatteBorder;
@@ -16,10 +16,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static format.ColorStyles.*;
-import static format.swing_comp.SwingComp.*;
-import static format.swing_comp.SwingPane.fluent;
-import static format.swing_comp.SwingPane.*;
+import static swing.ColorStyles.*;
+import static swing.fluent.SwingComp.*;
+import static swing.fluent.SwingPane.fluent;
+import static swing.fluent.SwingPane.*;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PROTECTED)
 public abstract class ActionFormPanel extends JPanel {

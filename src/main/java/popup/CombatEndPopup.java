@@ -1,10 +1,11 @@
-package combat_menu.popup;
+package popup;
 
 import __main.Main;
 import combat_object.combatant.PC;
 import input.CampaignWriter;
 import manager.EncounterManager;
 import org.jetbrains.annotations.NotNull;
+import swing.custom.Popup;
 import util.Message;
 import util.PopupPrompt;
 
@@ -14,10 +15,10 @@ import java.awt.*;
 import java.net.URL;
 import java.util.function.Consumer;
 
-import static format.ColorStyles.*;
-import static format.swing_comp.SwingComp.fluent;
-import static format.swing_comp.SwingComp.*;
-import static format.swing_comp.SwingPane.*;
+import static swing.ColorStyles.*;
+import static swing.fluent.SwingComp.fluent;
+import static swing.fluent.SwingComp.*;
+import static swing.fluent.SwingPane.*;
 
 @lombok.experimental.ExtensionMethod({util.StringUtil.class, util.Message.class})
 public class CombatEndPopup extends Popup {

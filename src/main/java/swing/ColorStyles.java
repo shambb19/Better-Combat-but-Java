@@ -1,4 +1,4 @@
-package format;
+package swing;
 
 import java.awt.*;
 
@@ -53,6 +53,7 @@ public final class ColorStyles {
 
         // ----- Code Display ----- //
         PARAMETER = new Color(0x18, 0x1A, 0x1F),
+        CONFIG = new Color(0xD4, 0x9A, 0x3D),
         STAT_PARAMETER = new Color(0x3E, 0x44, 0x51),
         KEY = new Color(0x98, 0xC3, 0x79),
         EQUATOR = new Color(0xC6, 0x78, 0xDD),

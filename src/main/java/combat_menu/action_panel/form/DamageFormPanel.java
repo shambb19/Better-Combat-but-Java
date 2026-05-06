@@ -1,22 +1,22 @@
 package combat_menu.action_panel.form;
 
 import combat_object.combatant.Combatant;
-import combat_object.damage_implements.Effect;
-import combat_object.damage_implements.Implement;
-import format.ColorStyles;
+import combat_object.implement.Effect;
+import combat_object.implement.Implement;
 import lombok.*;
 import lombok.experimental.*;
 import manager.CombatManager;
 import manager.EffectManager;
-import swing_custom.ValidatedField;
+import swing.ColorStyles;
+import swing.custom.ValidatedField;
 import util.StringUtil;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Optional;
 
-import static combat_object.damage_implements.Effect.*;
-import static format.swing_comp.SwingPane.*;
+import static combat_object.implement.Effect.*;
+import static swing.fluent.SwingPane.*;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @ExtensionMethod(StringUtil.class)

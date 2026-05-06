@@ -1,4 +1,4 @@
-package combat_object.damage_implements;
+package combat_object.implement;
 
 import combat_object.combatant.Combatant;
 import lombok.*;
@@ -10,9 +10,9 @@ import javax.swing.*;
 import javax.swing.border.MatteBorder;
 import java.awt.*;
 
-import static format.swing_comp.SwingComp.*;
-import static format.swing_comp.SwingPane.fluent;
-import static format.swing_comp.SwingPane.*;
+import static swing.fluent.SwingComp.*;
+import static swing.fluent.SwingPane.fluent;
+import static swing.fluent.SwingPane.*;
 
 @AllArgsConstructor
 public enum Effect {
@@ -76,6 +76,9 @@ public enum Effect {
             "..target.. has their Intelligence and Charisma scores dropped to 1")),
     STUNNED(Colors.purple("Stunned",
             "..target.. is incapacitated, can't move, and automatically fails Str and Dex saves")),
+
+    // released 5.5.0
+    DISADVANTAGE(Colors.red("Disadvantage", "..attacker.. is injured and must roll with disadvantage on this attack.")),
 
     NONE(null);
 

@@ -1,14 +1,16 @@
-package combat_menu.popup;
+package popup;
 
 import manager.CombatManager;
+import swing.custom.Popup;
+import util.Message;
 
 import javax.swing.*;
 import java.awt.*;
 
-import static format.ColorStyles.*;
-import static format.swing_comp.SwingComp.label;
-import static format.swing_comp.SwingComp.scrollPane;
-import static format.swing_comp.SwingPane.*;
+import static swing.ColorStyles.*;
+import static swing.fluent.SwingComp.label;
+import static swing.fluent.SwingComp.scrollPane;
+import static swing.fluent.SwingPane.*;
 
 public class EventLogPopup extends Popup {
 
@@ -40,6 +42,14 @@ public class EventLogPopup extends Popup {
         }
 
         return panel;
+    }
+
+    public static void run() {
+        if (CombatManager.getActionLog().isEmpty()) {
+            Message.showAsInfoMessage("There are no actions to show yet.");
+            return;
+        }
+        new EventLogPopup();
     }
 
 }

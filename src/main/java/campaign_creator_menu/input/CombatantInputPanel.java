@@ -8,16 +8,16 @@ import combat_object.combatant.NPC;
 import combat_object.combatant.PC;
 import combat_object.combatant.info.Class5e;
 import combat_object.combatant.info.Stats;
-import combat_object.damage_implements.Spell;
-import combat_object.damage_implements.Weapon;
+import combat_object.implement.Spell;
+import combat_object.implement.Weapon;
 import exception.InvalidParameterException;
 import exception.InvalidSyntaxError;
-import format.ColorStyles;
-import format.swing_comp.SwingComp;
-import format.swing_comp.SwingPane;
 import lombok.*;
 import lombok.experimental.*;
-import swing_custom.ValidatedField;
+import swing.ColorStyles;
+import swing.custom.ValidatedField;
+import swing.fluent.SwingComp;
+import swing.fluent.SwingPane;
 
 import javax.swing.*;
 import java.awt.*;
@@ -26,11 +26,11 @@ import java.util.Objects;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-import static format.ColorStyles.*;
-import static format.swing_comp.SwingComp.fluent;
-import static format.swing_comp.SwingComp.*;
-import static format.swing_comp.SwingPane.fluent;
-import static format.swing_comp.SwingPane.*;
+import static swing.ColorStyles.*;
+import static swing.fluent.SwingComp.fluent;
+import static swing.fluent.SwingComp.*;
+import static swing.fluent.SwingPane.fluent;
+import static swing.fluent.SwingPane.*;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @ExtensionMethod(util.StringUtil.class)
@@ -220,8 +220,8 @@ public class CombatantInputPanel extends JPanel {
             levelField.setValue(String.valueOf(pc.getStats().getLevel()));
             classBox.setSelectedItem(pc.getStats().getClass5e());
             statPanel.setTo(pc);
-            weaponPanel.setTo(pc.getWeapons());
-            spellPanel.setTo(pc.getSpells());
+            weaponPanel.setTo(pc.getImplements(Weapon.class));
+            spellPanel.setTo(pc.getImplements(Spell.class));
         }
 
         refreshFieldVisibility();

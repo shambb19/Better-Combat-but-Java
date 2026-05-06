@@ -1,18 +1,19 @@
-package combat_menu.popup;
+package popup;
 
 import combat_object.combatant.Combatant;
 import manager.ConcentrationManager;
 import manager.EffectManager;
+import swing.custom.Popup;
 import util.Message;
 
 import javax.swing.*;
 import java.awt.*;
 
-import static format.ColorStyles.CONCENTRATION;
-import static format.ColorStyles.SPELL;
-import static format.swing_comp.SwingComp.*;
-import static format.swing_comp.SwingPane.fluent;
-import static format.swing_comp.SwingPane.*;
+import static swing.ColorStyles.CONCENTRATION;
+import static swing.ColorStyles.SPELL;
+import static swing.fluent.SwingComp.*;
+import static swing.fluent.SwingPane.fluent;
+import static swing.fluent.SwingPane.*;
 
 public class SpellManagerPopup extends Popup {
 
@@ -44,7 +45,7 @@ public class SpellManagerPopup extends Popup {
                 new JLabel()
         );
 
-        for (ConcentrationManager.Concentration concentration : ConcentrationManager.getConcentrationsAsList()) {
+        for (ConcentrationManager.Concentration concentration : ConcentrationManager.getConcentrations()) {
             JPanel concentrationRow = panelIn(panel).arrangedAs(SINGLE_ROW, 15, 0).component();
 
             label("").onLeft().in(concentrationRow);
@@ -75,7 +76,7 @@ public class SpellManagerPopup extends Popup {
         ).component();
         tableHeaders.setName("Go fuck yourself, NullPointerException");
 
-        for (EffectManager.DealtEffect effect : EffectManager.getEffectsAsList()) {
+        for (EffectManager.DealtEffect effect : EffectManager.getEffects()) {
             JPanel effectRow = panelIn(panel).arrangedAs(SINGLE_ROW, 15, 0).component();
             effectRow.setName(effect.by().getName());
 
@@ -111,7 +112,7 @@ public class SpellManagerPopup extends Popup {
     }
 
     private static boolean areNoAvailableQueries() {
-        return EffectManager.getEffectsAsList().isEmpty() && ConcentrationManager.getConcentrationsAsList().isEmpty();
+        return EffectManager.getEffects().isEmpty() && ConcentrationManager.getConcentrations().isEmpty();
     }
 
     public static void run() {
@@ -119,6 +120,6 @@ public class SpellManagerPopup extends Popup {
             Message.showAsInfoMessage("No effects or concentrations exist yet.");
             return;
         }
-        new SpellManagerPopup().setVisible(true);
+        new SpellManagerPopup();
     }
 }

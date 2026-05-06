@@ -1,4 +1,4 @@
-package format.swing_comp;
+package swing.fluent;
 
 import boilerplate.FilteredVals;
 import lombok.*;
@@ -34,7 +34,7 @@ public class SwingPane extends SwingComp<JPanel> {
         return panelIn(container, null);
     }
 
-    public static SwingPane panelIn(RootPaneContainer container, @FilteredVals String location) {
+    public static SwingPane panelIn(RootPaneContainer container, @FilteredVals.Border String location) {
         return panelIn((JPanel) container.getContentPane(), location);
     }
 

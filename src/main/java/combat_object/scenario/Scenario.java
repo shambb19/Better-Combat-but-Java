@@ -6,12 +6,12 @@ import combat_object.combatant.Combatant;
 import combat_object.combatant.NPC;
 import exception.InvalidParameterException;
 import input.Key;
+import input.TextReader;
 import lombok.*;
 import lombok.experimental.*;
 import util.Filterable;
 import util.Locators;
 import util.Message;
-import util.TxtReader;
 
 import java.util.*;
 
@@ -43,8 +43,8 @@ public class Scenario extends CombatObject {
             HashMap<String, Integer> namesFromString(String list) {
                 HashMap<String, Integer> result = new HashMap<>();
                 if (list == null) return result;
-                for (String str : TxtReader.listTextAsArray(list))
-                    result.put(TxtReader.getName(str), TxtReader.getQty(str));
+                for (String str : TextReader.listTextAsArray(list))
+                    result.put(TextReader.getName(str), TextReader.getQty(str));
 
                 return result;
             }

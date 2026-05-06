@@ -1,11 +1,12 @@
 package _global_list;
 
+import combat_object.CombatObject;
 import input.CampaignReader;
 import util.Message;
 
 import java.util.ArrayList;
 
-public class GlobalList<T extends combat_object.CombatObject> {
+public class GlobalList<T extends CombatObject> {
 
     @lombok.experimental.Delegate protected final ArrayList<T> list = new ArrayList<>();
 

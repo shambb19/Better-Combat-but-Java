@@ -1,19 +1,24 @@
 package _global_list;
 
-import combat_object.damage_implements.Implement;
-import combat_object.damage_implements.Spell;
-import combat_object.damage_implements.Weapon;
+import combat_object.implement.Gun;
+import combat_object.implement.Implement;
+import combat_object.implement.Spell;
+import combat_object.implement.Weapon;
+import lombok.*;
 import lombok.experimental.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
-@FieldDefaults(makeFinal = true)
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @ExtensionMethod(util.Filterable.class)
 public class DamageImplements extends GlobalList<Implement> {
 
-    public static Weapon MANUAL_WEAPON = Weapon.createManual("Manual");
-    public static Spell MANUAL_HIT = Spell.createManual("Manual with Hit Roll");
-    public static Spell MANUAL_SAVE = Spell.createManual("Manual with Save Throw");
+    static Weapon MANUAL_WEAPON = Weapon.createManual("Manual");
+    static Spell MANUAL_HIT = Spell.createManual("Manual with Hit Roll");
+    static Spell MANUAL_SAVE = Spell.createManual("Manual with Save Throw");
+    static Gun MANUAL_GUN = Gun.createManual("Manual");
 
     private static final DamageImplements INSTANCE = new DamageImplements();
 
@@ -32,6 +37,25 @@ public class DamageImplements extends GlobalList<Implement> {
 
     public static <T extends Implement> List<T> toList(Class<T> type) {
         return INSTANCE.list.of().castToAsList(type);
+    }
+
+    public static <T extends Implement> Implement createHeader(Class<T> type) {
+        Map<Class<? extends Implement>, Function<String, ? extends Implement>> headerMap = Map.of(
+                Weapon.class, Weapon::createManual,
+                Spell.class, Spell::createManual,
+                Gun.class, Gun::createManual
+        );
+        String headerText = String.format("── %ss ──", type.getSimpleName());
+        return headerMap.get(type).apply(headerText);
+    }
+
+    public static List<? extends Implement> getManualEntries(Class<? extends Implement> type) {
+        Map<Class<? extends Implement>, List<? extends Implement>> entriesMap = Map.of(
+                Weapon.class, List.of(MANUAL_WEAPON),
+                Spell.class, List.of(MANUAL_HIT, MANUAL_SAVE),
+                Gun.class, List.of(MANUAL_GUN)
+        );
+        return entriesMap.get(type);
     }
 
 }

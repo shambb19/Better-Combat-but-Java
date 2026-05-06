@@ -8,7 +8,8 @@ package _global_list;
     HEAL_BUTTON("/heal-button.png"),
     INSPIRATION_BUTTON("/inspiration-button.png"),
 
-    STARTER_CODE("/starter.txt"),
+    STARTER_STANDARD("/starter.txt"),
+    STARTER_STEAMPUNK("/starter_steampunk.txt"),
     SPELL_CODE("/spells.txt"),
     WEAPON_CODE("/weapons.txt");
 

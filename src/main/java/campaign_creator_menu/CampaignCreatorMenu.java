@@ -1,7 +1,6 @@
 package campaign_creator_menu;
 
 import __main.Main;
-import __main.MainFrame;
 import _global_list.Combatants;
 import campaign_creator_menu.input.CombatantInputPanel;
 import campaign_creator_menu.input.ScenarioInputPanel;
@@ -11,6 +10,7 @@ import combat_object.scenario.Scenario;
 import encounter.Encounter;
 import lombok.*;
 import lombok.experimental.*;
+import swing.custom.MainFrame;
 
 import javax.swing.*;
 

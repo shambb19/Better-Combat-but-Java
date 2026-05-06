@@ -4,11 +4,12 @@ import __main.Main;
 import combat_object.combatant.Combatant;
 import combat_object.combatant.PC;
 import combat_object.combatant.info.LifeStatus;
-import combat_object.damage_implements.Effect;
+import combat_object.implement.Effect;
 import encounter.Encounter;
-import format.ColorStyles;
 import lombok.*;
 import lombok.experimental.*;
+import popup.MisfireManagerPopup;
+import swing.ColorStyles;
 import util.Filterable;
 import util.Message;
 import util.PopupPrompt;
@@ -127,15 +128,9 @@ public class EncounterManager {
                 EffectManager.removeEffectOn(currentCombatant, Effect.BANISH);
                 canTakeTurn = false;
             }
-            if (ConcentrationManager.isCombatantConcentrating(currentCombatant)) {
-                String message = currentCombatant + " is currently using a spell that requires concentration. " +
-                        "Taking any actions will end this spell's effects.";
-                Message.showActionPrompt(message,
-                        new PopupPrompt.ActionButton[]{
-                                new PopupPrompt.ActionButton("Take New Action", ColorStyles.SUCCESS, null),
-                                new PopupPrompt.ActionButton("Continue Concentrating", ColorStyles.CONCENTRATION, this::endCurrentTurn)
-                        });
-            }
+
+            promptConcentration();
+            promptMisfires();
 
             if (canTakeTurn)
                 Main.refreshUI();
@@ -145,6 +140,27 @@ public class EncounterManager {
 
         void sortList(List<Combatant> combatants) {
             combatants.sort(Comparator.comparingInt(Combatant::getInitiative).reversed());
+        }
+
+        private void promptConcentration() {
+            if (!ConcentrationManager.isCombatantConcentrating(currentCombatant)) return;
+
+            String message = currentCombatant + " is currently using a spell that requires concentration. " +
+                    "Taking any actions will end this spell's effects.";
+            Message.showActionPrompt(message,
+                    new PopupPrompt.ActionButton[]{
+                            new PopupPrompt.ActionButton("Take New Action", ColorStyles.SUCCESS, null),
+                            new PopupPrompt.ActionButton("Continue Concentrating", ColorStyles.CONCENTRATION, this::endCurrentTurn)
+                    });
+        }
+
+        private void promptMisfires() {
+            List<MisfireManager.Misfire> misfires = MisfireManager.getMisfiresForActive();
+
+            if (misfires.isEmpty()) return;
+
+            new MisfireManagerPopup(misfires);
+            endCurrentTurn();
         }
     }
 }

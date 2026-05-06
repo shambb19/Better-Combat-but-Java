@@ -1,17 +1,17 @@
 package util;
 
 import combat_menu.CombatMenu;
-import format.swing_comp.SwingComp;
 import lombok.experimental.*;
 import manager.EncounterManager;
 import org.intellij.lang.annotations.MagicConstant;
+import swing.fluent.SwingComp;
 import util.PopupPrompt.ResultButton;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 
-import static format.ColorStyles.*;
+import static swing.ColorStyles.*;
 import static util.PopupPrompt.of;
 import static util.PopupPrompt.ofInput;
 

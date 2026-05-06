@@ -4,8 +4,8 @@ import __main.Main;
 import campaign_creator_menu.input.ListSelectionPanel;
 import combat_object.combatant.PC;
 import combat_object.combatant.info.AbilityModifier;
-import combat_object.damage_implements.Spell;
-import combat_object.damage_implements.Weapon;
+import combat_object.implement.Spell;
+import combat_object.implement.Weapon;
 import encounter.Encounter;
 import lombok.*;
 import lombok.experimental.*;
@@ -17,11 +17,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static format.ColorStyles.BACKGROUND;
-import static format.ColorStyles.SUCCESS;
-import static format.swing_comp.SwingComp.fluent;
-import static format.swing_comp.SwingComp.*;
-import static format.swing_comp.SwingPane.*;
+import static swing.ColorStyles.BACKGROUND;
+import static swing.ColorStyles.SUCCESS;
+import static swing.fluent.SwingComp.fluent;
+import static swing.fluent.SwingComp.*;
+import static swing.fluent.SwingPane.*;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class LevelUpPanel extends JPanel {
@@ -113,8 +113,8 @@ public class LevelUpPanel extends JPanel {
             List<Weapon> newWeapons = panelsMap.get(partyMember).weaponPanel.getSelected();
             List<Spell> newSpells = panelsMap.get(partyMember).spellPanel.getSelected();
 
-            partyMember.getWeapons().addAll(newWeapons);
-            partyMember.getSpells().addAll(newSpells);
+            partyMember.getImplementList().addAll(newWeapons);
+            partyMember.getImplementList().addAll(newSpells);
         }
         Main.getCreatorMenu().finishLevelUpProcess();
     }
