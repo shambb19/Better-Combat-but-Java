@@ -3,6 +3,8 @@ package _global_list;
 import combat_object.scenario.Scenario;
 import util.Filterable;
 
+import java.util.List;
+
 @lombok.NoArgsConstructor
 public class Scenarios extends GlobalList<Scenario> {
 
@@ -13,7 +15,7 @@ public class Scenarios extends GlobalList<Scenario> {
         INSTANCE.init(file, Scenario.class);
     }
 
-    public static java.util.List<Scenario> toList() {
+    public static List<Scenario> toList() {
         return Filterable.of(INSTANCE.list).castToAsList(Scenario.class);
     }
 

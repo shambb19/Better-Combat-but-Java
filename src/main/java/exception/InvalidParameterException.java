@@ -1,22 +1,19 @@
 package exception;
 
-import input.Key;
-import util.Message;
+import lombok.*;
+import lombok.experimental.*;
 
-import java.util.logging.Logger;
-
+@Getter @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class InvalidParameterException extends InvalidSyntaxError {
-    public InvalidParameterException(String sourceName, Key key, Object actualValue) {
-        this(sourceName, key.name().toLowerCase(), actualValue, key.getRequirement());
-    }
+
+    String simpleReason;
 
     public InvalidParameterException(String sourceName, String key, Object actualValue, String requirement) {
         super(
                 false,
-                String.format("%s=%s is invalid; %s expected", key, actualValue, requirement)
+                String.format("%s.%s=%s is invalid; %s expected", sourceName, key, actualValue, requirement)
         );
 
-        Logger.getLogger(sourceName).severe(getMessage());
-        Message.showAsErrorMessage(getMessage());
+        simpleReason = String.format("%s=%s is invalid; %s expected", key, actualValue, requirement);
     }
 }

@@ -1,0 +1,70 @@
+config<<open
+ruleset.steampunk
+damage.hide
+queue.standard
+config<<close
+
+.party<incomplete Wolfgang von Wolfgang
+level: 1
+class: artificer
+stats: [STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10]
+
+.party<incomplete Ignacio Valdez Cortez
+level: 1
+class: gunslinger
+stats: [STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10]
+
+.party<incomplete Sinead O'Connor
+level: 1
+class: cleric
+stats: [STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10]
+
+.party<incomplete Gabriel Audrey
+level: 1
+class: ranger
+stats: [STR: 13, DEX: 16, CON: 15, INT: 12, WIS: 16, CHA: 17]
+
+.party<armored Valdris Coyne
+hp: 3/8
+level: 4
+class: cleric
+stats: [STR: 11, DEX: 10, CON: 15, INT: 12, WIS: 18, CHA: 8]
+weapons: [Mace]
+guns: [Hand Mortar]
+
+.party Hetta Bronn
+level: 4
+class: fighter
+stats: [STR: 17, DEX: 10, CON: 16, INT: 9, WIS: 11, CHA: 8]
+weapons: [Longsword, Handaxe]
+guns: [Musket]
+
+.party Castor Finch
+level: 4
+class: rogue
+stats: [STR: 9, DEX: 17, CON: 12, INT: 14, WIS: 13, CHA: 12]
+weapons: [Dagger, Shortsword]
+guns: [Pepperbox]
+
+.party Rula Vant
+level: 4
+class: ranger
+stats: [STR: 13, DEX: 15, CON: 13, INT: 10, WIS: 14, CHA: 9]
+weapons: [Shortsword]
+guns: [Dreyse Rifle, Pistol]
+
+.enemy<special Clockwork Drone
+hp: 14
+
+.enemy<special<armored Ironclad Enforcer
+hp: 28
+
+.enemy Smog Lurker
+
+.enemy<armored Undercity Enforcer
+
+.scenario Gasworks Ambush
+against: [Clockwork Drone_4, Smog Lurker_2, Ironclad Enforcer]
+
+.scenario<incomplete Test Incomplete
+against: [Undercity Enforcer_6]

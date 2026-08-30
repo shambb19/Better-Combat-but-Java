@@ -1,10 +1,10 @@
 package combat_menu.encounter_info;
 
+import _manager.EncounterManager;
 import combat_menu.action_panel.form.ActionFormPanel;
 import combat_object.combatant.Combatant;
 import lombok.*;
 import lombok.experimental.*;
-import manager.EncounterManager;
 import org.intellij.lang.annotations.MagicConstant;
 
 import javax.swing.*;
@@ -12,14 +12,14 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static format.ColorStyles.DIVIDER;
-import static format.ColorStyles.FG_SECTION;
-import static format.swing_comp.SwingComp.fluent;
-import static format.swing_comp.SwingComp.glue;
-import static format.swing_comp.SwingComp.label;
-import static format.swing_comp.SwingComp.spacer;
-import static format.swing_comp.SwingPane.VERTICAL_BOX;
-import static format.swing_comp.SwingPane.fluent;
+import static swing.ColorStyles.DIVIDER;
+import static swing.ColorStyles.FG_SECTION;
+import static swing.fluent.SwingComp.fluent;
+import static swing.fluent.SwingComp.glue;
+import static swing.fluent.SwingComp.label;
+import static swing.fluent.SwingComp.spacer;
+import static swing.fluent.SwingPane.VERTICAL_BOX;
+import static swing.fluent.SwingPane.fluent;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class EncounterListPanel extends JPanel {

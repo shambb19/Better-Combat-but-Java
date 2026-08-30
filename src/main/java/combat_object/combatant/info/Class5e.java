@@ -22,7 +22,9 @@ public enum Class5e {
     ROGUE(null, 5),
     SORCERER(CHA, 4),
     WARLOCK(CHA, 5),
-    WIZARD(INT, 4);
+    WIZARD(INT, 4),
+    GUNSLINGER(null, 6),
+    ARTIFICER(null, 4);
 
     AbilityModifier spellMod;
     int hpIncrement;

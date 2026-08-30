@@ -1,15 +1,15 @@
 package combat_menu;
 
-import format.ColorStyles;
-import format.swing_comp.SwingPane;
+import _manager.InspirationManager;
 import lombok.*;
-import manager.InspirationManager;
-import swing_custom.AnimatedBar;
+import swing.ColorStyles;
+import swing.custom.AnimatedBar;
+import swing.fluent.SwingPane;
 import util.Message;
 
 import javax.swing.*;
 
-import static format.swing_comp.SwingPane.*;
+import static swing.fluent.SwingPane.*;
 
 @NoArgsConstructor
 public class InspirationBar extends JPanel implements InspirationManager.Listener {

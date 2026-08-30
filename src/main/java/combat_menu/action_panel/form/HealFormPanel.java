@@ -1,10 +1,10 @@
 package combat_menu.action_panel.form;
 
 import __main.Main;
+import _manager.CombatManager;
 import combat_menu.encounter_info.HealthBarPanel;
 import lombok.experimental.*;
-import manager.CombatManager;
-import swing_custom.ValidatedField;
+import swing.custom.ValidatedField;
 import util.StringUtil;
 
 @ExtensionMethod(StringUtil.class)

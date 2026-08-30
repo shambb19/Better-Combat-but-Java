@@ -2,19 +2,20 @@ package combat_menu;
 
 import combat_object.combatant.Combatant;
 import combat_object.combatant.PC;
-import format.ColorStyles;
-import format.swing_comp.SwingPane;
 import lombok.*;
 import lombok.experimental.*;
+import swing.ColorStyles;
+import swing.fluent.SwingPane;
+import util.Filterable;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 
-import static format.ColorStyles.*;
-import static format.swing_comp.SwingComp.label;
-import static format.swing_comp.SwingComp.spacer;
-import static format.swing_comp.SwingPane.*;
+import static swing.ColorStyles.*;
+import static swing.fluent.SwingComp.label;
+import static swing.fluent.SwingComp.spacer;
+import static swing.fluent.SwingPane.*;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class CombatantHeaderPanel extends JPanel {
@@ -72,10 +73,7 @@ public class CombatantHeaderPanel extends JPanel {
                 statRow, spacer(0, 12),
                 rollRow
         );
-        // yet another absolutely heinous solution. Hey, as long as it works??
-        for (Component c : getComponents())
-            if (c instanceof JComponent j)
-                j.setAlignmentX(LEFT_ALIGNMENT);
+        Filterable.of(getComponents()).castToAsList(JComponent.class).forEach(j -> j.setAlignmentX(LEFT_ALIGNMENT));
 
         refresh();
     }

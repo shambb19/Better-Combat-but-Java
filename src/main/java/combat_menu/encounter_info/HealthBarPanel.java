@@ -1,12 +1,13 @@
 package combat_menu.encounter_info;
 
+import _manager.EncounterManager;
 import combat_menu.action_panel.form.ActionFormPanel;
 import combat_object.combatant.Combatant;
-import format.swing_comp.SwingPane;
 import lombok.*;
 import lombok.experimental.*;
-import manager.EncounterManager;
 import org.intellij.lang.annotations.MagicConstant;
+import popup.StatTooltipPopup;
+import swing.fluent.SwingPane;
 import util.Locators;
 
 import javax.swing.*;
@@ -16,9 +17,9 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Optional;
 
-import static format.ColorStyles.*;
-import static format.swing_comp.SwingComp.label;
-import static format.swing_comp.SwingPane.*;
+import static swing.ColorStyles.*;
+import static swing.fluent.SwingComp.label;
+import static swing.fluent.SwingPane.*;
 
 @FieldDefaults(makeFinal = true)
 public class HealthBarPanel extends JPanel {
@@ -34,7 +35,7 @@ public class HealthBarPanel extends JPanel {
     JPanel accentBar;
     RoundPanel barTrack;
     RoundPanel barFill;
-    @NonFinal StatTooltipWindow activeTooltip = null;
+    @NonFinal StatTooltipPopup activeTooltip = null;
     @NonFinal MouseListener actionSelectionListener;
 
     Timer animationTimer;
@@ -89,7 +90,7 @@ public class HealthBarPanel extends JPanel {
     public void update() {
         barFill.setFill(combatant.getHealthBarColor());
 
-        boolean unknown = combatant.isEnemy() && combatant.getLifeStatus().isConscious();
+        boolean unknown = combatant.isEnemy() && combatant.isConscious();
         if (unknown)
             targetFillWidth = BAR_WIDTH;
         else
@@ -106,7 +107,7 @@ public class HealthBarPanel extends JPanel {
         } else {
             accentBar.setBackground(TRACK);
             setBackground(BACKGROUND);
-            if (combatant.getLifeStatus().isConscious())
+            if (combatant.isConscious())
                 nameLabel.setForeground(FOREGROUND);
             else
                 fluent(nameLabel).muted();
@@ -119,8 +120,8 @@ public class HealthBarPanel extends JPanel {
         boolean isValidTarget = Locators.getTargetList(mode == ATTACK).contains(combatant);
 
         if (isValidTarget) {
-            accentBar.setBackground(EQUATOR);
-            nameLabel.setForeground(EQUATOR);
+            accentBar.setBackground(HEADER);
+            nameLabel.setForeground(HEADER);
             setBackground(BACKGROUND);
         } else {
             endActionState();
@@ -131,12 +132,12 @@ public class HealthBarPanel extends JPanel {
     private void installStatTooltip() {
         fluent(barTrack).withMouseMoveListener(
                 p -> { // onEnter
-                    if (!combatant.getLifeStatus().isAlive()) return;
+                    if (combatant.isDead()) return;
 
                     Optional.ofNullable(activeTooltip).ifPresent(Window::dispose);
 
                     Window owner = SwingUtilities.getWindowAncestor(HealthBarPanel.this);
-                    activeTooltip = new StatTooltipWindow(owner, combatant);
+                    activeTooltip = new StatTooltipPopup(owner, combatant);
 
                     Point barOnScreen = p.getLocationOnScreen();
                     int tx = barOnScreen.x - activeTooltip.getWidth() - 8;

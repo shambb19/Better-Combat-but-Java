@@ -1,16 +1,16 @@
 package combat_object.combatant.info;
 
+import input.TextReader;
 import lombok.*;
 import lombok.experimental.*;
 import util.Locators;
 import util.StringUtil;
-import util.TxtReader;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import static combat_object.combatant.info.AbilityModifier.*;
-import static util.TxtReader.listTextAsArray;
+import static input.TextReader.listTextAsArray;
 
 @Getter
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -103,11 +103,6 @@ public class Stats {
         return stats.get(stat);
     }
 
-    public void increment(@NonNull AbilityModifier stat) {
-        int newVal = get(stat) + 1;
-        stats.put(stat, newVal);
-    }
-
     public static Stats from(Object statsObj, Object class5eObj, Object levelObj) {
         Class5e class5e = (Class5e) class5eObj;
         int level = (int) levelObj;
@@ -115,10 +110,10 @@ public class Stats {
         Stats stats = new Stats(class5e, level);
 
         for (String s : listTextAsArray((String) statsObj)) {
-            String key = TxtReader.key(s);
+            String key = TextReader.key(s);
             AbilityModifier stat = Locators.enumNameSearch(key, AbilityModifier.class);
 
-            int value = TxtReader.value(s).toInt();
+            int value = TextReader.value(s).toInt();
 
             stats.put(stat, value);
         }

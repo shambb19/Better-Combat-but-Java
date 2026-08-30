@@ -34,7 +34,7 @@ public class Filterable<T> {
     }
 
     public T firstWithToStringEquals(String query) {
-        return stream.filter(t -> String.valueOf(t).equals(query))
+        return stream.filter(t -> String.valueOf(t).equalsIgnoreCase(query))
                 .findFirst()
                 .orElse(null);
     }

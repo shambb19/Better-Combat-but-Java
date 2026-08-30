@@ -1,24 +1,26 @@
 package util;
 
+import __main.Main;
+import _manager.EncounterManager;
 import combat_menu.CombatMenu;
-import format.swing_comp.SwingComp;
 import lombok.experimental.*;
-import manager.EncounterManager;
 import org.intellij.lang.annotations.MagicConstant;
+import swing.fluent.SwingComp;
 import util.PopupPrompt.ResultButton;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
+import java.util.Optional;
 
-import static format.ColorStyles.*;
+import static swing.ColorStyles.*;
 import static util.PopupPrompt.of;
 import static util.PopupPrompt.ofInput;
 
 @ExtensionMethod(StringUtil.class)
 public class Message {
 
-    public static final int CANCEL_OPTION = 2, REMOVE_OPTION = 1, EDIT_OPTION = 0;
+    public static final String READ_ERROR = "reading", WRITE_ERROR = "writing";
 
     public static void showAsErrorMessage(String text) {
         of(
@@ -28,16 +30,42 @@ public class Message {
     }
 
     public static void showAsInfoMessage(String text) {
-        of(CombatMenu.TITLE, text, new ResultButton("Close", BORDER_LIGHT, 0));
+        of(Main.TITLE, text, new ResultButton("Close", BORDER_LIGHT, 0));
     }
 
     public static void showActionPrompt(String text, PopupPrompt.ActionButton[] buttons) {
-        of(CombatMenu.TITLE, text, buttons);
+        of(Main.TITLE, text, buttons);
     }
 
-    public static int promptIntWithLoop(String message, String title) {
-        while (true) {
+    public static String promptString(String message) {
+        JTextField input = SwingComp.fluent(new JTextField())
+                .withBackground(TRACK)
+                .withForegroundAndCaretColor(Color.WHITE)
+                .withPaddedBorder(new LineBorder(TRACK), 8, 8, 8, 8)
+                .component();
 
+        ofInput(
+                Main.TITLE, message, input
+        );
+        return input.getText();
+    }
+
+    public static boolean wasPromptedRollSuccessful(String reason, Roll roll, int target, String failMessage) {
+        return promptRoll(reason, roll, target, null, failMessage) >= target;
+    }
+
+    public static int promptRoll(String reason, Roll roll, int target, Runnable onSuccess, String failMessage) {
+        String reasonFormatted = reason.replace("..name..", EncounterManager.getCurrentCombatant().toString());
+        int result = promptIntWithLoop("Roll " + roll.toString() + " " + reasonFormatted + ".");
+
+        if (result >= target) Optional.of(onSuccess).ifPresent(Runnable::run);
+        else Optional.of(failMessage).ifPresent(Message::showAsInfoMessage);
+
+        return result;
+    }
+
+    public static int promptIntWithLoop(String message) {
+        while (true) {
             JTextField input = SwingComp.fluent(new JTextField())
                     .withBackground(TRACK)
                     .withForegroundAndCaretColor(Color.WHITE)
@@ -45,7 +73,7 @@ public class Message {
                     .component();
 
             ofInput(
-                    title, message, input
+                    Main.TITLE, message, input
             );
 
             int value = input.getText().trim().toInt();
@@ -56,51 +84,11 @@ public class Message {
         }
     }
 
-    public static @MagicConstant(intValues = {CANCEL_OPTION, REMOVE_OPTION, EDIT_OPTION}) int showEditOrRemovePrompt(String name) {
-        int result = of(
-                "Manage " + name,
-                "What would you like to do with this entry?",
-                new ResultButton("Cancel", BORDER_LIGHT, CANCEL_OPTION),
-                new ResultButton("Remove", CRITICAL, REMOVE_OPTION),
-                new ResultButton("Edit", SUCCESS, EDIT_OPTION)
-        ).getResult();
-
-        return switch (result) {
-            case EDIT_OPTION -> EDIT_OPTION;
-            case REMOVE_OPTION -> {
-                int deleteResult = askYesNoQuestion("Are you sure you want to delete " + name + "?");
-                if (deleteResult == JOptionPane.YES_OPTION)
-                    yield REMOVE_OPTION;
-                else
-                    yield CANCEL_OPTION;
-            }
-            case CANCEL_OPTION -> CANCEL_OPTION;
-            default -> throw new IndexOutOfBoundsException();
-        };
-    }
-
-    public static void showFileErrorMessage(Exception error) {
+    public static void showFileErrorMessage(Exception error, @MagicConstant(valuesFromClass = Message.class) String errorType) {
         of(
-                "File Error", "Error reading file: " + error.getMessage(),
+                "File Error", "Error " + errorType + " file: " + error.getMessage(),
                 new ResultButton("Acknowledge", CRITICAL, 0)
         );
     }
 
-    public static int askYesNoQuestion(String text) {
-        return of(
-                "Question", text,
-                new ResultButton("No", BORDER_LIGHT, JOptionPane.NO_OPTION),
-                new ResultButton("Yes", SUCCESS, JOptionPane.YES_OPTION)
-        ).getResult();
-    }
-
-    public static int promptDeathSaveRoll() {
-        StringBuilder message = new StringBuilder("Roll Death Save for " + EncounterManager.getCurrentCombatant() + ".");
-        int roll;
-        do {
-            roll = promptIntWithLoop(message.toString(), CombatMenu.TITLE);
-            message.append("Enter flat d20 value on the range of 1-20 please.");
-        } while (roll <= 0 || roll > 20);
-        return roll;
-    }
 }

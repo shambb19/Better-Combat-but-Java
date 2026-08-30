@@ -1,6 +1,11 @@
-.party
-name: Rollo
-hp: 35/35
+config<<open
+ruleset.standard
+queue.cath
+damage.show
+config<<close
+
+.party Rollo
+hp: 35
 ac: 16
 level: 4
 class: cleric
@@ -8,9 +13,8 @@ stats: [STR: 12, DEX: 12, CON: 16, INT: 11, WIS: 19, CHA: 6]
 weapons: [Longsword]
 spells: [Guiding Bolt, Ray of Frost, Sacred Flame, Starry Wisp, Phantasmal Force, Cloud of Daggers]
 
-.party
-name: Braxton
-hp: 32/32
+.party Braxton
+hp: 32
 ac: 18
 level: 4
 class: paladin
@@ -18,8 +22,7 @@ stats: [STR: 16, DEX: 8, CON: 12, INT: 10, WIS: 13, CHA: 17]
 weapons: [Javelin, Lance, Longsword, Quarterstaff]
 spells: [Toll the Dead, Hunter's Mark]		
 
-.party
-name: Belladonna
+.party Belladonna
 hp: 18/30
 ac: 14
 level: 4
@@ -28,27 +31,24 @@ stats: [STR: 11, DEX: 13, CON: 14, INT: 16, WIS: 12, CHA: 10]
 weapons: [Dagger]
 spells: [Chill Touch, Poison Spray, Shocking Grasp, Ray of Sickness, Thunder Wave]
 
-.party
-name: Drexen
-hp: 27/27
+.party Drexen
+hp: 27
 ac: 11
 level: 4
 class: sorcerer
 stats: [STR: 10, DEX: 13, CON: 12, INT: 9, WIS: 11, CHA: 14]
 spells: [Chill Touch, Eldritch Blast, Hex, Burning Hands, Scorching Ray]
 
-.party
-name: Karis Veluthra
-hp: 24/24
+.party Karis Veluthra
+hp: 24
 ac: 14
 level: 4
 class: rogue
 stats: [STR: 7, DEX: 12, CON: 11, INT: 16, WIS: 14, CHA: 15]
 weapons: [Dagger, Light Crossbow]
 
-.party
-name: Ezekiel
-hp: 26/26
+.party Ezekiel
+hp: 26
 ac: 13
 level: 4
 class: wizard
@@ -56,12 +56,9 @@ stats: [STR: 8, DEX: 16, CON: 14, INT: 17, WIS: 10, CHA: 10]
 weapons: [Dagger, Fist]
 spells: [Shocking Grasp, Scorching Ray]
 
- ~test enemy, not intended for actual use
-.enemy
-name: Orc
-hp: 20/20
+.enemy Orc
+hp: 20
 ac: 12
 
-.scenario ~test scenario, not intended for actual use
-name: Test
+.scenario Test
 against: [Orc_6]

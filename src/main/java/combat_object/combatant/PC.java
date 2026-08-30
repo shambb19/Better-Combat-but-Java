@@ -1,22 +1,26 @@
 package combat_object.combatant;
 
+import __main.Main;
 import combat_object.combatant.info.Stats;
-import combat_object.damage_implements.Spell;
-import combat_object.damage_implements.Weapon;
-import exception.InvalidParameterException;
-import format.ColorStyles;
-import input.Key;
-import util.TxtReader;
+import combat_object.implement.Implement;
+import combat_object.implement.Spell;
+import combat_object.implement.Weapon;
+import input.TextReader;
+import input.syntax.Key;
+import input.syntax.Tag;
+import lombok.experimental.*;
+import swing.ColorStyles;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static input.Key.*;
+import static input.syntax.Key.*;
 
-@lombok.experimental.SuperBuilder
+@SuperBuilder
+@ExtensionMethod(TextReader.class)
 public class PC extends Combatant {
 
     public static PC create(String name, int hpMax, int armorClass, Stats stats, List<Weapon> weapons, List<Spell> spells) {
@@ -27,8 +31,9 @@ public class PC extends Combatant {
                 .armorClass(armorClass)
                 .isEnemy(false)
                 .stats(stats)
-                .weapons(new ArrayList<>(Objects.requireNonNullElse(weapons, List.of())))
-                .spells(new ArrayList<>(Objects.requireNonNullElse(spells, List.of())))
+                .implementList(Stream.of(weapons, spells)
+                        .flatMap(Collection::stream)
+                        .collect(Collectors.toCollection(ArrayList::new)))
                 .build();
     }
 
@@ -45,8 +50,11 @@ public class PC extends Combatant {
         ArrayList<String> txt = super.toTxt();
 
         txt.addAll(stats.toTxt());
+
+        List<Weapon> weapons = getImplements(Weapon.class);
         if (!weapons.isEmpty())
             txt.add("weapons: " + weapons);
+        List<Spell> spells = getImplements(Spell.class);
         if (!spells.isEmpty())
             txt.add("spells: " + spells);
         txt.add("");
@@ -54,25 +62,22 @@ public class PC extends Combatant {
     }
 
     @SuppressWarnings("unchecked")
-    public static PC from(EnumMap<Key, Object> params) {
-        params.forEach((key, value) -> {
-            if (!key.isValid(value)) throw new InvalidParameterException("CombatObject$PC", key, value);
-        });
-
-        int maxHp = TxtReader.getHp((String) params.get(HP));
-        int hp = TxtReader.getHpCur((String) params.get(HP));
-
-        if (hp > maxHp) throw new InvalidParameterException("PC", "hp", hp, "hp <= hpMax");
+    public static PC from(EnumMap<Key, Object> params, Set<Tag> tags) {
+        validateAll(params, "PC");
+        Main.getRuleset().validateCombatant(params, tags);
 
         return PC.builder()
                 .name((String) params.get(NAME))
-                .maxHp(maxHp)
-                .hp(hp)
+                .maxHp(params.get(HP).getHp(true))
+                .hp(params.get(HP).getHp(false))
                 .isEnemy(false)
+                .isArmored(tags.contains(Tag.ARMORED))
                 .armorClass((int) params.get(AC))
                 .stats(Stats.from(params.get(STATS), params.get(CLASS), params.get(LEVEL)))
-                .weapons(new ArrayList<>(Objects.requireNonNullElse((List<Weapon>) params.get(WEAPONS), List.of())))
-                .spells(new ArrayList<>(Objects.requireNonNullElse((List<Spell>) params.get(SPELLS), List.of())))
+                .implementList(Stream.of(WEAPONS, SPELLS, GUNS)
+                        .map(key -> (List<? extends Implement>) params.getOrDefault(key, List.of()))
+                        .flatMap(Collection::stream)
+                        .collect(Collectors.toCollection(ArrayList::new)))
                 .build();
     }
 

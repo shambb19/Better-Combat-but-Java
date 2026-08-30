@@ -7,10 +7,10 @@ import javax.swing.border.MatteBorder;
 import java.awt.*;
 import java.util.Optional;
 
-import static format.ColorStyles.*;
-import static format.swing_comp.SwingComp.*;
-import static format.swing_comp.SwingPane.fluent;
-import static format.swing_comp.SwingPane.*;
+import static swing.ColorStyles.*;
+import static swing.fluent.SwingComp.*;
+import static swing.fluent.SwingPane.fluent;
+import static swing.fluent.SwingPane.*;
 
 public class PopupPrompt extends JDialog {
 
@@ -41,7 +41,12 @@ public class PopupPrompt extends JDialog {
                 .withBorder(new MatteBorder(1, 0, 0, 0, TRACK))
                 .component();
 
-        label("<html><body style='width: 300px'>" + message + "</body></html>", Font.PLAIN, 13f).onLeft().in(contentArea);
+        textArea(message)
+                .withDerivedFont(Font.PLAIN, 13f)
+                .withMaximumSize(350, Integer.MAX_VALUE)
+                .withPreferredSize(350, 60)
+                .onLeft()
+                .in(contentArea);
     }
 
     private PopupPrompt(String title, String message, ResultButton... buttons) {

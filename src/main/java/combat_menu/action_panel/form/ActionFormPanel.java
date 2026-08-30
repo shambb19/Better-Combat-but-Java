@@ -1,13 +1,13 @@
 package combat_menu.action_panel.form;
 
+import _manager.CombatManager;
+import _manager.EncounterManager;
 import combat_object.combatant.Combatant;
-import combat_object.damage_implements.Effect;
-import combat_object.damage_implements.Implement;
+import combat_object.implement.Effect;
+import combat_object.implement.Implement;
 import lombok.*;
 import lombok.experimental.*;
-import manager.CombatManager;
-import manager.EncounterManager;
-import swing_custom.ValidatedField;
+import swing.custom.ValidatedField;
 
 import javax.swing.*;
 import javax.swing.border.MatteBorder;
@@ -16,10 +16,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static format.ColorStyles.*;
-import static format.swing_comp.SwingComp.*;
-import static format.swing_comp.SwingPane.fluent;
-import static format.swing_comp.SwingPane.*;
+import static swing.ColorStyles.*;
+import static swing.fluent.SwingComp.*;
+import static swing.fluent.SwingPane.fluent;
+import static swing.fluent.SwingPane.*;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PROTECTED)
 public abstract class ActionFormPanel extends JPanel {
@@ -50,17 +50,14 @@ public abstract class ActionFormPanel extends JPanel {
 
         buttonRow = newArrangedAs(FLOW_LEFT).transparent().onLeft().component();
 
-        @Helper class ConfirmCancel {
-            static JButton styledButton(String text, Color bg, Color fg, Runnable onClick) {
-                return button(text, bg, onClick)
-                        .withText(Font.BOLD, 12f, fg)
-                        .component();
-            }
+        interface ConfirmCancelFactory {
+            JButton getStyledButton(String txt, Color bg, Color fg, Runnable onClick);
         }
-        confirmButton =
-                ConfirmCancel.styledButton(confirmLabel, HEALTHY, new Color(0xD8, 0xF4, 0xEC), this::onConfirm);
-        cancelButton =
-                ConfirmCancel.styledButton("Cancel", TRACK, FG_MUTED, this::onCancel);
+        ConfirmCancelFactory ccf = (txt, bg, fg, onClick) ->
+                button(txt, bg, onClick).withText(Font.BOLD, 12f, fg).component();
+
+        confirmButton = ccf.getStyledButton(confirmLabel, HEALTHY, new Color(0xD8, 0xF4, 0xEC), this::onConfirm);
+        cancelButton = ccf.getStyledButton("Cancel", TRACK, FG_MUTED, this::onCancel);
 
         fluent(buttonRow).collect(confirmButton, spacer(8, 0), cancelButton);
 
@@ -131,6 +128,16 @@ public abstract class ActionFormPanel extends JPanel {
         header.repaint();
     }
 
+    protected JPanel getLabeledRow(String labelText, ValidatedField input) {
+        return newArrangedAs(BORDER, 12, 0)
+                .borderCollect(
+                        west(label(labelText).muted().withPreferredSize(110, 30)),
+                        center(input)
+                ).withMaximumSize(Integer.MAX_VALUE, 45)
+                .withMinimumSize(0, 45)
+                .transparent().onLeft().component();
+    }
+
     protected LabeledField addLabeledField(JPanel container, String labelText, String placeholder) {
         JLabel label = label(labelText).muted()
                 .withPreferredSize(110, 0).component();
@@ -138,7 +145,7 @@ public abstract class ActionFormPanel extends JPanel {
         ValidatedField field = new ValidatedField(placeholder, this::refreshButtons);
 
         JPanel row = newArrangedAs(BORDER, 12, 0)
-                .collect(label, field)
+                .borderCollect(west(label), center(field))
                 .transparent()
                 .onLeft()
                 .withMaximumSize(Integer.MAX_VALUE, 52)

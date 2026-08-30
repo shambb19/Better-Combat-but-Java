@@ -1,10 +1,10 @@
 package combat_menu.action_panel;
 
 import _global_list.Resource;
+import _manager.EncounterManager;
+import _manager.InspirationManager;
 import lombok.*;
 import lombok.experimental.*;
-import manager.EncounterManager;
-import manager.InspirationManager;
 import org.intellij.lang.annotations.MagicConstant;
 import util.Locators;
 
@@ -17,10 +17,10 @@ import java.util.List;
 import static _global_list.Resource.*;
 import static combat_menu.action_panel.ActionPanel.ATTACK_OPTION;
 import static combat_menu.action_panel.ActionPanel.HEAL_OPTION;
-import static format.ColorStyles.*;
-import static format.swing_comp.SwingComp.fluent;
-import static format.swing_comp.SwingPane.ONE_COLUMN;
-import static format.swing_comp.SwingPane.fluent;
+import static swing.ColorStyles.*;
+import static swing.fluent.SwingComp.fluent;
+import static swing.fluent.SwingPane.ONE_COLUMN;
+import static swing.fluent.SwingPane.fluent;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @ExtensionMethod(ActionButtons.class)
@@ -87,10 +87,6 @@ public class ActionButtons extends JPanel {
             setIcon(new ImageIcon(resized));
             setBackground(BACKGROUND);
             setMargin(new Insets(20, 20, 20, 20));
-            addActionListener(e -> {
-                addHighlight(SELECTION);
-                runnable.run();
-            });
 
             fluent(this)
                     .withAction(b -> {
