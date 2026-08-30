@@ -1,17 +1,22 @@
 package combat_menu;
 
 import __main.Main;
+import _manager.EncounterManager;
 import combat_menu.action_panel.ActionPanel;
 import combat_menu.action_panel.form.ActionFormPanel;
 import combat_menu.encounter_info.EncounterListPanel;
 import combat_menu.encounter_info.HealthBarPanel;
+import combat_object.combatant.Combatant;
 import lombok.*;
 import lombok.experimental.*;
 import org.intellij.lang.annotations.MagicConstant;
 import swing.custom.MainFrame;
 import swing.fluent.SwingPane;
 
+import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import static swing.fluent.SwingPane.*;
 
@@ -31,6 +36,7 @@ public class CombatMenu extends MainFrame {
     {
         setTitle(TITLE);
 
+        JMenuItem mapItem = CombatMapView.createMenuItem();
         setJMenuBar(new CombatMenuBar());
 
         InspirationBar excessInspirationBar = new InspirationBar();
@@ -42,6 +48,12 @@ public class CombatMenu extends MainFrame {
                         center(actionPanel), east(encounterListPanel),
                         south(excessInspirationBar)
                 ).withEmptyBorder(10);
+
+        List<Combatant> combatants = new ArrayList<>();
+        combatants.addAll(EncounterManager.getParty());
+        combatants.addAll(EncounterManager.getEncounter().getFriendlies());
+        combatants.addAll(EncounterManager.getEncounter().getEnemies());
+        CombatMapView.openPlacement(this, combatants, mapItem);
 
         setVisible(true);
     }

@@ -1,9 +1,9 @@
 package popup;
 
 import __main.Main;
+import _manager.EncounterManager;
 import combat_object.combatant.PC;
 import input.CampaignWriter;
-import manager.EncounterManager;
 import org.jetbrains.annotations.NotNull;
 import swing.custom.Popup;
 import util.Message;
@@ -38,13 +38,14 @@ public class CombatEndPopup extends Popup {
         getContentPane().setBackground(BACKGROUND);
         setLayout(new BorderLayout());
         getRootPane().setBorder(BorderFactory.createLineBorder(TRACK, 1));
+        setAlwaysOnTop(false);
 
-        Color titleForeground = FOREGROUND;
-        if (endType.equals("VICTORY")) {
-            titleForeground = HEALTHY;
-        } else if (endType.equals("DEFEAT")) {
-            titleForeground = CRITICAL;
-        }
+        Color titleForeground = switch (endType) {
+            case "VICTORY" -> HEALTHY;
+            case "DEFEAT" -> CRITICAL;
+            default -> FOREGROUND;
+        };
+
         setTitle(endType);
 
         // top bar with the title text (victory or defeat or whatever)

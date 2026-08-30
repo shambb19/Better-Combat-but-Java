@@ -15,7 +15,7 @@ public class GlobalList<T extends CombatObject> {
             var inputs = CampaignReader.getInstancesFromCode(url, type);
             list.addAll(inputs);
         } catch (java.io.IOException e) {
-            Message.showFileErrorMessage(e);
+            Message.showFileErrorMessage(e, Message.READ_ERROR);
         }
     }
 

@@ -26,6 +26,10 @@ public class Combatants extends GlobalList<Combatant> {
         );
     }
 
+    public static List<Combatant> getAll() {
+        return INSTANCE.list;
+    }
+
     public static List<Combatant> getFriendlies() {
         return Filterable.of(INSTANCE.list).filteredByAsList(c -> !c.isEnemy());
     }

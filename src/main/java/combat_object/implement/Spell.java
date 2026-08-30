@@ -1,16 +1,16 @@
 package combat_object.implement;
 
 import combat_object.combatant.info.AbilityModifier;
-import exception.InvalidParameterException;
-import input.Key;
 import input.TextReader;
+import input.syntax.Key;
 import lombok.*;
 import lombok.experimental.*;
+import util.Roll;
 
 import java.util.EnumMap;
 import java.util.Objects;
 
-import static input.Key.*;
+import static input.syntax.Key.*;
 
 @Getter @SuperBuilder
 @ExtensionMethod(TextReader.class)
@@ -37,16 +37,12 @@ public class Spell extends Implement {
     }
 
     public static Spell from(EnumMap<Key, Object> params) {
-        params.forEach((key, value) -> {
-            if (!key.isValid(value)) throw new InvalidParameterException("Spell", key, value);
-        });
+        validateAll(params, "Spell");
 
         String name = (String) params.get(NAME);
-
         return Spell.builder()
                 .name(name)
-                .numDice(TextReader.getNumDice((String) params.get(DMG)))
-                .dieSize(TextReader.getDieSize((String) params.get(DMG)))
+                .roll(Roll.ofString((String) params.get(DMG)))
                 .stat((AbilityModifier) params.get(STAT))
                 .effect((Effect) params.get(EFFECT))
                 .requiresConcentration(params.get(CONCENTRATION).booleanFromOptionalPresence())
@@ -57,8 +53,7 @@ public class Spell extends Implement {
     public static Spell createManual(String name) {
         return Spell.builder()
                 .name(name)
-                .numDice(1)
-                .dieSize(100)
+                .roll(Roll.implementDefault())
                 .stat(null)
                 .effect(Effect.NONE)
                 .isManual(true)

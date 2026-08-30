@@ -1,5 +1,6 @@
 package combat_object.combatant;
 
+import _manager.EffectManager;
 import combat_object.CombatObject;
 import combat_object.combatant.info.AbilityModifier;
 import combat_object.combatant.info.LifeStatus;
@@ -7,9 +8,9 @@ import combat_object.combatant.info.Stats;
 import combat_object.implement.*;
 import lombok.*;
 import lombok.experimental.*;
-import manager.EffectManager;
 import swing.ColorStyles;
 import util.Filterable;
+import util.Roll;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -24,9 +25,10 @@ public abstract class Combatant extends CombatObject {
     @Builder.Default final RollTracker rollTracker = new RollTracker();
     @Builder.Default final Stats stats = Stats.defaultStats();
     @Builder.Default final ArrayList<Implement> implementList = new ArrayList<>();
-    int armorClass;
+    final int armorClass;
     int maxHp, hp;
     final boolean isEnemy;
+    final boolean isArmored;
     @Builder.Default protected int initiative = 0;
     @Builder.Default protected int numInspirationUsed = 0;
 
@@ -34,8 +36,8 @@ public abstract class Combatant extends CombatObject {
         numInspirationUsed++;
     }
 
-    public void logRoll(int roll, int numDice, int dieSize) {
-        rollTracker.logRoll(roll, numDice, dieSize);
+    public void logRoll(int result, Roll roll) {
+        rollTracker.logRoll(result, roll);
     }
 
     public double getLuckScore() {
@@ -53,6 +55,8 @@ public abstract class Combatant extends CombatObject {
     public void damage(int damage) {
         if (damage <= 0) throw new IndexOutOfBoundsException("Combatant.damage: hp val >= 0 expected");
 
+        if (isArmored) damage = Math.max(0, damage - 2);
+
         hp = Math.max(0, hp - damage);
         if (hp == 0)
             lifeStatus.setDefeated(this);
@@ -66,7 +70,7 @@ public abstract class Combatant extends CombatObject {
 
     public Color getHealthBarColor() {
         if (isEnemy) return ColorStyles.UNKNOWN;
-        if (!lifeStatus.isConscious()) return Color.BLACK;
+        if (isUnconscious()) return Color.BLACK;
 
         double ratio = getHpRatio();
         if (ratio > 0.6) return ColorStyles.HEALTHY;
@@ -125,6 +129,18 @@ public abstract class Combatant extends CombatObject {
         };
     }
 
+    public boolean isConscious() {
+        return lifeStatus.isConscious();
+    }
+
+    public boolean isUnconscious() {
+        return lifeStatus.isUnconscious();
+    }
+
+    public boolean isDead() {
+        return lifeStatus.isDead();
+    }
+
     public ArrayList<String> toTxt() {
         ArrayList<String> txt = new ArrayList<>();
         switch (this) {
@@ -139,14 +155,29 @@ public abstract class Combatant extends CombatObject {
         return txt;
     }
 
+    public String getAbbreviation() {
+        String[] nameParts = name.split(" ");
+        boolean nameHasNumber;
+        try {
+            Integer.parseInt(nameParts[nameParts.length - 1]);
+            nameHasNumber = true;
+        } catch (NumberFormatException ignored) {
+            nameHasNumber = false;
+        }
+        if (nameHasNumber) {
+            return nameParts[0].substring(0, 1).toUpperCase() + " " + nameParts[nameParts.length - 1];
+        }
+        return nameParts[0].substring(0, 3);
+    }
+
     public static class RollTracker {
 
         final double[] rollStats = new double[]{0.0, 5.0};
 
-        public void logRoll(int roll, int diceCount, int dieSize) {
-            double expectedAverage = diceCount * ((dieSize + 1) / 2.0);
+        public void logRoll(int result, Roll roll) {
+            double expectedAverage = roll.getNumDice() * ((roll.getDieSize() + 1) / 2.0);
 
-            double netLuck = roll - expectedAverage;
+            double netLuck = result - expectedAverage;
 
             rollStats[0] += netLuck;
             rollStats[1]++;

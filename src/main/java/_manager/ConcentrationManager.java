@@ -1,4 +1,4 @@
-package manager;
+package _manager;
 
 import combat_object.combatant.Combatant;
 import combat_object.implement.Effect;
@@ -29,7 +29,7 @@ import java.util.List;
         if (concentration == null) return;
 
         Effect endedEffect = concentration.spell.getEffect();
-        EffectManager.removeEffectOn(concentration.on, endedEffect);
+        EffectManager.removeEffect(concentration.on, endedEffect);
     }
 
     public boolean isCombatantConcentrating(Combatant query) {

@@ -4,18 +4,27 @@ import combat_object.CombatObject;
 import combat_object.combatant.info.AbilityModifier;
 import lombok.*;
 import lombok.experimental.*;
+import util.Roll;
+import util.StringUtil;
 
 @EqualsAndHashCode(callSuper = true) @Getter
 @Data @SuperBuilder
 @FieldDefaults(makeFinal = true, level = AccessLevel.PROTECTED)
 public abstract class Implement extends CombatObject {
 
-    int numDice, dieSize;
+    Roll roll;
     AbilityModifier stat;
     boolean isManual;
 
     public String damageString() {
-        return util.StringUtil.stringIfElseBlank(numDice + "d" + dieSize, !isManual);
+        return StringUtil.stringIfElseBlank(roll.toString(), !isManual);
+    }
+
+    public String damageString(boolean isHalfDamage) {
+        if (isHalfDamage) {
+            return new Roll(roll.getNumDice() / 2, roll.getDieSize()).toString();
+        }
+        return damageString();
     }
 
     public boolean effectEquals(Effect o) {

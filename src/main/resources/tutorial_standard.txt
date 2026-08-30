@@ -1,0 +1,29 @@
+~ Tutorial Code for the ruleset.standard syntax:
+
+~ At least one party member, enemy, and scenario are required
+~ for a campaign to be complete.
+
+config<<open     ~ when using a default setting like
+ruleset.standard ~ ruleset.standard, the config block is
+config<<close    ~ encouraged but not required
+
+.party Frodo Baggins ~ put the name on the header line
+hp: 11/18 ~ hp can be listed as a fraction or int
+ac: 14
+level: 4
+class: paladin
+~ when a list is required, it should be typed in the standard
+~ java list print formatting as below
+stats: [STR: 14, DEX: 11, CON: 18, INT: 13, WIS: 16, CHA: 13]
+weapons: [Longsword]
+
+.enemy Orc
+hp: 12
+ac: 16
+
+~ note that scenarios will automatically include all party
+~ items, but npcs must be added manually
+~
+~ set the quantity of npcs with _n
+.scenario Flight to the Ford
+against: [Orc_12]

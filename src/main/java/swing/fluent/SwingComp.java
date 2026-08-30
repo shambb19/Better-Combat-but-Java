@@ -10,6 +10,7 @@ import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Optional;
@@ -108,23 +109,6 @@ public class SwingComp<E extends JComponent> {
         return SwingComp.fluent(button)
                 .withBackground(bg)
                 .applied(b -> Optional.ofNullable(actionListener).ifPresent(a -> b.addActionListener(e -> a.run())));
-    }
-
-    public static SwingComp<JToggleButton> toggleButton(
-            String text1, @FilteredVals.Color Color color1, // unselected
-            String text2, @FilteredVals.Color Color color2 // selected
-    ) {
-        JToggleButton button = new JToggleButton(text1, false);
-        return fluent(button)
-                .withBackground(color1)
-                .withAction(b -> {
-                    b.setText(b.isSelected() ? text2 : text1);
-                    b.setBackground(b.isSelected() ? color2 : color1);
-                });
-    }
-
-    public static <T> SwingComp<JComboBox<T>> comboBox(T[] contents) {
-        return new SwingComp<>(new JComboBox<>(contents));
     }
 
     public static SwingComp<JScrollPane> scrollPane(Component contents) {
@@ -246,9 +230,12 @@ public class SwingComp<E extends JComponent> {
     }
 
     public SwingComp<E> withAction(Consumer<E> action) {
-        if (!(component instanceof AbstractButton button))
-            throw new ClassCastException("SwingComp.withAction$Consumer: AbstractButton expected");
-        button.addActionListener(e -> action.accept(component));
+        ActionListener l = e -> action.accept(component);
+
+        if (component instanceof AbstractButton b) b.addActionListener(l);
+        else if (component instanceof JComboBox<?> c) c.addActionListener(l);
+        else throw new ClassCastException("SwingComp.withAction: AbstractButton or JComboBox expected");
+
         return this;
     }
 
@@ -276,16 +263,16 @@ public class SwingComp<E extends JComponent> {
         return this;
     }
 
-    public SwingComp<E> withPreferredSize(int width, int height) {
-        component.setPreferredSize(new Dimension(width, height));
+    public SwingComp<E> withMinimumSize(int width, int height) {
+        component.setMinimumSize(new Dimension(width, height));
         component.revalidate();
         return this;
     }
 
-    public SwingComp<JPanel> withCancelOption(Runnable onCancel) {
-        if (!(component instanceof JButton)) throw new ClassCastException();
-
-        return SwingPane.newArrangedAs(SwingPane.FLOW).collect(component, button("Cancel", CRITICAL, onCancel));
+    public SwingComp<E> withPreferredSize(int width, int height) {
+        component.setPreferredSize(new Dimension(width, height));
+        component.revalidate();
+        return this;
     }
 
     public SwingComp<E> applied(Consumer<E> action) {

@@ -4,9 +4,7 @@ import _global_list.Combatants;
 import combat_object.CombatObject;
 import combat_object.combatant.Combatant;
 import combat_object.combatant.NPC;
-import exception.InvalidParameterException;
-import input.Key;
-import input.TextReader;
+import input.syntax.Key;
 import lombok.*;
 import lombok.experimental.*;
 import util.Filterable;
@@ -15,10 +13,11 @@ import util.Message;
 
 import java.util.*;
 
-import static input.Key.*;
+import static input.syntax.Key.*;
 
 @EqualsAndHashCode(callSuper = true) @Value
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+@ExtensionMethod(input.TextReader.class)
 @SuperBuilder
 public class Scenario extends CombatObject {
 
@@ -33,31 +32,28 @@ public class Scenario extends CombatObject {
     }
 
     public static Scenario from(EnumMap<Key, Object> params) {
-        params.forEach((key, value) -> {
-            if (!key.isValid(value)) throw new InvalidParameterException("Scenario", key, value);
-        });
-
-        String name = (String) params.get(NAME);
+        validateAll(params, "Scenario");
 
         class Helper {
             HashMap<String, Integer> namesFromString(String list) {
                 HashMap<String, Integer> result = new HashMap<>();
                 if (list == null) return result;
-                for (String str : TextReader.listTextAsArray(list))
-                    result.put(TextReader.getName(str), TextReader.getQty(str));
+                for (String str : list.listTextAsArray())
+                    result.put(str.getNameScenario(), str.getQty());
 
                 return result;
             }
         }
-        Helper $Helper = new Helper();
+        Helper h = new Helper();
 
-        var with = $Helper.namesFromString((String) params.get(WITH));
-        var against = $Helper.namesFromString((String) params.get(AGAINST));
+        String name = (String) params.get(NAME);
+        var with = h.namesFromString((String) params.get(WITH));
+        var against = h.namesFromString((String) params.get(AGAINST));
 
         return create(name, with, against);
     }
 
-    public ArrayList<NPC> list(boolean isFriendlies, boolean isSingleOccurrences) {
+    public ArrayList<NPC> npcList(boolean isFriendlies, boolean isSingleOccurrences) {
         HashMap<String, Integer> team = isFriendlies ? with : against;
 
         Filterable<Combatant> sourceFilterable = isFriendlies

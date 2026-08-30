@@ -103,11 +103,6 @@ public class Stats {
         return stats.get(stat);
     }
 
-    public void increment(@NonNull AbilityModifier stat) {
-        int newVal = get(stat) + 1;
-        stats.put(stat, newVal);
-    }
-
     public static Stats from(Object statsObj, Object class5eObj, Object levelObj) {
         Class5e class5e = (Class5e) class5eObj;
         int level = (int) levelObj;

@@ -62,8 +62,7 @@ stat: str
 dmg: 1d8
 stat: str
 
-.weapon
-name: Glaive
+.weapon Glaive
 dmg: 1d10
 stat: str
 

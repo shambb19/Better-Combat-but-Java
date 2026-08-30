@@ -1,4 +1,4 @@
-package manager;
+package _manager;
 
 import combat_object.combatant.Combatant;
 import combat_object.implement.Gun;
@@ -28,7 +28,7 @@ public class MisfireManager {
         misfire.combatant.getImplementList().remove(misfire.gun);
     }
 
-    public static List<Misfire> getMisfiresForActive() {
+    public static List<Misfire> getCurrentCombatantMisfires() {
         return activeMisfires.stream().filter(
                 m -> m.combatant.equals(EncounterManager.getCurrentCombatant())
         ).toList();

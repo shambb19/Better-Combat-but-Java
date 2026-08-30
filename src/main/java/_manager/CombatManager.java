@@ -1,10 +1,10 @@
-package manager;
+package _manager;
 
 import __main.Main;
 import combat_menu.action_panel.ActionPanel;
 import combat_object.combatant.Combatant;
 import combat_object.implement.Implement;
-import config.Config;
+import config.ruleset.AttackResult;
 import lombok.*;
 import lombok.experimental.*;
 import util.StringUtil;
@@ -42,8 +42,8 @@ public class CombatManager {
         });
     }
 
-    public boolean logAttack(Combatant target, int roll, Implement implement) {
-        return Config.getRuleset().logAttack(target, implement, roll);
+    public AttackResult logAttack(Combatant target, int roll, Implement implement) {
+        return Main.getRuleset().logAttack(target, implement, roll);
     }
 
     public void finishAction() {
@@ -57,11 +57,11 @@ public class CombatManager {
 
     public void logDamage(Combatant target, Implement implement,
                           int roll, int bonus) {
-        Config.getRuleset().logDamage(target, implement, roll, bonus);
+        Main.getRuleset().logDamage(target, implement, roll, bonus);
 
         Combatant attacker = EncounterManager.getCurrentCombatant();
 
-        if (target.getLifeStatus().isConscious())
+        if (target.isConscious())
             logAction(DAMAGE_MESSAGE.apply(roll + bonus), attacker, target);
         else
             logAction(DEFEATED_MESSAGE, attacker, target);

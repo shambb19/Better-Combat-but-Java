@@ -1,0 +1,26 @@
+~ Tutorial Code for the ruleset.steampunk syntax:
+~ Item requirements are the same as standard
+
+~ config blocks are required for nonstandard settings
+config<<open
+ruleset.steampunk
+config<<close
+
+~ note that hp and ac are not valid parameters but can be
+~ modified by tags (see the tag dropdown for more info)
+.party<armored Jayce Talis
+level: 4
+class: paladin
+stats: [STR: 17, DEX: 14, CON: 15, INT: 16, WIS: 11, CHA: 12]
+weapons: [Mace]
+
+.npc Heimerdinger ~ simplified input lets you do one-liner
+                  ~ npcs, which is super neat
+.enemy<special Sevika
+hp: 22
+
+.enemy Shimmer Addict
+
+.scenario Zaun Brawl
+with: [Heimerdinger]
+against: [Sevika, Shimmer Addict_4]

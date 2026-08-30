@@ -1,46 +1,54 @@
 package config.ruleset;
 
 import __main.Main;
+import _manager.EffectManager;
+import _manager.EncounterManager;
 import combat_object.combatant.Combatant;
 import combat_object.combatant.info.AbilityModifier;
+import combat_object.combatant.info.Class5e;
 import combat_object.implement.Effect;
 import combat_object.implement.Implement;
 import combat_object.implement.Spell;
 import combat_object.implement.Weapon;
+import config.queue.PlayerQueue;
+import config.queue.SteampunkQueue;
 import exception.InvalidParameterException;
-import input.Key;
-import input.Tag;
 import input.TextReader;
-import manager.EffectManager;
-import manager.EncounterManager;
+import input.syntax.Key;
+import input.syntax.Tag;
+import util.Roll;
 
 import javax.swing.*;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Set;
 
+import static config.ruleset.AttackResult.SUCCEEDED;
+
 public class StandardRuleset implements Ruleset {
-    @Override public boolean logAttack(Combatant target, Implement implement, int roll) {
+
+    @Override public AttackResult logAttack(Combatant target, Implement implement, int roll) {
         Combatant attacker = EncounterManager.getCurrentCombatant();
 
         boolean autoHits = implement instanceof Spell s && s.doesNotRequireAttackRoll();
-
         if (!autoHits) {
             if (implement instanceof Spell s && s.hasSave()) {
-                target.logRoll(roll, 1, 20);
+                target.logRoll(roll, Roll.d20());
 
-                EffectManager.removeEffectOn(target, Effect.PENALTY_SAVE);
-            } else
-                attacker.logRoll(roll, 1, 20);
+                EffectManager.removeEffect(target, Effect.PENALTY_SAVE);
+            } else {
+                attacker.logRoll(roll, Roll.d20());
+            }
         }
 
-        boolean hit = Ruleset.isAttackSuccess(attacker, target, implement, roll);
-        boolean continues = hit;
+        AttackResult continues = Ruleset.getAttackResult(attacker, target, implement, roll);
+        boolean hit = continues == SUCCEEDED;
+
         if (!hit && implement instanceof Spell s) {
-            continues = s.dealsHalfDamageAnyways() || autoHits;
+            if (s.dealsHalfDamageAnyways() || autoHits) continues = SUCCEEDED;
         }
 
-        if (continues) {
+        if (continues == SUCCEEDED) {
             EffectManager.logEffect(target, attacker, implement);
 
             SwingUtilities.invokeLater(() ->
@@ -56,7 +64,7 @@ public class StandardRuleset implements Ruleset {
         Combatant attacker = EncounterManager.getCurrentCombatant();
 
         if (!implement.isManual())
-            attacker.logRoll(roll, implement.getNumDice(), implement.getDieSize());
+            attacker.logRoll(roll, implement.getRoll());
 
         if (implement.effectEquals(Effect.STAT_DROP)) {
             target.getStats().put(AbilityModifier.INT, 1);
@@ -75,7 +83,19 @@ public class StandardRuleset implements Ruleset {
         if (hp > maxHp) throw new InvalidParameterException("PC", "hp", hp, "hp <= hpMax");
     }
 
+    @Override public PlayerQueue getPlayerQueue(List<Combatant> friendlies, List<Combatant> enemies) {
+        return new SteampunkQueue(friendlies, enemies);
+    }
+
     @Override public List<Class<? extends Implement>> getAllowedImplementClasses() {
         return List.of(Weapon.class, Spell.class);
+    }
+
+    @Override public List<Class5e> getAllowedClasses() {
+        return List.of(Class5e.values());
+    }
+
+    @Override public String getConfigLine() {
+        return "ruleset.standard";
     }
 }

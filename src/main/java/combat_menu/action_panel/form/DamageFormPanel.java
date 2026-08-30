@@ -1,12 +1,12 @@
 package combat_menu.action_panel.form;
 
+import _manager.CombatManager;
+import _manager.EffectManager;
 import combat_object.combatant.Combatant;
 import combat_object.implement.Effect;
 import combat_object.implement.Implement;
 import lombok.*;
 import lombok.experimental.*;
-import manager.CombatManager;
-import manager.EffectManager;
 import swing.ColorStyles;
 import swing.custom.ValidatedField;
 import util.StringUtil;
@@ -16,7 +16,8 @@ import java.awt.*;
 import java.util.Optional;
 
 import static combat_object.implement.Effect.*;
-import static swing.fluent.SwingPane.*;
+import static swing.fluent.SwingPane.fluent;
+import static swing.fluent.SwingPane.spacer;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @ExtensionMethod(StringUtil.class)
@@ -37,9 +38,9 @@ public class DamageFormPanel extends ActionFormPanel {
     JPanel bonusRow;
 
     public DamageFormPanel(Combatant target, Implement implement, boolean attackSucceeded) {
-        super("Apply "
-                + ((!attackSucceeded) ? (implement.getNumDice() / 2) + "d" + implement.getDieSize() : implement.damageString())
-                + " Damage", target);
+        super("Apply" + implement.damageString(!attackSucceeded) + " Damage", target);
+
+        // FIXME input line does not appear
 
         this.implement = implement;
         this.attackFailed = !attackSucceeded;
@@ -51,21 +52,29 @@ public class DamageFormPanel extends ActionFormPanel {
     }
 
     @Override protected void buildFields() {
-        LabeledField amountLF = addLabeledField(fieldsPanel, "Damage Amount", "Enter Damage Amount");
-        amountField = amountLF.field();
+        amountField = new ValidatedField("Enter Damage Amount", this::refreshButtons);
         amountField.setValidator(s -> {
             int v = s.toInt();
-            return v >= 0 && v <= calculateMaxDamage();
+            return v >= 0 && v <= getMaxDamage();
         });
+        JPanel amountRow = getLabeledRow("Damage Amount", amountField);
 
-        JCheckBox bonusCheck = styledCheckbox();
-        bonusCheck.addActionListener(e -> toggleBonusRow(bonusCheck.isSelected(), fieldsPanel));
+        JCheckBox bonusCheck = fluent(new JCheckBox("Add bonus damage"))
+                .withAction(b -> toggleBonusRow(b.isSelected(), fieldsPanel))
+                .withDerivedFont(Font.PLAIN, 12f)
+                .withForeground(ColorStyles.FG_MUTED)
+                .transparent()
+                .component();
 
-        bonusRow = buildBonusRow();
+        bonusField = new ValidatedField("Bonus Damage", this::refreshButtons);
+        bonusField.setValidator(s -> s.toInt() > 0);
+        bonusRow = getLabeledRow("Bonus Damage", bonusField);
         bonusRow.setVisible(false);
 
         fluent(fieldsPanel).collect(
-                spacer(0, 10), checkboxRow(bonusCheck), spacer(0, 6), bonusRow, spacer(0, 12)
+                amountRow, spacer(0, 10),
+                checkboxRow(bonusCheck), spacer(0, 6),
+                bonusRow, spacer(0, 12)
         );
 
         addNotices();
@@ -116,9 +125,9 @@ public class DamageFormPanel extends ActionFormPanel {
         return (n != Integer.MIN_VALUE) ? n : 0;
     }
 
-    private int calculateMaxDamage() {
-        int numDice = implement.getNumDice();
-        int dieSize = implement.getDieSize();
+    private int getMaxDamage() {
+        int numDice = implement.getRoll().getNumDice();
+        int dieSize = implement.getRoll().getNumDice();
 
         if (attackFailed)
             numDice /= 2;
@@ -133,42 +142,13 @@ public class DamageFormPanel extends ActionFormPanel {
         return max;
     }
 
-    private static JCheckBox styledCheckbox() {
-        JCheckBox cb = new JCheckBox("Add bonus damage");
-        cb.setFont(cb.getFont().deriveFont(Font.PLAIN, 12f));
-        cb.setForeground(ColorStyles.FG_MUTED);
-        cb.setOpaque(false);
-        cb.setFocusPainted(false);
-        cb.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        return cb;
-    }
-
     private void toggleBonusRow(boolean show, JPanel container) {
         bonusRow.setVisible(show);
-        if (!show)
-            Optional.ofNullable(bonusField).ifPresent(ValidatedField::clear);
+        if (!show) Optional.ofNullable(bonusField).ifPresent(ValidatedField::clear);
 
         container.revalidate();
         container.repaint();
         refreshButtons();
-    }
-
-    private JPanel buildBonusRow() {
-        JPanel row = newArrangedAs(BORDER, 12, 0)
-                .transparent().onLeft().component();
-
-        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 45));
-        row.setMinimumSize(new Dimension(0, 45));
-
-        JLabel lbl = label("Bonus damage").muted().component();
-
-        lbl.setPreferredSize(new Dimension(110, 30));
-
-        row.add(lbl, BorderLayout.WEST);
-
-        bonusField = new ValidatedField("Enter Bonus Damage", this::refreshButtons);
-        row.add(bonusField, BorderLayout.CENTER);
-        return row;
     }
 
     private static JPanel checkboxRow(JCheckBox cb) {

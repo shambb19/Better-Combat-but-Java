@@ -1,6 +1,7 @@
 package combat_menu.action_panel;
 
 import __main.Main;
+import _manager.EncounterManager;
 import combat_menu.CombatantHeaderPanel;
 import combat_menu.action_panel.form.AttackFormPanel;
 import combat_menu.action_panel.form.DamageFormPanel;
@@ -10,7 +11,6 @@ import combat_object.combatant.Combatant;
 import combat_object.implement.Implement;
 import lombok.*;
 import lombok.experimental.*;
-import manager.EncounterManager;
 import org.intellij.lang.annotations.MagicConstant;
 
 import javax.swing.*;

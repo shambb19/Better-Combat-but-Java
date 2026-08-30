@@ -8,9 +8,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Retention(RetentionPolicy.SOURCE)
-@Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.LOCAL_VARIABLE, ElementType.METHOD})
-public @interface FilteredVals {
+@Retention(RetentionPolicy.SOURCE) @Target(ElementType.PARAMETER) public @interface FilteredVals {
     @MagicConstant(intValues = {Font.PLAIN, Font.BOLD, Font.ITALIC}) @interface Fonts {}
 
     @MagicConstant(valuesFromClass = BorderLayout.class) @interface Border {}

@@ -1,8 +1,8 @@
 package popup;
 
+import _manager.ConcentrationManager;
+import _manager.EffectManager;
 import combat_object.combatant.Combatant;
-import manager.ConcentrationManager;
-import manager.EffectManager;
 import swing.custom.Popup;
 import util.Message;
 
@@ -86,7 +86,7 @@ public class SpellManagerPopup extends Popup {
 
             button("End Effect", SPELL,
                     () -> {
-                        EffectManager.removeEffectOn(effect.by(), effect.effect());
+                        EffectManager.removeEffect(effect.by(), effect.effect());
                         panel.remove(effectRow);
                         panel.revalidate();
                         panel.repaint();

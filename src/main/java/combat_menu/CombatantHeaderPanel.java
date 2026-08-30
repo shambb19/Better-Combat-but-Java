@@ -6,6 +6,7 @@ import lombok.*;
 import lombok.experimental.*;
 import swing.ColorStyles;
 import swing.fluent.SwingPane;
+import util.Filterable;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -72,10 +73,7 @@ public class CombatantHeaderPanel extends JPanel {
                 statRow, spacer(0, 12),
                 rollRow
         );
-        // yet another absolutely heinous solution. Hey, as long as it works??
-        for (Component c : getComponents())
-            if (c instanceof JComponent j)
-                j.setAlignmentX(LEFT_ALIGNMENT);
+        Filterable.of(getComponents()).castToAsList(JComponent.class).forEach(j -> j.setAlignmentX(LEFT_ALIGNMENT));
 
         refresh();
     }

@@ -1,7 +1,6 @@
 package swing.custom;
 
-import config.Config;
-import swing.ColorStyles;
+import exception.InvalidSyntaxError;
 import swing.fluent.SwingPane;
 import util.StringUtil;
 
@@ -11,8 +10,9 @@ import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.util.function.Predicate;
 
+import static swing.ColorStyles.*;
 import static swing.fluent.SwingComp.fluent;
-import static swing.fluent.SwingPane.newArrangedAs;
+import static swing.fluent.SwingPane.*;
 
 @lombok.experimental.ExtensionMethod(StringUtil.class)
 public class ValidatedField extends JPanel {
@@ -25,18 +25,20 @@ public class ValidatedField extends JPanel {
         this(placeholder, onChange);
         validator = s -> {
             if (s.isBlank()) return false;
-            int intValue = s.toInt();
-            return intValue > 0 && intValue <= maxValue;
+            try {
+                int intValue = s.toInt();
+                return intValue > -5 && intValue <= maxValue;
+            } catch (InvalidSyntaxError ignored) {
+                return false;
+            }
         };
     }
 
     public ValidatedField(String placeholder, Runnable onChange) {
-        JTextComponent inputField = Config.isDamageHidden() ? new JPasswordField() : new JTextField();
-
-        field = fluent(inputField)
-                .withBackground(ColorStyles.TRACK)
+        field = fluent(new JTextField())
+                .withBackground(TRACK)
                 .withDerivedFont(Font.PLAIN, 13f)
-                .withPaddedBorder(new LineBorder(ColorStyles.DIVIDER, 1), 5, 8, 5, 8)
+                .withPaddedBorder(new LineBorder(DIVIDER, 1), 5, 8, 5, 8)
                 .applied(f -> f.putClientProperty("JTextField.placeholderText", placeholder))
                 .onLeft()
                 .in(this);
@@ -44,14 +46,14 @@ public class ValidatedField extends JPanel {
         Component gap = Box.createVerticalStrut(2);
         if (gap instanceof JComponent c) c.setAlignmentX(0.0f);
 
-        bar = newArrangedAs(SwingPane.FLOW)
+        bar = newArrangedAs(FLOW)
                 .withPreferredSize(0, 2)
                 .withMaximumSize(Integer.MAX_VALUE, 2)
-                .withBackground(ColorStyles.TRACK)
+                .withBackground(TRACK)
                 .onLeft()
                 .component();
 
-        SwingPane.fluent(this).arrangedAs(SwingPane.VERTICAL_BOX).collect(field, gap, bar).transparent();
+        SwingPane.fluent(this).arrangedAs(VERTICAL_BOX).collect(field, gap, bar).transparent();
 
         field.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
             public void insertUpdate(javax.swing.event.DocumentEvent e) {
@@ -78,16 +80,16 @@ public class ValidatedField extends JPanel {
         String text = getValue();
         Color barColor;
         if (text.isEmpty())
-            barColor = ColorStyles.TRACK;
+            barColor = TRACK;
         else if (validator.test(text))
-            barColor = ColorStyles.HEALTHY;
+            barColor = HEALTHY;
         else
-            barColor = ColorStyles.CRITICAL;
+            barColor = CRITICAL;
         bar.setBackground(barColor);
     }
 
-    public void setEditable(boolean editable) {
-        field.setEditable(editable);
+    @Override public void setEnabled(boolean enabled) {
+        field.setEnabled(enabled);
     }
 
     public void setValue(String value) {
@@ -104,9 +106,7 @@ public class ValidatedField extends JPanel {
     }
 
     public boolean isValid() {
-        if (validator == null) return false;
-
-        return validator.test(getValue());
+        return validator != null && validator.test(getValue());
     }
 
     public void clear() {

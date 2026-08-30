@@ -1,8 +1,8 @@
 package combat_menu.action_panel.form;
 
+import _manager.InspirationManager;
 import lombok.*;
 import lombok.experimental.*;
-import manager.InspirationManager;
 import swing.ColorStyles;
 import swing.fluent.SwingComp;
 import swing.fluent.SwingPane;

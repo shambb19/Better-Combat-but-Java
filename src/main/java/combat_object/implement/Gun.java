@@ -1,14 +1,15 @@
 package combat_object.implement;
 
 import combat_object.combatant.info.AbilityModifier;
-import input.Key;
 import input.TextReader;
+import input.syntax.Key;
 import lombok.*;
 import lombok.experimental.*;
+import util.Roll;
 
 import java.util.EnumMap;
 
-import static input.Key.*;
+import static input.syntax.Key.*;
 
 @Getter @SuperBuilder
 @FieldDefaults(makeFinal = true, level = AccessLevel.PROTECTED)
@@ -21,13 +22,14 @@ public class Gun extends Implement {
     boolean isHeavy, isExplosive;
 
     public static Gun from(EnumMap<Key, Object> params) {
+        validateAll(params, "Gun");
         return Gun.builder()
                 .name((String) params.get(NAME))
-                .numDice(1).dieSize(8)
+                .roll(Roll.d(8))
                 .stat(AbilityModifier.OPTION)
                 .isManual(false)
-                .shortHitDc(params.get(RANGE_DC).beforeSlash())
-                .longHitDc(params.get(RANGE_DC).afterSlash())
+                .shortHitDc(params.get(HIT).beforeSlash())
+                .longHitDc(params.get(HIT).afterSlash())
                 .coverDc((int) params.get(COVER))
                 .misfireDc((int) params.get(MISFIRE))
                 .numShots((int) params.get(SHOTS))
@@ -39,7 +41,7 @@ public class Gun extends Implement {
     public static Gun createManual(String name) {
         return Gun.builder()
                 .name(name)
-                .numDice(1).dieSize(100)
+                .roll(Roll.implementDefault())
                 .stat(AbilityModifier.OPTION)
                 .isManual(true)
                 .shortHitDc(10).longHitDc(10)

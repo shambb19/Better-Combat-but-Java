@@ -1,12 +1,18 @@
 package popup;
 
 import combat_object.implement.Gun;
+import config.ruleset.AttackResult;
+import lombok.*;
 import lombok.experimental.*;
 import swing.custom.Popup;
 import swing.custom.ValidatedField;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
+import javax.swing.border.MatteBorder;
+import java.awt.*;
 
+import static config.ruleset.AttackResult.*;
 import static swing.ColorStyles.*;
 import static swing.fluent.SwingComp.fluent;
 import static swing.fluent.SwingComp.*;
@@ -14,82 +20,139 @@ import static swing.fluent.SwingPane.fluent;
 import static swing.fluent.SwingPane.*;
 
 @ExtensionMethod(util.StringUtil.class)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class GunAttackPopup extends Popup {
 
-    private boolean hits;
-
-    private final int roll;
-    private final Gun gun;
-    private boolean isLongRange;
-
-    private JCheckBox coverCheck;
-    private ValidatedField coverInputField;
-    private JButton confirmButton;
+    final int roll;
+    final Gun gun;
+    AttackResult hits;
+    boolean isLongRange;
+    JCheckBox coverCheck;
+    ValidatedField coverInputField;
+    JButton confirmButton;
 
     private GunAttackPopup(int roll, Gun gun) {
         this.roll = roll;
         this.gun = gun;
 
-        setTitle("Finalize Shot");
         setModalityType(DEFAULT_MODALITY_TYPE);
+        setUndecorated(true);
+        setLocationRelativeTo(null);
 
-        fluent(this).arrangedAs(ONE_COLUMN, 0, 15).collect(
-                getRangeSelectionPanel(), getCoverPanel(), getConfirmButton()
-        );
+        fluent(this).arrangedAs(BORDER).borderCollect(
+                north(getTopBar()), center(getBody()), south(getFooter())
+        ).withBorder(new LineBorder(TRACK, 1));
 
         pack();
     }
 
-    private JPanel getRangeSelectionPanel() {
-        JToggleButton rangeToggle = toggleButton("Short Range", SCENARIO, "Long Range", SPELL)
-                .withAction(b -> isLongRange = b.isSelected())
-                .component();
+    private JPanel getTopBar() {
+        JLabel finalize = label("Finalize Shot", Font.BOLD, 11f).muted().component();
 
-        return newArrangedAs(FLOW_RIGHT, 20, 0).collect(
-                "Select Attack Range:", rangeToggle
-        ).component();
+        JLabel rollIndicator = label("Roll: " + roll, Font.PLAIN, 11f).muted()
+                .withEmptyBorder(4, 8, 4, 8).component();
+
+        return newArrangedAs(BORDER).borderCollect(
+                        west(finalize), east(rollIndicator)
+                ).withBackground(BG_DARK)
+                .withBorder(new MatteBorder(0, 0, 1, 0, TRACK))
+                .component();
     }
 
-    private JPanel getCoverPanel() {
-        coverInputField = new ValidatedField("Cover Save Roll",
-                () -> confirmButton.setEnabled(coverInputField.isValid()), 12);
-
-        JPanel coverInputPanel = newArrangedAs(FLOW_RIGHT, 20, 0).collect(
-                        "Enter Cover Save Roll:", coverInputField
-                ).applied(p -> p.setVisible(false))
-                .component();
-
-        coverCheck = fluent(new JCheckBox("Target Behind Cover?"))
-                .withAction(c -> coverInputPanel.setVisible(c.isSelected()))
-                .component();
-
-        return newArrangedAs(ONE_COLUMN, 0, 10).collect(
-                coverCheck, coverInputPanel
+    private JPanel getBody() {
+        JPanel rangeRow = newArrangedAs(FLOW_LEFT, 12, 0).collect(
+                label("Attack range", Font.PLAIN, 13f).muted().component(),
+                buildRangeToggle()
         ).component();
+
+        JSeparator separator = fluent(new JSeparator(SwingConstants.HORIZONTAL))
+                .withForeground(TRACK)
+                .withMaximumSize(Integer.MAX_VALUE, 1).component();
+
+        return newArrangedAs(VERTICAL_BOX).collect(
+                rangeRow, spacer(0, 10),
+                separator, spacer(0, 10),
+                getCoverSection()
+        ).spaced().component();
     }
 
-    private JButton getConfirmButton() {
+    private JPanel getFooter() {
         confirmButton = button("Attack", SUCCESS, () -> {
             hits = calculateShotHits();
             dispose();
         }).component();
 
-        return confirmButton;
+        return newArrangedAs(FLOW_RIGHT, 5, 5).collect(confirmButton)
+                .withBackground(BG_DARK)
+                .withBorder(new MatteBorder(1, 0, 0, 0, TRACK))
+                .component();
     }
 
-    private boolean calculateShotHits() {
-        boolean hitExcludingCover = roll >= gun.getShortHitDc();
-        if (isLongRange) hitExcludingCover = roll >= gun.getLongHitDc();
+    private JPanel buildRangeToggle() {
+        JButton shortButton = button("Short", SCENARIO, null)
+                .withForeground(BG_DEEP)
+                .withPreferredSize(64, 26)
+                .component();
+        JButton longButton = button("Long", BG_DARK, null)
+                .withPreferredSize(64, 26)
+                .component();
 
-        if (!hitExcludingCover || !coverCheck.isSelected()) return hitExcludingCover;
+        shortButton.addActionListener(e -> {
+            isLongRange = false;
+            shortButton.setBackground(SCENARIO);
+            shortButton.setForeground(BG_DEEP);
+            longButton.setBackground(BACKGROUND);
+            longButton.setForeground(FOREGROUND);
+        });
+        longButton.addActionListener(e -> {
+            isLongRange = true;
+            longButton.setBackground(SCENARIO);
+            longButton.setForeground(BG_DEEP);
+            shortButton.setBackground(BACKGROUND);
+            shortButton.setForeground(FOREGROUND);
+        });
 
-        return coverInputField.getValue().toInt() < gun.getCoverDc();
+        return newArrangedAs(HORIZONTAL_BOX).collect(
+                shortButton, longButton
+        ).component();
     }
 
-    public static boolean runAndReturnHit(int roll, Gun gun) {
+    private JPanel getCoverSection() {
+        coverInputField = new ValidatedField("Cover save roll",
+                () -> confirmButton.setEnabled(coverInputField.isValid()), 12);
+        coverInputField.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JPanel inputRow = newArrangedAs(FLOW_LEFT, 12, 0).collect(
+                label("Cover save roll", Font.PLAIN, 13f).muted().component(),
+                coverInputField
+        ).applied(p -> p.setVisible(false)).component();
+
+        coverCheck = fluent(new JCheckBox("Target behind cover?"))
+                .withDerivedFont(Font.PLAIN, 13f)
+                .withAction(c -> {
+                    inputRow.setVisible(c.isSelected());
+                    if (!c.isSelected()) confirmButton.setEnabled(true);
+                    pack();
+                }).transparent().component();
+
+        return newArrangedAs(VERTICAL_BOX, 0, 8).collect(
+                coverCheck, inputRow
+        ).component();
+    }
+
+    private AttackResult calculateShotHits() {
+        int hitDc = isLongRange ? gun.getLongHitDc() : gun.getShortHitDc();
+
+        if (roll < hitDc) return SHOT_MISSED;
+        if (!coverCheck.isSelected()) return SUCCEEDED;
+
+        if (coverInputField.getValue().toInt() < gun.getCoverDc()) return SUCCEEDED;
+        return COVER_SAVE_SUCCESSFUL;
+    }
+
+    public static AttackResult runAndReturnHit(int roll, Gun gun) {
         GunAttackPopup popup = new GunAttackPopup(roll, gun);
         popup.setVisible(true);
         return popup.hits;
     }
-
 }

@@ -1,10 +1,9 @@
 package combat_object.combatant;
 
-import config.Config;
-import exception.InvalidParameterException;
-import input.Key;
-import input.Tag;
+import __main.Main;
 import input.TextReader;
+import input.syntax.Key;
+import input.syntax.Tag;
 import swing.ColorStyles;
 
 import java.awt.*;
@@ -12,7 +11,7 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Set;
 
-import static input.Key.*;
+import static input.syntax.Key.*;
 
 @lombok.experimental.SuperBuilder
 public class NPC extends Combatant {
@@ -24,6 +23,7 @@ public class NPC extends Combatant {
                 .hp(hpMax)
                 .armorClass(armorClass)
                 .isEnemy(isEnemy)
+                .isArmored(false)
                 .build();
     }
 
@@ -43,18 +43,17 @@ public class NPC extends Combatant {
     }
 
     public static NPC from(EnumMap<Key, Object> params, Set<Tag> tags, boolean isEnemy) {
-        params.forEach((key, value) -> {
-            if (!key.isValid(value)) throw new InvalidParameterException("NPC", key, value);
-        });
+        validateAll(params, "NPC");
+        Main.getRuleset().validateCombatant(params, tags);
 
-        Config.getRuleset().validateCombatant(params, tags);
-
-        return NPC.create(
-                (String) params.get(NAME),
-                TextReader.beforeSlash(params.get(HP)),
-                (int) params.get(AC),
-                isEnemy
-        );
+        return NPC.builder()
+                .name((String) params.get(NAME))
+                .maxHp(TextReader.getHp(params.get(HP), true))
+                .hp(TextReader.getHp(params.get(HP), false))
+                .armorClass((int) params.get(AC))
+                .isEnemy(isEnemy)
+                .isArmored(tags.contains(Tag.ARMORED))
+                .build();
     }
 
 }

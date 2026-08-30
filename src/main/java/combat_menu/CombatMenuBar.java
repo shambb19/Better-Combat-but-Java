@@ -5,21 +5,25 @@ import popup.EventLogPopup;
 import popup.SpellManagerPopup;
 
 import javax.swing.*;
+import java.util.List;
 
 public class CombatMenuBar extends JMenuBar {
 
-    {
-        addMenuItem("Start New Encounter", "End the current encounter without any saved progress", CombatEndPopup::restart);
-        addMenuItem("Spell Manager", "Manually end concentration/effects from any dealt spell", SpellManagerPopup::run);
-        addMenuItem("Event Log", "View actions taken in this combat", EventLogPopup::run);
-        addMenuItem("Quit", "You know this one", CombatEndPopup::fireQuit);
-    }
-
-    private void addMenuItem(String name, String toolTip, Runnable action) {
-        JMenuItem item = new JMenuItem(name);
-        item.setToolTipText(toolTip);
-        item.addActionListener(e -> action.run());
-        add(item);
+    public CombatMenuBar(JMenuItem mapItem) {
+        class Item extends JMenuItem {
+            Item(String name, String toolTip, Runnable action) {
+                setText(name);
+                setToolTipText(toolTip);
+                addActionListener(e -> action.run());
+            }
+        }
+        List.of(
+                mapItem,
+                new Item("Start New Encounter", "End the current encounter without saving", CombatEndPopup::restart),
+                new Item("Spell Manager", "Manually adjust status/effects of dealt spells", SpellManagerPopup::run),
+                new Item("Event Log", "View a log of actions in this combat", EventLogPopup::run),
+                new Item("Quit", "You know this one", CombatEndPopup::fireQuit)
+        ).forEach(this::add);
     }
 
 }

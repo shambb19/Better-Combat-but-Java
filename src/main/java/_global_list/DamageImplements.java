@@ -20,7 +20,7 @@ public class DamageImplements extends GlobalList<Implement> {
     static Spell MANUAL_SAVE = Spell.createManual("Manual with Save Throw");
     static Gun MANUAL_GUN = Gun.createManual("Manual");
 
-    private static final DamageImplements INSTANCE = new DamageImplements();
+    static DamageImplements INSTANCE = new DamageImplements();
 
     private DamageImplements() {
         List.of(MANUAL_WEAPON, MANUAL_HIT, MANUAL_SAVE).forEach(this::add);
@@ -29,6 +29,7 @@ public class DamageImplements extends GlobalList<Implement> {
     public static void init() {
         INSTANCE.init(Resource.WEAPON_CODE.getUrl(), Weapon.class);
         INSTANCE.init(Resource.SPELL_CODE.getUrl(), Spell.class);
+        INSTANCE.init(Resource.GUN_CODE.getUrl(), Gun.class);
     }
 
     public static <T extends Implement> T get(String name, Class<T> type) {

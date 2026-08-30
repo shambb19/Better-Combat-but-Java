@@ -2,13 +2,13 @@ package combat_menu.action_panel.form;
 
 import __main.Main;
 import _global_list.DamageImplements;
+import _manager.CombatManager;
+import _manager.EffectManager;
 import combat_menu.encounter_info.HealthBarPanel;
 import combat_object.implement.*;
-import config.Config;
+import config.ruleset.AttackResult;
 import lombok.*;
 import lombok.experimental.*;
-import manager.CombatManager;
-import manager.EffectManager;
 import swing.custom.ValidatedField;
 import util.Filterable;
 import util.StringUtil;
@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static combat_object.implement.Effect.*;
+import static config.ruleset.AttackResult.SUCCEEDED;
 import static swing.ColorStyles.*;
 import static swing.fluent.SwingComp.fluent;
 import static swing.fluent.SwingComp.*;
@@ -36,7 +37,6 @@ public class AttackFormPanel extends ActionFormPanel {
     ValidatedField rollField;
     JLabel rollFieldLabel;
 
-
     public AttackFormPanel() {
         super("Use Weapon");
 
@@ -45,7 +45,7 @@ public class AttackFormPanel extends ActionFormPanel {
     }
 
     private void populateComboBox() {
-        for (Class<? extends Implement> c : Config.getRuleset().getAllowedImplementClasses()) {
+        for (var c : Main.getRuleset().getAllowedImplementClasses()) {
             Implement header = DamageImplements.createHeader(c);
 
             List<?> implementList = attacker.getImplements(c);
@@ -56,8 +56,6 @@ public class AttackFormPanel extends ActionFormPanel {
                             if (g.isHeavy()) return attacker.getHp() > 2;
                             return true;
                         });
-
-            // FIXME guns not adding properly here
 
             attackCombo.addItem(header);
             implementList.forEach(i -> attackCombo.addItem((Implement) i));
@@ -88,6 +86,7 @@ public class AttackFormPanel extends ActionFormPanel {
         for (Effect e : TARGET_EFFECTS)
             noticeConditions.put(e, EffectManager.hasEffect(target, e));
 
+
         super.addNotices();
     }
 
@@ -95,21 +94,15 @@ public class AttackFormPanel extends ActionFormPanel {
         Implement implement = Objects.requireNonNull((Implement) attackCombo.getSelectedItem());
         int roll = rollField.getValue().toInt();
 
-        boolean continues = CombatManager.logAttack(target, roll, implement);
+        AttackResult continues = CombatManager.logAttack(target, roll, implement);
 
-        if (!continues) {
-            String reason;
-            if (implement instanceof Spell s && s.hasSave())
-                reason = "Roll " + target.getSaveThrow(roll, implement) + " beat " + attacker + "'s " + s.getStat() + " save";
-            else
-                reason = "Roll " + attacker.getAttackRoll(roll, implement) + " did not meet " + target + "'s AC";
-            showMissResult(reason);
-        }
+        if (continues != SUCCEEDED) showMissResult(continues.getReason(attacker, target));
     }
 
     @Override protected void onTargetChanged() {
         super.onTargetChanged();
         addNotices();
+        onSelectionChanged();
     }
 
     @Override protected boolean isInputValid() {
@@ -181,12 +174,6 @@ public class AttackFormPanel extends ActionFormPanel {
                 refreshButtons();
                 return;
             }
-            case String ignored -> {
-                rollField.setVisible(false);
-                rollField.clear();
-                refreshButtons();
-                return;
-            }
             case Spell spell when spell.effectEquals(Effect.AUTO_HIT) -> {
                 rollField.setVisible(false);
                 confirmButton.setEnabled(true);
@@ -251,7 +238,7 @@ public class AttackFormPanel extends ActionFormPanel {
 
     private static class MixedComboModel extends DefaultComboBoxModel<Implement> {
         @Override public void setSelectedItem(Object item) {
-            // this is also disgusting, but I'm too lazy to implement something more robust, and it should work so ¯\_(ツ)_/¯
+            // this is also disgusting, but I'm too lazy to implement something more robust, and works so ¯\_(ツ)_/¯
             if (item instanceof Implement s && s.getName().startsWith("──")) return;
             super.setSelectedItem(item);
         }

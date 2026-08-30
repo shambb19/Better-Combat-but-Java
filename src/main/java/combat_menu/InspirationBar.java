@@ -1,7 +1,7 @@
 package combat_menu;
 
+import _manager.InspirationManager;
 import lombok.*;
-import manager.InspirationManager;
 import swing.ColorStyles;
 import swing.custom.AnimatedBar;
 import swing.fluent.SwingPane;

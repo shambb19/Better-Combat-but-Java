@@ -1,6 +1,6 @@
 package popup;
 
-import manager.CombatManager;
+import _manager.CombatManager;
 import swing.custom.Popup;
 import util.Message;
 

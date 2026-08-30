@@ -1,8 +1,10 @@
 package input;
 
+import __main.Main;
 import config.Config;
 import config.ruleset.Ruleset;
 import exception.InvalidSyntaxError;
+import input.syntax.Tag;
 import lombok.experimental.*;
 import util.Locators;
 
@@ -18,7 +20,7 @@ public class TextReader {
      * Returns "key" from any "key: value" code line
      */
     public static String key(String line) {
-        if (line.startsWith("+")) return line.substring(1);
+        if (line.startsWith("+")) return line.substring(1).trim();
 
         if (!line.contains(":")) throw new InvalidSyntaxError(false, "no delimiter found in " + line);
 
@@ -113,7 +115,7 @@ public class TextReader {
 
     public static int getHp(Object param, boolean isMaximum) {
         if (param == null) {
-            if (Config.getRuleset().equals(Ruleset.STANDARD_RULESET))
+            if (Main.getRuleset().equals(Ruleset.STANDARD_RULESET))
                 throw new InvalidSyntaxError(true, "absent hp line");
             return 8;
         }
@@ -131,7 +133,7 @@ public class TextReader {
      * @param fullString A name and optional quantity value (i.e. "Orc" or "Orc_6")
      * @return the name of the combatant (for example, "Orc_6" returns "Orc")
      */
-    public static String getName(String fullString) {
+    public static String getNameScenario(String fullString) {
         if (!fullString.contains("_"))
             return fullString;
         else
@@ -155,21 +157,18 @@ public class TextReader {
         return (boolean) value;
     }
 
-    public static ArrayList<String> extractConfigBlock(List<String> lines, Consumer<List<String>> onExtracted) {
-        final String OPEN_TOKEN = "config<<start";
-        final String CLOSE_TOKEN = "config<<end";
-
-        List<String> blockLines = new ArrayList<>();
+    public static ArrayList<String> extractConfigBlock(List<String> lines, Consumer<ArrayList<String>> onExtracted) {
+        ArrayList<String> blockLines = new ArrayList<>();
         ArrayList<String> remaining = new ArrayList<>();
         boolean inBlock = false;
 
         for (String line : lines) {
-            if (line.trim().equals(OPEN_TOKEN)) {
+            if (line.trim().equals(Config.CONFIG_OPEN_TOKEN)) {
                 inBlock = true;
                 blockLines.add(line);
             } else if (inBlock) {
                 blockLines.add(line);
-                if (line.trim().equals(CLOSE_TOKEN))
+                if (line.trim().equals(Config.CONFIG_CLOSE_TOKEN))
                     inBlock = false;
             } else {
                 remaining.add(line);
@@ -183,14 +182,46 @@ public class TextReader {
     }
 
     public static String getHeader(String line) {
-        return withoutComments(line).split("<")[0];
+        int spaceIdx = line.indexOf(" ");
+        int chevronIdx = line.indexOf("<");
+
+        int delimiterIdx;
+        if (spaceIdx == -1 && chevronIdx == -1) return withoutComments(line);
+        else if (spaceIdx == -1) delimiterIdx = chevronIdx;
+        else if (chevronIdx == -1) delimiterIdx = spaceIdx;
+        else delimiterIdx = Math.min(spaceIdx, chevronIdx);
+
+        return withoutComments(line).substring(0, delimiterIdx);
+    }
+
+    public static String getTagString(String line) {
+        if (!line.contains("<")) return "";
+        int start = line.indexOf("<");
+        int end = line.contains(" ") ? line.indexOf(" ") : line.length();
+        return line.substring(start, end);
+    }
+
+    public static String getName(String line) {
+        String eMessage = "Valid name on header line expected";
+
+        int spaceIdx = withoutComments(line).indexOf(" ");
+        if (spaceIdx == -1) throw new InvalidSyntaxError(true, eMessage);
+
+        String name = withoutComments(line).substring(spaceIdx).trim();
+        if (name.isBlank()) throw new InvalidSyntaxError(true, eMessage);
+
+        return name;
     }
 
     public static Set<Tag> getTags(String line) {
-        String[] headerAndTags = withoutComments(line).split("<");
-        Set<Tag> tags = new HashSet<>(Set.of());
-        for (int i = 1; i < headerAndTags.length; i++) {
-            Tag tag = Locators.enumNameSearch(headerAndTags[i], Tag.class);
+        String tagString = getTagString(withoutComments(line));
+        if (tagString.isBlank()) return Set.of();
+
+        Set<Tag> tags = new HashSet<>();
+        for (String part : tagString.split("<")) {
+            if (part.isBlank()) continue;
+            Tag tag = Locators.enumNameSearch(part, Tag.class);
+            if (tag == null) throw new InvalidSyntaxError(true, "Unrecognized tag: " + part);
             tags.add(tag);
         }
         return tags;

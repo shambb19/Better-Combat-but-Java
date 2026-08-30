@@ -1,10 +1,10 @@
 package combat_menu.encounter_info;
 
+import _manager.EncounterManager;
 import combat_menu.action_panel.form.ActionFormPanel;
 import combat_object.combatant.Combatant;
 import lombok.*;
 import lombok.experimental.*;
-import manager.EncounterManager;
 import org.intellij.lang.annotations.MagicConstant;
 
 import javax.swing.*;

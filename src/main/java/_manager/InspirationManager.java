@@ -1,4 +1,4 @@
-package manager;
+package _manager;
 
 import __main.Main;
 import combat_menu.action_panel.ActionPanel;

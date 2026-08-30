@@ -1,8 +1,9 @@
 package popup;
 
-import manager.MisfireManager;
+import _manager.MisfireManager;
 import swing.custom.Popup;
 import util.Message;
+import util.Roll;
 
 import javax.swing.*;
 import java.util.List;
@@ -25,6 +26,7 @@ public class MisfireManagerPopup extends Popup {
     }
 
     private class GunPanel extends JPanel {
+
         private final MisfireManager.Misfire misfire;
 
         GunPanel(MisfireManager.Misfire misfire) {
@@ -45,12 +47,11 @@ public class MisfireManagerPopup extends Popup {
 
         void attemptRepair() {
             setEnabled(false);
-            int repairRoll = Message.promptIntWithLoop(
-                    "Roll 1d6 to repair " + misfire.combatant() + "'s " + misfire.gun() + ".",
-                    "Repair Attempt");
 
-            if (repairRoll >= 3) MisfireManager.logRepair(misfire);
-            else Message.showAsInfoMessage("The repair has failed. You can try again next turn.");
+            Message.promptRoll("to repair " + misfire.combatant() + "'s " + misfire.gun(),
+                    Roll.d(6), 3,
+                    () -> MisfireManager.logRepair(misfire), "The repair has failed. You can try again next turn."
+            );
 
             MisfireManagerPopup.this.dispose();
         }

@@ -1,14 +1,13 @@
 package combat_object.combatant;
 
+import __main.Main;
 import combat_object.combatant.info.Stats;
 import combat_object.implement.Implement;
 import combat_object.implement.Spell;
 import combat_object.implement.Weapon;
-import config.Config;
-import exception.InvalidParameterException;
-import input.Key;
-import input.Tag;
 import input.TextReader;
+import input.syntax.Key;
+import input.syntax.Tag;
 import lombok.experimental.*;
 import swing.ColorStyles;
 
@@ -18,7 +17,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static input.Key.*;
+import static input.syntax.Key.*;
 
 @SuperBuilder
 @ExtensionMethod(TextReader.class)
@@ -64,20 +63,18 @@ public class PC extends Combatant {
 
     @SuppressWarnings("unchecked")
     public static PC from(EnumMap<Key, Object> params, Set<Tag> tags) {
-        params.forEach((key, value) -> {
-            if (!key.isValid(value)) throw new InvalidParameterException("CombatObject$PC", key, value);
-        });
-
-        Config.getRuleset().validateCombatant(params, tags);
+        validateAll(params, "PC");
+        Main.getRuleset().validateCombatant(params, tags);
 
         return PC.builder()
                 .name((String) params.get(NAME))
                 .maxHp(params.get(HP).getHp(true))
                 .hp(params.get(HP).getHp(false))
                 .isEnemy(false)
+                .isArmored(tags.contains(Tag.ARMORED))
                 .armorClass((int) params.get(AC))
                 .stats(Stats.from(params.get(STATS), params.get(CLASS), params.get(LEVEL)))
-                .implementList(Stream.of(WEAPONS, SPELLS)
+                .implementList(Stream.of(WEAPONS, SPELLS, GUNS)
                         .map(key -> (List<? extends Implement>) params.getOrDefault(key, List.of()))
                         .flatMap(Collection::stream)
                         .collect(Collectors.toCollection(ArrayList::new)))

@@ -9,6 +9,9 @@ import combat_object.implement.Weapon;
 import combat_object.scenario.Scenario;
 import config.Config;
 import exception.InvalidParameterException;
+import exception.InvalidSyntaxError;
+import input.syntax.Key;
+import input.syntax.Tag;
 import lombok.*;
 import lombok.experimental.*;
 import util.Message;
@@ -23,15 +26,20 @@ import java.util.*;
 @ExtensionMethod({TextReader.class, util.Filterable.class})
 public class CampaignReader {
 
-    public static <T extends CombatObject> List<T> getInstancesFromCode(URL url, Class<T> instanceType) throws IOException {
+    public static List<String> getLines(URL url) throws IOException {
+        if (url == null) return new ArrayList<>();
+
         @Cleanup BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8));
-        ArrayList<String> lines = new ArrayList<>(reader.lines().toList());
+        return new ArrayList<>(reader.lines().toList());
+    }
 
-        if (lines.isEmpty()) throw new IOException("Reader5e.getInstancesFromCode: empty file");
+    public static <T extends CombatObject> List<T> getInstancesFromCode(URL url, Class<T> instanceType) throws IOException {
+        List<String> lines = getLines(url);
 
-        lines = TextReader.extractConfigBlock(lines, Config::configure);
+        lines = TextReader.extractConfigBlock(lines, Config::applyGlobal);
 
-        return getAllItemBlocks(lines).stream().map(CampaignReader::createObject).of().castToAsList(instanceType);
+        return getAllItemBlocks(lines).stream().map(CampaignReader::createObject)
+                .filter(Objects::nonNull).of().castToAsList(instanceType);
     }
 
     private static List<ItemBlock> getAllItemBlocks(List<String> lines) {
@@ -54,6 +62,8 @@ public class CampaignReader {
     private static CombatObject createObject(ItemBlock block) {
         String header = block.header;
         EnumMap<Key, Object> map = block.params;
+
+        if (block.tags.contains(Tag.INCOMPLETE)) return null;
 
         return switch (header) {
             case ".party" -> PC.from(map, block.tags);
@@ -88,8 +98,8 @@ public class CampaignReader {
 
         params.stream().skip(1)
                 .forEach(param -> {
-                    Key key = Key.get(param);
-                    Object value = Key.value(param);
+                    Key key = Key.getKeyFromString(param);
+                    Object value = Key.getAppropriateValueFromLine(param);
 
                     Optional.ofNullable(key).ifPresent(k ->
                             map.put(k, Objects.requireNonNullElse(value, k.getDefaultValue()))
@@ -105,9 +115,17 @@ public class CampaignReader {
         EnumMap<Key, Object> params;
 
         ItemBlock(List<String> lines) {
-            header = lines.getFirst().getHeader();
-            tags = lines.getFirst().getTags();
+            String opener = lines.getFirst();
+            header = opener.getHeader();
+            tags = opener.getTags();
             params = toMap(lines);
+
+            String name = opener.getName();
+            if (name.isBlank()) {
+                throw new InvalidSyntaxError(false, "Empty name");
+            }
+
+            params.put(Key.NAME, opener.getName());
         }
     }
 

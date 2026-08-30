@@ -1,4 +1,4 @@
-package combat_menu.encounter_info;
+package popup;
 
 import combat_object.combatant.Combatant;
 import combat_object.combatant.PC;
@@ -15,13 +15,13 @@ import static swing.ColorStyles.*;
 import static swing.fluent.SwingComp.*;
 import static swing.fluent.SwingPane.*;
 
-public class StatTooltipWindow extends JWindow {
+public class StatTooltipPopup extends JWindow {
 
     private static final int WIDTH = 200;
 
     private final Combatant combatant;
 
-    public StatTooltipWindow(Window owner, Combatant combatant) {
+    public StatTooltipPopup(Window owner, Combatant combatant) {
         super(owner);
         this.combatant = combatant;
 
@@ -41,7 +41,7 @@ public class StatTooltipWindow extends JWindow {
     }
 
     private static String roughHpLabel(Combatant c) {
-        if (!c.getLifeStatus().isConscious()) return "Defeated";
+        if (c.isUnconscious()) return "Defeated";
         double ratio = c.getHpRatio();
         if (ratio > 0.7) return "Healthy";
         if (ratio > 0.50) return "Injured";

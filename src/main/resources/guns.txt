@@ -47,7 +47,7 @@ cover: 2
 .gun Shotgun
 hit: 4
 misfire: 1
-reload:
+reload: 2
 cover: 4
 +heavy
 

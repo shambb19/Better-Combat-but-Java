@@ -1,8 +1,8 @@
 package combat_object.combatant.info;
 
+import _manager.ConcentrationManager;
 import combat_object.combatant.Combatant;
 import lombok.*;
-import manager.ConcentrationManager;
 import org.intellij.lang.annotations.MagicConstant;
 
 public class LifeStatus {
@@ -27,19 +27,22 @@ public class LifeStatus {
     }
 
     public void setDefeated(Combatant combatant) {
-        if (combatant.isEnemy())
-            status = DEAD;
-        else
-            status = UNCONSCIOUS;
+        if (combatant.isEnemy()) status = DEAD;
+        else status = UNCONSCIOUS;
+
         ConcentrationManager.breakConcentration(combatant);
+    }
+
+    public boolean isUnconscious() {
+        return status == UNCONSCIOUS;
+    }
+
+    public boolean isDead() {
+        return status == DEAD;
     }
 
     public boolean isConscious() {
         return status == ALIVE;
-    }
-
-    public boolean isAlive() {
-        return status != DEAD;
     }
 
     @Override

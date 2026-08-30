@@ -59,7 +59,7 @@ public class SwingPane extends SwingComp<JPanel> {
     }
 
     public SwingPane arrangedAs(@FilteredVals.Pane int layout, int hgap, int vgap) {
-        LayoutManager manager = switch (layout) {
+        LayoutManager layoutManager = switch (layout) {
             case BORDER -> new BorderLayout(hgap, vgap);
             case VERTICAL_BOX -> new BoxLayout(component, BoxLayout.Y_AXIS);
             case HORIZONTAL_BOX -> new BoxLayout(component, BoxLayout.X_AXIS);
@@ -71,7 +71,7 @@ public class SwingPane extends SwingComp<JPanel> {
             case SINGLE_ROW -> new GridLayout(1, 0, hgap, vgap);
             default -> throw new IllegalArgumentException("withLayout in SwingPane : unexpected layout value");
         };
-        component.setLayout(manager);
+        component.setLayout(layoutManager);
         component.revalidate();
         component.repaint();
 
@@ -144,14 +144,8 @@ public class SwingPane extends SwingComp<JPanel> {
             case String s -> new JLabel(s);
             case Component c -> c;
             case SwingComp<?> sc -> sc.component();
-            default -> {
-                String cause;
-                if (comp instanceof BorderComponent)
-                    cause = "use SwingPane.borderCollect for BorderLayout assignment";
-                else
-                    cause = "unsupported obj " + comp.getClass();
-                throw new ClassCastException("SwingPane.getComponent: " + cause);
-            }
+            default ->
+                    throw new ClassCastException("SwingPane.getComponent: unexpected class " + comp.getClass().getSimpleName());
         };
     }
 

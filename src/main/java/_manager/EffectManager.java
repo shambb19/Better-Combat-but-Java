@@ -1,4 +1,4 @@
-package manager;
+package _manager;
 
 import combat_object.combatant.Combatant;
 import combat_object.implement.Effect;
@@ -7,6 +7,7 @@ import combat_object.implement.Spell;
 import lombok.*;
 import lombok.experimental.*;
 import util.Message;
+import util.Roll;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +44,7 @@ public class EffectManager {
                 .anyMatch(e -> e.on.equals(targetQuery) && e.by.equals(byQuery));
     }
 
-    public void removeEffectOn(Combatant query, Effect effect) {
+    public void removeEffect(Combatant query, Effect effect) {
         effects.removeIf(e -> e.on.equals(query) && e.effect.equals(effect));
     }
 
@@ -61,12 +62,8 @@ public class EffectManager {
         }
         for (Effect effect : effectsOnCombatantWithRoll) {
             if (!hasEffect(query, effect)) return;
-            effects.removeIf(e -> {
-                int result = Message.promptIntWithLoop(
-                        "Roll and enter a saving throw to remove the effect " + effect.name() + " from " + query,
-                        effect.name() + " Save Throw");
-                return result >= 10;
-            });
+            effects.removeIf(e -> Message.wasPromptedRollSuccessful("to remove the effect " + effect.name() + " from " + query,
+                    Roll.d20(), 10, "The effect was not removed."));
         }
     }
 

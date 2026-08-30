@@ -1,9 +1,9 @@
 package combat_object.implement;
 
+import _manager.EncounterManager;
 import combat_object.combatant.Combatant;
 import lombok.*;
 import lombok.experimental.*;
-import manager.EncounterManager;
 import util.StringUtil;
 
 import javax.swing.*;
@@ -65,9 +65,6 @@ public enum Effect {
     // released 4.5.0
     BANISH(Colors.purple("Banished",
             "..target.. is banished to another plane of existence if reduced to 50 hit points or fewer")),
-    // TODO implement CHARMED
-    CHARMED(Colors.purple("Charmed",
-            "..target.. is magically compelled by ..attacker.. and cannot disobey. Kinky")),
     PENALTY_ATTACK(Colors.amber("Muddled Mind",
             "..target.. must subtract 1d6 from their attack rolls and ability checks")),
     RANDOM_ACTION(Colors.purple("Reality Broken",
@@ -77,7 +74,7 @@ public enum Effect {
     STUNNED(Colors.purple("Stunned",
             "..target.. is incapacitated, can't move, and automatically fails Str and Dex saves")),
 
-    // released 5.5.0
+    // released 5.0.0
     DISADVANTAGE(Colors.red("Disadvantage", "..attacker.. is injured and must roll with disadvantage on this attack.")),
 
     NONE(null);
@@ -175,7 +172,6 @@ public enum Effect {
 
     @Value @RequiredArgsConstructor static class NoticeComponents {
         Color background, accent, foreground, foregroundDim;
-        String title;
-        String subtitle;
+        String title, subtitle;
     }
 }

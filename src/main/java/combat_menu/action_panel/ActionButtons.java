@@ -1,10 +1,10 @@
 package combat_menu.action_panel;
 
 import _global_list.Resource;
+import _manager.EncounterManager;
+import _manager.InspirationManager;
 import lombok.*;
 import lombok.experimental.*;
-import manager.EncounterManager;
-import manager.InspirationManager;
 import org.intellij.lang.annotations.MagicConstant;
 import util.Locators;
 
@@ -87,10 +87,6 @@ public class ActionButtons extends JPanel {
             setIcon(new ImageIcon(resized));
             setBackground(BACKGROUND);
             setMargin(new Insets(20, 20, 20, 20));
-            addActionListener(e -> {
-                addHighlight(SELECTION);
-                runnable.run();
-            });
 
             fluent(this)
                     .withAction(b -> {
