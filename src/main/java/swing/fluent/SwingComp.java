@@ -111,6 +111,12 @@ public class SwingComp<E extends JComponent> {
                 .applied(b -> Optional.ofNullable(actionListener).ifPresent(a -> b.addActionListener(e -> a.run())));
     }
 
+    public static SwingComp<JButton> button(
+            Object textOrIcon, @FilteredVals.Color Color bg, Consumer<JButton> actionListener
+    ) {
+        return button(textOrIcon, bg, (Runnable) null).withAction(actionListener);
+    }
+
     public static SwingComp<JScrollPane> scrollPane(Component contents) {
         JScrollPane pane = new JScrollPane(contents);
         pane.getVerticalScrollBar().setUnitIncrement(16);
@@ -136,6 +142,7 @@ public class SwingComp<E extends JComponent> {
 
     public SwingComp<E> withBackground(@FilteredVals.Color Color background) {
         component.setBackground(background);
+        if (component instanceof JScrollPane s) s.getViewport().setBackground(background);
         return this;
     }
 
@@ -211,6 +218,15 @@ public class SwingComp<E extends JComponent> {
         return this;
     }
 
+    /**
+     * @param topLength the size of the top and bottom empty borders
+     * @return the SwingComp object with top and bottom empty borders
+     * equal to topLength and left and right empty borders equal to 2*topLength
+     */
+    public SwingComp<E> withSidePaddedEmptyBorder(int topLength) {
+        return withEmptyBorder(topLength, topLength * 2, topLength, topLength * 2);
+    }
+
     public SwingComp<E> withLabeledBorder(String label) {
         return withBorder(new TitledBorder(BorderFactory.createEtchedBorder(), label, TitledBorder.LEFT, TitledBorder.TOP));
     }
@@ -273,6 +289,10 @@ public class SwingComp<E extends JComponent> {
         component.setPreferredSize(new Dimension(width, height));
         component.revalidate();
         return this;
+    }
+
+    public SwingComp<E> withFixedSize(int width, int height) {
+        return withPreferredSize(width, height).withMaximumSize(width, height).withMinimumSize(width, height);
     }
 
     public SwingComp<E> applied(Consumer<E> action) {

@@ -1,6 +1,7 @@
 package _global_list;
 
 import combat_object.combatant.Combatant;
+import combat_object.combatant.NPC;
 import encounter.Encounter;
 import lombok.*;
 import util.Filterable;
@@ -26,7 +27,7 @@ public class Combatants extends GlobalList<Combatant> {
         );
     }
 
-    public static List<Combatant> getAll() {
+    public static List<Combatant> getAllCombatants() {
         return INSTANCE.list;
     }
 
@@ -34,8 +35,16 @@ public class Combatants extends GlobalList<Combatant> {
         return Filterable.of(INSTANCE.list).filteredByAsList(c -> !c.isEnemy());
     }
 
+    public static List<NPC> getFriendlyNpcs() {
+        return Filterable.of(INSTANCE.list).castTo(NPC.class).filteredByAsList(c -> !c.isEnemy());
+    }
+
     public static List<Combatant> getEnemies() {
         return Filterable.of(INSTANCE.list).filteredByAsList(Combatant::isEnemy);
+    }
+
+    public static List<NPC> getEnemyNpcs() {
+        return Filterable.of(INSTANCE.list).castTo(NPC.class).filteredByAsList(Combatant::isEnemy);
     }
 
 }

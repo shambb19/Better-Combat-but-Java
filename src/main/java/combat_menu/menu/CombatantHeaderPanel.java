@@ -1,4 +1,4 @@
-package combat_menu;
+package combat_menu.menu;
 
 import combat_object.combatant.Combatant;
 import combat_object.combatant.PC;
@@ -199,7 +199,7 @@ public class CombatantHeaderPanel extends JPanel {
 
             double range = 5.0;
             double percentage = (displayLuck + range) / (range * 2.0);
-            percentage = Math.max(0, Math.min(1.0, percentage));
+            percentage = Math.clamp(percentage, 0, 1.0);
 
             int fillW = (int) (percentage * w);
 

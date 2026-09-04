@@ -149,9 +149,7 @@ public class SwingPane extends SwingComp<JPanel> {
         };
     }
 
-    @Value public static class BorderComponent {
-        @FilteredVals.Border String location;
-        Component component;
+    public record BorderComponent(@FilteredVals.Border String location, Component component) {
     }
 
 }

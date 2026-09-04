@@ -126,8 +126,8 @@ public class DamageFormPanel extends ActionFormPanel {
     }
 
     private int getMaxDamage() {
-        int numDice = implement.getRoll().getNumDice();
-        int dieSize = implement.getRoll().getNumDice();
+        int numDice = implement.getRoll().numDice();
+        int dieSize = implement.getRoll().numDice();
 
         if (attackFailed)
             numDice /= 2;

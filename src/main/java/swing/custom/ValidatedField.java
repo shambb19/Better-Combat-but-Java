@@ -97,7 +97,8 @@ public class ValidatedField extends JPanel {
     }
 
     public String getValue() {
-        return field.withoutWhitespace().stringIfElseBlank(field != null);
+        if (field == null || field.getText() == null) return "";
+        return field.getText().trim();
     }
 
     public void setValidator(Predicate<String> v) {

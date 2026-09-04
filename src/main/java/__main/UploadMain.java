@@ -32,7 +32,7 @@ import static swing.fluent.SwingPane.*;
 public class UploadMain extends MainFrame {
 
     private static final String INSTRUCTIONS = "Upload a file and select a run mode. " +
-            "The Kyreun starter includes the Kyreun campaign party and an example orc enemy and scenario. " +
+            "The Kryeun starter includes the Kryeun campaign party and an example orc enemy and scenario. " +
             "The Steampunk starter includes an example party, enemies, and scenarios to demonstrate syntax.";
 
     JPanel sidebar;
@@ -80,7 +80,7 @@ public class UploadMain extends MainFrame {
                         sectionLabel("Upload Options"), spacer(0, 3),
                         uploadButton("New Campaign", () -> onInputChange(null)),
                         uploadButton("Upload Existing (.txt)", () -> onInputChange(FileGetter.getUrl(this))),
-                        uploadButton("Load Kyreun Starter", () -> onInputChange(Resource.STARTER_STANDARD.getUrl())),
+                        uploadButton("Load Kryeun Starter", () -> onInputChange(Resource.STARTER_STANDARD.getUrl())),
                         uploadButton("Load Steampunk Starter", () -> onInputChange(Resource.STARTER_STEAMPUNK.getUrl())),
                         spacer(0, 7),
                         sectionLabel("Run mode"), spacer(0, 3),

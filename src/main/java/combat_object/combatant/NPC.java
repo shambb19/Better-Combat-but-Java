@@ -1,6 +1,6 @@
 package combat_object.combatant;
 
-import __main.Main;
+import config.Config;
 import input.TextReader;
 import input.syntax.Key;
 import input.syntax.Tag;
@@ -44,7 +44,7 @@ public class NPC extends Combatant {
 
     public static NPC from(EnumMap<Key, Object> params, Set<Tag> tags, boolean isEnemy) {
         validateAll(params, "NPC");
-        Main.getRuleset().validateCombatant(params, tags);
+        Config.getRuleset().validateCombatant(params, tags);
 
         return NPC.builder()
                 .name((String) params.get(NAME))

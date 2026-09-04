@@ -6,7 +6,7 @@ import combat_object.combatant.PC;
 import combat_object.implement.Gun;
 import combat_object.implement.Spell;
 import combat_object.implement.Weapon;
-import combat_object.scenario.Scenario;
+import combat_object.scenario.ScenarioStarter;
 import config.Config;
 import exception.InvalidParameterException;
 import exception.InvalidSyntaxError;
@@ -72,7 +72,7 @@ public class CampaignReader {
             case ".weapon" -> Weapon.from(map);
             case ".spell" -> Spell.from(map);
             case ".gun" -> Gun.from(map);
-            case ".scenario" -> Scenario.from(map);
+            case ".scenario" -> ScenarioStarter.from(map);
             default ->
                     throw new InvalidParameterException("CampaignReader.createObject", "header", header, "valid item header");
         };

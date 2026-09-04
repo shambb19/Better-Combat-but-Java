@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-@EqualsAndHashCode(callSuper = true) @SuperBuilder @Data
+@EqualsAndHashCode(callSuper = true) @SuperBuilder @Getter @Setter
 @FieldDefaults(level = AccessLevel.PROTECTED)
 public abstract class Combatant extends CombatObject {
 
@@ -137,6 +137,10 @@ public abstract class Combatant extends CombatObject {
         return lifeStatus.isUnconscious();
     }
 
+    public boolean isAlive() {
+        return !isDead();
+    }
+
     public boolean isDead() {
         return lifeStatus.isDead();
     }
@@ -175,7 +179,7 @@ public abstract class Combatant extends CombatObject {
         final double[] rollStats = new double[]{0.0, 5.0};
 
         public void logRoll(int result, Roll roll) {
-            double expectedAverage = roll.getNumDice() * ((roll.getDieSize() + 1) / 2.0);
+            double expectedAverage = roll.numDice() * ((roll.dieSize() + 1) / 2.0);
 
             double netLuck = result - expectedAverage;
 

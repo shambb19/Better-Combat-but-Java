@@ -2,7 +2,7 @@ package combat_menu.action_panel;
 
 import __main.Main;
 import _manager.EncounterManager;
-import combat_menu.CombatantHeaderPanel;
+import combat_menu.menu.CombatantHeaderPanel;
 import combat_menu.action_panel.form.AttackFormPanel;
 import combat_menu.action_panel.form.DamageFormPanel;
 import combat_menu.action_panel.form.HealFormPanel;
@@ -62,7 +62,7 @@ public class ActionPanel extends JPanel {
 
         formPanel = newArrangedAs(BORDER)
                 .transparent()
-                .withEmptyBorder(10, 20, 10, 20)
+                .withSidePaddedEmptyBorder(10)
                 .component();
 
         splitPanel.add(this.formPanel, BorderLayout.CENTER);

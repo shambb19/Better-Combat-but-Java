@@ -1,6 +1,5 @@
 package _manager;
 
-import __main.Main;
 import combat_object.combatant.Combatant;
 import combat_object.combatant.PC;
 import config.Config;
@@ -23,7 +22,7 @@ public class EncounterManager {
         var override = Config.getOverrideQueueType();
 
         if (override == null) {
-            queue = Main.getRuleset().getPlayerQueue(getFriendlies(), getEnemies());
+            queue = Config.getRuleset().getPlayerQueue(getFriendlies(), getEnemies());
             return;
         }
         try {

@@ -7,8 +7,7 @@ import lombok.experimental.*;
 import util.Roll;
 import util.StringUtil;
 
-@EqualsAndHashCode(callSuper = true) @Getter
-@Data @SuperBuilder
+@EqualsAndHashCode(callSuper = true) @Getter @SuperBuilder
 @FieldDefaults(makeFinal = true, level = AccessLevel.PROTECTED)
 public abstract class Implement extends CombatObject {
 
@@ -22,7 +21,7 @@ public abstract class Implement extends CombatObject {
 
     public String damageString(boolean isHalfDamage) {
         if (isHalfDamage) {
-            return new Roll(roll.getNumDice() / 2, roll.getDieSize()).toString();
+            return new Roll(roll.numDice() / 2, roll.dieSize()).toString();
         }
         return damageString();
     }

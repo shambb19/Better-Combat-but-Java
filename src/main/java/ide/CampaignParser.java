@@ -1,6 +1,6 @@
 package ide;
 
-import __main.Main;
+import config.Config;
 import config.ruleset.Ruleset;
 import exception.InvalidSyntaxError;
 import input.syntax.Key;
@@ -103,7 +103,7 @@ public class CampaignParser extends AbstractParser {
         try { // tag validation
             Set<Tag> tags = line.getTags();
 
-            if (Main.getRuleset().equals(Ruleset.STANDARD_RULESET)) {
+            if (Config.getRuleset().equals(Ruleset.STANDARD_RULESET)) {
                 boolean invalidTags = tags.stream().anyMatch(t -> !t.equals(Tag.INCOMPLETE));
                 if (invalidTags) addNoticeAt(index, "tag unavailable in standard ruleset");
             }
@@ -182,7 +182,7 @@ public class CampaignParser extends AbstractParser {
                 .forEach(e -> addNoticeAt(e.index, "cannot resolve key \"" + kg.get(e.key) + "\" for item type " + header));
 
         // missing required params
-        Ruleset activeRuleset = Main.getRuleset();
+        Ruleset activeRuleset = Config.getRuleset();
         List<String> missingKeys = Key.getRequiredParametersFor(header, activeRuleset).stream()
                 .filter(k -> !lg.getList(loggedKeys).contains(k))
                 .map(kg::get).toList();
@@ -219,7 +219,7 @@ public class CampaignParser extends AbstractParser {
         // TODO needs more robust validation for error prevention
         try {
             ConfigSet configSet = test(lines);
-            Main.applyRuleset(configSet.ruleset());
+            Config.setRuleset(configSet.ruleset());
         } catch (ConfigException ce) {
             addNoticeAt(configStartLine, ce.getSimpleReason());
         }

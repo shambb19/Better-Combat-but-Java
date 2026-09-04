@@ -1,10 +1,10 @@
 package combat_object.combatant;
 
-import __main.Main;
 import combat_object.combatant.info.Stats;
 import combat_object.implement.Implement;
 import combat_object.implement.Spell;
 import combat_object.implement.Weapon;
+import config.Config;
 import input.TextReader;
 import input.syntax.Key;
 import input.syntax.Tag;
@@ -64,7 +64,7 @@ public class PC extends Combatant {
     @SuppressWarnings("unchecked")
     public static PC from(EnumMap<Key, Object> params, Set<Tag> tags) {
         validateAll(params, "PC");
-        Main.getRuleset().validateCombatant(params, tags);
+        Config.getRuleset().validateCombatant(params, tags);
 
         return PC.builder()
                 .name((String) params.get(NAME))

@@ -50,7 +50,7 @@ public class GunAttackPopup extends Popup {
         JLabel finalize = label("Finalize Shot", Font.BOLD, 11f).muted().component();
 
         JLabel rollIndicator = label("Roll: " + roll, Font.PLAIN, 11f).muted()
-                .withEmptyBorder(4, 8, 4, 8).component();
+                .withSidePaddedEmptyBorder(4).component();
 
         return newArrangedAs(BORDER).borderCollect(
                         west(finalize), east(rollIndicator)
@@ -89,11 +89,11 @@ public class GunAttackPopup extends Popup {
     }
 
     private JPanel buildRangeToggle() {
-        JButton shortButton = button("Short", SCENARIO, null)
+        JButton shortButton = button("Short", SCENARIO, (Runnable) null)
                 .withForeground(BG_DEEP)
                 .withPreferredSize(64, 26)
                 .component();
-        JButton longButton = button("Long", BG_DARK, null)
+        JButton longButton = button("Long", BG_DARK, (Runnable) null)
                 .withPreferredSize(64, 26)
                 .component();
 

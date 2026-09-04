@@ -60,7 +60,7 @@ public abstract class PlayerQueue {
 
             return false;
         }
-        return !currentCombatant.isDead();
+        return currentCombatant.isAlive();
     }
 
     protected void sortList(List<Combatant> combatants) {

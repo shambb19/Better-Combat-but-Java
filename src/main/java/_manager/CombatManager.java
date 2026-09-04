@@ -1,9 +1,11 @@
 package _manager;
 
 import __main.Main;
+import combat_menu.menu.CombatMenu;
 import combat_menu.action_panel.ActionPanel;
 import combat_object.combatant.Combatant;
 import combat_object.implement.Implement;
+import config.Config;
 import config.ruleset.AttackResult;
 import lombok.*;
 import lombok.experimental.*;
@@ -12,6 +14,7 @@ import util.StringUtil;
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 @UtilityClass
@@ -26,13 +29,15 @@ public class CombatManager {
 
     public static final String DEFEATED_MESSAGE = "..target.. was defeated by ..attacker..";
 
-    @Getter List<LoggedAction> actionLog = new ArrayList<>();
+    @Getter
+    List<LoggedAction> actionLog = new ArrayList<>();
 
     public void confirmButtonStates() {
-        SwingUtilities.invokeLater(() -> {
-            getActionPanel().returnToButtons();
-            getActionPanel().confirmButtonStates();
-        });
+        SwingUtilities.invokeLater(() ->
+                Optional.ofNullable(getActionPanel()).ifPresent(ap -> {
+                    ap.returnToButtons();
+                    ap.confirmButtonStates();
+                }));
     }
 
     public void cancelAction() {
@@ -43,7 +48,7 @@ public class CombatManager {
     }
 
     public AttackResult logAttack(Combatant target, int roll, Implement implement) {
-        return Main.getRuleset().logAttack(target, implement, roll);
+        return Config.getRuleset().logAttack(target, implement, roll);
     }
 
     public void finishAction() {
@@ -57,7 +62,7 @@ public class CombatManager {
 
     public void logDamage(Combatant target, Implement implement,
                           int roll, int bonus) {
-        Main.getRuleset().logDamage(target, implement, roll, bonus);
+        Config.getRuleset().logDamage(target, implement, roll, bonus);
 
         Combatant attacker = EncounterManager.getCurrentCombatant();
 
@@ -81,10 +86,12 @@ public class CombatManager {
     }
 
     private ActionPanel getActionPanel() {
-        return Main.getCombatMenu().getActionPanel();
+        Optional<CombatMenu> combatMenu = Optional.ofNullable(Main.getCombatMenu());
+        return combatMenu.map(CombatMenu::getActionPanel).orElse(null);
     }
 
-    @Value public static class LoggedAction {
+    @Value
+    public static class LoggedAction {
         String logMessage;
         String timeLogged;
 

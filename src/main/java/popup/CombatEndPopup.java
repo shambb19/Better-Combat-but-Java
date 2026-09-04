@@ -88,11 +88,8 @@ public class CombatEndPopup extends Popup {
     }
 
     private JButton createActionButton(String text, Color bg, Consumer<JButton> onClick) {
-        return button(text, bg, null).withDerivedFont(Font.PLAIN, 13f)
-                .withAction(onClick)
-                .withBackground(bg)
-                .onLeft()
-                .withMaximumSize(Integer.MAX_VALUE, 40).component();
+        return button(text, bg, onClick).withDerivedFont(Font.PLAIN, 13f)
+                .withBackground(bg).onLeft().withMaximumSize(Integer.MAX_VALUE, 40).component();
     }
 
     private void levelUp(JButton button) {

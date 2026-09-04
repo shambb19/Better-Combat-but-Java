@@ -6,6 +6,7 @@ import _manager.CombatManager;
 import _manager.EffectManager;
 import combat_menu.encounter_info.HealthBarPanel;
 import combat_object.implement.*;
+import config.Config;
 import config.ruleset.AttackResult;
 import lombok.*;
 import lombok.experimental.*;
@@ -45,7 +46,7 @@ public class AttackFormPanel extends ActionFormPanel {
     }
 
     private void populateComboBox() {
-        for (var c : Main.getRuleset().getAllowedImplementClasses()) {
+        for (var c : Config.getRuleset().getAllowedImplementClasses()) {
             Implement header = DamageImplements.createHeader(c);
 
             List<?> implementList = attacker.getImplements(c);
@@ -208,8 +209,9 @@ public class AttackFormPanel extends ActionFormPanel {
     }
 
     private static class MixedComboRenderer extends DefaultListCellRenderer {
-        @Override public Component getListCellRendererComponent(JList<?> list, Object value,
-                                                      int index, boolean selected, boolean focused) {
+        @Override public Component getListCellRendererComponent(
+                JList<?> list, Object value, int index, boolean selected, boolean focused
+        ) {
             super.getListCellRendererComponent(list, value, index, selected, focused);
 
             if (!(value instanceof Implement implement)) return this;

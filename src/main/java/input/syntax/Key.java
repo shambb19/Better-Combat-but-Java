@@ -1,10 +1,10 @@
 package input.syntax;
 
-import __main.Main;
 import _global_list.DamageImplements;
 import combat_object.combatant.info.AbilityModifier;
 import combat_object.combatant.info.Class5e;
 import combat_object.implement.*;
+import config.Config;
 import config.ruleset.Ruleset;
 import exception.InvalidParameterException;
 import input.TextReader;
@@ -47,7 +47,7 @@ public enum Key {
 
     CLASS("5e class allowed in selected ruleset",
             value -> enumNameSearch(value, Class5e.class),
-            c -> c instanceof Class5e c5 && Main.getRuleset().getAllowedClasses().contains(c5),
+            c -> c instanceof Class5e c5 && Config.getRuleset().getAllowedClasses().contains(c5),
             null, RequirementType.TRUE,
             "class: "),
 

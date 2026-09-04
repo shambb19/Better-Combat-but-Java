@@ -1,4 +1,4 @@
-package combat_menu;
+package combat_menu.menu;
 
 import _manager.InspirationManager;
 import lombok.*;

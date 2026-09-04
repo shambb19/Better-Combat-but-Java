@@ -14,17 +14,10 @@ import java.util.List;
     public int toInt(String string) {
         if (string.isEmpty()) return 0;
         try {
-            return Integer.parseInt(withoutWhitespace(string));
+            return Integer.parseInt(string.trim());
         } catch (NumberFormatException ignored) {
             throw new InvalidSyntaxError(true, "non-integer input");
         }
-    }
-
-    public String withoutWhitespace(Object o) {
-        String s = String.valueOf(o);
-        if (o instanceof JTextField f) s = f.getText();
-
-        return s.toLowerCase().replace(" ", "");
     }
 
     public String stringIfElseBlank(String def, boolean condition) {

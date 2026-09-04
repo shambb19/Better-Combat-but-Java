@@ -19,6 +19,7 @@ public final class ColorStyles {
         BG_DARK = new Color(0x19, 0x1C, 0x22),
         BG_DEEP = new Color(0x16, 0x18, 0x1E),
         BG_SURFACE = new Color(0x23, 0x26, 0x2E),
+        BG_ABSENT = new Color(0x1C, 0x1E, 0x24),
 
         // ----- Foregrounds ----- //
         FOREGROUND = new Color(0xD8, 0xDC, 0xE8),

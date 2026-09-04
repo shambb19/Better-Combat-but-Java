@@ -2,6 +2,8 @@ package util;
 
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -23,6 +25,10 @@ public class Filterable<T> {
 
     public <E> List<E> castToAsList(Class<E> type) {
         return castTo(type).toList();
+    }
+
+    public T firstOrElseThrow(Predicate<T> condition) {
+        return stream.filter(condition).findFirst().orElseThrow();
     }
 
     public Filterable<T> filteredBy(Predicate<T> condition) {
@@ -51,8 +57,18 @@ public class Filterable<T> {
         return stream.collect(Collectors.toList());
     }
 
-    @SuppressWarnings("unchecked") public T[] toArray() {
-        return (T[]) stream.toArray();
+    @SafeVarargs
+    public static <S> Filterable<S> ofLists(List<S>... lists) {
+        ArrayList<S> list = new ArrayList<>();
+        for (List<S> l : lists) list.addAll(l);
+        return of(list);
+    }
+
+    @SafeVarargs
+    public static <S> Filterable<S> ofArrays(S[]... arrays) {
+        ArrayList<S> list = new ArrayList<>();
+        for (S[] arr : arrays) Collections.addAll(list, arr);
+        return of(list);
     }
 
     public static <S> Filterable<S> of(Stream<S> stream) {

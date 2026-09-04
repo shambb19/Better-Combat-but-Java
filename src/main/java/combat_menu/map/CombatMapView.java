@@ -1,109 +1,88 @@
-package combat_menu;
+package combat_menu.map;
 
 import _manager.EncounterManager;
 import combat_object.combatant.Combatant;
-import combat_object.combatant.PC;
+import encounter.Encounter;
 import lombok.*;
 import lombok.experimental.*;
+import util.Filterable;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static swing.ColorStyles.*;
-import static swing.fluent.SwingComp.button;
-import static swing.fluent.SwingComp.label;
+import static swing.fluent.SwingComp.*;
 import static swing.fluent.SwingPane.*;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class CombatMapView {
+public class CombatMapView {
 
     static int GRID_COLS = 24;   // 120 ft wide
     static int GRID_ROWS = 16;   //  80 ft tall
     static int CELL = 42;        // px per 5ft square
-    static int TRAY_HEIGHT = 84;
+    static int GRID_LEFT = 0;
+    static int GRID_TOP = 84; // also: tray bottom
+    static int GRID_BOTTOM = 49;
 
     static int TOKEN_D = 34;
     static int TOKEN_R = TOKEN_D / 2;
 
-    public static JMenuItem launch(Component parent, List<Combatant> combatants) {
-        JMenuItem menuItem = new JMenuItem("Battle Map");
-        menuItem.setEnabled(false);
+    Component parent;
+    @Getter MapCanvas canvas;
+    @Getter JMenuItem mapMenuItem;
 
-        MapCanvas canvas = new MapCanvas(combatants);
-        menuItem.addActionListener(e -> reopenViewer(parent, canvas));
+    public CombatMapView(Component parent) {
+        this.parent = parent;
 
-        openPlacementDialog(parent, canvas, menuItem);
+        Encounter e = EncounterManager.getEncounter();
+        List<Combatant> all = Filterable.ofLists(e.getFriendlies(), e.getEnemies()).toList();
 
-        return menuItem;
+        canvas = new MapCanvas(all);
+
+        mapMenuItem = new JMenuItem("Battle Map");
+        mapMenuItem.setEnabled(false);
+        mapMenuItem.addActionListener(f -> reopenViewer());
+
+        openPlacementDialog();
     }
 
-    /**
-     * Convenience overload that pulls the full combatant list straight from
-     * EncounterManager. Verify these accessor names match your Encounter
-     * model (they're inferred from EncounterSelectionPanel's
-     * setFriendlies/setEnemies/getParty calls) - adjust if needed.
-     */
-    public static JMenuItem launch(Component parent) {
-        List<Combatant> all = new ArrayList<>();
-        all.addAll(EncounterManager.getParty());
-        all.addAll(EncounterManager.getEncounter().getFriendlies());
-        all.addAll(EncounterManager.getEncounter().getEnemies());
-        return launch(parent, all);
-    }
-
-    // ------------------------------------------------------------------
-    // Dialogs
-    // ------------------------------------------------------------------
-
-    private static void openPlacementDialog(Component parent, MapCanvas canvas, JMenuItem menuItem) {
-        JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(parent), "Place Your Combatants",
+    private void openPlacementDialog() {
+        JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(parent), "Setup Combatant Map",
                 Dialog.ModalityType.APPLICATION_MODAL);
         dialog.setLayout(new BorderLayout());
         dialog.getContentPane().setBackground(BG_DARK);
 
-        JLabel instructions = new JLabel(
-                "Drag every combatant from the tray onto the grid to set up the encounter.");
-        instructions.setForeground(FG_MUTED);
-        instructions.setBorder(new EmptyBorder(10, 14, 6, 14));
-        dialog.add(instructions, BorderLayout.NORTH);
+        label("Drag every combatant onto the grid.", FG_MUTED)
+                .withEmptyBorder(10, 14, 6, 14)
+                .in(dialog, BorderLayout.NORTH);
 
-        JScrollPane scroller = new JScrollPane(canvas);
-        scroller.setBorder(null);
-        scroller.getViewport().setBackground(BG_DARK);
-        dialog.add(scroller, BorderLayout.CENTER);
+        scrollPane(canvas).withBorder(null).withBackground(BG_DARK).in(dialog, BorderLayout.CENTER);
 
         JButton confirmButton = button("Confirm Layout", SUCCESS,
                 () -> {
                     canvas.setEditable(false);
                     dialog.dispose();
-                    menuItem.setEnabled(true);
+                    mapMenuItem.setEnabled(true);
                 }).enabled(false)
-                .withoutPaintedFocus().withEmptyBorder(8, 16, 8, 16)
+                .withoutPaintedFocus().withSidePaddedEmptyBorder(8)
                 .component();
-
         dialog.add(footer(confirmButton), BorderLayout.SOUTH);
 
         canvas.setOnPlacementChanged(confirmButton::setEnabled);
 
-        dialog.setSize(
-                Math.min(1100, GRID_COLS * CELL + 80),
-                Math.min(780, TRAY_HEIGHT + GRID_ROWS * CELL + 160));
+        sizeDialogToContent(dialog);
         dialog.setLocationRelativeTo(parent);
         dialog.setVisible(true);
     }
 
-    private static void reopenViewer(Component parent, MapCanvas canvas) {
-        // a component can only live in one container at a time
+    private void reopenViewer() {
         Container currentParent = canvas.getParent();
         if (currentParent != null) currentParent.remove(canvas);
 
@@ -112,21 +91,37 @@ public final class CombatMapView {
         dialog.setLayout(new BorderLayout());
         dialog.getContentPane().setBackground(BG_DARK);
 
-        JScrollPane scroller = new JScrollPane(canvas);
-        scroller.setBorder(null);
-        scroller.getViewport().setBackground(BG_DARK);
-        dialog.add(scroller, BorderLayout.CENTER);
+        fluent(new JScrollPane(canvas)).withBorder(null).withBackground(BG_DARK).in(dialog, BorderLayout.CENTER);
 
-        JButton editButton = button("Edit Positions", BG_SURFACE, () -> canvas.setEditable(true))
-                .withoutPaintedFocus().withEmptyBorder(8, 16, 8, 16).component();
-
+        JButton editButton = positionEditButton(canvas, dialog);
         dialog.add(footer(editButton), BorderLayout.SOUTH);
 
-        dialog.setSize(
-                Math.min(1100, GRID_COLS * CELL + 80),
-                Math.min(780, TRAY_HEIGHT + GRID_ROWS * CELL + 160));
+        sizeDialogToContent(dialog);
         dialog.setLocationRelativeTo(parent);
         dialog.setVisible(true);
+    }
+
+    private static void sizeDialogToContent(JDialog dialog) {
+        dialog.pack();
+
+        Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+        int maxW = Math.min(screen.width - 100, dialog.getWidth());
+        int maxH = Math.min(screen.height - 100, dialog.getHeight());
+        dialog.setSize(maxW, maxH);
+    }
+
+    private static JButton positionEditButton(MapCanvas canvas, JDialog dialog) {
+        final String EDIT_START = "Edit Positions";
+        final String EDIT_END = "Finish and Close";
+        final Color EDIT_START_COLOR = BG_SURFACE;
+
+        return button(EDIT_START, EDIT_START_COLOR, b -> {
+            boolean editing = b.getBackground().equals(EDIT_START_COLOR);
+            canvas.setEditable(editing);
+            b.setText(editing ? EDIT_END : EDIT_START);
+            b.setBackground(editing ? SUCCESS : EDIT_START_COLOR);
+            if (!editing) dialog.setVisible(false);
+        }).withoutPaintedFocus().withSidePaddedEmptyBorder(8).component();
     }
 
     private static JPanel footer(JButton actionButton) {
@@ -166,35 +161,40 @@ public final class CombatMapView {
         return newArrangedAs(FLOW_LEFT, 6, 0).collect(dot, label).transparent().component();
     }
 
-    // ------------------------------------------------------------------
-    // Canvas: draws the tray + grid, hosts the draggable tokens
-    // ------------------------------------------------------------------
     @FieldDefaults(level = AccessLevel.PRIVATE)
-    private static final class MapCanvas extends JPanel {
+    public static final class MapCanvas extends JPanel {
 
+        final ArrayList<MapToken> tokens = new ArrayList<>();
         final Map<Point, MapToken> occupied = new HashMap<>();
         boolean editable = true;
         Consumer<Boolean> onPlacementChanged = b -> {};
 
-        MapCanvas(List<Combatant> combatants) {
+        public MapCanvas(List<Combatant> combatants) {
             setLayout(null);
             setBackground(BG_DARK);
 
             int width = GRID_COLS * CELL;
-            int height = TRAY_HEIGHT + GRID_ROWS * CELL;
+            int height = GRID_TOP + GRID_ROWS * CELL;
             setPreferredSize(new Dimension(width, height));
 
             int trayX = 10, trayY = 8;
             for (Combatant c : combatants) {
                 MapToken token = new MapToken(c, this);
+                tokens.add(token);
                 add(token);
                 token.setBounds(trayX, trayY, TOKEN_D, TOKEN_D);
+                token.markHome();
                 trayX += TOKEN_D + 8;
                 if (trayX + TOKEN_D > width - 10) {
                     trayX = 10;
                     trayY += TOKEN_D + 8;
                 }
             }
+        }
+
+        public void logCombatantDead(Combatant c, boolean dead) {
+            MapToken token = Filterable.of(tokens).firstOrElseThrow(t -> t.getCombatant().equals(c));
+            token.setDead(dead);
         }
 
         void setOnPlacementChanged(Consumer<Boolean> callback) {
@@ -210,33 +210,29 @@ public final class CombatMapView {
             repaint();
         }
 
-        /**
-         * Called by a token once it's dropped. Snaps into the nearest free
-         * cell if released over the grid; otherwise leaves it in the tray.
-         */
         void handleDrop(MapToken token, int centerX, int centerY) {
-            if (centerY < gridTop()) {
-                occupied.entrySet().removeIf(entry -> entry.getValue() == token);
+            if (centerY < GRID_TOP) {
+                token.returnHome();
                 notifyPlacementChanged();
                 return;
             }
+            //TODO same for grid bottom
 
-            int col = clamp(Math.round((centerX - gridLeft() - CELL / 2f) / (float) CELL), GRID_COLS - 1);
-            int row = clamp(Math.round((centerY - gridTop() - CELL / 2f) / (float) CELL), GRID_ROWS - 1);
+            int col = clamp(Math.round((centerX - GRID_LEFT - CELL / 2f) / (float) CELL), GRID_COLS - 1);
+            int row = clamp(Math.round((centerY - GRID_TOP - CELL / 2f) / (float) CELL), GRID_ROWS - 1);
 
             Point cell = nearestFreeCell(col, row, token);
 
             occupied.entrySet().removeIf(entry -> entry.getValue() == token);
             occupied.put(cell, token);
 
-            int x = gridLeft() + cell.x * CELL + CELL / 2 - TOKEN_R;
-            int y = gridTop() + cell.y * CELL + CELL / 2 - TOKEN_R;
+            int x = GRID_LEFT + cell.x * CELL + CELL / 2 - TOKEN_R;
+            int y = GRID_TOP + cell.y * CELL + CELL / 2 - TOKEN_R;
             token.setLocation(x, y);
+            token.markHome();
 
             notifyPlacementChanged();
         }
-
-        int gridTop() {return TRAY_HEIGHT;}
 
         private void notifyPlacementChanged() {
             boolean allPlaced = occupied.size() == getComponentCount();
@@ -244,10 +240,8 @@ public final class CombatMapView {
         }
 
         private static int clamp(int v, int max) {
-            return Math.max(0, Math.min(max, v));
+            return Math.clamp(max, 0, v);
         }
-
-        int gridLeft() {return 0;}
 
         private Point nearestFreeCell(int col, int row, MapToken token) {
             Point direct = new Point(col, row);
@@ -267,7 +261,7 @@ public final class CombatMapView {
                     }
                 }
             }
-            return direct; // grid completely full - fall back rather than lose the token
+            return direct;
         }
 
         @Override
@@ -278,41 +272,41 @@ public final class CombatMapView {
 
             g2.setColor(FG_HINT);
             g2.setFont(getFont().deriveFont(Font.PLAIN, 11f));
-            g2.drawString("TRAY — unplaced combatants", 12, TRAY_HEIGHT - 10);
+            g2.drawString("Unplaced Combatants", 12, GRID_TOP - 10);
 
             int gridW = GRID_COLS * CELL;
             int gridH = GRID_ROWS * CELL;
 
             g2.setColor(BG_SURFACE);
-            g2.fillRect(gridLeft(), gridTop(), gridW, gridH);
+            g2.fillRect(GRID_LEFT, GRID_TOP, gridW, gridH);
 
             g2.setColor(TRACK);
             for (int c = 0; c <= GRID_COLS; c++) {
-                int x = gridLeft() + c * CELL;
-                g2.drawLine(x, gridTop(), x, gridTop() + gridH);
+                int x = GRID_LEFT + c * CELL;
+                g2.drawLine(x, GRID_TOP, x, GRID_TOP + gridH);
             }
             for (int r = 0; r <= GRID_ROWS; r++) {
-                int y = gridTop() + r * CELL;
-                g2.drawLine(gridLeft(), y, gridLeft() + gridW, y);
+                int y = GRID_TOP + r * CELL;
+                g2.drawLine(GRID_LEFT, y, GRID_LEFT + gridW, y);
             }
 
             g2.dispose();
         }
     }
 
-    // ------------------------------------------------------------------
-    // Token: a draggable colored dot labeled with the combatant's abbreviation
-    // ------------------------------------------------------------------
-    @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+    @FieldDefaults(level = AccessLevel.PRIVATE)
     private static final class MapToken extends JComponent {
 
-        Combatant combatant;
+        @Getter final Combatant combatant;
+        final Color aliveColor;
         Color color;
-        @NonFinal Point dragOffset;
+        Point dragOffset;
+        Point homePosition;
 
         MapToken(Combatant combatant, MapCanvas canvas) {
             this.combatant = combatant;
-            this.color = factionColor(combatant);
+            aliveColor = combatant.getCombatantColor();
+            color = aliveColor;
             setSize(TOKEN_D, TOKEN_D);
             setToolTipText(combatant.toString());
 
@@ -337,8 +331,8 @@ public final class CombatMapView {
                     Point parentPoint = SwingUtilities.convertPoint(MapToken.this, e.getPoint(), canvas);
                     int x = parentPoint.x - dragOffset.x;
                     int y = parentPoint.y - dragOffset.y;
-                    x = Math.max(0, Math.min(canvas.getWidth() - TOKEN_D, x));
-                    y = Math.max(0, Math.min(canvas.getHeight() - TOKEN_D, y));
+                    x = Math.clamp(x, 0, canvas.getWidth() - TOKEN_D);
+                    y = Math.clamp(y, 0, canvas.getHeight() - TOKEN_D);
                     setLocation(x, y);
                     canvas.repaint();
                 }
@@ -347,9 +341,21 @@ public final class CombatMapView {
             addMouseMotionListener(dragHandler);
         }
 
-        private static Color factionColor(Combatant c) {
-            if (c instanceof PC) return PARTY;
-            return c.isEnemy() ? ENEMY : FRIENDLY;
+        public void setDead(boolean dead) {
+            this.color = dead ? BG_LOCKED : aliveColor;
+            repaint();
+
+            String toolTipText = combatant.toString();
+            if (dead) toolTipText = "(Defeated) " + toolTipText;
+            setToolTipText(toolTipText);
+        }
+
+        void markHome() {
+            homePosition = getLocation();
+        }
+
+        void returnHome() {
+            Optional.of(homePosition).ifPresent(this::setLocation);
         }
 
         @Override
@@ -378,7 +384,8 @@ public final class CombatMapView {
         public boolean contains(int x, int y) {
             int c = TOKEN_D / 2;
             int r = TOKEN_D / 2;
-            return (x - c) * (x - c) + (y - c) * (y - c) <= r * r;
+            Function<Integer, Double> s = v -> Math.pow(v, 2);
+            return s.apply(x - c) + s.apply(y - c) <= s.apply(r);
         }
 
         private static Color textColorFor(Color bg) {

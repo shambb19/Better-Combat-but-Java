@@ -1,6 +1,5 @@
 package input;
 
-import __main.Main;
 import config.Config;
 import config.ruleset.Ruleset;
 import exception.InvalidSyntaxError;
@@ -115,7 +114,7 @@ public class TextReader {
 
     public static int getHp(Object param, boolean isMaximum) {
         if (param == null) {
-            if (Main.getRuleset().equals(Ruleset.STANDARD_RULESET))
+            if (Config.getRuleset().equals(Ruleset.STANDARD_RULESET))
                 throw new InvalidSyntaxError(true, "absent hp line");
             return 8;
         }

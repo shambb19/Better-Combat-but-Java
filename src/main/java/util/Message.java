@@ -2,7 +2,7 @@ package util;
 
 import __main.Main;
 import _manager.EncounterManager;
-import combat_menu.CombatMenu;
+import combat_menu.menu.CombatMenu;
 import lombok.experimental.*;
 import org.intellij.lang.annotations.MagicConstant;
 import swing.fluent.SwingComp;

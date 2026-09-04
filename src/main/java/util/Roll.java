@@ -1,10 +1,9 @@
 package util;
 
 import input.TextReader;
-import lombok.*;
+import org.jetbrains.annotations.NotNull;
 
-@Value public class Roll {
-    int numDice, dieSize;
+public record Roll(int numDice, int dieSize) {
 
     public static Roll ofString(String rollString) {
         int numDice = TextReader.getNumDice(rollString);
@@ -24,7 +23,8 @@ import lombok.*;
         return new Roll(1, 20);
     }
 
-    @Override public String toString() {
+    @NotNull @Override
+    public String toString() {
         return numDice + "d" + dieSize;
     }
 }

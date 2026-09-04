@@ -1,6 +1,6 @@
 package ide;
 
-import __main.Main;
+import config.Config;
 import config.ruleset.Ruleset;
 import input.syntax.Key;
 import lombok.*;
@@ -39,7 +39,7 @@ public enum ItemType {
 
         List<Key> autofillKeys = new ArrayList<>(Key.getAllParametersFor(header));
 
-        Ruleset ruleset = Main.getRuleset();
+        Ruleset ruleset = Config.getRuleset();
         nonstandardKeysMap.get(ruleset).forEach(autofillKeys::remove);
 
         List<String> autofillLines = autofillKeys.stream().map(Key::getAutofillLine).toList();
@@ -48,7 +48,7 @@ public enum ItemType {
     }
 
     public boolean isUnavailableInActiveRuleset() {
-        return inaccessibleTypesMap.get(Main.getRuleset()).contains(this);
+        return inaccessibleTypesMap.get(Config.getRuleset()).contains(this);
     }
 
     public static boolean isInvalidHeader(String query) {

@@ -1,12 +1,10 @@
 package input;
 
-import __main.Main;
 import _global_list.Combatants;
 import _global_list.Scenarios;
 import combat_object.combatant.Combatant;
 import combat_object.combatant.PC;
 import combat_object.scenario.Scenario;
-import config.Config;
 import lombok.*;
 import lombok.experimental.*;
 import util.Filterable;
@@ -20,6 +18,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+
+import static config.Config.*;
 
 @ExtensionMethod(util.Filterable.class)
 @RequiredArgsConstructor
@@ -72,17 +72,11 @@ public class CampaignWriter {
     }
 
     private void writeConfig() {
-        code.add(Config.CONFIG_OPEN_TOKEN);
-        code.add(Main.getRuleset().getConfigLine());
-        code.add(Config.CONFIG_CLOSE_TOKEN);
+        code.addAll(List.of(CONFIG_OPEN_TOKEN, getRuleset().getConfigLine(), CONFIG_CLOSE_TOKEN));
     }
 
     private void writeCombatants() {
-        friendlySource.forEach(c -> {
-            if (c instanceof PC || !c.isDead())
-                code.addAll(c.toTxt());
-        });
-
+        for (Combatant c : friendlySource) if (c instanceof PC || c.isAlive()) code.addAll(c.toTxt());
         Filterable.of(enemySource).filteredBy(Combatant::isConscious).forEach(e -> code.addAll(e.toTxt()));
     }
 
