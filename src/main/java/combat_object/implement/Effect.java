@@ -100,8 +100,8 @@ public enum Effect {
             String subtitle = components.subtitle.infoString(EncounterManager.getCurrentCombatant(), target);
 
             fluent(this).arrangedAs(BORDER, 15, 0)
-                    .withBackground(components.getBackground())
-                    .withPaddedBorder(new MatteBorder(0, 4, 0, 0, effect.noticeComponents.getAccent()),
+                    .withBackground(components.background())
+                    .withPaddedBorder(new MatteBorder(0, 4, 0, 0, effect.noticeComponents.accent()),
                             10, 12, 10, 12)
                     .withMaximumSize(Integer.MAX_VALUE, 60)
                     .onLeft();
@@ -110,10 +110,10 @@ public enum Effect {
                     .arrangedAs(VERTICAL_BOX).transparent().component();
 
             JLabel titleLabel =
-                    label(components.getTitle(), Font.BOLD, 12f, components.getForeground())
+                    label(components.title(), Font.BOLD, 12f, components.foreground())
                             .onLeft().transparent().component();
 
-            JLabel subLabel = label(subtitle, Font.PLAIN, 11f, components.getForegroundDim())
+            JLabel subLabel = label(subtitle, Font.PLAIN, 11f, components.foregroundDim())
                     .onLeft().transparent().component();
 
             fluent(textCol).collect(
@@ -170,8 +170,7 @@ public enum Effect {
         }
     }
 
-    @Value @RequiredArgsConstructor static class NoticeComponents {
-        Color background, accent, foreground, foregroundDim;
-        String title, subtitle;
-    }
+    record NoticeComponents(
+            Color background, Color accent, Color foreground, Color foregroundDim,
+            String title, String subtitle) {}
 }

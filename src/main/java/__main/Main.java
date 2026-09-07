@@ -52,6 +52,7 @@ public class Main {
             case COMBAT -> () -> {
                 EncounterManager.confirmQueueFinalized();
                 combatMenu = new CombatMenu();
+                combatMenu.endActionState();
                 refreshUI();
             };
             case CREATOR -> () -> creatorMenu = new CampaignCreatorMenu();

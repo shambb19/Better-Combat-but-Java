@@ -79,9 +79,11 @@ public class EncounterSelectionPanel extends JPanel {
                 .component();
 
         button("Randomize Initiatives", BG_SURFACE, this::randomizeInitiatives)
-                .withDerivedFont(Font.PLAIN, 12f)
-                .enabled(true)
-                .in(footer);
+                .withDerivedFont(Font.PLAIN, 12f).in(footer);
+
+        button("Refresh Inputs", BG_SURFACE, this::validateCards)
+                .applied(b -> b.setToolTipText("Forces an input validation check"))
+                .withDerivedFont(Font.PLAIN, 12f).in(footer);
 
         beginButton = button("Begin Encounter", SUCCESS, this::logAndBegin)
                 .withDerivedFont(Font.PLAIN, 13f)

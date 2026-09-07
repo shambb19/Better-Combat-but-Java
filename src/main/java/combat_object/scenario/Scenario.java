@@ -56,7 +56,8 @@ public class Scenario extends CombatObject {
 
         ArrayList<NPC> list = new ArrayList<>();
         team.forEach((npc, qty) -> {
-            for (int i = 0; i < qty; i++) list.add(NPC.create(npc + " " + (i + 1), npc));
+            if (qty == 1) list.add(npc);
+            else list.addAll(NPC.createBulk(npc, qty));
         });
 
         return list;

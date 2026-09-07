@@ -70,8 +70,7 @@ public class CombatantCard extends JPanel {
         inputLabel = label(inputType, 11f).muted().component();
         right.add(inputLabel, gbc);
 
-        input = new ValidatedField("0", validator, 30);
-        fluent(input).withBackground(TRACK).opaque();
+        input = validatedField("0", validator, 30).withBackground(TRACK).opaque().component();
         right.add(input, gbc);
 
         checkBox = SwingComp.fluent(new JCheckBox("Absent"))
@@ -181,8 +180,7 @@ public class CombatantCard extends JPanel {
         inputLabel.setVisible(false);
         right.add(inputLabel, gbc);
 
-        input = new ValidatedField("1", validator, 30);
-        fluent(input).withBackground(TRACK).opaque();
+        input = validatedField("1", validator, 30).withBackground(TRACK).opaque().component();
         input.setVisible(false);
         right.add(input, gbc);
 

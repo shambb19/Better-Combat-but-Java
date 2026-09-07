@@ -9,6 +9,7 @@ import swing.ColorStyles;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Set;
 
 import static input.syntax.Key.*;
@@ -27,8 +28,13 @@ public class NPC extends Combatant {
                 .build();
     }
 
-    public static NPC create(String name, NPC source) {
-        return create(name, source.maxHp, source.armorClass, source.isEnemy);
+    public static List<NPC> createBulk(NPC source, int qty) {
+        ArrayList<NPC> list = new ArrayList<>();
+        for (int i = 1; i <= qty; i++) {
+            NPC copy = create(source.name + " " + i, source.maxHp, source.armorClass, source.isEnemy);
+            list.add(copy);
+        }
+        return list;
     }
 
     public Color getCombatantColor() {

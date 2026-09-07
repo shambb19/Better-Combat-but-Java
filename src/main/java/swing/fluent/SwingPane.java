@@ -93,6 +93,13 @@ public class SwingPane extends SwingComp<JPanel> {
         return this;
     }
 
+    public SwingPane collectArr(Object[] components) {
+        for (Object obj : components) component.add(getComponent(obj));
+        component.revalidate();
+        component.repaint();
+        return this;
+    }
+
     @SneakyThrows
     public SwingPane borderCollect(BorderComponent... components) {
         for (BorderComponent comp : components) {
@@ -141,7 +148,7 @@ public class SwingPane extends SwingComp<JPanel> {
 
     private static Component getComponent(Object comp) {
         return switch (comp) {
-            case String s -> new JLabel(s);
+            case String s -> label(s).component;
             case Component c -> c;
             case SwingComp<?> sc -> sc.component();
             default ->

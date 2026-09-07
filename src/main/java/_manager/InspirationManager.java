@@ -2,6 +2,7 @@ package _manager;
 
 import __main.Main;
 import combat_menu.action_panel.ActionPanel;
+import combat_object.combatant.Combatant;
 import lombok.*;
 import lombok.experimental.*;
 
@@ -12,8 +13,8 @@ import java.util.List;
 public class InspirationManager {
 
     public static final InspirationManager MANAGER = new InspirationManager();
+    public static final int FREE_USES = 2;
 
-    static final int FREE_USES = 2;
     static final int BAR_MAX = 10;
     static final int EXCESS_DIE = 4;
     final List<Listener> listeners = new ArrayList<>();
@@ -24,19 +25,21 @@ public class InspirationManager {
         listeners.add(l);
     }
 
+    public void useInspiration(Combatant combatant, boolean showPanel) {
+        combatant.useInspiration();
+        usedCount++;
+        fireCountChanged();
+
+        if (combatant.getNumInspirationUsed() > FREE_USES && showPanel) fireExcessPanel();
+        else getActionPanel().returnToButtons();
+
+        Main.refreshUI();
+    }
+
     public void useInspiration() {
         if (EncounterManager.getQueue() == null) return;
 
-        EncounterManager.getCurrentCombatant().useInspiration();
-
-        usedCount++;
-        fireCountChanged();
-        if (usedCount > FREE_USES)
-            fireExcessPanel();
-        else
-            getActionPanel().returnToButtons();
-
-        Main.refreshUI();
+        useInspiration(EncounterManager.getCurrentCombatant(), true);
     }
 
     private void fireCountChanged() {

@@ -27,15 +27,18 @@ public class QuickAddDialog extends JDialog {
     static final String SELECT = "select";
     static final String CREATE = "create";
 
+    boolean forEnemies;
     List<NPC> available;
     Consumer<HashMap<NPC, Integer>> onConfirmSelection;
 
     CardLayout cardLayout = new CardLayout();
     JPanel cardHolder;
+    JPanel createCard;
     CombatantScroller selectionScroller;
     JButton selectConfirmButton;
 
     public QuickAddDialog(boolean forEnemies, List<NPC> available, Consumer<HashMap<NPC, Integer>> onConfirmSelection) {
+        this.forEnemies = forEnemies;
         this.available = available;
         this.onConfirmSelection = onConfirmSelection;
 
@@ -73,11 +76,10 @@ public class QuickAddDialog extends JDialog {
 
         cardHolder.add(selectCard, SELECT);
 
-        //
-        // --create card
-        JPanel createCard = newArrangedAs(BORDER).borderCollect(
-                center(new QuickCombatantPanel(this::confirmCreate, forEnemies))
-        ).transparent().component();
+        createCard = newArrangedAs(BORDER)
+                .borderCollect(center(new QuickCombatantPanel(this::confirmCreate, forEnemies)))
+                        .transparent().component();
+        setCreateCard();
 
         cardHolder.add(createCard, CREATE);
 
@@ -91,6 +93,11 @@ public class QuickAddDialog extends JDialog {
     public void showCard(@MagicConstant(valuesFromClass = QuickAddDialog.class) String card) {
         if (available.isEmpty()) cardLayout.show(cardHolder, CREATE);
         else cardLayout.show(cardHolder, card);
+    }
+
+    private void setCreateCard() {
+        createCard.removeAll();
+        createCard.add(new QuickCombatantPanel(this::confirmCreate, forEnemies), BorderLayout.CENTER);
     }
 
     /** Relabels the existing "absent" checkbox as an inclusion toggle and ties it to the quantity field. */
@@ -125,6 +132,7 @@ public class QuickAddDialog extends JDialog {
         CombatantCard card = selectionScroller.addCard(created);
         card.getCheckBox().setSelected(true);
         showCard(SELECT);
+        setCreateCard();
     }
 
     private void validateSelection() {

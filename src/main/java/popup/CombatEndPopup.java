@@ -30,10 +30,6 @@ public class CombatEndPopup extends Popup {
         new CombatEndPopup(endType);
     }
 
-    public static void fireQuit() {
-        new CombatEndPopup("Quit");
-    }
-
     private CombatEndPopup(String endType) {
         getContentPane().setBackground(BACKGROUND);
         setLayout(new BorderLayout());
@@ -121,11 +117,15 @@ public class CombatEndPopup extends Popup {
         });
     }
 
-    public static void restart() {
+    public static void fireQuit() {
+        promptAction("quit", () -> new CombatEndPopup("Quit"));
+    }
+
+    public static void fireRestart() {
         promptAction("restart", () -> Main.closeAndSwitch(null, Main.UPLOAD));
     }
 
-    public static void promptAction(String mode, Runnable runnable) {
+    private static void promptAction(String mode, Runnable runnable) {
         Message.showActionPrompt("Are you sure you would like to " + mode + "? You will lose all progress.",
                 new PopupPrompt.ActionButton[]{
                         new PopupPrompt.ActionButton(mode.capitalized(), CRITICAL, runnable),

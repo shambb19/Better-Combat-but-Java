@@ -167,8 +167,8 @@ public class CombatantScroller extends JScrollPane {
     }
 
     public boolean areAllCardsValid() {
-        return content.getComponents().of()
-                .castToAsList(CombatantCard.class).stream().allMatch(CombatantCard::hasValidInput);
+        return content.getComponents().of().castToAsList(CombatantCard.class).stream()
+                .filter(c -> !c.getCheckBox().isSelected()).allMatch(CombatantCard::hasValidInput);
     }
 
     public boolean containsEnemies() {

@@ -58,8 +58,7 @@ public abstract class Combatant extends CombatObject {
         if (isArmored) damage = Math.max(0, damage - 2);
 
         hp = Math.max(0, hp - damage);
-        if (hp == 0)
-            lifeStatus.setDefeated(this);
+        if (hp == 0) lifeStatus.setDefeated(this);
     }
 
     public void heal(int healthRegained) {

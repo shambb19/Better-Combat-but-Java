@@ -152,6 +152,7 @@ public class ActionButtons extends JPanel {
             }
 
             setToolTipText(toolTipText);
+            setEnabled(enabled);
             if (enabled) {
                 addHighlight(highlightColor);
                 setBackground(backgroundColor);

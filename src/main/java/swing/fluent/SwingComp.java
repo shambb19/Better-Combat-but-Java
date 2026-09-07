@@ -5,6 +5,7 @@ import boilerplate.FilteredVals;
 import lombok.*;
 import lombok.experimental.*;
 import org.intellij.lang.annotations.MagicConstant;
+import swing.custom.ValidatedField;
 
 import javax.swing.*;
 import javax.swing.border.*;
@@ -78,6 +79,10 @@ public class SwingComp<E extends JComponent> {
         return label(text).withForeground(fg);
     }
 
+    public static SwingComp<ValidatedField> validatedField(String placeholder, Runnable onChange, int maxValue) {
+        return new SwingComp<>(new ValidatedField(placeholder, onChange, maxValue));
+    }
+
     /**
      * <blockquote><pre>
      *     {@code
@@ -103,7 +108,7 @@ public class SwingComp<E extends JComponent> {
                 Image resized = image.getScaledInstance(80, 80, Image.SCALE_SMOOTH);
                 yield new JButton(new ImageIcon(resized));
             }
-            default -> throw new ClassCastException("SwingComp.button: String or Resource expected");
+            default -> new JButton(String.valueOf(textOrIcon));
         };
 
         return SwingComp.fluent(button)
@@ -289,10 +294,6 @@ public class SwingComp<E extends JComponent> {
         component.setPreferredSize(new Dimension(width, height));
         component.revalidate();
         return this;
-    }
-
-    public SwingComp<E> withFixedSize(int width, int height) {
-        return withPreferredSize(width, height).withMaximumSize(width, height).withMinimumSize(width, height);
     }
 
     public SwingComp<E> applied(Consumer<E> action) {

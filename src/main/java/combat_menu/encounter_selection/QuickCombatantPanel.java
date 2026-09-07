@@ -30,7 +30,7 @@ public class QuickCombatantPanel extends JPanel {
 
         nameField = new ValidatedField("Name", this::validateInputs);
 
-        hpField = new ValidatedField("Health", this::validateInputs, 100);
+        hpField = new ValidatedField("Health", this::validateInputs, 1000);
         acField = new ValidatedField("Armor Class", this::validateInputs, 40);
 
         panelIn(this, BorderLayout.CENTER).arrangedAs(VERTICAL_BOX, 15, 15)
