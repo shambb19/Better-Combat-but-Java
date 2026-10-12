@@ -33,6 +33,6 @@ public class HealFormPanel extends ActionFormPanel {
 
     @Override
     protected boolean isInputValid() {
-        return amountField.isValid();
+        return amountField.isInputValid();
     }
 }

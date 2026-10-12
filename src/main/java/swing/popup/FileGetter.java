@@ -1,4 +1,4 @@
-package popup;
+package swing.popup;
 
 import util.Message;
 

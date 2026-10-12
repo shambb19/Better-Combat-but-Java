@@ -4,12 +4,13 @@ import _manager.InspirationManager;
 import lombok.*;
 import swing.ColorStyles;
 import swing.custom.AnimatedBar;
-import swing.fluent.SwingPane;
+import swing.builder.ComponentBuilder;
+import swing.builder.PanelBuilder;
 import util.Message;
 
 import javax.swing.*;
 
-import static swing.fluent.SwingPane.*;
+import java.awt.*;
 
 @NoArgsConstructor
 public class InspirationBar extends JPanel implements InspirationManager.Listener {
@@ -19,12 +20,14 @@ public class InspirationBar extends JPanel implements InspirationManager.Listene
     {
         InspirationManager.MANAGER.addListener(this);
 
-        SwingPane.fluent(this).arrangedAs(SwingPane.BORDER, 10, 0)
-                .borderCollect(
-                        west(label("Excess Inspiration 1d4 Points", ColorStyles.FG_MUTED)),
-                        center(bar)
-                )
-                .withPreferredSize(0, 40);
+        JLabel label = ComponentBuilder.createLabel("Excess Inspiration 1d4 Points")
+                .border(BorderFactory.createEmptyBorder(0, 0, 0, 4))
+                .foreground(ColorStyles.FG_MUTED).build().get();
+
+        PanelBuilder.modifyingPanel(this).layoutType(PanelBuilder.BORDER).hgap(10)
+                .hostedComponent(label, BorderLayout.WEST)
+                .hostedComponent(bar, BorderLayout.CENTER)
+                .preferredSize(new Dimension(0, 40)).build().validated();
     }
 
     @Override public void onCountChanged(int used, int max) {

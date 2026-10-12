@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -27,8 +28,8 @@ public class Filterable<T> {
         return castTo(type).toList();
     }
 
-    public T firstOrElseThrow(Predicate<T> condition) {
-        return stream.filter(condition).findFirst().orElseThrow();
+    public <U> T firstOrElseThrow(Function<T, U> classifier, U comparator) {
+        return stream.filter(t -> classifier.apply(t).equals(comparator)).findFirst().orElseThrow();
     }
 
     public Filterable<T> filteredBy(Predicate<T> condition) {
@@ -78,6 +79,10 @@ public class Filterable<T> {
     public static <S> Filterable<S> of(Iterable<S> iterable) {
         Stream<S> stream = StreamSupport.stream(iterable.spliterator(), false);
         return new Filterable<>(stream);
+    }
+
+    public static <R, S extends R> Filterable<S> of(Iterable<R> iterable, Class<S> classifier) {
+        return of(iterable).castTo(classifier);
     }
 
     @SafeVarargs

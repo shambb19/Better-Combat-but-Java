@@ -37,7 +37,7 @@ public class Stats {
     }
 
     public static Stats defaultStats() {
-        Stats stats = new Stats(null, 1);
+        Stats stats = new Stats(Class5e.NPC, 1);
         stats.proficiencyBonus = 0;
 
         return stats;

@@ -1,25 +1,60 @@
 package swing.custom;
 
 import exception.InvalidSyntaxError;
-import swing.fluent.SwingPane;
+import lombok.AccessLevel;
+import lombok.experimental.ExtensionMethod;
+import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
+import swing.builder.TextItemBuilder;
 import util.StringUtil;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
-import javax.swing.text.JTextComponent;
 import java.awt.*;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import static swing.ColorStyles.*;
-import static swing.fluent.SwingComp.fluent;
-import static swing.fluent.SwingPane.*;
+import static swing.builder.PanelBuilder.*;
 
-@lombok.experimental.ExtensionMethod(StringUtil.class)
-public class ValidatedField extends JPanel {
+@ExtensionMethod(StringUtil.class)
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+public class ValidatedField extends JTextField {
 
-    private final JTextComponent field;
-    private final JPanel bar;
-    private Predicate<String> validator = s -> !s.isBlank();
+    @NonFinal Predicate<String> validator = s -> !s.isBlank();
+
+    public ValidatedField(String placeholder, Runnable onChange) {
+        TextItemBuilder.modifyingTextItem(this)
+                .clientProperty("JTextField.placeholderText", placeholder)
+                .clientProperty("JTextField.padding", new Insets(0, 8, 0, 8))
+                .onEdit(() -> {
+                    refreshVisuals();
+                    Optional.ofNullable(onChange).ifPresent(Runnable::run);
+                }).fontBuilder(FontBuilder.of(Font.PLAIN, 13f))
+                .background(TRACK)
+                .border(BorderFactory.createCompoundBorder(
+                        BorderFactory.createMatteBorder(0, 3, 0, 0, BG_DEEP),
+                        BorderFactory.createEmptyBorder(6, 0, 6, 0)
+                )).alignmentX(LEFT_ALIGNMENT)
+                .fixedHeight(40)
+                .editable(true)
+                .focusable(true).build().validated();
+
+        addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                setBackground(BORDER_LIGHT);
+                setCaretColor(BORDER_LIGHT);
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                setBackground(TRACK);
+                setCaretColor(TRACK);
+            }
+        });
+    }
 
     public ValidatedField(String placeholder, Runnable onChange, int maxValue) {
         this(placeholder, onChange);
@@ -34,71 +69,27 @@ public class ValidatedField extends JPanel {
         };
     }
 
-    public ValidatedField(String placeholder, Runnable onChange) {
-        field = fluent(new JTextField())
-                .withBackground(TRACK)
-                .withDerivedFont(Font.PLAIN, 13f)
-                .withPaddedBorder(new LineBorder(DIVIDER, 1), 5, 8, 5, 8)
-                .applied(f -> f.putClientProperty("JTextField.placeholderText", placeholder))
-                .onLeft()
-                .in(this);
-
-        Component gap = Box.createVerticalStrut(2);
-        if (gap instanceof JComponent c) c.setAlignmentX(0.0f);
-
-        bar = newArrangedAs(FLOW)
-                .withPreferredSize(0, 2)
-                .withMaximumSize(Integer.MAX_VALUE, 2)
-                .withBackground(TRACK)
-                .onLeft()
-                .component();
-
-        SwingPane.fluent(this).arrangedAs(VERTICAL_BOX).collect(field, gap, bar).transparent();
-
-        field.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
-            public void insertUpdate(javax.swing.event.DocumentEvent e) {
-                update();
-            }
-
-            public void removeUpdate(javax.swing.event.DocumentEvent e) {
-                update();
-            }
-
-            public void changedUpdate(javax.swing.event.DocumentEvent e) {
-                update();
-            }
-
-            private void update() {
-                refreshVisuals();
-                if (onChange != null)
-                    onChange.run();
-            }
-        });
-    }
-
     private void refreshVisuals() {
-        String text = getValue();
-        Color barColor;
-        if (text.isEmpty())
-            barColor = TRACK;
-        else if (validator.test(text))
-            barColor = HEALTHY;
-        else
-            barColor = CRITICAL;
-        bar.setBackground(barColor);
+        Color color = isInputValid() ? HEALTHY : WARNING;
+        setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 3, 0, 0, color),
+                BorderFactory.createEmptyBorder(6, 0, 6, 0)
+        ));
+        repaint();
     }
 
-    @Override public void setEnabled(boolean enabled) {
-        field.setEnabled(enabled);
+    public void allowEnter(Runnable onEnter) {
+        addActionListener(e -> onEnter.run());
     }
 
     public void setValue(String value) {
-        field.setText(value);
+        setText(value);
+        refreshVisuals();
     }
 
     public String getValue() {
-        if (field == null || field.getText() == null) return "";
-        return field.getText().trim();
+        if (getText() == null) return "";
+        return getText().trim();
     }
 
     public void setValidator(Predicate<String> v) {
@@ -106,11 +97,11 @@ public class ValidatedField extends JPanel {
         refreshVisuals();
     }
 
-    public boolean isValid() {
+    public boolean isInputValid() {
         return validator != null && validator.test(getValue());
     }
 
     public void clear() {
-        field.setText("");
+        setValue("");
     }
 }

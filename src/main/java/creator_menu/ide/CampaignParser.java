@@ -1,4 +1,4 @@
-package ide;
+package creator_menu.ide;
 
 import config.Config;
 import config.ruleset.Ruleset;
@@ -17,9 +17,11 @@ import util.Locators;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import static config.Config.*;
-import static ide.CampaignToken.*;
+import static creator_menu.ide.CampaignToken.*;
 
 @ExtensionMethod({input.TextReader.class, util.Locators.class})
 public class CampaignParser extends AbstractParser {
@@ -47,7 +49,7 @@ public class CampaignParser extends AbstractParser {
             int type = token.getType();
 
             switch (type) {
-                case HEADER:
+                case HEADER_TOKEN:
                     validateLastItem(currentItem, currentItemStartIndex);
                     validateHeader(line, i);
 
@@ -56,7 +58,7 @@ public class CampaignParser extends AbstractParser {
                     currentItem = new ArrayList<>();
                     currentItem.add(line);
                     break;
-                case CONFIG:
+                case CONFIG_TOKEN:
                     validateConfigActionLine(line, i);
                     switch (line) {
                         case CONFIG_OPEN_TOKEN:
@@ -74,10 +76,10 @@ public class CampaignParser extends AbstractParser {
                             currentItem.add(line);
                     }
                     break;
-                case KEY, KEY_OPTIONAL, VALUE:
+                case KEY_TOKEN, KEY_OPTIONAL_TOKEN, VALUE_TOKEN:
                     if (currentItemExists) currentItem.add(line);
                     break;
-                case UNEXPECTED:
+                case UNEXPECTED_TOKEN:
                     addNoticeAt(i, "cannot resolve line");
             }
         }
@@ -166,26 +168,20 @@ public class CampaignParser extends AbstractParser {
     }
 
     private void validateLoggedParameters(String header, List<KeyEntry> loggedKeys, int headerLine) {
-        interface DisplayableKeyGetter {
-            String get(Key key);
-        }
-        DisplayableKeyGetter kg = k -> k.name().toLowerCase();
+        Function<Key, String> keyGetter = k -> k.name().toLowerCase();
 
-        interface KeyListGetter {
-            List<Key> getList(List<KeyEntry> entries);
-        }
-        KeyListGetter lg = e -> e.stream().map(KeyEntry::key).toList();
+        BiFunction<List<KeyEntry>, Key, Boolean> listContains = (list, key) ->
+                list.stream().map(KeyEntry::key).toList().contains(key);
 
         // unexpected keys
         loggedKeys.stream()
                 .filter(e -> !Key.getAllParametersFor(header).contains(e.key))
-                .forEach(e -> addNoticeAt(e.index, "cannot resolve key \"" + kg.get(e.key) + "\" for item type " + header));
+                .forEach(e -> addNoticeAt(e.index, "cannot resolve key \"" + keyGetter.apply(e.key) + "\" for item type " + header));
 
         // missing required params
         Ruleset activeRuleset = Config.getRuleset();
         List<String> missingKeys = Key.getRequiredParametersFor(header, activeRuleset).stream()
-                .filter(k -> !lg.getList(loggedKeys).contains(k))
-                .map(kg::get).toList();
+                .filter(k -> !listContains.apply(loggedKeys, k)).map(keyGetter).toList();
 
         if (!missingKeys.isEmpty()) {
             String missingKeyString = String.join(", ", missingKeys);
@@ -200,7 +196,7 @@ public class CampaignParser extends AbstractParser {
         for (KeyEntry entry : loggedKeys) {
             if (allowedDuplicates.contains(entry.key)) continue;
 
-            boolean duplicate = lg.getList(entryDump).contains(entry.key);
+            boolean duplicate = listContains.apply(entryDump, entry.key);
             if (duplicate) duplicates.add(entry);
             else entryDump.add(entry);
         }
@@ -213,7 +209,7 @@ public class CampaignParser extends AbstractParser {
             addNoticeAt(configStartLine, "invalid config opener; " + CONFIG_OPEN_TOKEN + " expected");
             return;
         }
-        if (!lines.getFirst().equals(CONFIG_CLOSE_TOKEN)) {
+        if (!lines.getFirst().equals(CONFIG_CLOSE_TOKEN)) { // fixme why??
             addNoticeAt(endLine, "invalid config closer; " + CONFIG_CLOSE_TOKEN + " expected");
         }
         // TODO needs more robust validation for error prevention

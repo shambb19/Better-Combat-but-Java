@@ -5,17 +5,15 @@ import combat_object.combatant.PC;
 import lombok.*;
 import lombok.experimental.*;
 import swing.ColorStyles;
-import swing.fluent.SwingPane;
+import swing.builder.ComponentBuilder;
 import util.Filterable;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import java.awt.*;
 
 import static swing.ColorStyles.*;
-import static swing.fluent.SwingComp.label;
-import static swing.fluent.SwingComp.spacer;
-import static swing.fluent.SwingPane.*;
+import static swing.builder.Components.*;
+import static swing.builder.PanelBuilder.*;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class CombatantHeaderPanel extends JPanel {
@@ -38,41 +36,50 @@ public class CombatantHeaderPanel extends JPanel {
     public CombatantHeaderPanel(Combatant combatant) {
         this.combatant = combatant;
 
-        fluent(this).arrangedAs(VERTICAL_BOX).spaced()
-                .withBackground((combatant.isEnemy()) ? UNKNOWN : BACKGROUND)
-                .onLeft();
+        modifyBasicPanel(this, VERTICAL_BOX, SPACER_BORDER);
+        setAlignmentX(LEFT_ALIGNMENT);
 
-        String classText = (combatant instanceof PC pc) ? pc.getStats().getClass5e().toString() :
-                (combatant.isEnemy() ? "Enemy" : "Ally");
+        String classText;
+        if (combatant instanceof PC pc) classText = pc.getStats().getClass5e().toString();
+        else classText = combatant.isEnemy() ? "Enemy" : "Ally";
 
-        JPanel nameRow = row().collect(
-                label(combatant, Font.PLAIN, 26f, combatant.isEnemy() ? UNKNOWN : FOREGROUND),
-                spacer(12, 0), badge(classText), spacer(8, 0)
-        ).transparent().component();
+        //
+        // name row
+        Color fg = combatant.isEnemy() ? UNKNOWN : FOREGROUND;
+        JLabel nameLabel = ComponentBuilder.getBasicLabel(combatant, Font.PLAIN, 26f, fg);
 
+        JPanel nameRow = row(
+                nameLabel, spacer(12, 0), badge(classText), spacer(8, 0)
+        );
+
+        //
+        // stat row
         inspirationChip = new JPanel();
         hpChip = new JPanel();
 
-        statRow = row().collect(
+        statRow = row(
                 statChip("Initiative", "+" + combatant.getInitiative(), false), dividerLine(),
                 inspirationChip, dividerLine(),
                 hpChip
-        ).transparent().component();
+        );
 
+        //
+        // roll row
         rollTrack = new RollTrack();
-        rollCaption = label("-", Font.PLAIN, 11f, FG_HINT).component();
+        rollCaption = ComponentBuilder.getBasicLabel("-", Font.PLAIN, 11f, FG_HINT);
 
-        JPanel rollRow = row().collect(
-                label("Roll Luck", 11f).muted(), spacer(12, 0),
-                rollTrack, spacer(10, 0),
-                rollCaption
-        ).transparent().component();
+        JLabel luckLabel = ComponentBuilder.getBasicLabel("Roll Luck", Font.PLAIN, 11f, FG_MUTED);
 
-        fluent(this).collect(
+        JPanel rollRow = row(
+                luckLabel, spacer(12, 0), rollTrack, spacer(10, 0), rollCaption
+        );
+
+        addConstraintlessComponentsTo(this,
                 nameRow, spacer(0, 10),
                 statRow, spacer(0, 12),
                 rollRow
         );
+
         Filterable.of(getComponents()).castToAsList(JComponent.class).forEach(j -> j.setAlignmentX(LEFT_ALIGNMENT));
 
         refresh();
@@ -117,49 +124,50 @@ public class CombatantHeaderPanel extends JPanel {
         });
     }
 
-    private static SwingPane row() {
-        return newArrangedAs(HORIZONTAL_BOX).transparent().onLeft().toPane();
+    private static JPanel row(Object... components) {
+        return createPanel(HORIZONTAL_BOX, components).alignmentX(LEFT_ALIGNMENT).build().get();
     }
 
     private JLabel badge(String text) {
         Color fg = combatant.isEnemy() ? UNKNOWN : FG_MUTED;
         Color border = combatant.isEnemy() ? UNKNOWN : DIVIDER;
 
-        return label(text, Font.PLAIN, 11f, fg)
-                .withPaddedBorder(new LineBorder(border, 1), 2, 8, 2, 8)
-                .component();
+        return ComponentBuilder.createLabel(text, Font.PLAIN, 11f, fg)
+                .border(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(border, 1),
+                        BorderFactory.createEmptyBorder(2, 8, 2, 8)
+                )).build().get();
     }
 
     private static JPanel statChip(String labelText, String value, boolean criticalCondition) {
-        JPanel chip = newArrangedAs(VERTICAL_BOX).spaced().transparent().component();
+        JLabel statName = ComponentBuilder.createLabel(labelText.toUpperCase(), Font.PLAIN, 10f, FG_MUTED)
+                .alignmentX(LEFT_ALIGNMENT)
+                .build().get();
 
-        label(labelText.toUpperCase(), 10f).muted().onLeft().in(chip);
+        Color fg = criticalCondition ? CRITICAL : FOREGROUND;
+        JLabel statValue = ComponentBuilder.createLabel(value, Font.BOLD, 14f, fg)
+                .alignmentX(LEFT_ALIGNMENT)
+                .build().get();
 
-        label(value, Font.BOLD, 14f, criticalCondition ? CRITICAL : FOREGROUND).onLeft().in(chip);
-
-        return chip;
+        return createPanel(VERTICAL_BOX, statName, statValue).border(SPACER_BORDER).build().get();
     }
 
     private static Component dividerLine() {
-        JPanel d = newArrangedAs(BORDER)
-                .withPreferredSize(1, 28)
-                .withMaximumSize(1, 28)
-                .withBackground(DIVIDER)
-                .component();
+        JPanel d = createPanel(BORDER).background(DIVIDER)
+                .fixedSize(new Dimension(1, 28)).build().get();
 
-        return newBorderPanel(center(d))
-                .transparent()
-                .withEmptyBorder(0, 10, 0, 10)
-                .withMaximumSize(21, 28)
-                .applied(p -> p.setAlignmentY(CENTER_ALIGNMENT))
-                .component();
+        return createPanel(BORDER).hostedComponent(d, BorderLayout.CENTER)
+                .border(BorderFactory.createEmptyBorder(0, 10, 0, 10))
+                .maximumSize(new Dimension(21, 28))
+                .alignmentY(CENTER_ALIGNMENT).build().get();
     }
 
+    @FieldDefaults(level = AccessLevel.PRIVATE)
     private static class RollTrack extends JPanel {
-        private final Timer animationTimer;
-        private double luckValue = 0;
-        private double displayLuck = 0;
-        private Color fillColor = ColorStyles.HEALTHY;
+        final Timer animationTimer;
+        double luckValue = 0;
+        double displayLuck = 0;
+        Color fillColor = ColorStyles.HEALTHY;
 
         {
             setOpaque(false);

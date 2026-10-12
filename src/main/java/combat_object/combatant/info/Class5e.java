@@ -24,7 +24,8 @@ public enum Class5e {
     WARLOCK(CHA, 5),
     WIZARD(INT, 4),
     GUNSLINGER(null, 6),
-    ARTIFICER(null, 4);
+    ARTIFICER(null, 4),
+    NPC(null, 0);
 
     AbilityModifier spellMod;
     int hpIncrement;

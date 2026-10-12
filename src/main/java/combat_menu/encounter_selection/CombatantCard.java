@@ -3,13 +3,13 @@ package combat_menu.encounter_selection;
 import _global_list.Combatants;
 import combat_object.combatant.Combatant;
 import combat_object.combatant.NPC;
+import combat_object.combatant.CombatantOption;
 import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.experimental.ExtensionMethod;
 import lombok.experimental.FieldDefaults;
 import swing.custom.ValidatedField;
-import swing.fluent.SwingComp;
-import swing.fluent.SwingPane;
+import swing.builder.ButtonBuilder;
+import swing.builder.ComponentBuilder;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,196 +18,171 @@ import java.awt.event.MouseEvent;
 import java.util.List;
 
 import static swing.ColorStyles.*;
-import static swing.ColorStyles.BG_SURFACE;
-import static swing.ColorStyles.TRACK;
-import static swing.fluent.SwingComp.label;
-import static swing.fluent.SwingPane.*;
+import static swing.builder.PanelBuilder.*;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PACKAGE)
 @ExtensionMethod(util.StringUtil.class)
 public class CombatantCard extends JPanel {
 
-    @Getter Combatant combatant;
+    Combatant combatant;
     JLabel inputLabel;
     ValidatedField input;
-    @Getter JCheckBox checkBox;
+    boolean showInput;
+    JCheckBox checkBox;
     JPanel accentBar;
     JLabel label;
-    @Getter boolean isEmpty;
+    boolean isEmpty;
     CombatantScroller host;
 
-    CombatantCard( // default constructor
-            CombatantScroller host, Combatant combatant, String inputType, boolean showAbsent, Runnable validator
+    private CombatantCard( // default constructor
+                           CombatantScroller host, Combatant combatant,
+                           String inputType, boolean showInput,
+                           boolean absentCheck, // else include check
+                           Runnable validator
     ) {
         this.host = host;
         this.combatant = combatant;
+        this.showInput = showInput;
         label = null;
         isEmpty = false;
 
-        SwingPane.fluent(this).arrangedAs(SwingPane.BORDER, 10, 0)
-                .withBackground(BG_SURFACE)
-                .withMaximumSize(Integer.MAX_VALUE, 52)
-                .withPreferredSize(0, 52)
-                .onLeft()
-                .withEmptyBorder(0, 0, 0, 12);
+        modifyBasicPanel(this, BORDER, 10, 0, BorderFactory.createEmptyBorder(0, 0, 0, 12));
+        modifying(this).background(BG_SURFACE)
+                .fixedHeight(52)
+                .alignmentX(LEFT_ALIGNMENT).build().validated();
 
-        accentBar = panelIn(this, BorderLayout.WEST)
-                .withPreferredSize(3, 0)
-                .withBackground(combatant.getCombatantColor())
-                .component();
+        //
+        // accent bar
+        Color accent = absentCheck ? combatant.getCombatantColor() : TRACK;
 
-        label(combatant, Font.BOLD, 14f).withEmptyBorder(0, 10, 0, 0)
-                .in(this, BorderLayout.CENTER);
+        accentBar = createPanel(FLOW)
+                .preferredSize(new Dimension(3, 0))
+                .background(accent)
+                .build().putIn(this, BorderLayout.WEST);
 
-        JPanel right = new JPanel(new GridBagLayout());
-        right.setOpaque(false);
-        add(right, BorderLayout.EAST);
+        //
+        // label
+        ComponentBuilder.createLabel(combatant.toString(), Font.BOLD, 14f, FOREGROUND)
+                .border(BorderFactory.createEmptyBorder(0, 10, 0, 0))
+                .build().putIn(this, BorderLayout.CENTER);
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(0, 8, 0, 0);
-        gbc.anchor = GridBagConstraints.CENTER;
+        //
+        // input
+        JPanel right = createPanel(GRID_BAG).build().putIn(this, BorderLayout.EAST);
+        GridBagConstraints gbc = createConstraints(GridBagConstraints.CENTER, 0, 8, 0, 0);
 
-        inputLabel = label(inputType, 11f).muted().component();
-        right.add(inputLabel, gbc);
+        inputLabel = ComponentBuilder.createLabel(inputType, Font.PLAIN, 11f, FG_MUTED)
+                .visible(showInput).build().putIn(right, gbc);
 
-        input = validatedField("0", validator, 30).withBackground(TRACK).opaque().component();
+        input = new ValidatedField("1", validator, 30);
+        input.allowEnter(() -> host.focusNext(this));
+        input.setVisible(showInput);
         right.add(input, gbc);
 
-        checkBox = SwingComp.fluent(new JCheckBox("Absent"))
-                .withAction(b -> updateAbsentState())
-                .withDerivedFont(Font.PLAIN, 11f)
-                .withBackgroundAndForeground(BG_SURFACE, FG_MUTED)
-                .transparent().component();
-        if (showAbsent)
-            right.add(checkBox, gbc);
-    }
+        Runnable action = absentCheck
+                ? this::updateAbsentState
+                : this::updateIncludeState;
 
-    private CombatantCard( // constructor for add new model
-            CombatantScroller host, CombatantScroller.CombatantOption option
-    ) {
-        this.host = host;
-        this.combatant = null;
-        isEmpty = true;
-
-        SwingPane.fluent(this).arrangedAs(SwingPane.BORDER, 10, 0)
-                .withBackground(BG_ABSENT)
-                .withMaximumSize(Integer.MAX_VALUE, 52)
-                .withPreferredSize(0, 52)
-                .onLeft()
-                .withEmptyBorder(0, 0, 0, 12);
-
-        accentBar = panelIn(this, BorderLayout.WEST)
-                .withPreferredSize(3, 0)
-                .withBackground(TRACK)
-                .component();
-
-        label = label("Add New " + option.text, Font.PLAIN, 14f).muted()
-                .withEmptyBorder(0, 10, 0, 0)
-                .in(this, BorderLayout.CENTER);
-
-        inputLabel = label("", 11f).muted().component();
-        inputLabel.setVisible(false);
-
-        input = new ValidatedField("0", null, 30);
-        input.setVisible(false);
-
-        checkBox = SwingComp.fluent(new JCheckBox("Absent"))
-                .transparent().applied(b -> b.setVisible(false)).component();
-
-        addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseExited(MouseEvent e) {
-                accentBar.setBackground(TRACK);
-                fluent(label).withForeground(FOREGROUND).withDerivedFont(Font.PLAIN, 14f);
-            }
-
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                accentBar.setBackground(SUCCESS);
-                label.setForeground(SUCCESS);
-                fluent(label).withForeground(SUCCESS).withDerivedFont(Font.BOLD, 14f);
-            }
-
-            @Override
-            public void mousePressed(MouseEvent e) {
-                if (host.isForQuickAdd()) {
-                    if (!(host.getHost() instanceof QuickAddDialog dialog))
-                        throw new IllegalArgumentException(
-                                "CombatantCard.MouseAdapter.mousePressed: QuickAddDialog expected"
-                        );
-                    dialog.showCard(QuickAddDialog.CREATE);
-                } else {
-                    boolean forEnemies = option == CombatantScroller.CombatantOption.ENEMIES;
-                    List<NPC> available = forEnemies ? Combatants.getEnemyNpcs() : Combatants.getFriendlyNpcs();
-                    new QuickAddDialog(forEnemies, available, host::addCardBulk).setVisible(true);
-                }
-            }
-        });
-    }
-
-    private CombatantCard( // constructor for scenario editing
-            CombatantScroller host, Combatant combatant, String inputType, Runnable validator
-    ) {
-        this.host = host;
-        this.combatant = combatant;
-        label = null;
-        isEmpty = false;
-
-        SwingPane.fluent(this).arrangedAs(SwingPane.BORDER, 10, 0)
-                .withBackground(BG_ABSENT)
-                .withMaximumSize(Integer.MAX_VALUE, 52)
-                .withPreferredSize(0, 52)
-                .onLeft()
-                .withEmptyBorder(0, 0, 0, 12);
-
-        accentBar = panelIn(this, BorderLayout.WEST)
-                .withPreferredSize(3, 0)
-                .withBackground(TRACK)
-                .component();
-
-        label(combatant, Font.BOLD, 14f).withEmptyBorder(0, 10, 0, 0)
-                .in(this, BorderLayout.CENTER);
-
-        JPanel right = new JPanel(new GridBagLayout());
-        right.setOpaque(false);
-        add(right, BorderLayout.EAST);
-
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(0, 8, 0, 0);
-        gbc.anchor = GridBagConstraints.CENTER;
-
-        inputLabel = label(inputType, 11f).muted().component();
-        inputLabel.setVisible(false);
-        right.add(inputLabel, gbc);
-
-        input = validatedField("1", validator, 30).withBackground(TRACK).opaque().component();
-        input.setVisible(false);
-        right.add(input, gbc);
-
-        checkBox = SwingComp.fluent(new JCheckBox("Include"))
-                .withAction(b -> updateIncludeState())
-                .applied(b -> b.addChangeListener(e -> updateIncludeState()))
-                .withDerivedFont(Font.PLAIN, 11f)
-                .withBackgroundAndForeground(BG_ABSENT, FG_MUTED)
-                .transparent().component();
-        right.add(checkBox, gbc);
+        String checkBoxText = absentCheck ? "Absent?" : "Include?";
+        checkBox = ButtonBuilder.createCheckBox(checkBoxText, b -> action.run())
+                .fontBuilder(FontBuilder.of(Font.PLAIN, 11f, FG_MUTED))
+                .background(getBackground())
+                .build().putIn(right, gbc);
 
         setForegroundAlpha(this, 0.5f);
     }
 
+    private CombatantCard( // constructor for add new model
+                           CombatantScroller host, CombatantOption option
+    ) {
+        this.host = host;
+        this.combatant = null;
+        showInput = false;
+        isEmpty = true;
+
+        modifyingPanel(this).layoutType(BORDER).hgap(10)
+                .border(BorderFactory.createEmptyBorder(0, 0, 0, 12))
+                .background(BG_SURFACE)
+                .fixedHeight(52)
+                .alignmentX(LEFT_ALIGNMENT).build().validated();
+
+        accentBar = createPanel(FLOW)
+                .preferredSize(new Dimension(3, 0))
+                .background(TRACK)
+                .build().putIn(this, BorderLayout.WEST);
+
+        String labelText = "Add New " + option.getExpandedName();
+        label = ComponentBuilder.createLabel(labelText, Font.PLAIN, 14f, FG_MUTED)
+                .border(BorderFactory.createEmptyBorder(0, 10, 0, 0))
+                .build().putIn(this, BorderLayout.CENTER);
+
+        inputLabel = ComponentBuilder.createLabel("", Font.PLAIN, 11f, FG_MUTED)
+                .visible(false).build().get();
+
+        input = new ValidatedField(null, null);
+        checkBox = new JCheckBox();
+
+        for (Component c : getComponents()) {
+            c.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    accentBar.setBackground(TRACK);
+                    FontBuilder.setFontOn(label, FontBuilder.of(Font.PLAIN, 14f, FG_MUTED));
+                }
+
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    accentBar.setBackground(option.getColor());
+                    FontBuilder.setFontOn(label, FontBuilder.of(Font.BOLD, 14f, option.getColor()));
+                }
+
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    if (host.isForQuickAdd()) {
+                        ((QuickAddDialog) host.getHost()).showCard(QuickAddDialog.CREATE);
+                    } else {
+                        boolean forEnemies = option.isEnemies();
+                        List<NPC> available = Combatants.getNpcs(forEnemies);
+                        new QuickAddDialog(forEnemies, available, host::addCardBulk).setVisible(true);
+                    }
+                }
+            });
+        }
+    }
+
     private void updateIncludeState() {
         boolean included = checkBox.isSelected();
+
         input.setVisible(included);
         inputLabel.setVisible(included);
         input.setEnabled(included);
-        setBackground(included ? BG_SURFACE : BG_ABSENT);
-        checkBox.setBackground(included ? BG_SURFACE : BG_ABSENT);
-        accentBar.setBackground(included ? combatant.getCombatantColor() : TRACK);
+
+        Color backgroundPrimary = included ? BG_SURFACE : BG_ABSENT;
+        Color accent = included ? combatant.getCombatantColor() : TRACK;
+        setBackground(backgroundPrimary);
+        checkBox.setBackground(backgroundPrimary);
+        accentBar.setBackground(accent);
 
         float alpha = included ? 1.0f : 0.5f;
         setForegroundAlpha(this, alpha);
 
         revalidate();
+        repaint();
+    }
+
+    private void updateAbsentState() {
+        boolean absent = checkBox.isSelected();
+
+        input.setEnabled(!absent);
+
+        Color background = absent ? BG_ABSENT : BG_SURFACE;
+        Color accent = absent ? TRACK : combatant.getCombatantColor();
+        setBackground(background);
+        checkBox.setBackground(background);
+        accentBar.setBackground(accent);
+
+        float alpha = absent ? 0.5f : 1.0f;
+        setForegroundAlpha(this, alpha);
         repaint();
     }
 
@@ -223,42 +198,30 @@ public class CombatantCard extends JPanel {
         }
     }
 
-    private void updateAbsentState() {
-        boolean absent = checkBox.isSelected();
-        input.setEnabled(!absent);
-        setBackground(absent ? BG_ABSENT : BG_SURFACE);
-        checkBox.setBackground(absent ? BG_ABSENT : BG_SURFACE);
-        accentBar.setBackground(absent ? TRACK : combatant.getCombatantColor());
-
-        float alpha = absent ? 0.5f : 1.0f;
-        setForegroundAlpha(this, alpha);
-        repaint();
-    }
-
     public int getInputValue() {
+        if (input == null) return 0;
         return input.getValue().toInt();
     }
 
     public boolean hasValidInput() {
-        if (!input.isVisible()) return true;
-        return input.isValid();
+        return input.isInputValid() || !showInput;
     }
 
-    public CombatantCard withUpdatedVisibility(boolean noInput, boolean noAbsentCheck) {
-        input.setVisible(!noInput);
-        inputLabel.setVisible(!noInput);
-        checkBox.setVisible(!noAbsentCheck);
-        return this;
+    public static CombatantCard getCombatantCard(
+            CombatantScroller host, Combatant combatant, String inputType,
+            boolean showInput, Runnable validator
+    ) {
+        return new CombatantCard(host, combatant, inputType, showInput, true, validator);
     }
 
-    public static CombatantCard promptCard(CombatantScroller host, CombatantScroller.CombatantOption option) {
-        return new CombatantCard(host, option);
-    }
-
-    public static CombatantCard quickAddCard(
+    public static CombatantCard getCombatantQuickAddCard(
             CombatantScroller host, Combatant combatant, String inputType, Runnable validator
     ) {
-        return new CombatantCard(host, combatant, inputType, validator);
+        return new CombatantCard(host, combatant, inputType, true, false, validator);
+    }
+
+    public static CombatantCard getAddNewCombatantCard(CombatantScroller host, CombatantOption option) {
+        return new CombatantCard(host, option);
     }
 
 }

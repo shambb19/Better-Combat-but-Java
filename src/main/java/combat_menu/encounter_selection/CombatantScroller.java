@@ -2,67 +2,59 @@ package combat_menu.encounter_selection;
 
 import _manager.EncounterManager;
 import combat_object.combatant.Combatant;
+import combat_object.combatant.CombatantOption;
 import combat_object.combatant.NPC;
 import combat_object.scenario.Scenario;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.ExtensionMethod;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
+import org.jetbrains.annotations.Nullable;
 import swing.ColorStyles;
+import swing.builder.ComponentBuilder;
 import util.Filterable;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
-import static swing.fluent.SwingComp.*;
-import static swing.fluent.SwingPane.*;
-import static swing.ColorStyles.*;
+import static swing.builder.Components.*;
+import static swing.builder.PanelBuilder.*;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @ExtensionMethod(Filterable.class)
+@RequiredArgsConstructor
 public class CombatantScroller extends JScrollPane {
-
-    @AllArgsConstructor @FieldDefaults(makeFinal = true) public enum CombatantOption {
-        PARTY("Party", ColorStyles.PARTY), ALLIES("Ally", FRIENDLY), ENEMIES("Enemy", ENEMY);
-        String text;
-        Color color;
-    }
 
     @Getter Component host;
     boolean isParty;
-    boolean showAbsent;
-    boolean alwaysShowInput;
+    @Getter boolean isForQuickAdd;
     String inputType;
     Runnable validator;
-    CombatantOption toExclude;
+    @Nullable CombatantOption toExclude;
 
-    JPanel content;
-    HashMap<Combatant, CombatantCard> combatantCardMap = new HashMap<>();
+    @NonFinal JPanel content;
+    ArrayList<CombatantCard> combatantCards;
 
     private CombatantScroller(
             Component host,
-            boolean isParty, boolean showAbsent, boolean alwaysShowInput, String inputType, Runnable validator,
+            boolean isParty, boolean alwaysShowInput,
+            String inputType, Runnable validator,
             CombatantOption toExclude
     ) {
-        this.host = host;
-        this.isParty = isParty;
-        this.showAbsent = showAbsent;
-        this.alwaysShowInput = alwaysShowInput;
-        this.inputType = inputType;
-        this.validator = validator;
-        this.toExclude = toExclude;
+        this(host, isParty, alwaysShowInput, inputType, validator, toExclude, new ArrayList<>());
 
         if (toExclude == CombatantOption.PARTY) throw new IllegalArgumentException(
                 "CombatantScroller.<init>: cannot exclude party"
         );
 
-        content = newArrangedAs(VERTICAL_BOX).transparent().component();
+        content = createPanel(VERTICAL_BOX)
+                .background(ColorStyles.BG_DARK)
+                .build().get();
 
         if (isParty) {
             addSectionLabel(CombatantOption.PARTY);
@@ -73,30 +65,26 @@ public class CombatantScroller extends JScrollPane {
         getVerticalScrollBar().setUnitIncrement(16);
         setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
-        fluent(this).withEmptyBorder(10, 12, 10, 12).withBackground(BACKGROUND);
+        setBorder(BorderFactory.createEmptyBorder(10, 12, 10, 10));
+        getViewport().setBackground(ColorStyles.BG_DARK);
     }
 
     private CombatantScroller(
             Component host,
-            boolean isParty, boolean showAbsent, boolean alwaysShowInput, String inputType, Runnable validator
+            boolean isParty, boolean alwaysShowInput, String inputType, Runnable validator
     ) {
-        this(host, isParty, showAbsent, alwaysShowInput, inputType, validator, null);
+        this(host, isParty, alwaysShowInput, inputType, validator, null);
     }
 
-    public CombatantCard addCard(Combatant combatant) {
-        boolean showInput = alwaysShowInput;
-        if (!alwaysShowInput) showInput = combatant.isEnemy();
-
+    public void addCard(Combatant combatant) {
         CombatantCard card;
-        if (isForQuickAdd()) card = CombatantCard.quickAddCard(this, combatant, inputType, validator);
-        else card = new CombatantCard(this, combatant, inputType, showAbsent, validator).withUpdatedVisibility(!showInput, !showAbsent);
+        if (isForQuickAdd) card = CombatantCard.getCombatantQuickAddCard(this, combatant, inputType, validator);
+        else card = CombatantCard.getCombatantCard(this, combatant, inputType, true, validator);
 
-        combatantCardMap.put(combatant, card);
+        combatantCards.add(card);
 
-        if (isParty) fluent(content).collect(card, spacer(0, 6));
+        if (isParty) addCard(card);
         else rebuildSections();
-
-        return card;
     }
 
     /**
@@ -113,39 +101,56 @@ public class CombatantScroller extends JScrollPane {
     }
 
     private void addCard(CombatantCard card) {
-        fluent(content).collect(card, spacer(0, 6));
+        addConstraintlessComponentsTo(content, card, spacer(0, 6));
     }
 
     public void setScenario(Scenario scenario) {
         if (isParty) throw new IllegalArgumentException(
                 "CombatantCardPanel.setScenario: party illegally affected by scenario change");
 
-        combatantCardMap.clear();
+        combatantCards.clear();
         content.removeAll();
         scenario.npcListAll(false).forEach(npc -> {
-            boolean showInput = alwaysShowInput || npc.isEnemy();
-            CombatantCard card = new CombatantCard(this, npc, inputType, showAbsent, validator)
-                    .withUpdatedVisibility(!showInput, !showAbsent);
-            combatantCardMap.put(npc, card);
+            boolean showInput = !isForQuickAdd || npc.isEnemy();
+            CombatantCard card = CombatantCard.getCombatantCard(this, npc, inputType, showInput, validator);
+            combatantCards.add(card);
         });
         rebuildSections();
     }
 
+    public void focusNext(CombatantCard hasFocus) {
+        CombatantCard toFocus = hasFocus;
+        for (int i = 0; i < combatantCards.size(); i++) {
+            if (!combatantCards.get(i).equals(hasFocus)) continue;
+            try {
+                toFocus = combatantCards.get(i + 1);
+            } catch (IndexOutOfBoundsException ignored) {
+                toFocus = combatantCards.getFirst();
+            }
+        }
+        toFocus.input.grabFocus();
+    }
+
     private void rebuildSections() {
-        var combatantsSplit = combatantCardMap.keySet().stream()
-                .collect(Collectors.partitioningBy(Combatant::isEnemy));
+        List<Combatant> combatants = combatantCards.stream().map(c -> c.combatant).toList();
+
+        var combatantsSplit = Combatant.enemyPartition(combatants);
 
         content.removeAll();
 
         Consumer<CombatantOption> cardAdder = section -> {
             if (toExclude == section) return;
 
-            boolean isEnemies = section == CombatantOption.ENEMIES;
+            boolean isEnemies = section.isEnemies();
             List<Combatant> validCombatants = combatantsSplit.get(isEnemies);
 
-            if (!isForQuickAdd()) addSectionLabel(section);
-            validCombatants.forEach(c -> addCard(combatantCardMap.get(c)));
-            addCard(CombatantCard.promptCard(this, section));
+            if (!isForQuickAdd) addSectionLabel(section);
+
+            validCombatants.forEach(c -> {
+                CombatantCard thisCard = Filterable.of(combatantCards).firstOrElseThrow(card -> card.combatant, c);
+                addCard(thisCard);
+            });
+            addCard(CombatantCard.getAddNewCombatantCard(this, section));
         };
 
         List.of(CombatantOption.ALLIES, CombatantOption.ENEMIES).forEach(cardAdder);
@@ -155,9 +160,11 @@ public class CombatantScroller extends JScrollPane {
     }
 
     private void addSectionLabel(CombatantOption option) {
-        JLabel label = label(option.text.toUpperCase(), Font.BOLD, 16f, option.color)
-                .withEmptyBorder(10, 2, 6, 2).onLeft().component();
-        content.add(label);
+        ComponentBuilder.createLabel(option.name())
+                .fontBuilder(FontBuilder.of(Font.BOLD, 16f, option.getColor()))
+                .border(BorderFactory.createEmptyBorder(10, 2, 6, 2))
+                .alignmentX(LEFT_ALIGNMENT)
+                .build().putIn(content);
     }
 
     public CombatantCard[] getCombatantCards() {
@@ -168,37 +175,25 @@ public class CombatantScroller extends JScrollPane {
 
     public boolean areAllCardsValid() {
         return content.getComponents().of().castToAsList(CombatantCard.class).stream()
-                .filter(c -> !c.getCheckBox().isSelected()).allMatch(CombatantCard::hasValidInput);
+                .filter(c -> !c.checkBox.isSelected()).allMatch(CombatantCard::hasValidInput);
     }
 
     public boolean containsEnemies() {
         return content.getComponents().of().castToAsList(CombatantCard.class).stream()
-                .map(CombatantCard::getCombatant).filter(Objects::nonNull)
+                .map(c -> c.combatant).filter(Objects::nonNull)
                 .anyMatch(Combatant::isEnemy);
     }
 
-    public boolean isForQuickAdd() {
-        return toExclude != null;
+    public static CombatantScroller createForEncounterSelectionPanel(
+            Component host, Runnable validator, boolean isParty
+    ) {
+        return new CombatantScroller(host, isParty, true, "Initiative", validator);
     }
 
-    public static CombatantScroller partyPanel(
-            Component host, String inputType, boolean showAbsent, boolean alwaysShowInput, Runnable validator
+    public static CombatantScroller getNpcQuickAddPanel(
+            Component host, Runnable validator, CombatantOption toExclude
     ) {
-        return new CombatantScroller(host, true, showAbsent, alwaysShowInput, inputType, validator);
-    }
-
-    public static CombatantScroller npcPanel(
-            Component host,
-            String inputType, boolean showAbsent, boolean alwaysShowInput, Runnable validator,
-            CombatantOption toExclude
-    ) {
-        return new CombatantScroller(host, false, showAbsent, alwaysShowInput, inputType, validator, toExclude);
-    }
-
-    public static CombatantScroller npcPanel(
-            Component host, String inputType, boolean showAbsent, boolean alwaysShowInput, Runnable validator
-    ) {
-        return new CombatantScroller(host, false, showAbsent, alwaysShowInput, inputType, validator);
+        return new CombatantScroller(host, false, false, "Include", validator, toExclude);
     }
 
 }

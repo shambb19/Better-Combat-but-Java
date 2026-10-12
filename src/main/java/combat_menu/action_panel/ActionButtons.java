@@ -6,11 +6,10 @@ import _manager.InspirationManager;
 import lombok.*;
 import lombok.experimental.*;
 import org.intellij.lang.annotations.MagicConstant;
+import swing.builder.ButtonBuilder;
 import util.Locators;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.MatteBorder;
 import java.awt.*;
 import java.util.List;
 
@@ -18,9 +17,6 @@ import static _global_list.Resource.*;
 import static combat_menu.action_panel.ActionPanel.ATTACK_OPTION;
 import static combat_menu.action_panel.ActionPanel.HEAL_OPTION;
 import static swing.ColorStyles.*;
-import static swing.fluent.SwingComp.fluent;
-import static swing.fluent.SwingPane.ONE_COLUMN;
-import static swing.fluent.SwingPane.fluent;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @ExtensionMethod(ActionButtons.class)
@@ -39,7 +35,7 @@ public class ActionButtons extends JPanel {
     public ActionButtons(ActionPanel root) {
         this.root = root;
 
-        fluent(this).arrangedAs(ONE_COLUMN);
+        setLayout(new GridLayout(0, 1));
 
         attackButton = new ActionButton("Attack", ATTACK_BUTTON, () -> onTurnAction(ATTACK_OPTION));
         healButton = new ActionButton("Heal", HEAL_BUTTON, () -> onTurnAction(HEAL_OPTION));
@@ -88,20 +84,18 @@ public class ActionButtons extends JPanel {
             setBackground(BACKGROUND);
             setMargin(new Insets(20, 20, 20, 20));
 
-            fluent(this)
-                    .withAction(b -> {
+            ButtonBuilder.modifyingButton(this)
+                    .clickAction(b -> {
                         b.addHighlight(SELECTION);
                         runnable.run();
-                    }).withMouseMoveListener(
-                            b -> {
-                                if (activeButton == null && isButtonAvailable())
-                                    addHighlight(SELECTION);
-                            },
-                            b -> {
-                                if (!ActionButton.this.equals(activeButton))
-                                    refreshState();
-                            }
-                    );
+                    }).onMouseEnter(b -> {
+                        if (activeButton == null && isButtonAvailable())
+                            addHighlight(SELECTION);
+                    }).onMouseExit(b -> {
+                        if (!ActionButton.this.equals(activeButton))
+                            refreshState();
+                    }).build().validated();
+
 
             ActionButtons.this.add(this);
             refreshState();
@@ -109,8 +103,8 @@ public class ActionButtons extends JPanel {
 
         private void addHighlight(Color color) {
             setBorder(BorderFactory.createCompoundBorder(
-                    new MatteBorder(0, 0, 0, 6, color),
-                    new EmptyBorder(10, 15, 10, 15)
+                    BorderFactory.createMatteBorder(0, 0, 0, 6, color),
+                    BorderFactory.createEmptyBorder(10, 15, 10, 15)
             ));
         }
 

@@ -1,61 +1,63 @@
 package creator_menu;
 
 import _global_list.Resource;
+import combat_object.combatant.CombatantOption;
 import config.Config;
-import ide.CampaignEditor;
+import creator_menu.ide.CampaignEditor;
 import input.CampaignReader;
 import input.syntax.Key;
-import util.Message;
+import swing.builder.ComponentBuilder;
+import swing.builder.TextItemBuilder;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ItemListener;
-import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 import static swing.ColorStyles.*;
-import static swing.fluent.SwingComp.label;
-import static swing.fluent.SwingPane.*;
+import static swing.builder.Components.*;
+import static swing.builder.PanelBuilder.*;
 
 public class HelpMenu extends JPanel {
 
     private static final String
-            ITEM_HEADER_TUTORIAL_TEXT =
+            ITEM_HEADER_TUTORIAL =
             "Provided is the list of valid item headers. " +
                     "To create the item, type its header, then press CTRL+SHIFT+SPACE to autofill its parameters. " +
                     "Note that the name parameter is required and should go on the same line as the header.",
 
-    TAG_HEADER_TEXT =
+    TAG_HEADER =
             "Tags (except <incomplete) are only available in nonstandard rulesets and are put immediately " +
                     "after the header, without spaces.",
 
-    COMBAT_OBJECT_HEADER_TEXT =
+    COMBAT_OBJECT_HEADER =
             "Values in blue are not required and, if absent, will default to false, null, or the key's equivalent. " +
                     "Parameters in yellow are only required in the standard ruleset. " +
                     "All parameter lines should be typed in the \"key: value\" form.",
 
-    DAMAGE_IMPLEMENT_FOOTER_TEXT =
+    DAMAGE_IMPLEMENT_FOOTER =
             "* Damage Implements only need to be included if they aren't in the weapon database.",
 
-    CONFIG_HEADER_TUTORIAL_TEXT =
+    CONFIG_HEADER_TUTORIAL =
             "Hover over a value to see the available options for that token.",
 
-    TOKEN_CONFIG_HINT_TEXT =
+    TOKEN_CONFIG_HINT =
             Config.CONFIG_OPEN_TOKEN + " (opens the config block)\n" +
                     Config.CONFIG_CLOSE_TOKEN + " (closes the config block)",
 
-    RULESET_CONFIG_HINT_TEXT =
+    RULESET_CONFIG_HINT =
             "ruleset.standard (Cath's improved combat ruleset)\n" +
                     "ruleset.steampunk (Steampunk ruleset for the Summer 2026 campaign)",
 
-    DAMAGE_CONFIG_HINT_TEXT =
+    DAMAGE_CONFIG_HINT =
             "damage.show (enemy input damage is visible to players)\n" +
                     "damage.hide (enemy input damage is hidden in a password field)",
 
-    QUEUE_CONFIG_HINT_TEXT =
+    QUEUE_CONFIG_HINT =
             "queue.standard (standard 5e initiative style)\n" +
                     "queue.cath (Cath's queue (all enemies take turn between party members))";
 
@@ -92,11 +94,10 @@ public class HelpMenu extends JPanel {
         comboBoxPanelMap.put(TUTORIAL_CODE_STANDARD_OPTION, () -> getTutorialCodePanel(Resource.TUTORIAL_STANDARD));
         comboBoxPanelMap.put(TUTORIAL_CODE_STEAMPUNK_OPTION, () -> getTutorialCodePanel(Resource.TUTORIAL_STEAMPUNK));
 
-        fluent(this).arrangedAs(BORDER, 0, 10).spaced();
+        modifyingPanel(this).layoutType(BORDER).vgap(15).border(SPACER_BORDER).build().validated();
 
-        JPanel headerPanel = newArrangedAs(FLOW, 10, 0)
-                .collect("Select an option to learn more:")
-                .in(this, BorderLayout.NORTH);
+        JPanel headerPanel = createPanel(FLOW, "Select an option to learn more:")
+                .hgap(10).build().putIn(this, BorderLayout.NORTH);
 
         String[] options = {
                 TUTORIAL_CODE_STANDARD_OPTION, TUTORIAL_CODE_STEAMPUNK_OPTION,
@@ -104,60 +105,47 @@ public class HelpMenu extends JPanel {
                 PARTY_MEMBER_OPTION, NPC_ENEMY_OPTION, SCENARIO_OPTION,
                 WEAPON_OPTION, SPELL_OPTION, GUN_OPTION
         };
-        optionBox = new JComboBox<>();
-        for (String option : options) {
-            optionBox.addItem(option);
-            optionBox.addItemListener(getOptionActionListener(option));
-        }
-        optionBox.setSelectedIndex(-1);
-        headerPanel.add(optionBox);
+        optionBox = ComponentBuilder.createComboBox(options, b -> {}, null)
+                .build().putIn(headerPanel);
+
+        for (String option : options) optionBox.addItemListener(getOptionActionListener(option));
     }
 
     private JPanel getTutorialCodePanel(Resource tutorialCode) {
-        List<String> code;
-        try {
-            URL tutorialCodeFile = tutorialCode.getUrl();
-            code = CampaignReader.getLines(tutorialCodeFile);
-        } catch (IOException e) {
-            Message.showFileErrorMessage(e, Message.READ_ERROR);
-            throw new RuntimeException("static resource could not be downloaded");
-        }
+        URL tutorialCodeFile = tutorialCode.getUrl();
+        List<String> code = CampaignReader.getLines(tutorialCodeFile, "static resource could not be downloaded");
 
         CampaignEditor codePanel = new CampaignEditor();
         codePanel.importText(code);
         codePanel.setFocusable(false);
 
-        return newArrangedAs(FLOW).collect(codePanel)
-                .withPreferredSize(500, 756)
-                .withMaximumSize(500, 756)
-                .component();
+        Dimension size = new Dimension(500, 756);
+        return createPanel(FLOW, codePanel).preferredSize(size).maximumSize(size).build().get();
     }
 
     private JPanel getItemPanel() {
-        return getInfoPanel(ITEM_HEADER_TUTORIAL_TEXT,
-                getListItem("Party Member", PARTY, ".party", HEADER), spacer(0, 15),
-                getListItem("Friendly NPC", FRIENDLY, ".npc", HEADER), spacer(0, 15),
-                getListItem("Enemy Combatant", ENEMY, ".enemy", HEADER), spacer(0, 15),
-                getListItem("Combat Scenario", SCENARIO, ".scenario", HEADER), spacer(0, 15),
-                getListItem("Weapon*", FOREGROUND, ".weapon", HEADER), spacer(0, 15),
-                getListItem("Spell*", FOREGROUND, ".spell", HEADER), spacer(0, 15),
-                getListItem("Gun*", FOREGROUND, ".gun", HEADER), spacer(0, 15),
-                label(DAMAGE_IMPLEMENT_FOOTER_TEXT, Font.ITALIC, 10f, FG_HINT),
-                glue()
+        JLabel footer = ComponentBuilder.createLabel(DAMAGE_IMPLEMENT_FOOTER)
+                .fontBuilder(FontBuilder.of(Font.ITALIC, 10f, FG_HINT)).build().get();
+
+        return getInfoPanel(ITEM_HEADER_TUTORIAL,
+                getListItem(CombatantOption.PARTY),
+                getListItem(CombatantOption.ALLIES),
+                getListItem(CombatantOption.ENEMIES),
+                getListItem("Combat Scenario", SCENARIO, ".scenario", HEADER),
+                getListItem("Weapon*", FOREGROUND, ".weapon", HEADER),
+                getListItem("Spell*", FOREGROUND, ".spell", HEADER),
+                getListItem("Gun*", FOREGROUND, ".gun", HEADER),
+                footer
         );
     }
 
     private JPanel getTagPanel() {
-        interface ConfigListItemGetter {
-            JPanel getItem(String str1, String str2);
-        }
-        ConfigListItemGetter lg = (str1, str2) -> getListItem(str1, CONFIG, str2, FOREGROUND);
+        BiFunction<String, String, JPanel> lg = (str1, str2) -> getListItem(str1, CONFIG, str2, FOREGROUND);
 
-        return getInfoPanel(TAG_HEADER_TEXT,
-                lg.getItem("<armored", "all incoming damage is reduced by 2"), spacer(0, 15),
-                lg.getItem("<special", "unlocks custom HP values"), spacer(0, 15),
-                lg.getItem("<incomplete", "item will not be included when the code is run"), spacer(0, 15),
-                glue()
+        return getInfoPanel(TAG_HEADER,
+                lg.apply("<armored", "all incoming damage is reduced by 2"),
+                lg.apply("<special", "unlocks custom HP values"),
+                lg.apply("<incomplete", "item will not be included when the code is run")
         );
     }
 
@@ -180,49 +168,67 @@ public class HelpMenu extends JPanel {
             contentPaneComponents.add(spacer(0, 15));
         }
 
-        return getInfoPanel(COMBAT_OBJECT_HEADER_TEXT, contentPaneComponents);
+        return getInfoPanel(COMBAT_OBJECT_HEADER, contentPaneComponents);
     }
 
     private JPanel getConfigPanel() {
-        interface ToolTipListItemGetter {
-            JPanel getItem(String str1, String str2, Color colorStr1, String toolTipText);
-        }
-        ToolTipListItemGetter lg = (str1, str2, colorStr1, toolTipText) -> {
-            JPanel listItem = getListItem(str1, colorStr1, str2, VALUE);
-            listItem.setToolTipText(toolTipText);
-            return listItem;
-        };
-
-        return getInfoPanel(CONFIG_HEADER_TUTORIAL_TEXT,
-                lg.getItem(Config.CONFIG_GENERIC_TOKEN, "Opens or closes the config block", CONFIG, TOKEN_CONFIG_HINT_TEXT),
-                spacer(0, 15),
-                lg.getItem("ruleset", "Sets the campaign's combat ruleset", FOREGROUND, RULESET_CONFIG_HINT_TEXT),
-                spacer(0, 15),
-                lg.getItem("damage", "Sets the visibility of enemy damage input", FOREGROUND, DAMAGE_CONFIG_HINT_TEXT),
-                spacer(0, 15),
-                lg.getItem("queue", "Determines the initiative order in combat", FOREGROUND, QUEUE_CONFIG_HINT_TEXT),
-                glue()
+        return getInfoPanel(CONFIG_HEADER_TUTORIAL,
+                getListItem(
+                        Config.CONFIG_GENERIC_TOKEN, CONFIG,
+                        "Opens or closes the config block", VALUE, TOKEN_CONFIG_HINT),
+                getListItem(
+                        "ruleset", FOREGROUND,
+                        "Sets the campaign's combat ruleset", VALUE, RULESET_CONFIG_HINT),
+                getListItem(
+                        "damage", FOREGROUND,
+                        "Sets the visibility of enemy damage input", VALUE, DAMAGE_CONFIG_HINT),
+                getListItem(
+                        "queue", FOREGROUND,
+                        "Determines the initiative order in combat", VALUE, QUEUE_CONFIG_HINT)
         );
     }
 
-    private JPanel getListItem(String str1, Color color1, String str2, Color color2) {
-        JPanel listItem = newArrangedAs(FLOW_LEFT, 10, 0).collect(
-                label(str1, Font.BOLD, 13f, color1), label(str2, color2)
-        ).transparent().component();
-        fluent(listItem).withMaximumSize(Integer.MAX_VALUE, listItem.getPreferredSize().height);
+    private JPanel getListItem(CombatantOption combatantOption) {
+        return getListItem(
+                combatantOption.getExpandedName(), combatantOption.getColor(), combatantOption.getCodeHeader(),
+                HEADER
+        );
+    }
+
+    private JPanel getListItem(String sectionName, Color nameColor, String codeHeader, Color codeColor) {
+        return getListItem(sectionName, nameColor, codeHeader, codeColor, null);
+    }
+
+    private JPanel getListItem(String sectionName, Color nameColor, String codeHeader, Color codeColor, String toolTipText) {
+        JLabel sectionNameLabel = ComponentBuilder.createLabel(sectionName)
+                .fontBuilder(FontBuilder.of(Font.BOLD, 13f, nameColor)).build().get();
+
+        JLabel codeHeaderLabel = ComponentBuilder.createLabel(codeHeader).foreground(codeColor).build().get();
+
+        JPanel listItem = createPanel(FLOW_LEFT, sectionNameLabel, codeHeaderLabel).hgap(10)
+                .toolTipText(toolTipText).build().get();
+        listItem.setMaximumSize(new Dimension(Integer.MAX_VALUE, listItem.getPreferredSize().height));
 
         return listItem;
     }
 
     private JPanel getInfoPanel(String headerText, Object... contentComponents) {
-        JScrollPane contents = newArrangedAs(VERTICAL_BOX, 0, 15)
-                .collect(contentComponents)
-                .toScroller().component();
+        JPanel infoPanel = new JPanel(new BorderLayout());
 
-        return newArrangedAs(BORDER).borderCollect(
-                north(textArea(headerText).withEmptyBorder(0, 0, 15, 0)),
-                center(contents)
-        ).component();
+        ArrayList<Object> components = new ArrayList<>(List.of(contentComponents[0]));
+        for (int i = 1; i < contentComponents.length; i++) {
+            components.addAll(List.of(contentComponents[i], spacer(0, 15)));
+        }
+        components.set(components.size() - 1, glue());
+
+        TextItemBuilder.createTextArea(headerText) // header
+                .border(BorderFactory.createEmptyBorder(0, 0, 15, 0))
+                .build().putIn(infoPanel, BorderLayout.NORTH);
+
+        createPanel(VERTICAL_BOX, components).vgap(15) // contents
+                .build().getAsScrollerIn(infoPanel, BorderLayout.CENTER);
+
+        return infoPanel;
     }
 
     private ItemListener getOptionActionListener(String option) {

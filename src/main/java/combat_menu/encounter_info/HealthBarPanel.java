@@ -1,13 +1,12 @@
 package combat_menu.encounter_info;
 
-import _manager.EncounterManager;
 import combat_menu.action_panel.form.ActionFormPanel;
 import combat_object.combatant.Combatant;
 import lombok.*;
 import lombok.experimental.*;
 import org.intellij.lang.annotations.MagicConstant;
-import popup.StatTooltipPopup;
-import swing.fluent.SwingPane;
+import swing.popup.StatTooltipPopup;
+import swing.builder.ComponentBuilder;
 import util.Locators;
 
 import javax.swing.*;
@@ -15,11 +14,11 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.Arrays;
 import java.util.Optional;
 
 import static swing.ColorStyles.*;
-import static swing.fluent.SwingComp.label;
-import static swing.fluent.SwingPane.*;
+import static swing.builder.PanelBuilder.*;
 
 @FieldDefaults(makeFinal = true)
 public class HealthBarPanel extends JPanel {
@@ -36,33 +35,53 @@ public class HealthBarPanel extends JPanel {
     RoundPanel barTrack;
     RoundPanel barFill;
     @NonFinal StatTooltipPopup activeTooltip = null;
-    @NonFinal MouseListener actionSelectionListener;
 
     Timer animationTimer;
     @NonFinal int targetFillWidth = 0;
 
-    public static HealthBarPanel getPanelFor(Combatant combatant) {
-        return new HealthBarPanel(combatant);
-    }
-
-    private HealthBarPanel(Combatant combatant) {
+    public HealthBarPanel(Combatant combatant) {
         this.combatant = combatant;
 
-        SwingPane.fluent(this).arrangedAs(BORDER, 10, 0)
-                .withEmptyBorder(5, 0, 5, 10);
+        modifyingPanel(this).layoutType(BORDER).hgap(10)
+                .border(BorderFactory.createEmptyBorder(5, 0, 5, 10))
+                .fixedHeight(40)
+                .background(BACKGROUND)
+                .alignmentX(LEFT_ALIGNMENT).build().validated();
 
-        accentBar = panelIn(this, BorderLayout.WEST)
-                .withPreferredSize(ACCENT_WIDTH, 0)
-                .withBackground(TRACK)
-                .component();
+        accentBar = createPanel(FLOW)
+                .preferredSize(new Dimension(ACCENT_WIDTH, 0))
+                .background(TRACK)
+                .build().putIn(this, BorderLayout.WEST);
 
-        nameLabel = label(combatant)
-                .withEmptyBorder(0, 10, 0, 0)
-                .in(this, BorderLayout.CENTER);
+        nameLabel = ComponentBuilder.createLabel(combatant)
+                .border(BorderFactory.createEmptyBorder(0, 10, 0, 0))
+                .build().putIn(this, BorderLayout.CENTER);
 
-        barTrack = new RoundPanel(BAR_HEIGHT / 2, TRACK);
-        barTrack.setLayout(null);
-        barTrack.setPreferredSize(new Dimension(BAR_WIDTH, BAR_HEIGHT));
+        barTrack = modifyingPanel(new RoundPanel(BAR_HEIGHT / 2, TRACK))
+                .layoutType(NONE)
+                .preferredSize(new Dimension(BAR_WIDTH, BAR_HEIGHT))
+                .onMouseEnter(p -> { // stat tooltip
+                    if (combatant.isDead()) return;
+
+                    Optional.ofNullable(activeTooltip).ifPresent(Window::dispose);
+
+                    Window owner = SwingUtilities.getWindowAncestor(HealthBarPanel.this);
+                    activeTooltip = new StatTooltipPopup(owner, combatant);
+
+                    Point barOnScreen = p.getLocationOnScreen();
+                    int tx = barOnScreen.x - activeTooltip.getWidth() - 8;
+                    int ty = barOnScreen.y + (p.getHeight() - activeTooltip.getHeight()) / 2;
+
+                    if (tx < 0) tx = barOnScreen.x + p.getWidth() + 8;
+
+                    activeTooltip.setLocation(tx, ty);
+                    activeTooltip.setVisible(true);
+                }).onMouseExit(p -> {
+                    if (activeTooltip != null) {
+                        activeTooltip.dispose();
+                        activeTooltip = null;
+                    }
+                }).build().get();
 
         barFill = new RoundPanel(BAR_HEIGHT / 2, HEALTHY);
         barFill.setBounds(0, 0, 0, BAR_HEIGHT);
@@ -70,12 +89,11 @@ public class HealthBarPanel extends JPanel {
 
         add(barTrack, BorderLayout.EAST);
 
-        animationTimer = new Timer(16, e -> tickAnimation());
-        installStatTooltip();
+        animationTimer = new Timer(16, e -> doTickAnimation());
         update();
     }
 
-    private void tickAnimation() {
+    private void doTickAnimation() {
         int current = barFill.getWidth();
         if (current == targetFillWidth) {
             animationTimer.stop();
@@ -100,18 +118,15 @@ public class HealthBarPanel extends JPanel {
     }
 
     public void endActionState() {
-        if (combatant == EncounterManager.getCurrentCombatant()) {
-            accentBar.setBackground(HEALTHY);
-            setBackground(ROW_TURN);
-            nameLabel.setForeground(FOREGROUND);
-        } else {
-            accentBar.setBackground(TRACK);
-            setBackground(BACKGROUND);
-            if (combatant.isConscious())
-                nameLabel.setForeground(FOREGROUND);
-            else
-                fluent(nameLabel).muted();
-        }
+        // new Color[]{background, accent bar background, name label foreground}
+        Color[] currentCombatant = new Color[]{ROW_TURN, HEALTHY, FOREGROUND};
+        Color[] otherCombatants = new Color[]{BACKGROUND, TRACK, FOREGROUND};
+
+        Color[] colors = combatant.isCurrentCombatant() ? currentCombatant : otherCombatants;
+        setBackground(colors[0]);
+        accentBar.setBackground(colors[1]);
+        nameLabel.setForeground(colors[2]);
+        if (combatant.isUnconscious()) nameLabel.setForeground(FG_MUTED);
     }
 
     public void setActionMode(
@@ -126,48 +141,19 @@ public class HealthBarPanel extends JPanel {
         } else {
             endActionState();
         }
-        setActionSelectionState(isValidTarget, dest);
-    }
 
-    private void installStatTooltip() {
-        fluent(barTrack).withMouseMoveListener(
-                p -> { // onEnter
-                    if (combatant.isDead()) return;
-
-                    Optional.ofNullable(activeTooltip).ifPresent(Window::dispose);
-
-                    Window owner = SwingUtilities.getWindowAncestor(HealthBarPanel.this);
-                    activeTooltip = new StatTooltipPopup(owner, combatant);
-
-                    Point barOnScreen = p.getLocationOnScreen();
-                    int tx = barOnScreen.x - activeTooltip.getWidth() - 8;
-                    int ty = barOnScreen.y + (p.getHeight() - activeTooltip.getHeight()) / 2;
-
-                    if (tx < 0) tx = barOnScreen.x + p.getWidth() + 8;
-
-                    activeTooltip.setLocation(tx, ty);
-                    activeTooltip.setVisible(true);
-                },
-                p -> { // onExit
-                    if (activeTooltip != null) {
-                        activeTooltip.dispose();
-                        activeTooltip = null;
-                    }
-                }
-        );
-    }
-
-    private void setActionSelectionState(boolean isSelectable, ActionFormPanel dest) {
-        actionSelectionListener = new MouseAdapter() {
+        MouseListener actionSelectionListener = new MouseAdapter() {
             @Override public void mouseClicked(MouseEvent e) {
                 dest.submitTarget(combatant);
             }
         };
 
-        if (isSelectable)
-            addMouseListener(actionSelectionListener);
-        else
-            removeMouseListener(actionSelectionListener);
+        Component[] components = Arrays.copyOf(getComponents(), getComponents().length + 1);
+        components[components.length - 1] = this;
+        for (Component c : components) {
+            if (isValidTarget) c.addMouseListener(actionSelectionListener);
+            else c.removeMouseListener(actionSelectionListener);
+        }
     }
 
     @RequiredArgsConstructor static class RoundPanel extends JPanel {

@@ -20,7 +20,10 @@ package _global_list;
 
     // ----- TUTORIAL CODE ----- //
     TUTORIAL_STANDARD("/tutorial_standard.txt"),
-    TUTORIAL_STEAMPUNK("/tutorial_steampunk.txt");
+    TUTORIAL_STEAMPUNK("/tutorial_steampunk.txt"),
+
+    // ----- OTHER ----- //
+    COMBAT_MENU_FILLER_IMAGE("/combat-menu-filler-image.png");
 
     private final java.net.URL url;
 

@@ -6,12 +6,14 @@ import combat_object.combatant.Combatant;
 import exception.IllegalArgumentAtRootException;
 import lombok.*;
 import lombok.experimental.*;
-import popup.InitiativeResolutionPopup;
+import swing.popup.InitiativeResolutionPopup;
 import util.Message;
 import util.Roll;
 
 import javax.swing.*;
 import java.util.List;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 @FieldDefaults(level = AccessLevel.PROTECTED)
 public abstract class PlayerQueue {
@@ -74,16 +76,14 @@ public abstract class PlayerQueue {
     }
 
     protected void sortList(List<Combatant> combatants) {
-        combatants.sort((c1, c2) -> {
-            if (c1.getInitiative() > c2.getInitiative()) return -1;
-            else if (c2.getInitiative() > c1.getInitiative()) return 1;
-            else {
-                Combatant priority = new InitiativeResolutionPopup(c1, c2).result;
-                if (priority == c1) return -1;
-                else if (priority == c2) return 1;
-                else return 0;
-            }
-        });
+        var initiativeSets = combatants.stream().collect(Collectors.groupingBy(Combatant::getInitiative));
+        TreeMap<Integer, List<Combatant>> treeMap = new TreeMap<>(initiativeSets);
+
+        combatants.clear();
+        for (var set : treeMap.descendingMap().values()) {
+            List<Combatant> toAdd = (set.size() == 1) ? set : new InitiativeResolutionPopup(set).result;
+            combatants.addAll(toAdd);
+        }
     }
 
 }

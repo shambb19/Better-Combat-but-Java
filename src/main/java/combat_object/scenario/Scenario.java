@@ -8,14 +8,16 @@ import input.syntax.Key;
 import lombok.*;
 import lombok.experimental.*;
 import util.Filterable;
+import util.StringUtil;
 
 import java.util.*;
+import java.util.function.BiFunction;
 
 import static input.syntax.Key.*;
 
 @EqualsAndHashCode(callSuper = true)
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-@ExtensionMethod(input.TextReader.class)
+@ExtensionMethod({input.TextReader.class, StringUtil.class})
 @SuperBuilder
 public class Scenario extends CombatObject {
 
@@ -24,24 +26,21 @@ public class Scenario extends CombatObject {
     public static Scenario from(EnumMap<Key, Object> params) {
         validateAll(params, "Scenario");
 
-        interface Helper {
-            HashMap<NPC, Integer> getMap(String list, List<Combatant> source);
-        }
-        Helper h = (list, source) -> {
+        BiFunction<String, List<Combatant>, HashMap<NPC, Integer>> mapGetter = (list, source) -> {
             HashMap<NPC, Integer> result = new HashMap<>();
             if (list == null) return result;
             for (String str : list.listTextAsArray()) {
                 String name = str.getNameScenario();
                 int qty = str.getQty();
-                NPC npc = Filterable.of(source).castTo(NPC.class).firstOrElseThrow(n -> n.getName().equals(name));
+                NPC npc = Filterable.of(source, NPC.class).firstOrElseThrow(NPC::getName, name);
                 result.put(npc, qty);
             }
             return result;
         };
 
         String name = (String) params.get(NAME);
-        var with = h.getMap((String) params.get(WITH), Combatants.getFriendlies());
-        var against = h.getMap((String) params.get(AGAINST), Combatants.getEnemies());
+        var with = mapGetter.apply((String) params.get(WITH), Combatants.getFriendlies());
+        var against = mapGetter.apply((String) params.get(AGAINST), Combatants.getEnemies());
 
         return builder().name(name).with(with).against(against).build();
     }
@@ -70,14 +69,10 @@ public class Scenario extends CombatObject {
     }
 
     public ArrayList<String> toTxt() {
-        interface Helper {
-            String formattedLine(String key, HashMap<NPC, Integer> source);
-        }
-        Helper h = (key, source) -> {
+        BiFunction<String, HashMap<NPC, Integer>, String> formatter = (key, source) -> {
             StringJoiner joiner = new StringJoiner(", ", ": [", "]");
             source.forEach((npc, qty) -> {
-                String txt = npc.getName();
-                if (qty > 1) txt += "_" + qty;
+                String txt = npc.getName() + ("_" + qty).stringIfElseBlank(qty > 1);
                 joiner.add(txt);
             });
             return joiner.toString();
@@ -86,8 +81,8 @@ public class Scenario extends CombatObject {
         ArrayList<String> txt = new ArrayList<>();
         txt.add(".scenario");
         txt.add("name: " + name);
-        if (!with.isEmpty()) txt.add(h.formattedLine("with", with));
-        txt.add(h.formattedLine("against", against));
+        if (!with.isEmpty()) txt.add(formatter.apply("with", with));
+        txt.add(formatter.apply("against", against));
         txt.add("");
         return txt;
     }

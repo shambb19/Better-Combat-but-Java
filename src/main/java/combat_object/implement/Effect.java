@@ -1,18 +1,16 @@
 package combat_object.implement;
 
-import _manager.EncounterManager;
 import combat_object.combatant.Combatant;
 import lombok.*;
 import lombok.experimental.*;
+import swing.builder.ComponentBuilder;
 import util.StringUtil;
 
 import javax.swing.*;
-import javax.swing.border.MatteBorder;
 import java.awt.*;
 
-import static swing.fluent.SwingComp.*;
-import static swing.fluent.SwingPane.fluent;
-import static swing.fluent.SwingPane.*;
+import static swing.builder.Components.*;
+import static swing.builder.PanelBuilder.*;
 
 @AllArgsConstructor
 public enum Effect {
@@ -81,42 +79,45 @@ public enum Effect {
 
     private final NoticeComponents noticeComponents;
 
-    public NoticePanel noticePanel(Combatant target) {
-        return new NoticePanel(this, target);
+    public NoticePanel noticePanel(Combatant on, Combatant by) {
+        return new NoticePanel(this, on, by);
     }
 
     public String getOfficialName() {
         return noticeComponents.title;
     }
 
+    @Override public String toString() {
+        return name();
+    }
+
     @ExtensionMethod(StringUtil.class)
     public static class NoticePanel extends JPanel {
-        public NoticePanel(Effect effect, Combatant target) {
+        public NoticePanel(Effect effect, Combatant on, Combatant by) {
             if (effect.noticeComponents == null)
                 throw new IllegalStateException("Effect " + effect.name() + " does not have an associated notice.");
 
             NoticeComponents components = effect.noticeComponents;
 
-            String subtitle = components.subtitle.infoString(EncounterManager.getCurrentCombatant(), target);
+            String subtitle = components.subtitle.infoString(by, on);
 
-            fluent(this).arrangedAs(BORDER, 15, 0)
-                    .withBackground(components.background())
-                    .withPaddedBorder(new MatteBorder(0, 4, 0, 0, effect.noticeComponents.accent()),
-                            10, 12, 10, 12)
-                    .withMaximumSize(Integer.MAX_VALUE, 60)
-                    .onLeft();
+            modifyBasicPanel(this, BORDER, 15, 0, BorderFactory.createCompoundBorder(
+                    BorderFactory.createMatteBorder(0, 4, 0, 0, effect.noticeComponents.accent),
+                    BorderFactory.createEmptyBorder(10, 12, 10, 12)
+            ));
+            modifying(this).fixedHeight(60).alignmentX(LEFT_ALIGNMENT).build().validated();
 
-            JPanel textCol = panelIn(this, BorderLayout.CENTER)
-                    .arrangedAs(VERTICAL_BOX).transparent().component();
+            JPanel textCol = createPanel(VERTICAL_BOX).build().putIn(this, BorderLayout.CENTER);
 
-            JLabel titleLabel =
-                    label(components.title(), Font.BOLD, 12f, components.foreground())
-                            .onLeft().transparent().component();
+            JLabel titleLabel = ComponentBuilder.createLabel(components.title)
+                    .fontBuilder(FontBuilder.of(Font.BOLD, 12f, components.foreground))
+                    .alignmentX(LEFT_ALIGNMENT).build().get();
 
-            JLabel subLabel = label(subtitle, Font.PLAIN, 11f, components.foregroundDim())
-                    .onLeft().transparent().component();
+            JLabel subLabel = ComponentBuilder.createLabel(subtitle)
+                    .fontBuilder(FontBuilder.of(Font.PLAIN, 11f, components.foregroundDim))
+                    .alignmentX(LEFT_ALIGNMENT).build().get();
 
-            fluent(textCol).collect(
+            addConstraintlessComponentsTo(textCol,
                     glue(), titleLabel, spacer(0, 2), subLabel, glue()
             );
         }

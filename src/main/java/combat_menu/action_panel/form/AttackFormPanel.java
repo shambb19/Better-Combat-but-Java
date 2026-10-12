@@ -1,31 +1,31 @@
 package combat_menu.action_panel.form;
 
 import __main.Main;
-import _global_list.DamageImplements;
 import _manager.CombatManager;
 import _manager.EffectManager;
 import combat_menu.encounter_info.HealthBarPanel;
+import combat_object.combatant.Combatant;
 import combat_object.implement.*;
 import config.Config;
 import config.ruleset.AttackResult;
 import lombok.*;
 import lombok.experimental.*;
 import swing.custom.ValidatedField;
-import util.Filterable;
+import swing.builder.ComponentBuilder;
 import util.StringUtil;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 import static combat_object.implement.Effect.*;
 import static config.ruleset.AttackResult.SUCCEEDED;
 import static swing.ColorStyles.*;
-import static swing.fluent.SwingComp.fluent;
-import static swing.fluent.SwingComp.*;
-import static swing.fluent.SwingPane.fluent;
-import static swing.fluent.SwingPane.*;
+import static swing.builder.Components.*;
+import static swing.builder.PanelBuilder.*;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @ExtensionMethod(StringUtil.class)
@@ -41,31 +41,26 @@ public class AttackFormPanel extends ActionFormPanel {
     public AttackFormPanel() {
         super("Use Weapon");
 
-        populateComboBox();
         Main.getCombatMenu().setActionMode(HealthBarPanel.ATTACK, this);
     }
 
-    private void populateComboBox() {
-        for (var c : Config.getRuleset().getAllowedImplementClasses()) {
-            Implement header = DamageImplements.createHeader(c);
-
-            List<?> implementList = attacker.getImplements(c);
-
-            if (c.isInstance(Gun.class))
-                implementList = Filterable.of(implementList).castTo(Gun.class)
-                        .filteredByAsList(g -> {
-                            if (g.isHeavy()) return attacker.getHp() > 2;
-                            return true;
-                        });
-
-            attackCombo.addItem(header);
-            implementList.forEach(i -> attackCombo.addItem((Implement) i));
-            DamageImplements.getManualEntries(c).forEach(attackCombo::addItem);
-        }
-    }
-
     @Override protected void buildFields() {
-        attackCombo = addMixedCombo(fieldsPanel);
+        JLabel attackLabel = ComponentBuilder.createLabel("Select an attack", Font.PLAIN, 12f, FG_MUTED)
+                .preferredSize(new Dimension(110, 0)).build().get();
+
+        attackCombo = ComponentBuilder.createComboBox(getImplements(), b -> onSelectionChanged(), null)
+                .fontBuilder(FontBuilder.of(Font.PLAIN, 13f, FG_SECTION))
+                .background(TRACK).build().get();
+        attackCombo.setRenderer(new MixedComboRenderer());
+        attackCombo.setModel(new MixedComboModel());
+
+        JPanel attackPanel = createPanel(BORDER).hgap(12)
+                .hostedComponent(attackLabel, BorderLayout.WEST)
+                .hostedComponent(attackCombo, BorderLayout.CENTER)
+                .alignmentX(LEFT_ALIGNMENT)
+                .preferredSize(new Dimension(Integer.MAX_VALUE, 52)).build().get();
+
+        addConstraintlessComponentsTo(fieldsPanel, attackPanel, spacer(0, 10));
 
         LabeledField rollRow = addLabeledField(fieldsPanel, "Roll for hit", "Enter Roll");
         rollFieldLabel = rollRow.label();
@@ -76,17 +71,27 @@ public class AttackFormPanel extends ActionFormPanel {
             return v > 0 && v <= 20;
         });
 
-        attackCombo.addActionListener(e -> onSelectionChanged());
-
         addNotices();
     }
 
-    @Override protected void addNotices() {
-        for (Effect e : ATTACKER_EFFECTS)
-            noticeConditions.put(e, EffectManager.hasEffect(attacker, e));
-        for (Effect e : TARGET_EFFECTS)
-            noticeConditions.put(e, EffectManager.hasEffect(target, e));
+    private Implement[] getImplements() {
+        List<Function<Class<? extends Implement>, List<? extends Implement>>> getters =
+                List.of(Implement::createHeader, attacker::getImplements, Implement::getManualEntries);
 
+        return Config.getRuleset().getAllowedImplementClasses().stream()
+                .flatMap(c -> getters.stream().flatMap(g -> g.apply(c).stream()))
+                .toArray(Implement[]::new);
+    }
+
+    @Override protected void addNotices() {
+        BiConsumer<Effect[], Combatant> putter = (effectOn, on) -> {
+            for (Effect e : effectOn) {
+                boolean effectValidHere = EffectManager.hasEffect(on, e);
+                if (effectValidHere) noticeConditions.put(e, on);
+            }
+        };
+        putter.accept(ATTACKER_EFFECTS, attacker);
+        putter.accept(TARGET_EFFECTS, target);
 
         super.addNotices();
     }
@@ -109,7 +114,7 @@ public class AttackFormPanel extends ActionFormPanel {
     @Override protected boolean isInputValid() {
         Object selected = attackCombo.getSelectedItem();
         if (selected == null || selected instanceof String) return false;
-        return rollField.isVisible() && rollField.isValid();
+        return rollField.isVisible() && rollField.isInputValid();
     }
 
     private void showMissResult(String reason) {
@@ -133,63 +138,44 @@ public class AttackFormPanel extends ActionFormPanel {
     }
 
     private JPanel buildMissBanner(String reason) {
-        JPanel banner = newArrangedAs(BORDER, 10, 0)
-                .withBackground(new Color(0x2A, 0x1E, 0x1E))
-                .withMaximumSize(Integer.MAX_VALUE, 56)
-                .withPaddedMatteBorderOnSide(ENEMY, LEFT, 10, 12, 10, 10)
-                .component();
+        JPanel banner = createPanel(BORDER).hgap(10)
+                .background(new Color(0x2a, 0x1e, 0x1e))
+                .fixedHeight(56)
+                .border(BorderFactory.createCompoundBorder(
+                        BorderFactory.createMatteBorder(0, 6, 0, 0, ENEMY),
+                        BorderFactory.createEmptyBorder(10, 12, 10, 0)
+                )).build().get();
 
-        label("✕", Font.PLAIN, 15f, ENEMY).in(banner, BorderLayout.WEST);
+        ComponentBuilder.createLabel("✕", Font.PLAIN, 15f, ENEMY)
+                .build().putIn(banner, BorderLayout.WEST);
 
-        panelIn(banner, BorderLayout.CENTER).arrangedAs(VERTICAL_BOX)
-                .collect(
-                        label("Attack missed", Font.BOLD, 13f, ENEMY),
-                        spacer(0, 2),
-                        label(reason, 11f).muted()
-                ).transparent();
+        JLabel missLabel = ComponentBuilder.getBasicLabel("Attack missed", Font.BOLD, 13f, ENEMY);
+
+        JLabel reasonLabel = ComponentBuilder.getBasicLabel(reason, Font.PLAIN, 11f, FG_MUTED);
+
+        createPanel(VERTICAL_BOX, missLabel, spacer(0, 2), reasonLabel)
+                .build().putIn(banner, BorderLayout.CENTER);
 
         return banner;
     }
 
-    private JComboBox<Implement> addMixedCombo(JPanel container) {
-        JComboBox<Implement> combo = fluent(new JComboBox<Implement>())
-                .withText(Font.PLAIN, 13f, FG_SECTION)
-                .withBackground(TRACK)
-                .applied(b -> {
-                    b.setRenderer(new MixedComboRenderer());
-                    b.setModel(new MixedComboModel());
-                }).component();
-
-        fluent(container).collect(getAttackComboRow(combo), spacer(0, 10));
-        return combo;
-    }
-
     private void onSelectionChanged() {
-        Object selected = attackCombo.getSelectedItem();
-        clearNotices(fieldsPanel);
+        if (attackCombo == null) return;
 
-        switch (selected) {
-            case null -> {
-                rollField.setVisible(false);
-                rollField.clear();
-                refreshButtons();
-                return;
-            }
-            case Spell spell when spell.effectEquals(Effect.AUTO_HIT) -> {
-                rollField.setVisible(false);
-                confirmButton.setEnabled(true);
-                confirmButton.setText("Cast Spell");
-                addNotice(spell.getEffect(), fieldsPanel);
-                return;
-            }
-            case Gun gun -> {
-                boolean hasDisadvantage = (gun.isHeavy() && attacker.getHp() <= 4) || attacker.getHp() <= 2;
-                if (hasDisadvantage) {
-                    confirmButton.setText("Fire");
-                    addNotice(DISADVANTAGE, fieldsPanel);
-                }
-            }
-            default -> {
+        Object selected = attackCombo.getSelectedItem();
+
+        addNotices();
+
+        if (selected instanceof Spell spell && spell.effectEquals(AUTO_HIT)) {
+            rollField.setVisible(false);
+            confirmButton.setEnabled(true);
+            confirmButton.setText("Cast Spell");
+            addNotice(spell.getEffect(), fieldsPanel);
+        } else if (selected instanceof Gun gun) {
+            boolean hasDisadvantage = (gun.isHeavy() && attacker.getHp() <= 4) || attacker.getHp() <= 2;
+            if (hasDisadvantage) {
+                confirmButton.setText("Fire");
+                addNotice(DISADVANTAGE, fieldsPanel);
             }
         }
 
@@ -219,9 +205,10 @@ public class AttackFormPanel extends ActionFormPanel {
             boolean isHeader = implement.getName().startsWith("──");
 
             if (isHeader) {
-                fluent(this)
-                        .withText(Font.PLAIN, 11f, FG_HINT)
-                        .withBackground(BG_SURFACE).enabled(false);
+                modifying(this)
+                        .fontBuilder(FontBuilder.of(Font.PLAIN, 11f))
+                        .background(BG_SURFACE).foreground(FG_HINT)
+                        .enabled(false).build().validated();
                 setText(implement.toString());
             } else if (implement.isManual()) {
                 setText(implement.getName());
@@ -240,7 +227,7 @@ public class AttackFormPanel extends ActionFormPanel {
 
     private static class MixedComboModel extends DefaultComboBoxModel<Implement> {
         @Override public void setSelectedItem(Object item) {
-            // this is also disgusting, but I'm too lazy to implement something more robust, and works so ¯\_(ツ)_/¯
+            // this is also disgusting, but I'm too lazy to think of something better, and it works so ¯\_(ツ)_/¯
             if (item instanceof Implement s && s.getName().startsWith("──")) return;
             super.setSelectedItem(item);
         }

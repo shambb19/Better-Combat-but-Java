@@ -14,10 +14,15 @@ import static input.syntax.Key.*;
 
 @Getter @SuperBuilder
 @ExtensionMethod(TextReader.class)
+@FieldDefaults(makeFinal = true)
 public class Spell extends Implement {
 
-    @Builder.Default private final Effect effect = Effect.NONE;
-    private final boolean requiresConcentration;
+    public static Spell HIT_MANUAL = createManual("Manual Hit");
+    public static Spell SAVE_MANUAL = createManual("Manual Save");
+    public static Spell HEADER = createManual("── Spell ──");
+
+    private final Effect effect;
+    private final boolean concentrationRequired;
 
     @Override
     public boolean effectEquals(Effect o) {
@@ -45,7 +50,7 @@ public class Spell extends Implement {
                 .roll(Roll.ofString((String) params.get(DMG)))
                 .stat((AbilityModifier) params.get(STAT))
                 .effect((Effect) params.get(EFFECT))
-                .requiresConcentration(params.get(CONCENTRATION).booleanFromOptionalPresence())
+                .concentrationRequired(params.get(CONCENTRATION).booleanFromOptionalPresence())
                 .isManual(name != null && name.startsWith("Manual"))
                 .build();
     }

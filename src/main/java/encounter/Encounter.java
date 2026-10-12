@@ -1,22 +1,22 @@
 package encounter;
 
 import combat_object.combatant.Combatant;
-import combat_object.combatant.NPC;
 import combat_object.scenario.Scenario;
 import lombok.*;
 import lombok.experimental.*;
-import util.Filterable;
 
 import java.util.List;
-import java.util.stream.Stream;
+import java.util.Map;
 
-@Value @AllArgsConstructor public class Encounter {
+@Value public class Encounter {
 
     List<Scenario> scenarios;
-    @NonFinal @Setter List<Combatant> friendlies, enemies;
+    List<Combatant> friendlies, enemies;
 
-    public List<NPC> getAllNpcs() {
-        return Filterable.of(Stream.concat(friendlies.stream(), enemies.stream())).castToAsList(NPC.class);
+    public Encounter(List<Scenario> scenarios, Map<Boolean, List<Combatant>> partitionedList) {
+        this.scenarios = scenarios;
+        friendlies = partitionedList.get(false);
+        enemies = partitionedList.get(true);
     }
 
     public boolean isEncounterOver() {

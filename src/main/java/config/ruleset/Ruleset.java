@@ -10,7 +10,7 @@ import combat_object.implement.Weapon;
 import config.queue.PlayerQueue;
 import input.syntax.Key;
 import input.syntax.Tag;
-import popup.GunAttackPopup;
+import swing.popup.GunAttackPopup;
 
 import java.util.EnumMap;
 import java.util.List;

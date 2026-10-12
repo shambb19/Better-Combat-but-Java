@@ -2,6 +2,7 @@ package creator_menu;
 
 import __main.Main;
 import lombok.*;
+import swing.builder.ButtonBuilder;
 import util.Message;
 
 import javax.swing.*;
@@ -12,19 +13,17 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
 
-import static swing.ColorStyles.BG_DEEP;
-import static swing.ColorStyles.SUCCESS;
-import static swing.fluent.SwingComp.button;
-import static swing.fluent.SwingPane.FLOW;
-import static swing.fluent.SwingPane.fluent;
+import static swing.ColorStyles.*;
+import static swing.builder.PanelBuilder.*;
 
 public class CampaignCreatorFooterBar extends JPanel {
 
     {
-        fluent(this).arrangedAs(FLOW, 15, 0).collect(
-                button("Copy to Clipboard", SUCCESS, this::clipboardCopy),
-                button("Download .txt File", SUCCESS, this::download)
-        ).withBackground(BG_DEEP);
+        JButton copy = ButtonBuilder.createButton("Copy to Clipboard", SUCCESS, this::clipboardCopy).build().get();
+        JButton download = ButtonBuilder.createButton("Download .txt File", SUCCESS, this::download).build().get();
+
+        modifyingPanel(this).layoutType(FLOW).hgap(15).background(BG_DEEP).build().validated();
+        addConstraintlessComponentsTo(this, copy, download);
     }
 
     private void clipboardCopy() {
@@ -38,7 +37,7 @@ public class CampaignCreatorFooterBar extends JPanel {
     private void download() {
         File directory = new File(System.getProperty("user.home"), "Downloads");
 
-        String fileName = Message.promptString("Enter unique file name.");
+        String fileName = Message.promptString("Enter unique file name.", "File Name");
 
         File file = new File(directory, fileName + " " + LocalDate.now() + ".txt");
 

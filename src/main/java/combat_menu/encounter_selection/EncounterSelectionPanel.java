@@ -2,25 +2,25 @@ package combat_menu.encounter_selection;
 
 import __main.Main;
 import __main.UploadMain;
+import _global_list.Scenarios;
 import _manager.EncounterManager;
 import combat_object.combatant.Combatant;
 import combat_object.combatant.info.AbilityModifier;
 import combat_object.scenario.Scenario;
+import encounter.Encounter;
 import lombok.*;
 import lombok.experimental.*;
+import swing.builder.ButtonBuilder;
+import swing.builder.Components;
 import util.Filterable;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
-import javax.swing.border.MatteBorder;
 import java.awt.*;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static swing.ColorStyles.*;
-import static swing.fluent.SwingComp.*;
-import static swing.fluent.SwingPane.*;
+import static swing.builder.PanelBuilder.*;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class EncounterSelectionPanel extends JPanel {
@@ -29,79 +29,71 @@ public class EncounterSelectionPanel extends JPanel {
 
     @NonFinal boolean updatingScenario = false;
 
-    @Getter JComboBox<Scenario> scenarioCombo;
     CombatantScroller partyContainer, dynamicContainer;
     JButton beginButton;
 
     public EncounterSelectionPanel(UploadMain root) {
         this.root = root;
 
-        fluent(this).arrangedAs(BORDER).withBorder(new LineBorder(TRACK, 1));
+        setLayout(new BorderLayout());
+        setBackground(BG_DARK);
 
-        JPanel topBar = panelIn(this, BorderLayout.NORTH).arrangedAs(BORDER)
-                .withBackground(BG_DARK)
-                .withPaddedMatteBorderOnSide(TRACK, BOTTOM, 8, 0, 8, 0)
-                .component();
-
-        List<Scenario> scenariosList = EncounterManager.getEncounter().getScenarios();
+        List<Scenario> scenariosList = Scenarios.toList();
         scenariosList.addFirst(Scenario.emptyScenario());
 
-        scenarioCombo = new JComboBox<>(scenariosList.toArray(new Scenario[0]));
-        fluent(scenarioCombo)
-                .withBackground(TRACK)
-                .withPaddedBorder(new LineBorder(BORDER_LIGHT, 1), 2, 8, 2, 8)
-                .applied(b -> {
-                    b.setSelectedItem(Scenario.emptyScenario());
-                    b.addActionListener(e -> updateScenario());
-                });
+        JTabbedPane scenarioOptions = new JTabbedPane(SwingConstants.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
+        for (Scenario s : scenariosList) {
+            scenarioOptions.addTab(s.getName(), null);
+        }
+        scenarioOptions.addChangeListener(e -> {
+            Scenario s = scenariosList.get(scenarioOptions.getSelectedIndex());
+            updateScenario(s);
+        });
+        scenarioOptions.putClientProperty("JTabbedPane.tabsPopupPolicy", "never");
+        scenarioOptions.putClientProperty("JTabbedPane.scrollButtonsPolicy", "asNeeded");
+        scenarioOptions.putClientProperty("TabbedPane.underlineColor", SCENARIO);
 
-        panelIn(topBar, BorderLayout.WEST).arrangedAs(FLOW, 10, 0)
-                .collect(
-                        "(Optional) Select an Existing Scenario:", scenarioCombo
-                ).withBackground(BG_DARK);
+        createPanel(HORIZONTAL_BOX,
+                "(Optional) Select an Existing Scenario:", Components.spacer(6, 0),
+                scenarioOptions
+                ).border(BorderFactory.createEmptyBorder(8, 8, 14, 8))
+                .build().putIn(this, BorderLayout.NORTH);
 
-        partyContainer = CombatantScroller.partyPanel(
-                this, "Initiative", true, true, this::validateCards);
-        dynamicContainer = CombatantScroller.npcPanel(
-                this, "Initiative", false, true, this::validateCards);
+        partyContainer = CombatantScroller.createForEncounterSelectionPanel(this, this::validateCards, true);
+        dynamicContainer = CombatantScroller.createForEncounterSelectionPanel(this, this::validateCards, false);
 
-        newArrangedAs(TWO_COLUMN, 15, 0)
-                .collect(partyContainer, dynamicContainer)
-                .transparent()
-                .withEmptyBorder(8, 12, 12, 12)
-                .toScroller()
-                .withPreferredSize(500, 520)
-                .in(this, BorderLayout.CENTER);
+        JScrollPane scrollPane = createPanel(TWO_COLUMN, partyContainer, dynamicContainer).hgap(10)
+                .border(BorderFactory.createEmptyBorder(8, 12, 12, 12))
+                .background(BG_DARK)
+                .build().getAsScrollerIn(this, BorderLayout.CENTER);
+        scrollPane.setPreferredSize(new Dimension(500, 520));
 
-        JPanel footer = panelIn(this, BorderLayout.SOUTH).arrangedAs(FLOW_RIGHT, 12, 8)
-                .withBackground(BG_DARK)
-                .withBorder(new MatteBorder(1, 0, 0, 0, TRACK))
-                .component();
+        JPanel footer = createPanel(FLOW_RIGHT).hgap(12).vgap(8).build().putIn(this, BorderLayout.SOUTH);
 
-        button("Randomize Initiatives", BG_SURFACE, this::randomizeInitiatives)
-                .withDerivedFont(Font.PLAIN, 12f).in(footer);
+        ButtonBuilder.createButton("Randomize Initiatives", BG_SURFACE, this::randomizeInitiatives)
+                .fontBuilder(FontBuilder.of(Font.PLAIN, 12f))
+                .build().putIn(footer);
 
-        button("Refresh Inputs", BG_SURFACE, this::validateCards)
-                .applied(b -> b.setToolTipText("Forces an input validation check"))
-                .withDerivedFont(Font.PLAIN, 12f).in(footer);
+        ButtonBuilder.createButton("Refresh Inputs", BG_SURFACE, this::validateCards)
+                .toolTipText("Forces an input validation check")
+                .build().putIn(footer);
 
-        beginButton = button("Begin Encounter", SUCCESS, this::logAndBegin)
-                .withDerivedFont(Font.PLAIN, 13f)
+        beginButton = ButtonBuilder.createButton("Begin Encounter", SUCCESS, this::logAndBegin)
+                .fontBuilder(FontBuilder.of(Font.PLAIN, 13f))
                 .enabled(false)
-                .in(footer);
+                .build().putIn(footer);
 
         setVisible(true);
 
         SwingUtilities.invokeLater(beginButton::requestFocusInWindow);
 
-        updateScenario();
+        updateScenario(scenariosList.getFirst());
     }
 
-    void updateScenario() {
+    void updateScenario(Scenario scenario) {
         if (updatingScenario) return;
         updatingScenario = true;
 
-        Scenario scenario = (Scenario) scenarioCombo.getSelectedItem();
         if (scenario == null) return;
 
         dynamicContainer.setScenario(scenario);
@@ -122,22 +114,22 @@ public class EncounterSelectionPanel extends JPanel {
     private void randomizeInitiatives() {
         for (CombatantCard c : getAllActiveCards()) {
             int initiative = (int) (Math.random() * 20) + 1;
-            initiative += c.getCombatant().getStats().mod(AbilityModifier.DEX);
+            initiative += c.combatant.getStats().mod(AbilityModifier.DEX);
             c.input.setValue(String.valueOf(initiative));
         }
     }
 
     private void logAndBegin() {
-        var activeCombatants = Arrays.stream(getAllActiveCards())
+        var activeCombatantsList = Arrays.stream(getAllActiveCards())
                 .filter(c -> c.checkBox == null || !c.checkBox.isSelected())
                 .map(card -> {
-                    Combatant c = card.getCombatant();
+                    Combatant c = card.combatant;
                     c.setInitiative(card.getInputValue());
                     return c;
-                }).collect(Collectors.partitioningBy(Combatant::isEnemy));
+                }).toList();
+        var activeCombatants = Combatant.enemyPartition(activeCombatantsList);
 
-        EncounterManager.getEncounter().setEnemies(activeCombatants.get(true));
-        EncounterManager.getEncounter().setFriendlies(activeCombatants.get(false));
+        EncounterManager.setEncounter(new Encounter(Scenarios.toList(), activeCombatants));
 
         Main.closeAndSwitch(root, Main.COMBAT);
     }

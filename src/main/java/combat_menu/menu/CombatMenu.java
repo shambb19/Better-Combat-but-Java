@@ -5,16 +5,15 @@ import combat_menu.action_panel.ActionPanel;
 import combat_menu.action_panel.form.ActionFormPanel;
 import combat_menu.encounter_info.EncounterListPanel;
 import combat_menu.encounter_info.HealthBarPanel;
-import combat_menu.map.CombatMapView;
 import lombok.*;
 import lombok.experimental.*;
 import org.intellij.lang.annotations.MagicConstant;
+import swing.ColorStyles;
 import swing.custom.MainFrame;
-import swing.fluent.SwingPane;
+import swing.builder.PanelBuilder;
 
+import javax.swing.*;
 import java.awt.*;
-
-import static swing.fluent.SwingPane.*;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class CombatMenu extends MainFrame {
@@ -23,23 +22,22 @@ public class CombatMenu extends MainFrame {
 
     EncounterListPanel encounterListPanel = new EncounterListPanel();
     @Getter ActionPanel actionPanel = new ActionPanel();
-    @Getter CombatMapView map;
 
     {
         setTitle(TITLE);
-
-        map = new CombatMapView(this);
-        setJMenuBar(new CombatMenuBar(map.getMapMenuItem()));
+        setJMenuBar(new CombatMenuBar());
 
         InspirationBar excessInspirationBar = new InspirationBar();
 
         encounterListPanel.setPreferredSize(new Dimension(300, 0));
 
-        fluent(this).arrangedAs(SwingPane.BORDER)
-                .borderCollect(
-                        center(actionPanel), east(encounterListPanel),
-                        south(excessInspirationBar)
-                ).withEmptyBorder(10);
+        PanelBuilder.modifyingPanel(this).layoutType(PanelBuilder.BORDER)
+                .hostedComponent(actionPanel, BorderLayout.CENTER)
+                .hostedComponent(encounterListPanel, BorderLayout.EAST)
+                .hostedComponent(excessInspirationBar, BorderLayout.SOUTH)
+                .border(BorderFactory.createEmptyBorder(10, 10, 10, 10))
+                .background(ColorStyles.BACKGROUND)
+                .build().validated();
 
         setVisible(true);
     }

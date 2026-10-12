@@ -22,10 +22,6 @@ public class Locators {
             return fullList.filter(c -> c.getMaxHp() != c.getHp() && !EffectManager.hasEffect(c, Effect.HEAL_BLOCK)).toList();
     }
 
-    public static <T> T getWithNameFromDirectory(List<T> source, Object obj) {
-        return Filterable.of(source).firstWithToStringEquals(String.valueOf(obj));
-    }
-
     public static <T extends Enum<T>> T enumNameSearch(String name, Class<T> enumClass) {
         return Filterable.of(enumClass.getEnumConstants()).firstWithToStringEquals(name);
     }

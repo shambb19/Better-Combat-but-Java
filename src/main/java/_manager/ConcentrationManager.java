@@ -15,7 +15,7 @@ import java.util.List;
     @Getter private static final List<Concentration> concentrations = new ArrayList<>();
 
     public void startNewConcentration(Combatant by, Combatant on, Spell spell) {
-        if (!spell.isRequiresConcentration()) return;
+        if (!spell.isConcentrationRequired()) return;
 
         Concentration concentration = new Concentration(by, on, spell);
         breakConcentration(by);

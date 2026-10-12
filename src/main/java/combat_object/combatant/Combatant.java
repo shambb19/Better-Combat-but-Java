@@ -1,6 +1,7 @@
 package combat_object.combatant;
 
 import _manager.EffectManager;
+import _manager.EncounterManager;
 import combat_object.CombatObject;
 import combat_object.combatant.info.AbilityModifier;
 import combat_object.combatant.info.LifeStatus;
@@ -15,7 +16,10 @@ import util.Roll;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @EqualsAndHashCode(callSuper = true) @SuperBuilder @Getter @Setter
 @FieldDefaults(level = AccessLevel.PROTECTED)
@@ -31,6 +35,10 @@ public abstract class Combatant extends CombatObject {
     final boolean isArmored;
     @Builder.Default protected int initiative = 0;
     @Builder.Default protected int numInspirationUsed = 0;
+
+    public boolean isCurrentCombatant() {
+        return this == EncounterManager.getCurrentCombatant();
+    }
 
     public void useInspiration() {
         numInspirationUsed++;
@@ -49,7 +57,11 @@ public abstract class Combatant extends CombatObject {
     }
 
     public <T extends Implement> List<T> getImplements(Class<T> type) {
-        return Filterable.of(implementList).castToAsList(type);
+        return Filterable.of(implementList).castTo(type)
+                .filteredByAsList(i -> {
+                    if (i instanceof Gun g && g.isHeavy()) return hp > 2;
+                    return true;
+                });
     }
 
     public void damage(int damage) {
@@ -88,8 +100,7 @@ public abstract class Combatant extends CombatObject {
             }
             case LifeStatus.UNCONSCIOUS -> lifeStatus.toString();
             case LifeStatus.DEAD -> "Dead";
-            default ->
-                    throw new ClassCastException("Combatant.getHealthBarString: unexpected int lifeStatus.getStatus");
+            default -> throw new ClassCastException("Combatant.getHealthBarString: unexpected value of lifeStatus.status");
         };
     }
 
@@ -158,19 +169,8 @@ public abstract class Combatant extends CombatObject {
         return txt;
     }
 
-    public String getAbbreviation() {
-        String[] nameParts = name.split(" ");
-        boolean nameHasNumber;
-        try {
-            Integer.parseInt(nameParts[nameParts.length - 1]);
-            nameHasNumber = true;
-        } catch (NumberFormatException ignored) {
-            nameHasNumber = false;
-        }
-        if (nameHasNumber) {
-            return nameParts[0].substring(0, 1).toUpperCase() + " " + nameParts[nameParts.length - 1];
-        }
-        return nameParts[0].substring(0, 3);
+    public static Map<Boolean, List<Combatant>> enemyPartition(Iterable<Combatant> list) {
+        return StreamSupport.stream(list.spliterator(), false).collect(Collectors.partitioningBy(Combatant::isEnemy));
     }
 
     public static class RollTracker {

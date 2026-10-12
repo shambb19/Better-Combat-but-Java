@@ -2,18 +2,19 @@ package __main;
 
 import _global_list.Resource;
 import combat_menu.encounter_selection.EncounterSelectionPanel;
-import ide.CampaignEditor;
+import creator_menu.ide.CampaignEditor;
 import input.CampaignReader;
 import lombok.*;
 import lombok.experimental.*;
 import org.jetbrains.annotations.NotNull;
-import popup.FileGetter;
+import swing.popup.FileGetter;
 import swing.custom.MainFrame;
-import swing.fluent.SwingPane;
+import swing.builder.ButtonBuilder;
+import swing.builder.ComponentBuilder;
+import swing.builder.TextItemBuilder;
 import util.Message;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -24,9 +25,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static swing.ColorStyles.*;
-import static swing.fluent.SwingComp.fluent;
-import static swing.fluent.SwingComp.*;
-import static swing.fluent.SwingPane.*;
+import static swing.builder.PanelBuilder.*;
+import static swing.builder.Components.*;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UploadMain extends MainFrame {
@@ -48,14 +48,17 @@ public class UploadMain extends MainFrame {
     {
         setTitle("Campaign File Selection" + Main.TITLE);
 
-        SwingPane.fluent(this).arrangedAs(BORDER).borderCollect(
-                west(buildSidebar()), center(buildPreview()));
+        modifyingPanel(this).layoutType(BORDER)
+                .hostedComponent(buildSidebar(), BorderLayout.WEST)
+                .hostedComponent(buildPreview(), BorderLayout.CENTER)
+                .background(BG_DARK)
+                .build().validated();
 
         setVisible(true);
     }
 
     private JPanel buildSidebar() {
-        sidebar = newArrangedAs(VERTICAL_BOX, 0, 5).component();
+        sidebar = createPanel(VERTICAL_BOX).vgap(5).build().get();
 
         combatButton = uploadButton("Start", () -> {
             Main.uploadCampaign(currentFile);
@@ -71,47 +74,49 @@ public class UploadMain extends MainFrame {
         });
         creatorButton.setEnabled(false);
 
-        return SwingPane.fluent(sidebar)
-                .collect(
-                        new JLabel(Main.getAppIcon()),
-                        spacer(0, 13),
-                        instructionsArea(),
-                        spacer(0, 13),
-                        sectionLabel("Upload Options"), spacer(0, 3),
-                        uploadButton("New Campaign", () -> onInputChange(null)),
-                        uploadButton("Upload Existing (.txt)", () -> onInputChange(FileGetter.getUrl(this))),
-                        uploadButton("Load Kryeun Starter", () -> onInputChange(Resource.STARTER_STANDARD.getUrl())),
-                        uploadButton("Load Steampunk Starter", () -> onInputChange(Resource.STARTER_STEAMPUNK.getUrl())),
-                        spacer(0, 7),
-                        sectionLabel("Run mode"), spacer(0, 3),
-                        combatButton, creatorButton
-                ).withBackground(BG_DARK)
-                .withPreferredSize(300, 0)
-                .withEmptyBorder(22, 20, 18, 20)
-                .component();
+        addConstraintlessComponentsTo(sidebar,
+                new JLabel(Main.getAppIcon()),
+                spacer(0, 13),
+                instructionsArea(),
+                spacer(0, 13),
+                sectionLabel("Upload Options"), spacer(0, 3),
+                uploadButton("New Campaign", () -> onInputChange(null)),
+                uploadButton("Upload Existing (.txt)", () -> onInputChange(FileGetter.getUrl(this))),
+                uploadButton("Load Kryeun Starter", () -> onInputChange(Resource.STARTER_STANDARD.getUrl())),
+                uploadButton("Load Steampunk Starter", () -> onInputChange(Resource.STARTER_STEAMPUNK.getUrl())),
+                spacer(0, 7),
+                sectionLabel("Run mode"), spacer(0, 3),
+                combatButton, creatorButton
+        );
+        return modifying(sidebar)
+                .background(BG_DARK)
+                .preferredSize(new Dimension(300, 0))
+                .border(BorderFactory.createCompoundBorder(
+                        BorderFactory.createMatteBorder(0, 0, 0, 2, TRACK),
+                        BorderFactory.createEmptyBorder(22, 20, 18, 18)
+                )).build().get();
     }
 
     @NotNull
     private static JTextArea instructionsArea() {
-        return textArea(INSTRUCTIONS)
-                .withText(Font.PLAIN, 13f, FG_MUTED)
-                .onLeft()
-                .withMaximumSize(Integer.MAX_VALUE, 80).component();
+        return TextItemBuilder.<JTextArea>buildTextItem().component(new JTextArea(INSTRUCTIONS))
+                .fontBuilder(ComponentBuilder.FontBuilder.of(Font.PLAIN, 13f, FG_MUTED))
+                .alignmentX(LEFT_ALIGNMENT)
+                .maximumSize(new Dimension(Integer.MAX_VALUE, 80)).build().get();
     }
 
     private static JLabel sectionLabel(String text) {
-        return label(text.toUpperCase(), Font.PLAIN, 10f, FG_HINT).onLeft().component();
+        return ComponentBuilder.createLabel(text.toUpperCase(), Font.PLAIN, 10f, FG_HINT)
+                .alignmentX(LEFT_ALIGNMENT).build().get();
     }
 
     private JButton uploadButton(String label, Runnable action) {
-        return button(label, BG_SURFACE, action)
-                .withMouseMoveListener(
-                        b -> b.setBackground(DIVIDER),
-                        b -> b.setBackground(BG_SURFACE)
-                ).applied(b -> b.setHorizontalAlignment(SwingConstants.LEFT))
-                .onLeft()
-                .withMaximumSize(221, 34)
-                .component();
+        return ButtonBuilder.createButton(label, BG_SURFACE, action)
+                .onMouseEnter(b -> b.setBackground(DIVIDER))
+                .onMouseExit(b -> b.setBackground(BG_SURFACE))
+                .background(BG_SURFACE)
+                .alignmentX(LEFT_ALIGNMENT)
+                .maximumSize(new Dimension(221, 34)).build().get();
     }
 
     private void onInputChange(URL input) {
@@ -139,15 +144,10 @@ public class UploadMain extends MainFrame {
         }
         accentStrip.setBackground(background);
         statusDot.setBackground(background);
-        statusDot.setBorder(new LineBorder(background, 4));
+        statusDot.setBorder(BorderFactory.createLineBorder(background, 4));
 
         statusText.setText(text);
         statusText.setForeground(foreground);
-
-        fluent(statusDot)
-                .withBackgroundAndForeground(background, foreground)
-                .withBorder(new LineBorder(background, 4))
-                .applied(d -> d.setText(text));
 
         combatButton.setEnabled(valid);
         creatorButton.setEnabled(valid || currentFile == null);
@@ -179,50 +179,44 @@ public class UploadMain extends MainFrame {
     }
 
     private static JLabel centeredLabel() {
-        return label("A new campaign file will be generated on save.", 13f).muted().component();
+        final String text = "A new campaign file will be generated on save.";
+        return ComponentBuilder.getBasicLabel(text, Font.PLAIN, 13f, FG_MUTED);
     }
 
     private JPanel buildPreview() {
-        JPanel preview = newArrangedAs(BORDER).withBackground(BACKGROUND).component();
+        JPanel preview = createPanel(BORDER)
+                .background(BG_DARK)
+                .build().get();
 
-        accentStrip = panelIn(preview, BorderLayout.NORTH)
-                .withPreferredSize(0, 2)
-                .withBackground(FG_HINT)
-                .component();
+        accentStrip = createPanel(FLOW)
+                .preferredSize(new Dimension(0, 2))
+                .background(FG_HINT).build().get();
 
-        JPanel header = panelIn(preview, BorderLayout.NORTH).arrangedAs(FLOW_LEFT, 10, 8)
-                .withBackground(BG_DARK)
-                .withPaddedMatteBorderOnSide(TRACK, BOTTOM, 0, 0, 0, 0)
-                .component();
+        JPanel header = createPanel(FLOW_LEFT).hgap(10).vgap(8)
+                .background(BG_DARK).build().get();
 
-        statusDot = label(null).opaque()
-                .withPreferredSize(8, 8)
-                .withBackground(FG_HINT)
-                .withBorder(new LineBorder(FG_HINT, 4))
-                .in(header);
+        statusDot = ComponentBuilder.modifying(new JLabel())
+                .preferredSize(new Dimension(8, 8))
+                .background(FG_HINT)
+                .build().putIn(header);
 
-        statusText = label("No file selected", FG_MUTED).in(header);
+        statusText = ComponentBuilder.createLabel("No file selected", Font.PLAIN, 12f, FG_MUTED)
+                .build().putIn(header);
 
-        panelIn(preview, BorderLayout.NORTH).arrangedAs(BORDER)
-                .borderCollect(
-                        north(accentStrip), center(header)
-                ).transparent()
-                .transparent();
+        createPanel(BORDER)
+                .hostedComponent(accentStrip, BorderLayout.NORTH)
+                .hostedComponent(header, BorderLayout.CENTER)
+                .build().putIn(preview, BorderLayout.NORTH);
 
         codeDisplay = new CampaignEditor();
-        codeDisplay.setFocusable(false);
-        fallbackDisplay = textArea("")
-                .withText(Font.PLAIN, 12f, CRITICAL)
-                .withBackground(BACKGROUND)
-                .withEmptyBorder(12, 14, 12, 14)
-                .applied(f -> f.setEditable(false))
-                .component();
 
-        scrollPane = textArea("No file loaded; select an option from the left")
-                .withText(Font.PLAIN, 20f, FG_HINT)
-                .applied(a -> a.setAlignmentY(Component.CENTER_ALIGNMENT))
-                .toScroller()
-                .in(preview, BorderLayout.CENTER);
+        fallbackDisplay = TextItemBuilder.createTextArea("", CRITICAL)
+                .border(BorderFactory.createEmptyBorder(12, 14, 12, 14)).build().get();
+
+        scrollPane = TextItemBuilder.createTextArea("", FG_HINT)
+                .fontBuilder(FontBuilder.of(Font.PLAIN, 20f))
+                .build().getAsScrollerIn(preview, BorderLayout.CENTER);
+        scrollPane.setBackground(BG_DARK);
 
         return preview;
     }

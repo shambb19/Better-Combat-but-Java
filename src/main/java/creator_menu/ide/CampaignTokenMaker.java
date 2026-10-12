@@ -1,4 +1,4 @@
-package ide;
+package creator_menu.ide;
 
 import config.Config;
 import org.fife.ui.rsyntaxtextarea.AbstractTokenMaker;
@@ -8,7 +8,7 @@ import org.intellij.lang.annotations.MagicConstant;
 
 import javax.swing.text.Segment;
 
-import static ide.CampaignToken.*;
+import static creator_menu.ide.CampaignToken.*;
 
 public class CampaignTokenMaker extends AbstractTokenMaker {
 
@@ -40,27 +40,27 @@ public class CampaignTokenMaker extends AbstractTokenMaker {
         while (firstNonSpace < end && array[firstNonSpace] == ' ') firstNonSpace++;
 
         if (array[firstNonSpace] == '~') {
-            addToken(array, offset, lineEnd, COMMENT, docOffset + offset);
+            addToken(array, offset, lineEnd, COMMENT_TOKEN, docOffset + offset);
             addNullToken();
             return firstToken;
         }
 
         if (array[offset] == '~') { // entire segment set to comment
-            addToken(array, offset, lineEnd, COMMENT, docOffset + offset);
+            addToken(array, offset, lineEnd, COMMENT_TOKEN, docOffset + offset);
             addNullToken();
             return firstToken;
         }
 
         boolean isConfigAction = configLineStartsWith(array, offset, Config.CONFIG_GENERIC_TOKEN);
-        if (initialTokenType == CONFIG || isConfigAction) {
-            int token = isConfigAction ? CONFIG : VALUE; // interior lines use VALUE color
+        if (initialTokenType == CONFIG_TOKEN || isConfigAction) {
+            int token = isConfigAction ? CONFIG_TOKEN : VALUE_TOKEN; // interior lines use VALUE color
 
             addLineWithTrailingComment(array, offset, end, token, docOffset);
 
             if (configLineStartsWith(array, offset, Config.CONFIG_CLOSE_TOKEN)) {
                 addNullToken();
             } else {
-                addToken(array, end, end, CONFIG, docOffset + end);
+                addToken(array, end, end, CONFIG_TOKEN, docOffset + end);
             }
 
             return firstToken;
@@ -71,12 +71,12 @@ public class CampaignTokenMaker extends AbstractTokenMaker {
             int i = offset;
 
             while (i < end && array[i] != '<' && array[i] != ' ') i++; // if header, stop at tag or name
-            addToken(array, tokenStart, i - 1, HEADER, docOffset + tokenStart);
+            addToken(array, tokenStart, i - 1, HEADER_TOKEN, docOffset + tokenStart);
 
             if (i < end && array[i] == '<') { // if tags, stop at name
                 tokenStart = i;
                 while (i < end && array[i] != ' ') i++;
-                addToken(array, tokenStart, i - 1, TAG, docOffset + tokenStart);
+                addToken(array, tokenStart, i - 1, TAG_TOKEN, docOffset + tokenStart);
             }
 
             if (i < end && array[i] == ' ') { // space indicates name start and is final header line item
@@ -84,7 +84,7 @@ public class CampaignTokenMaker extends AbstractTokenMaker {
 
                 int nameStart = i + 1;
                 if (nameStart < end) {
-                    addLineWithTrailingComment(array, nameStart, end, NAME, docOffset);
+                    addLineWithTrailingComment(array, nameStart, end, NAME_TOKEN, docOffset);
                 }
             }
 
@@ -95,7 +95,7 @@ public class CampaignTokenMaker extends AbstractTokenMaker {
         if (containsColon(array, offset, end) || array[offset] == '+') { // colon used as key: value delimiter
             int i = offset;
 
-            int token = array[offset] == '+' ? KEY_OPTIONAL : KEY;
+            int token = array[offset] == '+' ? KEY_OPTIONAL_TOKEN : KEY_TOKEN;
 
             while (i < end && array[i] != ':') i++;
             addToken(array, tokenStart, i, token, docOffset + tokenStart);
@@ -112,14 +112,14 @@ public class CampaignTokenMaker extends AbstractTokenMaker {
             i = spaceEnd;
 
             if (i < end) { // check for inline comments
-                addLineWithTrailingComment(array, i, end, VALUE, docOffset);
+                addLineWithTrailingComment(array, i, end, VALUE_TOKEN, docOffset);
             }
 
             addNullToken();
             return firstToken;
         }
 
-        addLineWithTrailingComment(array, offset, end, UNEXPECTED, docOffset); // unrecognized line
+        addLineWithTrailingComment(array, offset, end, UNEXPECTED_TOKEN, docOffset); // unrecognized line
 
         addNullToken();
         return firstToken;
@@ -133,7 +133,7 @@ public class CampaignTokenMaker extends AbstractTokenMaker {
             addToken(array, offset, i - 1, tokenType, docOffset + offset);
         }
         if (i < end && array[i] == '~') {
-            addToken(array, i, end - 1, COMMENT, docOffset + i);
+            addToken(array, i, end - 1, COMMENT_TOKEN, docOffset + i);
         }
     }
 

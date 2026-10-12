@@ -4,7 +4,7 @@ import _manager.EffectManager;
 import _manager.MisfireManager;
 import combat_object.combatant.Combatant;
 import lombok.experimental.*;
-import popup.MisfireManagerPopup;
+import swing.popup.MisfireManagerPopup;
 
 import java.util.Comparator;
 import java.util.List;

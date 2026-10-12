@@ -16,6 +16,9 @@ import static input.syntax.Key.*;
 @ExtensionMethod(TextReader.class)
 public class Gun extends Implement {
 
+    public static Gun MANUAL = createManual("Manual Gun");
+    public static Gun HEADER = createManual("── Gun ──");
+
     int shortHitDc, longHitDc, coverDc, misfireDc;
     // TODO implement numShots somehow
     int numShots;

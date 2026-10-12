@@ -10,6 +10,7 @@ import combat_object.scenario.ScenarioStarter;
 import config.Config;
 import exception.InvalidParameterException;
 import exception.InvalidSyntaxError;
+import exception.FileProcessErrorException;
 import input.syntax.Key;
 import input.syntax.Tag;
 import lombok.*;
@@ -26,15 +27,21 @@ import java.util.*;
 @ExtensionMethod({TextReader.class, util.Filterable.class})
 public class CampaignReader {
 
-    public static List<String> getLines(URL url) throws IOException {
+    @SneakyThrows
+    public static List<String> getLines(URL url, String errorMessage) {
         if (url == null) return new ArrayList<>();
 
-        @Cleanup BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8));
-        return new ArrayList<>(reader.lines().toList());
+        try {
+            @Cleanup BufferedReader reader =
+                    new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8));
+            return new ArrayList<>(reader.lines().toList());
+        } catch (IOException e) {
+            throw new FileProcessErrorException(errorMessage, Message.READ_ERROR);
+        }
     }
 
-    public static <T extends CombatObject> List<T> getInstancesFromCode(URL url, Class<T> instanceType) throws IOException {
-        List<String> lines = getLines(url);
+    public static <T extends CombatObject> List<T> getInstancesFromCode(URL url, Class<T> instanceType) {
+        List<String> lines = getLines(url, "could not read item of type " + instanceType.getSimpleName());
 
         lines = TextReader.extractConfigBlock(lines, Config::applyGlobal);
 
@@ -84,7 +91,7 @@ public class CampaignReader {
             getInstancesFromCode(file, CombatObject.class);
             return true;
         } catch (Exception e) {
-            Message.showAsErrorMessage(e.getMessage());
+            Message.showFileErrorMessage(e, Message.READ_ERROR);
             return false;
         }
     }

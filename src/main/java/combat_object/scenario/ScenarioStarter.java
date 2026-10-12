@@ -54,7 +54,7 @@ public class ScenarioStarter extends Scenario {
             void putNpc(HashMap<NPC, Integer> dest, List<Combatant> source, Map.Entry<String, Integer> entry);
         }
         Helper h = (dest, source, entry) -> {
-            NPC npc = Filterable.of(source).castTo(NPC.class).firstWithToStringEquals(entry.getKey());
+            NPC npc = Filterable.of(source, NPC.class).firstWithToStringEquals(entry.getKey());
             dest.put(npc, entry.getValue());
         };
 

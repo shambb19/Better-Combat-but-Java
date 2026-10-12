@@ -1,4 +1,4 @@
-package popup;
+package swing.popup;
 
 import __main.Main;
 import _manager.EncounterManager;
@@ -6,19 +6,18 @@ import combat_object.combatant.PC;
 import input.CampaignWriter;
 import org.jetbrains.annotations.NotNull;
 import swing.custom.Popup;
+import swing.builder.ButtonBuilder;
+import swing.builder.ComponentBuilder;
 import util.Message;
-import util.PopupPrompt;
+import swing.custom.PopupPrompt;
 
 import javax.swing.*;
-import javax.swing.border.MatteBorder;
 import java.awt.*;
-import java.net.URL;
 import java.util.function.Consumer;
 
 import static swing.ColorStyles.*;
-import static swing.fluent.SwingComp.fluent;
-import static swing.fluent.SwingComp.*;
-import static swing.fluent.SwingPane.*;
+import static swing.builder.Components.*;
+import static swing.builder.PanelBuilder.*;
 
 @lombok.experimental.ExtensionMethod({util.StringUtil.class, util.Message.class})
 public class CombatEndPopup extends Popup {
@@ -45,22 +44,24 @@ public class CombatEndPopup extends Popup {
         setTitle(endType);
 
         // top bar with the title text (victory or defeat or whatever)
-        panelIn(this, BorderLayout.NORTH).arrangedAs(FLOW_LEFT, 15, 12)
-                .collect(
-                        label(endType, Font.BOLD, 16f, titleForeground)
-                )
-                .withBackground(BG_DARK)
-                .withBorder(new MatteBorder(0, 0, 1, 0, TRACK));
+        createPanel(FLOW_LEFT,
+                ComponentBuilder.createLabel(endType, Font.BOLD, 16f, titleForeground)
+                ).background(BG_DARK)
+                .border(BorderFactory.createMatteBorder(0, 0, 1, 0, TRACK))
+                .build().putIn(this, BorderLayout.NORTH);
 
         // longer end description and the three action buttons
-        panelIn(this, BorderLayout.CENTER).arrangedAs(VERTICAL_BOX)
-                .collect(
-                        getEndMessage(endType), spacer(0, 24),
-                        label("OPTIONS", Font.BOLD, 10f, FG_MUTED).onLeft(),
-                        createActionButton("Level Up the Party", SUCCESS, this::levelUp), spacer(0, 10),
-                        createActionButton("Download Updated .txt File", TRACK, b -> download()), spacer(0, 10),
-                        createActionButton("Quit Program", CRITICAL, b -> quit())
-                ).spaced();
+        JLabel optionsLabel = ComponentBuilder.createLabel("OPTIONS", Font.BOLD, 10f, FG_MUTED)
+                        .alignmentX(LEFT_ALIGNMENT).build().get();
+
+        createPanel(VERTICAL_BOX,
+                getEndMessage(endType), spacer(0, 24),
+                optionsLabel,
+                createActionButton("Level Up the Party", SUCCESS, this::levelUp), spacer(0, 10),
+                createActionButton("Download Updated .txt File", TRACK, b -> download()), spacer(0, 10),
+                createActionButton("Quit Program", CRITICAL, b -> quit())
+                ).border(SPACER_BORDER)
+                .build().putIn(this, BorderLayout.CENTER);
 
         pack();
 
@@ -78,14 +79,16 @@ public class CombatEndPopup extends Popup {
             default -> throw new ClassCastException("CombatEndPopup.getEndMessage: unexpected String endType");
         };
 
-        return label("<html><p style='width: 250px;'>" + msg + "</p></html>")
-                .withDerivedFont(Font.PLAIN, 14f)
-                .onLeft().component();
+        return ComponentBuilder.createLabel("<html><p style='width: 250px;'>" + msg + "</p></html>",
+                Font.PLAIN, 14f, FOREGROUND)
+                .alignmentX(LEFT_ALIGNMENT).build().get();
     }
 
     private JButton createActionButton(String text, Color bg, Consumer<JButton> onClick) {
-        return button(text, bg, onClick).withDerivedFont(Font.PLAIN, 13f)
-                .withBackground(bg).onLeft().withMaximumSize(Integer.MAX_VALUE, 40).component();
+        return ButtonBuilder.createButton(text, bg, onClick)
+                .fontBuilder(FontBuilder.of(Font.PLAIN, 13f))
+                .alignmentX(LEFT_ALIGNMENT)
+                .fixedHeight(40).build().get();
     }
 
     private void levelUp(JButton button) {
@@ -96,18 +99,14 @@ public class CombatEndPopup extends Popup {
                 "in the Campaign Creator for now. If you buy Braden a Red Bull he might fix that :P";
         message.showAsInfoMessage();
 
-        fluent(button).enabled(false)
-                .withBackgroundAndForeground(TRACK, FG_MUTED)
-                .applied(b -> b.setText("Party Level Increased"));
+        ButtonBuilder.modifyingButton(button)
+                .enabled(false)
+                .background(TRACK).foreground(FG_MUTED)
+                .text("Party Level Increased").build().validated();
     }
 
     private void download() {
-        URL savedFile = CampaignWriter.ofFullCampaign().getUrl("Campaign Post Encounter", true);
-
-        if (savedFile != null)
-            "Successfully saved to Downloads".showAsInfoMessage();
-        else
-            "Could not download file".showAsErrorMessage();
+        CampaignWriter.ofFullCampaign().download("Campaign Post Encounter", true);
     }
 
     public static void quit() {
@@ -127,9 +126,7 @@ public class CombatEndPopup extends Popup {
 
     private static void promptAction(String mode, Runnable runnable) {
         Message.showActionPrompt("Are you sure you would like to " + mode + "? You will lose all progress.",
-                new PopupPrompt.ActionButton[]{
-                        new PopupPrompt.ActionButton(mode.capitalized(), CRITICAL, runnable),
-                        new PopupPrompt.ActionButton("Continue", SUCCESS, null)
-                });
+                new PopupPrompt.ActionButton(mode.capitalized(), CRITICAL, runnable),
+                new PopupPrompt.ActionButton("Continue", SUCCESS, null));
     }
 }

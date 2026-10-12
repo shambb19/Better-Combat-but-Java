@@ -36,7 +36,7 @@ public class StandardRuleset implements Ruleset {
                 target.logRoll(roll, Roll.d20());
 
                 EffectManager.removeEffect(target, Effect.PENALTY_SAVE);
-            } else {
+            } else if (!implement.isManual()) {
                 attacker.logRoll(roll, Roll.d20());
             }
         }

@@ -19,7 +19,7 @@ public class TextReader {
      * Returns "key" from any "key: value" code line
      */
     public static String key(String line) {
-        if (line.startsWith("+")) return line.substring(1).trim();
+        if (line.startsWith("+")) return line.substringToElseEnd(1, ":");
 
         if (!line.contains(":")) throw new InvalidSyntaxError(false, "no delimiter found in " + line);
 
@@ -31,12 +31,11 @@ public class TextReader {
      * Returns "value" from any "key: value" code line
      */
     public static String value(String line) {
-        if (line.startsWith("+")) return "true";
+        if (line.startsWith("+") && !line.contains(":")) return "true";
 
         if (!line.contains(":")) throw new InvalidSyntaxError(false, "no delimiter found");
 
-        int valueStartIdx = line.contains(": ") ? 2 : 1;
-        return line.substring(line.indexOf(":") + valueStartIdx);
+        return line.substring(line.indexOf(":") + 1).trim();
     }
 
     /**

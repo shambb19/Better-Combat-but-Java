@@ -1,4 +1,4 @@
-package ide;
+package creator_menu.ide;
 
 import config.Config;
 import config.ruleset.Ruleset;

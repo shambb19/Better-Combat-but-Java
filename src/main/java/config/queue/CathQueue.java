@@ -5,7 +5,7 @@ import _manager.EffectManager;
 import combat_object.combatant.Combatant;
 import lombok.experimental.*;
 import util.Message;
-import util.PopupPrompt;
+import swing.custom.PopupPrompt;
 
 import java.util.List;
 
@@ -59,10 +59,8 @@ public class CathQueue extends PlayerQueue {
         String message = currentCombatant + " is currently using a spell that requires concentration. " +
                 "Taking any actions will end this spell's effects.";
         Message.showActionPrompt(message,
-                new PopupPrompt.ActionButton[]{
-                        new PopupPrompt.ActionButton("Take New Action", SUCCESS, null),
-                        new PopupPrompt.ActionButton("Continue Concentrating", CONCENTRATION, this::endCurrentTurn)
-                });
+                new PopupPrompt.ActionButton("Take New Action", SUCCESS, null),
+                new PopupPrompt.ActionButton("Continue Concentrating", CONCENTRATION, this::endCurrentTurn));
     }
 
 }

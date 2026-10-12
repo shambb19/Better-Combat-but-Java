@@ -5,6 +5,7 @@ import combat_object.combatant.NPC;
 import lombok.*;
 import lombok.experimental.*;
 import swing.custom.ValidatedField;
+import swing.builder.ButtonBuilder;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,8 +13,7 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static swing.ColorStyles.*;
-import static swing.fluent.SwingComp.button;
-import static swing.fluent.SwingPane.*;
+import static swing.builder.PanelBuilder.*;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @ExtensionMethod(util.StringUtil.class)
@@ -26,18 +26,19 @@ public class QuickCombatantPanel extends JPanel {
     public QuickCombatantPanel(Consumer<NPC> onConfirm, boolean isEnemy) {
         this.isEnemy = isEnemy;
 
-        fluent(this).arrangedAs(BORDER, 0, 15).spaced().withPreferredSize(350, 180);
+        modifyBasicPanel(this, BORDER, 0, 15, SPACER_BORDER);
+        setPreferredSize(new Dimension(350, 180));
 
         nameField = new ValidatedField("Name", this::validateInputs);
 
         hpField = new ValidatedField("Health", this::validateInputs, 1000);
         acField = new ValidatedField("Armor Class", this::validateInputs, 40);
 
-        panelIn(this, BorderLayout.CENTER).arrangedAs(VERTICAL_BOX, 15, 15)
-                .collect(nameField, hpField, acField);
+        createPanel(VERTICAL_BOX, nameField, hpField, acField
+        ).hgap(15).vgap(15).build().putIn(this, BorderLayout.CENTER);
 
-        confirmButton = button("Quick Add", SUCCESS, () -> onConfirm.accept(buildNpc()))
-                .in(this, BorderLayout.SOUTH);
+        confirmButton = ButtonBuilder.createButton("Quick Add", SUCCESS, () -> onConfirm.accept(buildNpc()))
+                .build().putIn(this, BorderLayout.SOUTH);
 
         setVisible(true);
     }
@@ -52,8 +53,8 @@ public class QuickCombatantPanel extends JPanel {
     }
 
     void validateInputs() {
-        boolean inputValid = Stream.of(nameField, hpField, acField).allMatch(ValidatedField::isValid);
-        boolean nameTaken = Combatants.getAllCombatants().stream().anyMatch(c -> c.getName().equals(nameField.getValue()));
+        boolean inputValid = Stream.of(nameField, hpField, acField).allMatch(ValidatedField::isInputValid);
+        boolean nameTaken = Combatants.toList().stream().anyMatch(c -> c.getName().equals(nameField.getValue()));
 
         String buttonText = "Quick Add";
         if (!inputValid) buttonText = "Invalid Input(s)";

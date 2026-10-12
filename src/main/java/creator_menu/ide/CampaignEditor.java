@@ -1,6 +1,5 @@
-package ide;
+package creator_menu.ide;
 
-import boilerplate.FilteredVals;
 import config.ruleset.Ruleset;
 import lombok.*;
 import org.fife.ui.rsyntaxtextarea.*;
@@ -9,14 +8,13 @@ import swing.ColorStyles;
 import java.awt.*;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+
+import static creator_menu.ide.CampaignToken.*;
+import static swing.ColorStyles.*;
 
 @Setter @Getter public class CampaignEditor extends RSyntaxTextArea {
-
-    public static final List<String>
-            TUTORIAL_TEXT = List.of(
-            "~ Welcome to the Campaign IDE!",
-            "~ Use the help menu on the right for help."
-    );
 
     private Ruleset currentAppliedRuleset = Ruleset.STANDARD_RULESET;
 
@@ -50,8 +48,7 @@ import java.util.List;
     }
 
     private void setSyntaxSchemeStyle() {
-        SyntaxScheme schemeOld = getSyntaxScheme();
-        Style[] oldStyles = schemeOld.getStyles();
+        Style[] oldStyles = getSyntaxScheme().getStyles();
         Style[] newStyles = Arrays.copyOf(oldStyles, CampaignToken.TOKEN_COUNT);
 
         for (int i = oldStyles.length; i < newStyles.length; i++) {
@@ -61,20 +58,20 @@ import java.util.List;
         SyntaxScheme schemeNew = new SyntaxScheme(true);
         schemeNew.setStyles(newStyles);
 
-        interface StyleSetter {
-            void setStyle(int token, @FilteredVals.Color Color color);
-        }
-        StyleSetter s = (int token, @FilteredVals.Color Color color) -> schemeNew.getStyle(token).foreground = color;
+        Consumer<Map.Entry<Integer, Color>> setter = entry ->
+                schemeNew.getStyle(entry.getKey()).foreground = entry.getValue();
 
-        s.setStyle(CampaignToken.CONFIG, ColorStyles.CONFIG);
-        s.setStyle(CampaignToken.HEADER, ColorStyles.HEADER);
-        s.setStyle(CampaignToken.TAG, ColorStyles.CONFIG);
-        s.setStyle(CampaignToken.NAME, ColorStyles.KEY);
-        s.setStyle(CampaignToken.KEY, ColorStyles.KEY);
-        s.setStyle(CampaignToken.KEY_OPTIONAL, ColorStyles.KEY_OPTIONAL);
-        s.setStyle(CampaignToken.VALUE, ColorStyles.VALUE);
-        s.setStyle(CampaignToken.COMMENT, ColorStyles.COMMENT);
-        s.setStyle(CampaignToken.UNEXPECTED, ColorStyles.VALUE);
+        Map.of(
+                CONFIG_TOKEN, CONFIG,
+                HEADER_TOKEN, HEADER,
+                TAG_TOKEN, CONFIG,
+                NAME_TOKEN, KEY,
+                KEY_TOKEN, KEY,
+                KEY_OPTIONAL_TOKEN, KEY_OPTIONAL,
+                VALUE_TOKEN, VALUE,
+                COMMENT_TOKEN, COMMENT,
+                UNEXPECTED_TOKEN, VALUE
+        ).entrySet().forEach(setter);
 
         setSyntaxScheme(schemeNew);
 

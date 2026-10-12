@@ -58,4 +58,9 @@ import java.util.List;
         return builder.toString();
     }
 
+    public String substringToElseEnd(String str, int start, String regex) {
+        if (str.contains(regex)) return str.substring(start, str.indexOf(regex)).trim();
+        else return str.substring(start).trim();
+    }
+
 }

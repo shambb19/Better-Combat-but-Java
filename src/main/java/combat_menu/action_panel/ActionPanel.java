@@ -1,6 +1,7 @@
 package combat_menu.action_panel;
 
 import __main.Main;
+import _global_list.Resource;
 import _manager.EncounterManager;
 import combat_menu.menu.CombatantHeaderPanel;
 import combat_menu.action_panel.form.AttackFormPanel;
@@ -19,8 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static swing.ColorStyles.TRACK;
-import static swing.fluent.SwingPane.*;
+import static swing.builder.PanelBuilder.*;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @ExtensionMethod(util.Filterable.class)
@@ -34,7 +34,7 @@ public class ActionPanel extends JPanel {
             INSPIRATION_OPTION = "INSPIRATION_OPTION";
 
     static Map<String, Supplier<JPanel>> panelGetters = Map.of(
-            ACTION_BUTTONS, () -> newArrangedAs(BORDER).withBackground(TRACK).component(),
+            ACTION_BUTTONS, ActionPanel::getActionButtonsPanel,
             ATTACK_OPTION, AttackFormPanel::new,
             HEAL_OPTION, HealFormPanel::new,
             INSPIRATION_OPTION, InspirationFormPanel::new
@@ -46,30 +46,32 @@ public class ActionPanel extends JPanel {
     @NonFinal CombatantHeaderPanel headerPanel = null;
 
     {
-        fluent(this).arrangedAs(BORDER).withEmptyBorder(0, 30, 30, 30);
+        modifyBasicPanel(this, BORDER, BorderFactory.createEmptyBorder(0, 30, 30, 30));
 
-        turnInformation = panelIn(this, BorderLayout.NORTH).arrangedAs(BORDER).spaced()
-                .transparent().component();
+        turnInformation = createPanel(BORDER).border(SPACER_BORDER).build().putIn(this, BorderLayout.NORTH);
 
-        JPanel mainPanel = panelIn(this, BorderLayout.CENTER).arrangedAs(BORDER).component();
-
-        JPanel splitPanel = newArrangedAs(BORDER).withBackground(TRACK).component();
+        JPanel splitPanel = new JPanel(new BorderLayout());
+        add(splitPanel, BorderLayout.CENTER);
 
         buttonsPanel = new ActionButtons(this);
         buttonsPanel.setOpaque(false);
-
         splitPanel.add(buttonsPanel, BorderLayout.WEST);
 
-        formPanel = newArrangedAs(BORDER)
-                .transparent()
-                .withSidePaddedEmptyBorder(10)
-                .component();
+        formPanel = createPanel(BORDER)
+                .border(BorderFactory.createEmptyBorder(10, 20, 10, 20))
+                .build().putIn(splitPanel, BorderLayout.CENTER);
 
-        splitPanel.add(this.formPanel, BorderLayout.CENTER);
-
-        mainPanel.add(splitPanel, BorderLayout.CENTER);
-
+        switchTo(ACTION_BUTTONS);
         update();
+    }
+
+    private static JPanel getActionButtonsPanel() {
+        Image image = new ImageIcon(Resource.COMBAT_MENU_FILLER_IMAGE.getUrl()).getImage()
+                // original size: width=474, height=366, current scale=1.5
+                .getScaledInstance(711, 549, Image.SCALE_SMOOTH);
+        JLabel icon = new JLabel(new ImageIcon(image));
+
+        return createPanel(FLOW, icon).build().get();
     }
 
     public void update() {
@@ -79,8 +81,9 @@ public class ActionPanel extends JPanel {
             headerPanel = new CombatantHeaderPanel(currentCombatant);
             turnInformation.removeAll();
             turnInformation.add(headerPanel);
-        } else
+        } else {
             headerPanel.refresh();
+        }
 
         turnInformation.revalidate();
         turnInformation.repaint();

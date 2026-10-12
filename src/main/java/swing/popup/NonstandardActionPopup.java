@@ -1,4 +1,4 @@
-package popup;
+package swing.popup;
 
 import _manager.CombatManager;
 import _manager.EncounterManager;
@@ -7,16 +7,19 @@ import combat_object.combatant.Combatant;
 import combat_object.implement.Weapon;
 import swing.custom.Popup;
 import swing.custom.ValidatedField;
+import swing.builder.ButtonBuilder;
+import swing.builder.ComponentBuilder;
 import util.Filterable;
 import util.StringUtil;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
-import static swing.fluent.SwingComp.*;
-import static swing.fluent.SwingPane.*;
 import static swing.ColorStyles.*;
+import static swing.builder.Components.*;
+import static swing.builder.PanelBuilder.*;
 
 public class NonstandardActionPopup extends Popup {
 
@@ -29,49 +32,50 @@ public class NonstandardActionPopup extends Popup {
     {
         setTitle("Nonstandard Actions");
 
-        fluent(this).arrangedAs(BORDER, 0, 12).withEmptyBorder(12);
+        modifyingPanel(this).layoutType(BORDER).vgap(12)
+                .border(BorderFactory.createEmptyBorder(12, 12, 12, 12)).build().validated();
 
         //
         // header
         Combatant[] availableSearchPool = Filterable.ofLists(
                 EncounterManager.getFriendlies(), EncounterManager.getEnemies()
         ).toList().toArray(new Combatant[0]);
-        JComboBox<Combatant> comboBox = new JComboBox<>(availableSearchPool);
-        comboBox.addActionListener(e -> selectedCombatant = (Combatant) comboBox.getSelectedItem());
-        comboBox.setSelectedIndex(-1);
+        JComboBox<Combatant> comboBox = ComponentBuilder.createComboBox(
+                availableSearchPool,
+                b -> selectedCombatant = (Combatant) b.getSelectedItem(),
+                null
+        ).build().get();
 
-        panelIn(this, BorderLayout.NORTH)
-                .arrangedAs(HORIZONTAL_BOX, 10, 0)
-                .collect("Select an actionable combatant:", spacer(6, 0), comboBox)
-                .withEmptyBorder(0, 0, 8, 0);
+        createPanel(HORIZONTAL_BOX, "Select an actionable combatant:", spacer(6, 0), comboBox)
+                .hgap(10)
+                .border(BorderFactory.createEmptyBorder(0, 0, 8, 0))
+                .build().putIn(this, BorderLayout.NORTH);
 
         //
         // content
-        interface ButtonMaker {
-            JButton create(String name, ContentType contentType);
-        }
-        ButtonMaker bm = (name, contentType) -> button(name, BG_SURFACE, () -> setDynamicContent(contentType))
-                .withMinimumSize(270, 35)
-                .withMaximumSize(270, 35)
-                .enabled(false).component();
+        BiFunction<String, ContentType, JButton> bm = (name, contentType) ->
+                ButtonBuilder.createButton(name, BG_SURFACE, () -> setDynamicContent(contentType))
+                        .fixedSize(new Dimension(270, 35))
+                        .enabled(false).build().get();
 
-        JPanel buttonPanel = newArrangedAs(VERTICAL_BOX, 0, 8)
-                .collect(
-                        bm.create("Log Inspiration Use", ContentType.INSPIRATION),
-                        bm.create("Damage Manually", ContentType.DAMAGE),
-                        bm.create("Heal Manually", ContentType.HEAL),
-                        bm.create("Kill Combatant", ContentType.KILL),
-                        bm.create("Force Combatant Turn", ContentType.FORCE_TURN)
-                ).component();
+        JPanel buttonPanel = createPanel(VERTICAL_BOX,
+                bm.apply("Log Inspiration Use", ContentType.INSPIRATION),
+                bm.apply("Damage Manually", ContentType.DAMAGE),
+                bm.apply("Heal Manually", ContentType.HEAL),
+                bm.apply("Kill Combatant", ContentType.KILL),
+                bm.apply("Force Combatant Turn", ContentType.FORCE_TURN)
+        ).vgap(8).build().get();
 
         comboBox.addActionListener(e -> {
             for (Component c : buttonPanel.getComponents()) c.setEnabled(true);
         });
 
-        dynamicPanel = newArrangedAs(BORDER).component();
+        dynamicPanel = createPanel(BORDER).build().get();
 
-        panelIn(this, BorderLayout.CENTER).arrangedAs(VERTICAL_BOX, 0, 14)
-                .collect(buttonPanel, spacer(0, 8), dynamicPanel);
+        createPanel(VERTICAL_BOX,
+                buttonPanel, spacer(0, 8), dynamicPanel
+                ).vgap(14)
+                .build().putIn(this, BorderLayout.CENTER);
 
         pack();
         setMinimumSize(new Dimension(340, getHeight()));
@@ -102,8 +106,8 @@ public class NonstandardActionPopup extends Popup {
         dynamicPanel.removeAll();
         dynamicPanel.add(switch (contentType) {
             case EMPTY ->
-                    label("Nothing to see here until a selection is made.", Font.ITALIC, 13f, FG_MUTED)
-                            .applied(l -> l.setHorizontalAlignment(SwingConstants.CENTER)).component();
+                    ComponentBuilder.createLabel("Nothing to see here until a selection is made",
+                            Font.ITALIC, 13f, FG_MUTED).build().get();
             case INSPIRATION -> getInspirationPanel();
             case DAMAGE -> getNumberInputPanel("Damage Amount", this::logDamage);
             case HEAL -> getNumberInputPanel("Heal Amount", this::logHeal);
@@ -137,34 +141,33 @@ public class NonstandardActionPopup extends Popup {
         boolean rollRequired = selectedCombatant.getNumInspirationUsed() >= InspirationManager.FREE_USES;
         if (!rollRequired) {
             InspirationManager.MANAGER.useInspiration(selectedCombatant, false);
-            return label("Inspiration Logged!", Font.ITALIC, 14f, SUCCESS)
-                    .applied(l -> l.setHorizontalAlignment(SwingConstants.CENTER))
-                    .component();
+            return ComponentBuilder.getBasicLabel("Inspiration Logged!", Font.ITALIC, 14f, SUCCESS);
         }
 
         JButton[] buttons = new JButton[4];
         for (int i = 1; i <= 4; i++) {
             final int roll = i;
-            buttons[i - 1] = button(i, BG_DEEP, () -> logInspiration(roll)).component();
+            buttons[i - 1] = ButtonBuilder.createButton(String.valueOf(i), BACKGROUND, () -> logInspiration(roll))
+                    .fontBuilder(FontBuilder.of(Font.BOLD, 14f)).build().get();
         }
 
-        return newArrangedAs(FLOW, 8, 4).collectArr(buttons).component();
+        return createPanel(FLOW_LEFT, "Select d4 Inspiration Roll: ", buttons).hgap(8).vgap(4).build().get();
     }
 
     private JPanel getNumberInputPanel(String placeholder, Consumer<Integer> onConfirm) {
         ValidatedField input = new ValidatedField(placeholder, null, 1000);
 
-        JButton confirmButton = button(
-                "Confirm", SUCCESS,
-                () -> {
-                    if (!input.isValid()) return;
-                    onConfirm.accept(StringUtil.toInt(input.getValue()));
-                    setDynamicContent(ContentType.EMPTY);
-                })
-                .component();
+        JButton confirmButton = ButtonBuilder.createButton("Confirm", SUCCESS, () -> {
+            if (!input.isInputValid()) return;
+            onConfirm.accept(StringUtil.toInt(input.getValue()));
+            setDynamicContent(ContentType.EMPTY);
+        }).build().get();
 
-        return newArrangedAs(HORIZONTAL_BOX, 10, 0)
-                .collect(input, spacer(8, 0), confirmButton).component();
+        input.allowEnter(confirmButton::doClick);
+
+        return createPanel(HORIZONTAL_BOX,
+                input, spacer(8, 0), confirmButton
+                ).hgap(10).build().get();
     }
 
 }

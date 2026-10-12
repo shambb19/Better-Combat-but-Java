@@ -4,10 +4,13 @@ import _global_list.Combatants;
 import _global_list.DamageImplements;
 import _global_list.Resource;
 import _global_list.Scenarios;
+import combat_object.combatant.Combatant;
 import creator_menu.CampaignCreatorMenu;
 import com.formdev.flatlaf.intellijthemes.FlatSpacegrayIJTheme;
 import combat_menu.menu.CombatMenu;
-import popup.CombatEndPopup;
+import encounter.Encounter;
+import lombok.experimental.FieldDefaults;
+import swing.popup.CombatEndPopup;
 import lombok.*;
 import _manager.EncounterManager;
 import org.intellij.lang.annotations.MagicConstant;
@@ -18,20 +21,21 @@ import java.awt.*;
 import java.net.URL;
 import java.util.Optional;
 
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Main {
 
-    public static final String VERSION = "v4.4.0";
-    public static final String TITLE = " || DnD Red Bull Edition " + VERSION;
+    public static final String VERSION = "v4.8.1.1";
+    public static final String TITLE = "DnD Red Bull Edition " + VERSION;
     public static final long START_TIME_MILLISECONDS;
 
     public static final int COMBAT = 0, CREATOR = 1, UPLOAD = 2;
 
-    @Getter private static CombatMenu combatMenu;
-    @Getter private static CampaignCreatorMenu creatorMenu;
+    @Getter static CombatMenu combatMenu;
+    @Getter static CampaignCreatorMenu creatorMenu;
 
-    @Getter private static URL file;
+    @Getter static URL file;
 
-    private static boolean isCombatFinished = false;
+    static boolean isCombatFinished = false;
 
     static {
         FlatSpacegrayIJTheme.setup();
@@ -68,7 +72,9 @@ public class Main {
         Main.file = file;
         Combatants.init(file);
         Scenarios.init(file);
-        EncounterManager.setEncounter(Combatants.toBattle());
+        EncounterManager.setEncounter(new Encounter(
+                Scenarios.toList(), Combatant.enemyPartition(Combatants.toList())
+        ));
     }
 
     public static void refreshUI() {

@@ -37,9 +37,9 @@ public class SteampunkRuleset implements Ruleset {
                     Main.getCombatMenu().getActionPanel().promptDamageAmount(implement, target, true));
         }
 
-        attacker.logRoll(roll, Roll.d20());
-        if (result == AttackResult.COVER_SAVE_SUCCESSFUL)
-            target.logRoll(12, Roll.d(12));
+        if (result == AttackResult.COVER_SAVE_SUCCESSFUL) target.logRoll(12, Roll.d(12));
+        else if (!implement.isManual()) attacker.logRoll(roll, Roll.d20());
+
 
         Main.getCombatMenu().endActionState();
         Main.refreshUI();

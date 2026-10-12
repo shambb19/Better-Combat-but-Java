@@ -1,31 +1,25 @@
 package combat_menu.encounter_selection;
 
+import combat_object.combatant.CombatantOption;
 import combat_object.combatant.NPC;
 import lombok.AccessLevel;
-import lombok.experimental.ExtensionMethod;
 import lombok.experimental.FieldDefaults;
 import org.intellij.lang.annotations.MagicConstant;
-import swing.fluent.SwingComp;
+import swing.builder.ButtonBuilder;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
-import javax.swing.border.MatteBorder;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.function.Consumer;
 
 import static swing.ColorStyles.*;
-import static swing.fluent.SwingComp.*;
-import static swing.fluent.SwingPane.*;
-import static combat_menu.encounter_selection.CombatantScroller.CombatantOption.*;
+import static swing.builder.PanelBuilder.*;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-@ExtensionMethod(SwingComp.class)
 public class QuickAddDialog extends JDialog {
 
-    static final String SELECT = "select";
-    static final String CREATE = "create";
+    static final String SELECT = "select", CREATE = "create";
 
     boolean forEnemies;
     List<NPC> available;
@@ -37,7 +31,9 @@ public class QuickAddDialog extends JDialog {
     CombatantScroller selectionScroller;
     JButton selectConfirmButton;
 
-    public QuickAddDialog(boolean forEnemies, List<NPC> available, Consumer<HashMap<NPC, Integer>> onConfirmSelection) {
+    public QuickAddDialog(
+            boolean forEnemies, List<NPC> available, Consumer<HashMap<NPC, Integer>> onConfirmSelection
+    ) {
         this.forEnemies = forEnemies;
         this.available = available;
         this.onConfirmSelection = onConfirmSelection;
@@ -46,39 +42,37 @@ public class QuickAddDialog extends JDialog {
         setLocationRelativeTo(null);
         setModal(true);
 
-        fluent(this).arrangedAs(BORDER).withBorder(new LineBorder(TRACK, 1));
+        modifyingPanel(this).layoutType(BORDER).border(BorderFactory.createLineBorder(TRACK, 1)).build().validated();
 
         cardHolder = new JPanel(cardLayout);
         cardHolder.setOpaque(false);
 
         //
         // begin select card
-        CombatantScroller.CombatantOption toExclude = forEnemies ? ALLIES : ENEMIES;
-        selectionScroller = CombatantScroller
-                .npcPanel(this, "Quantity", true, false, this::validateSelection, toExclude)
-                .fluent().withPreferredSize(360, 260).component();
+        CombatantOption toExclude = CombatantOption.getNpcType(!forEnemies);
+        selectionScroller = CombatantScroller.getNpcQuickAddPanel(this, this::validateSelection, toExclude);
+        selectionScroller.setPreferredSize(new Dimension(360, 260));
 
         available.forEach(selectionScroller::addCard);
-        convertCheckboxesToIncludeToggles();
 
-        JPanel selectPanelFooter = newArrangedAs(FLOW_RIGHT, 12, 8)
-                .withBackground(BG_DARK)
-                .withBorder(new MatteBorder(1, 0, 0, 0, TRACK))
-                .component();
+        JPanel selectPanelFooter = createPanel(FLOW_RIGHT).hgap(12).vgap(8)
+                .background(BG_DARK)
+                .border(BorderFactory.createMatteBorder(1, 0, 0, 0, TRACK)).build().get();
 
-        JPanel selectCard = newArrangedAs(BORDER).borderCollect(
-                center(selectionScroller), south(selectPanelFooter)
-        ).transparent().component();
+        JPanel selectCard = createPanel(BORDER)
+                .hostedComponent(selectionScroller, BorderLayout.CENTER)
+                .hostedComponent(selectPanelFooter, BorderLayout.SOUTH).build().get();
 
-        selectConfirmButton = button("Confirm", SUCCESS, this::confirmSelection)
+        selectConfirmButton = ButtonBuilder.createButton("Confirm", SUCCESS, this::confirmSelection)
                 .enabled(false)
-                .in(selectPanelFooter);
+                .build().putIn(selectPanelFooter);
 
         cardHolder.add(selectCard, SELECT);
 
-        createCard = newArrangedAs(BORDER)
-                .borderCollect(center(new QuickCombatantPanel(this::confirmCreate, forEnemies)))
-                        .transparent().component();
+        createCard = createPanel(BORDER)
+                .hostedComponent(new QuickCombatantPanel(this::confirmCreate, forEnemies), BorderLayout.CENTER)
+                .build().get();
+
         setCreateCard();
 
         cardHolder.add(createCard, CREATE);
@@ -100,28 +94,11 @@ public class QuickAddDialog extends JDialog {
         createCard.add(new QuickCombatantPanel(this::confirmCreate, forEnemies), BorderLayout.CENTER);
     }
 
-    /** Relabels the existing "absent" checkbox as an inclusion toggle and ties it to the quantity field. */
-    private void convertCheckboxesToIncludeToggles() {
-        for (CombatantCard card : selectionScroller.getCombatantCards()) {
-            if (card.isEmpty || card.checkBox == null) continue;
-
-            card.checkBox.setText("Include");
-            card.checkBox.setSelected(false);
-            card.input.setVisible(false);
-
-            card.checkBox.addActionListener(e -> {
-                card.input.setVisible(card.checkBox.isSelected());
-                card.revalidate();
-                card.repaint();
-            });
-        }
-    }
-
     private void confirmSelection() {
         HashMap<NPC, Integer> selected = new LinkedHashMap<>();
         for (CombatantCard card : selectionScroller.getCombatantCards()) {
             if (card.isEmpty || card.checkBox == null || !card.checkBox.isSelected()) continue;
-            selected.put((NPC) card.getCombatant(), card.getInputValue());
+            selected.put((NPC) card.combatant, card.getInputValue());
         }
         onConfirmSelection.accept(selected);
         dispose();
@@ -129,8 +106,7 @@ public class QuickAddDialog extends JDialog {
 
     private void confirmCreate(NPC created) {
         available.add(created);
-        CombatantCard card = selectionScroller.addCard(created);
-        card.getCheckBox().setSelected(true);
+        selectionScroller.addCard(created);
         showCard(SELECT);
         setCreateCard();
     }

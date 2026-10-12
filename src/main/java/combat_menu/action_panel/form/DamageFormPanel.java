@@ -9,6 +9,7 @@ import lombok.*;
 import lombok.experimental.*;
 import swing.ColorStyles;
 import swing.custom.ValidatedField;
+import swing.builder.ButtonBuilder;
 import util.StringUtil;
 
 import javax.swing.*;
@@ -16,8 +17,8 @@ import java.awt.*;
 import java.util.Optional;
 
 import static combat_object.implement.Effect.*;
-import static swing.fluent.SwingPane.fluent;
-import static swing.fluent.SwingPane.spacer;
+import static swing.builder.Components.*;
+import static swing.builder.PanelBuilder.*;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @ExtensionMethod(StringUtil.class)
@@ -45,6 +46,11 @@ public class DamageFormPanel extends ActionFormPanel {
         this.implement = implement;
         this.attackFailed = !attackSucceeded;
 
+        amountField.setValidator(s -> {
+            int v = s.toInt();
+            return v >= 0 && v <= getMaxDamage();
+        });
+
         if (target != null) {
             onTargetChanged();
         }
@@ -53,25 +59,19 @@ public class DamageFormPanel extends ActionFormPanel {
 
     @Override protected void buildFields() {
         amountField = new ValidatedField("Enter Damage Amount", this::refreshButtons);
-        amountField.setValidator(s -> {
-            int v = s.toInt();
-            return v >= 0 && v <= getMaxDamage();
-        });
+
         JPanel amountRow = getLabeledRow("Damage Amount", amountField);
 
-        JCheckBox bonusCheck = fluent(new JCheckBox("Add bonus damage"))
-                .withAction(b -> toggleBonusRow(b.isSelected(), fieldsPanel))
-                .withDerivedFont(Font.PLAIN, 12f)
-                .withForeground(ColorStyles.FG_MUTED)
-                .transparent()
-                .component();
+        JCheckBox bonusCheck = ButtonBuilder.createCheckBox
+                        ("Add bonus damage", b -> toggleBonusRow(b.isSelected(), fieldsPanel))
+                        .foreground(ColorStyles.FG_MUTED).build().get();
 
         bonusField = new ValidatedField("Bonus Damage", this::refreshButtons);
         bonusField.setValidator(s -> s.toInt() > 0);
         bonusRow = getLabeledRow("Bonus Damage", bonusField);
         bonusRow.setVisible(false);
 
-        fluent(fieldsPanel).collect(
+        addConstraintlessComponentsTo(fieldsPanel,
                 amountRow, spacer(0, 10),
                 checkboxRow(bonusCheck), spacer(0, 6),
                 bonusRow, spacer(0, 12)
@@ -82,11 +82,11 @@ public class DamageFormPanel extends ActionFormPanel {
 
     @Override protected void addNotices() {
         SwingUtilities.invokeLater(() -> {
-            noticeConditions.put(Effect.HALF_DAMAGE, attackFailed);
-            noticeConditions.put(Effect.BONUS_DAMAGE, EffectManager.isHexedBy(target, attacker));
+            noticeConditions.put(Effect.HALF_DAMAGE, target);
+            noticeConditions.put(Effect.BONUS_DAMAGE, target);
 
             for (Effect e : DAMAGE_EFFECTS) {
-                noticeConditions.put(e, implement.effectEquals(e));
+                noticeConditions.put(e, target);
             }
 
             super.addNotices();
@@ -110,9 +110,9 @@ public class DamageFormPanel extends ActionFormPanel {
     }
 
     @Override protected boolean isInputValid() {
-        if (amountField == null || !amountField.isValid()) return false;
+        if (amountField == null || !amountField.isInputValid()) return false;
         if (bonusRow != null && bonusRow.isVisible())
-            return bonusField != null && bonusField.isValid();
+            return bonusField != null && bonusField.isInputValid();
         return true;
     }
 

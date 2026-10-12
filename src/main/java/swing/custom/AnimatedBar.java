@@ -33,7 +33,7 @@ public class AnimatedBar extends JPanel {
     public void animateTo(float target, Runnable callback) {
         if (timer != null && timer.isRunning()) timer.stop();
         fromRatio = displayRatio;
-        toRatio = Math.max(0f, Math.min(1f, target));
+        toRatio = Math.clamp(target, 0f, 1f);
         animStart = System.currentTimeMillis();
         onComplete = callback;
 

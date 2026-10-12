@@ -11,6 +11,7 @@ import util.Roll;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import static combat_object.implement.Effect.*;
@@ -23,11 +24,16 @@ public class EffectManager {
     public void logEffect(Combatant affected, Combatant by, Implement implement) {
         if (!(implement instanceof Spell spell)) return;
 
-        if (spell.isRequiresConcentration())
+        if (spell.isConcentrationRequired())
             ConcentrationManager.startNewConcentration(by, affected, spell);
 
         if (!spell.effectEquals(NONE))
             effects.add(new DealtEffect(affected, by, spell.getEffect()));
+    }
+
+    public Optional<Combatant> getSource(Combatant on, Effect effect) {
+        return effects.stream().filter(de -> de.on.equals(on) && de.effect.equals(effect))
+                .map(DealtEffect::by).findFirst();
     }
 
     public boolean hasEffect(Combatant query, Effect effect) {
@@ -62,8 +68,14 @@ public class EffectManager {
         }
         for (Effect effect : effectsOnCombatantWithRoll) {
             if (!hasEffect(query, effect)) return;
-            effects.removeIf(e -> Message.wasPromptedRollSuccessful("to remove the effect " + effect.name() + " from " + query,
-                    Roll.d20(), 10, "The effect was not removed."));
+            effects.removeIf(e -> {
+                int roll = Message.promptRoll(
+                        "to remove the effect " + effect.name() + " from " + query,
+                        Roll.d20(), 10,
+                        () -> {}, "The effect was not removed"
+                );
+                return roll >= 10;
+            });
         }
     }
 
