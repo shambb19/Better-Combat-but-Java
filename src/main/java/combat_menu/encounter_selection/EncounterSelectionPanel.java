@@ -4,6 +4,7 @@ import __main.Main;
 import __main.UploadMain;
 import _global_list.Scenarios;
 import _manager.EncounterManager;
+import combat_menu.menu.CombatMenu;
 import combat_object.combatant.Combatant;
 import combat_object.combatant.info.AbilityModifier;
 import combat_object.scenario.Scenario;
@@ -16,13 +17,13 @@ import util.Filterable;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static swing.ColorStyles.*;
 import static swing.builder.PanelBuilder.*;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+@ExtensionMethod(Arrays.class)
 public class EncounterSelectionPanel extends JPanel {
 
     UploadMain root;
@@ -38,7 +39,7 @@ public class EncounterSelectionPanel extends JPanel {
         setLayout(new BorderLayout());
         setBackground(BG_DARK);
 
-        List<Scenario> scenariosList = Scenarios.toList();
+        ArrayList<Scenario> scenariosList = new ArrayList<>(Scenarios.toSet());
         scenariosList.addFirst(Scenario.emptyScenario());
 
         JTabbedPane scenarioOptions = new JTabbedPane(SwingConstants.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
@@ -129,15 +130,15 @@ public class EncounterSelectionPanel extends JPanel {
                 }).toList();
         var activeCombatants = Combatant.enemyPartition(activeCombatantsList);
 
-        EncounterManager.setEncounter(new Encounter(Scenarios.toList(), activeCombatants));
+        EncounterManager.setEncounter(new Encounter(Scenarios.toSet(), activeCombatants));
 
-        Main.closeAndSwitch(root, Main.COMBAT);
+        Main.closeAndSwitch(root, new CombatMenu());
     }
 
     private CombatantCard[] getAllActiveCards() {
-        return Filterable.ofArrays(partyContainer.getCombatantCards(), dynamicContainer.getCombatantCards())
-                .filteredBy(card -> !card.isEmpty)
-                .toList().toArray(new CombatantCard[0]);
+        return Filterable.ofCollections(
+                Arrays.asList(partyContainer.getCombatantCards()), Arrays.asList(dynamicContainer.getCombatantCards())
+        ).filteredBy(card -> !card.isEmpty).toArray(CombatantCard[]::new);
     }
 
 }

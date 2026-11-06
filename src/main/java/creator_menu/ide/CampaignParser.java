@@ -13,12 +13,12 @@ import org.fife.ui.rsyntaxtextarea.parser.DefaultParseResult;
 import org.fife.ui.rsyntaxtextarea.parser.DefaultParserNotice;
 import org.fife.ui.rsyntaxtextarea.parser.ParseResult;
 import util.Locators;
+import util.function.Writer;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 import static config.Config.*;
 import static creator_menu.ide.CampaignToken.*;
@@ -168,7 +168,7 @@ public class CampaignParser extends AbstractParser {
     }
 
     private void validateLoggedParameters(String header, List<KeyEntry> loggedKeys, int headerLine) {
-        Function<Key, String> keyGetter = k -> k.name().toLowerCase();
+        Writer<Key> keyGetter = k -> k.name().toLowerCase();
 
         BiFunction<List<KeyEntry>, Key, Boolean> listContains = (list, key) ->
                 list.stream().map(KeyEntry::key).toList().contains(key);
@@ -176,12 +176,15 @@ public class CampaignParser extends AbstractParser {
         // unexpected keys
         loggedKeys.stream()
                 .filter(e -> !Key.getAllParametersFor(header).contains(e.key))
-                .forEach(e -> addNoticeAt(e.index, "cannot resolve key \"" + keyGetter.apply(e.key) + "\" for item type " + header));
+                .forEach(e -> {
+                    String notice = "cannot resolve key '" + keyGetter.write(e.key) + "' for item type " + header;
+                    addNoticeAt(e.index, notice);
+                });
 
         // missing required params
         Ruleset activeRuleset = Config.getRuleset();
         List<String> missingKeys = Key.getRequiredParametersFor(header, activeRuleset).stream()
-                .filter(k -> !listContains.apply(loggedKeys, k)).map(keyGetter).toList();
+                .filter(k -> !listContains.apply(loggedKeys, k)).map(keyGetter::write).toList();
 
         if (!missingKeys.isEmpty()) {
             String missingKeyString = String.join(", ", missingKeys);
@@ -217,7 +220,7 @@ public class CampaignParser extends AbstractParser {
             ConfigSet configSet = test(lines);
             Config.setRuleset(configSet.ruleset());
         } catch (ConfigException ce) {
-            addNoticeAt(configStartLine, ce.getSimpleReason());
+            addNoticeAt(configStartLine, ce.getMessage());
         }
     }
 

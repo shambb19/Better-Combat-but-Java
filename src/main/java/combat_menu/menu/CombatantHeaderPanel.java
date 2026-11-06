@@ -80,7 +80,7 @@ public class CombatantHeaderPanel extends JPanel {
                 rollRow
         );
 
-        Filterable.of(getComponents()).castToAsList(JComponent.class).forEach(j -> j.setAlignmentX(LEFT_ALIGNMENT));
+        Filterable.of(getComponents(), JComponent.class).toList().forEach(j -> j.setAlignmentX(LEFT_ALIGNMENT));
 
         refresh();
     }

@@ -11,6 +11,7 @@ import combat_object.implement.Weapon;
 import config.queue.PlayerQueue;
 import config.queue.SteampunkQueue;
 import exception.InvalidParameterException;
+import exception.UnexpectedClassException;
 import input.TextReader;
 import input.syntax.Key;
 import input.syntax.Tag;
@@ -26,10 +27,9 @@ import static combat_object.combatant.info.Class5e.*;
 public class SteampunkRuleset implements Ruleset {
 
     @Override public AttackResult logAttack(Combatant target, Implement implement, int roll) {
-        Combatant attacker = EncounterManager.getCurrentCombatant();
+        Combatant attacker = EncounterManager.currentCombatant();
 
-        if (implement instanceof Spell)
-            throw new ClassCastException("Ruleset$SteampunkRuleset.logAttack: Weapon or Gun expected");
+        if (implement instanceof Spell) throw new UnexpectedClassException(implement, Weapon.class, Gun.class);
 
         AttackResult result = Ruleset.getAttackResult(attacker, target, implement, roll);
         if (result == AttackResult.SUCCEEDED) {
@@ -47,7 +47,7 @@ public class SteampunkRuleset implements Ruleset {
     }
 
     @Override public void logDamage(Combatant target, Implement implement, int roll, int bonus) {
-        Combatant attacker = EncounterManager.getCurrentCombatant();
+        Combatant attacker = EncounterManager.currentCombatant();
 
         if (!implement.isManual())
             attacker.logRoll(roll, implement.getRoll());
@@ -64,7 +64,7 @@ public class SteampunkRuleset implements Ruleset {
         if (!isHpValid) throw new InvalidParameterException("Combatant", "maxHp", maxHp, "8 or <special tag");
     }
 
-    @Override public PlayerQueue getPlayerQueue(List<Combatant> friendlies, List<Combatant> enemies) {
+    @Override public PlayerQueue getPlayerQueue(Set<Combatant> friendlies, Set<Combatant> enemies) {
         return new SteampunkQueue(friendlies, enemies);
     }
 

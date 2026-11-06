@@ -3,6 +3,7 @@ package _manager;
 import __main.Main;
 import combat_menu.action_panel.ActionPanel;
 import combat_object.combatant.Combatant;
+import exception.ProgramRunError;
 import lombok.*;
 import lombok.experimental.*;
 
@@ -16,7 +17,6 @@ public class InspirationManager {
     public static final int FREE_USES = 2;
 
     static final int BAR_MAX = 10;
-    static final int EXCESS_DIE = 4;
     final List<Listener> listeners = new ArrayList<>();
     int usedCount = 0;
     int barTotal = 0;
@@ -39,7 +39,7 @@ public class InspirationManager {
     public void useInspiration() {
         if (EncounterManager.getQueue() == null) return;
 
-        useInspiration(EncounterManager.getCurrentCombatant(), true);
+        useInspiration(EncounterManager.currentCombatant(), true);
     }
 
     private void fireCountChanged() {
@@ -51,8 +51,7 @@ public class InspirationManager {
     }
 
     public void submitExcessRoll(int roll) {
-        if (roll < 1 || roll > EXCESS_DIE)
-            throw new IllegalArgumentException("Roll must be 1–" + EXCESS_DIE);
+        if (roll < 1 || roll > 4) throw new ProgramRunError("Roll must be on [1, 4]");
 
         barTotal += roll;
         fireBarChanged();

@@ -6,7 +6,6 @@ import input.syntax.Key;
 import lombok.*;
 import lombok.experimental.*;
 import org.fife.ui.rsyntaxtextarea.templates.StaticCodeTemplate;
-import util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +33,7 @@ public enum ItemType {
     );
 
     public StaticCodeTemplate getCodeTemplate() {
-        String header = StringUtil.headerString(name());
+        String header = "." + name().toLowerCase();
         String id = header.replaceAll("[^a-zA-Z0-9_]", "");
 
         List<Key> autofillKeys = new ArrayList<>(Key.getAllParametersFor(header));
@@ -44,7 +43,8 @@ public enum ItemType {
 
         List<String> autofillLines = autofillKeys.stream().map(Key::getAutofillLine).toList();
 
-        return new StaticCodeTemplate(id, id, StringUtil.fromList(autofillLines, true));
+        String afterCaret = "\n" + String.join("\n", autofillLines);
+        return new StaticCodeTemplate(id, id, afterCaret);
     }
 
     public boolean isUnavailableInActiveRuleset() {

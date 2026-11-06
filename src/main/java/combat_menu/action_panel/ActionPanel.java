@@ -13,17 +13,16 @@ import combat_object.implement.Implement;
 import lombok.*;
 import lombok.experimental.*;
 import org.intellij.lang.annotations.MagicConstant;
+import util.Locators;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Supplier;
 
 import static swing.builder.PanelBuilder.*;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-@ExtensionMethod(util.Filterable.class)
 public class ActionPanel extends JPanel {
 
     public static final String
@@ -75,7 +74,7 @@ public class ActionPanel extends JPanel {
     }
 
     public void update() {
-        Combatant currentCombatant = EncounterManager.getCurrentCombatant();
+        Combatant currentCombatant = EncounterManager.currentCombatant();
 
         if (headerPanel == null || headerPanel.getCombatant() != currentCombatant) {
             headerPanel = new CombatantHeaderPanel(currentCombatant);
@@ -116,10 +115,7 @@ public class ActionPanel extends JPanel {
     }
 
     public void promptDamageAmount(Implement implement, Combatant target, boolean attackSucceeded) {
-        Component existing = formPanel.getComponents().of()
-                .filteredBy(c -> c.getName() != null).firstWithToStringEquals(DAMAGE_AMOUNT_OPTION);
-
-        Optional.ofNullable(existing).ifPresent(formPanel::remove);
+        Locators.firstMatching(getComponents(), Component::getName, DAMAGE_AMOUNT_OPTION).ifPresent(formPanel::remove);
 
         DamageFormPanel damageAmountPanel = new DamageFormPanel(target, implement, attackSucceeded);
 

@@ -1,8 +1,6 @@
 package config.ruleset;
 
-import combat_object.combatant.Combatant;
 import lombok.*;
-import util.StringUtil;
 
 @AllArgsConstructor
 public enum AttackResult {
@@ -14,10 +12,6 @@ public enum AttackResult {
     COVER_SAVE_SUCCESSFUL("..target..'s cover DC defeated ..attacker..'s shot"),
     SHOT_MISSED("..attacker..'s shot missed");
 
-    private final String reason;
-
-    public String getReason(Combatant attacker, Combatant target) {
-        return StringUtil.infoString(reason, attacker, target);
-    }
+    @Getter private final String reason;
 
 }

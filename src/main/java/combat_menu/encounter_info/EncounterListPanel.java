@@ -12,6 +12,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static swing.ColorStyles.*;
 import static swing.builder.Components.*;
@@ -23,8 +24,8 @@ public class EncounterListPanel extends JPanel {
     List<HealthBarPanel> allPanels = new ArrayList<>();
 
     {
-        List<JComponent> friendlyPanels = getCombatantRowComponents(EncounterManager.getFriendlies());
-        List<JComponent> enemyPanels = getCombatantRowComponents(EncounterManager.getEnemies());
+        List<JComponent> friendlyPanels = getCombatantRowComponents(EncounterManager.friendlies());
+        List<JComponent> enemyPanels = getCombatantRowComponents(EncounterManager.enemies());
 
         modifyBasicPanel(this, VERTICAL_BOX, BorderFactory.createEmptyBorder(20, 0, 0, 0));
         setPreferredSize(new Dimension(350, 0));
@@ -46,7 +47,7 @@ public class EncounterListPanel extends JPanel {
                 .border(BorderFactory.createEmptyBorder(10, 15, 5, 0)).build().get();
     }
 
-    private List<JComponent> getCombatantRowComponents(List<Combatant> ref) {
+    private List<JComponent> getCombatantRowComponents(Set<Combatant> ref) {
         List<JComponent> comps = new ArrayList<>();
         for (Combatant c : ref) {
             HealthBarPanel healthBarPanel = new HealthBarPanel(c);

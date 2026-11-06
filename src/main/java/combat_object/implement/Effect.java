@@ -16,75 +16,62 @@ import static swing.builder.PanelBuilder.*;
 public enum Effect {
 
     // pre 4.3.1
-    HEAL_BLOCK(Colors.purple("Heal Block",
-            "..target.. is unable to recover hit points until the effect expires")),
-    POISON(Colors.green("Poisoned",
-            "..attacker.. has disadvantage on all attack rolls")),
-    ILLUSION(Colors.purple("Illusion",
-            "..target.. now believes an illusion of ..attacker..'s choice. Spooky")),
-    ADVANTAGE_SOON(Colors.amber("Advantage",
-            "..attacker.. can take advantage (unpunished) if they attack ..target.. again this turn")),
-    BONUS_DAMAGE(Colors.amber("Hex / Mark",
-            "..target.. is taking bonus 1d6 damage from ..attacker.. for the rest of combat")),
-    HALF_DAMAGE(Colors.blue("Half Damage",
-            "This attack deals half damage on a failed attack/save (handled internally; enter full roll value)")),
+    HEAL_BLOCK(Colors.purple("..target.. is unable to recover hit points until the effect expires")),
+    POISON(Colors.green("..attacker.. has disadvantage on all attack rolls")),
+    ILLUSION(Colors.purple("..target.. now believes an illusion of ..attacker..'s choice. Spooky")),
+    ADVANTAGE(Colors.amber("..attacker.. can take advantage (unpunished) if they attack ..target.. again this turn")),
+    BONUS_DAMAGE(Colors.amber("..target.. is taking bonus 1d6 damage from ..attacker.. for the rest of combat")),
+    HALF_DAMAGE(Colors.blue("On a failed attack, this spell still deals half damage")),
 
     // released 4.4.0
-    AUTO_HIT(Colors.blue("Auto Hit",
-            "This spell bypasses armor class and saving throws. ..target.. takes the damage automatically.")),
-    BLIND(Colors.purple("Blinded",
-            "..target.. cannot see and automatically fails any ability check that requires sight.")),
-    // TODO implement DAMAGE_OVER_TIME
-    DAMAGE_OVER_TIME(Colors.red("Damage Over Time",
-            "..target.. takes ongoing damage on subsequent turns.")),
-    DIFFICULT_TERRAIN(Colors.green("Difficult Terrain",
-            "The area around ..target.. becomes difficult terrain, costing extra movement.")),
-    DISADVANTAGE_ATTACK(Colors.amber("Disadvantage",
-            "..target.. has disadvantage on their next attack roll.")),
-    FORCED_MOVE(Colors.red("Forced Movement",
-            "..target.. is forced to move away or in a random direction.")),
-    FRIGHTEN(Colors.purple("Frightened",
-            "..target.. has disadvantage on ability checks and attack rolls while ..attacker.. is within line of sight.")),
-    HEAL_SELF(Colors.red("Life Drain",
-            "..attacker.. regains hit points equal to half the damage dealt to ..target..")),
-    PENALTY_SAVE(Colors.purple("Mind Weakened",
-            "..target.. must subtract 1d4 from their next saving throw")),
-    PRONE(Colors.amber("Prone",
-            "..target.. is knocked prone and must spend half their next turn to get up")),
-    PULL(Colors.blue("Pulled",
-            "..target.. is pulled 10 feet towards ..attacker..")),
-    RESTRAIN(Colors.green("Restrained",
-            "..target.. cannot move, so attack rolls against them have advantage")),
-    TRACKING(Colors.green("Tracked",
-            "..attacker.. knows the exact location of ..target.., so ..target.. cannot hide")),
-    FULL_HP_OPTION(Colors.blue("Toll the Dead",
-            "Deals a d12 instead of a d8 if ..target.. is missing any hit points")),
+    AUTO_HIT(Colors.blue("This spell bypasses AC and saving throws; ..target.. takes the damage automatically.")),
+    BLIND(Colors.purple("..target.. cannot see and automatically fails any ability check that requires sight.")),
+    DAMAGE_OVER_TIME(Colors.red("..target.. takes ongoing damage on subsequent turns.")), // todo implement
+    DIFFICULT_TERRAIN(Colors.green("The area around ..target.. becomes difficult terrain, costing extra movement.")),
+    ATTACK_DISADVANTAGE(Colors.amber("..target.. has disadvantage on their next attack roll.")),
+    FORCED_MOVEMENT(Colors.red("..target.. is forced to move away or in a random direction.")),
+    FRIGHTENED(Colors.purple("..target.. has disadvantage on all rolls while ..attacker.. can see them.")),
+    LIFE_DRAIN(Colors.red("..attacker.. regains hit points equal to half the damage dealt to ..target..")),
+    PENALTY_SAVE(Colors.purple("..target.. must subtract 1d4 from their next saving throw")),
+    PRONE(Colors.amber("..target.. is knocked prone and must spend half their next turn to get up")),
+    PULLED(Colors.blue("..target.. is pulled 10 feet towards ..attacker..")),
+    RESTRAINED(Colors.green("..target.. cannot move, so attack rolls against them have advantage")),
+    TRACKED(Colors.green("..attacker.. knows the exact location of ..target.., so ..target.. cannot hide")),
+    FULL_HP_OPTION(Colors.blue("Deals a d12 instead of a d8 if ..target.. is missing any hit points")),
 
     // released 4.5.0
-    BANISH(Colors.purple("Banished",
-            "..target.. is banished to another plane of existence if reduced to 50 hit points or fewer")),
-    PENALTY_ATTACK(Colors.amber("Muddled Mind",
-            "..target.. must subtract 1d6 from their attack rolls and ability checks")),
-    RANDOM_ACTION(Colors.purple("Reality Broken",
-            "..target.. suffers unpredictable effects each turn based on a d10 roll")),
-    STAT_DROP(Colors.red("Mind Shattered",
-            "..target.. has their Intelligence and Charisma scores dropped to 1")),
-    STUNNED(Colors.purple("Stunned",
-            "..target.. is incapacitated, can't move, and automatically fails Str and Dex saves")),
+    BANISHED(Colors.purple("..target.. is banished to another plane of existence if hp <= 50")),
+    PENALTY_ATTACK(Colors.amber("..target.. must subtract 1d6 from their attack rolls and ability checks")),
+    RANDOM_ACTION(Colors.purple("..target.. suffers unpredictable effects each turn based on a d10 roll")),
+    STAT_DROP(Colors.red("..target.. has their Intelligence and Charisma scores dropped to 1")),
+    STUNNED(Colors.purple("..target.. is incapacitated, can't move, and automatically fails Str and Dex saves")),
 
     // released 5.0.0
-    DISADVANTAGE(Colors.red("Disadvantage", "..attacker.. is injured and must roll with disadvantage on this attack.")),
+    DISADVANTAGE(Colors.red("..attacker.. is injured and must roll with disadvantage on this attack.")),
 
     NONE(null);
 
     private final NoticeComponents noticeComponents;
 
+    /**
+     * Returns the notice JPanel associated with this Effect, which is displayed
+     * in the CombatMenu action panel when its information is relevant to the user
+     * @param on the Combatant object on which this effect is
+     * @param by the Combatant object that dealt this effect
+     * @return the notice JPanel
+     */
     public NoticePanel noticePanel(Combatant on, Combatant by) {
         return new NoticePanel(this, on, by);
     }
 
+    /**
+     * The screen-appropriate name String for this effect, which is just the enum name
+     * capitalized and with underscores replaced with spaces
+     * @return the adjusted name String
+     */
     public String getOfficialName() {
-        return noticeComponents.title;
+        String withSpaces = name().replace("_", " ");
+        return StringUtil.capitalized(withSpaces);
     }
 
     @Override public String toString() {
@@ -109,7 +96,7 @@ public enum Effect {
 
             JPanel textCol = createPanel(VERTICAL_BOX).build().putIn(this, BorderLayout.CENTER);
 
-            JLabel titleLabel = ComponentBuilder.createLabel(components.title)
+            JLabel titleLabel = ComponentBuilder.createLabel(effect.getOfficialName())
                     .fontBuilder(FontBuilder.of(Font.BOLD, 12f, components.foreground))
                     .alignmentX(LEFT_ALIGNMENT).build().get();
 
@@ -150,28 +137,27 @@ public enum Effect {
                 FG_GREEN_DIM = new Color(0x60, 0xAF, 0x70),
                 BORDER_GREEN = new Color(0x3A, 0xFF, 0x55);
 
-        static NoticeComponents purple(String title, String subtitle) {
-            return new NoticeComponents(BG_PURPLE, BORDER_PURPLE, FG_PURPLE, FG_PURPLE_DIM, title, subtitle);
+        static NoticeComponents purple(String subtitle) {
+            return new NoticeComponents(BG_PURPLE, BORDER_PURPLE, FG_PURPLE, FG_PURPLE_DIM, subtitle);
         }
 
-        static NoticeComponents amber(String title, String subtitle) {
-            return new NoticeComponents(BG_AMBER, BORDER_AMBER, FG_AMBER, FG_AMBER_DIM, title, subtitle);
+        static NoticeComponents amber(String subtitle) {
+            return new NoticeComponents(BG_AMBER, BORDER_AMBER, FG_AMBER, FG_AMBER_DIM, subtitle);
         }
 
-        static NoticeComponents blue(String title, String subtitle) {
-            return new NoticeComponents(BG_BLUE, BORDER_BLUE, FG_BLUE, FG_BLUE_DIM, title, subtitle);
+        static NoticeComponents blue(String subtitle) {
+            return new NoticeComponents(BG_BLUE, BORDER_BLUE, FG_BLUE, FG_BLUE_DIM, subtitle);
         }
 
-        static NoticeComponents red(String title, String subtitle) {
-            return new NoticeComponents(BG_RED, BORDER_RED, FG_RED, FG_RED_DIM, title, subtitle);
+        static NoticeComponents red(String subtitle) {
+            return new NoticeComponents(BG_RED, BORDER_RED, FG_RED, FG_RED_DIM, subtitle);
         }
 
-        static NoticeComponents green(String title, String subtitle) {
-            return new NoticeComponents(BG_GREEN, BORDER_GREEN, FG_GREEN, FG_GREEN_DIM, title, subtitle);
+        static NoticeComponents green(String subtitle) {
+            return new NoticeComponents(BG_GREEN, BORDER_GREEN, FG_GREEN, FG_GREEN_DIM, subtitle);
         }
     }
 
     record NoticeComponents(
-            Color background, Color accent, Color foreground, Color foregroundDim,
-            String title, String subtitle) {}
+            Color background, Color accent, Color foreground, Color foregroundDim, String subtitle) {}
 }

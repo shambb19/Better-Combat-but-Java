@@ -166,12 +166,6 @@ public enum Key {
         return key.parameterFactory.get(value);
     }
 
-    public static boolean lineStartsWithKey(String str) {
-        if (str.isComments() || str.isBlank()) return false;
-
-        return enumNameSearch(str.key(), Key.class) != null;
-    }
-
     public static Key getKeyFromString(String query) {
         return enumNameSearch(query.key(), Key.class);
     }
@@ -199,8 +193,7 @@ public enum Key {
 
             for (String name : listTextAsArray(value)) {
                 T obj = DamageImplements.get(name, type);
-
-                Optional.ofNullable(obj).ifPresent(list::add);
+                list.add(obj);
             }
 
             list.removeIf(Objects::isNull);

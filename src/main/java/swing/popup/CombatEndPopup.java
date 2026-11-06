@@ -1,15 +1,16 @@
 package swing.popup;
 
 import __main.Main;
+import __main.UploadMain;
 import _manager.EncounterManager;
 import combat_object.combatant.PC;
 import input.CampaignWriter;
+import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
 import swing.custom.Popup;
 import swing.builder.ButtonBuilder;
 import swing.builder.ComponentBuilder;
 import util.Message;
-import swing.custom.PopupPrompt;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,22 +23,20 @@ import static swing.builder.PanelBuilder.*;
 @lombok.experimental.ExtensionMethod({util.StringUtil.class, util.Message.class})
 public class CombatEndPopup extends Popup {
 
-    public static void fireCombatEndedNaturally() {
-        boolean isVictory = EncounterManager.getEncounter().isVictory();
-        String endType = isVictory ? "Victory" : "Defeat";
+    public static final String
+            VICTORY_END = "Victory",
+            DEFEAT_END = "Defeat",
+            QUIT_END = "Quit";
 
-        new CombatEndPopup(endType);
-    }
-
-    private CombatEndPopup(String endType) {
+    private CombatEndPopup(@MagicConstant(valuesFromClass = CombatEndPopup.class) String endType) {
         getContentPane().setBackground(BACKGROUND);
         setLayout(new BorderLayout());
         getRootPane().setBorder(BorderFactory.createLineBorder(TRACK, 1));
         setAlwaysOnTop(false);
 
         Color titleForeground = switch (endType) {
-            case "VICTORY" -> HEALTHY;
-            case "DEFEAT" -> CRITICAL;
+            case VICTORY_END -> HEALTHY;
+            case DEFEAT_END -> CRITICAL;
             default -> FOREGROUND;
         };
 
@@ -46,13 +45,13 @@ public class CombatEndPopup extends Popup {
         // top bar with the title text (victory or defeat or whatever)
         createPanel(FLOW_LEFT,
                 ComponentBuilder.createLabel(endType, Font.BOLD, 16f, titleForeground)
-                ).background(BG_DARK)
+        ).background(BG_DARK)
                 .border(BorderFactory.createMatteBorder(0, 0, 1, 0, TRACK))
                 .build().putIn(this, BorderLayout.NORTH);
 
         // longer end description and the three action buttons
         JLabel optionsLabel = ComponentBuilder.createLabel("OPTIONS", Font.BOLD, 10f, FG_MUTED)
-                        .alignmentX(LEFT_ALIGNMENT).build().get();
+                .alignmentX(LEFT_ALIGNMENT).build().get();
 
         createPanel(VERTICAL_BOX,
                 getEndMessage(endType), spacer(0, 24),
@@ -60,7 +59,7 @@ public class CombatEndPopup extends Popup {
                 createActionButton("Level Up the Party", SUCCESS, this::levelUp), spacer(0, 10),
                 createActionButton("Download Updated .txt File", TRACK, b -> download()), spacer(0, 10),
                 createActionButton("Quit Program", CRITICAL, b -> quit())
-                ).border(SPACER_BORDER)
+        ).border(SPACER_BORDER)
                 .build().putIn(this, BorderLayout.CENTER);
 
         pack();
@@ -73,14 +72,14 @@ public class CombatEndPopup extends Popup {
     private static JLabel getEndMessage(String endType) {
         String percentToVictory = EncounterManager.getEncounter().percentToVictory();
         String msg = switch (endType) {
-            case "Victory" -> "Victory! You have won this combat.";
-            case "Defeat" -> "You have been defeated. You were " + percentToVictory + " of the way to victory.";
-            case "Quit" -> "You have quit early. Lame.";
-            default -> throw new ClassCastException("CombatEndPopup.getEndMessage: unexpected String endType");
+            case VICTORY_END -> "Victory! You have won this combat.";
+            case DEFEAT_END -> "You have been defeated. You were " + percentToVictory + " of the way to victory.";
+            case QUIT_END -> "You have quit early. Lame.";
+            default -> null;
         };
 
         return ComponentBuilder.createLabel("<html><p style='width: 250px;'>" + msg + "</p></html>",
-                Font.PLAIN, 14f, FOREGROUND)
+                        Font.PLAIN, 14f, FOREGROUND)
                 .alignmentX(LEFT_ALIGNMENT).build().get();
     }
 
@@ -92,7 +91,7 @@ public class CombatEndPopup extends Popup {
     }
 
     private void levelUp(JButton button) {
-        EncounterManager.getParty().forEach(PC::levelUp);
+        EncounterManager.party().forEach(PC::levelUp);
 
         final String message = "Level up successful! As of " + Main.VERSION + ", only proficiency bonuses " +
                 "and hp are handled internally. All other changes (stats, etc.) need to be manually entered " +
@@ -116,12 +115,19 @@ public class CombatEndPopup extends Popup {
         });
     }
 
+    public static void fireCombatEndedNaturally() {
+        boolean isVictory = EncounterManager.getEncounter().isVictory();
+        String endType = isVictory ? VICTORY_END : DEFEAT_END;
+
+        new CombatEndPopup(endType);
+    }
+
     public static void fireQuit() {
-        promptAction("quit", () -> new CombatEndPopup("Quit"));
+        promptAction("quit", () -> new CombatEndPopup(QUIT_END));
     }
 
     public static void fireRestart() {
-        promptAction("restart", () -> Main.closeAndSwitch(null, Main.UPLOAD));
+        promptAction("restart", () -> Main.closeAndSwitch(null, new UploadMain()));
     }
 
     private static void promptAction(String mode, Runnable runnable) {

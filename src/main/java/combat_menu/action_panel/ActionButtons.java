@@ -62,7 +62,7 @@ public class ActionButtons extends JPanel {
             turnStatus = MAIN_ACTION;
         } else if (changeType == CONFIRM) {
             if (turnStatus == MAIN_ACTION)
-                turnStatus = EncounterManager.getCurrentCombatant().isEnemy() ? DONE : BONUS_ACTION;
+                turnStatus = EncounterManager.currentCombatant().isEnemy() ? DONE : BONUS_ACTION;
             else if (turnStatus == BONUS_ACTION)
                 turnStatus = DONE;
         }
@@ -112,7 +112,7 @@ public class ActionButtons extends JPanel {
             boolean isAnyTargets = !Locators.getTargetList(buttonType.equals("Attack")).isEmpty();
             return switch (buttonType) {
                 case "Attack", "Heal" -> isAnyTargets && turnStatus != DONE;
-                case "Use Inspiration" -> !EncounterManager.getCurrentCombatant().isEnemy();
+                case "Use Inspiration" -> !EncounterManager.currentCombatant().isEnemy();
                 case "End Turn" -> true;
                 default -> false;
             };
@@ -140,7 +140,7 @@ public class ActionButtons extends JPanel {
                     backgroundColor = GOLD_TINT;
                     toolTipText += " (Bonus Action)";
                 }
-            } else if (buttonType.equals("Use Inspiration") && EncounterManager.getCurrentCombatant().isEnemy()) {
+            } else if (buttonType.equals("Use Inspiration") && EncounterManager.currentCombatant().isEnemy()) {
                 toolTipText = "Inspiration use is for the friendly team only";
                 enabled = false;
             }

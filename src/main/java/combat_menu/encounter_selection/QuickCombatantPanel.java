@@ -54,7 +54,7 @@ public class QuickCombatantPanel extends JPanel {
 
     void validateInputs() {
         boolean inputValid = Stream.of(nameField, hpField, acField).allMatch(ValidatedField::isInputValid);
-        boolean nameTaken = Combatants.toList().stream().anyMatch(c -> c.getName().equals(nameField.getValue()));
+        boolean nameTaken = Combatants.toSet().stream().anyMatch(c -> c.getName().equals(nameField.getValue()));
 
         String buttonText = "Quick Add";
         if (!inputValid) buttonText = "Invalid Input(s)";

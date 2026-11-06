@@ -15,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
 import swing.ColorStyles;
 import swing.builder.ComponentBuilder;
 import util.Filterable;
+import util.Locators;
 
 import javax.swing.*;
 import java.awt.*;
@@ -58,7 +59,7 @@ public class CombatantScroller extends JScrollPane {
 
         if (isParty) {
             addSectionLabel(CombatantOption.PARTY);
-            EncounterManager.getParty().forEach(this::addCard);
+            EncounterManager.party().forEach(this::addCard);
         }
 
         setViewportView(content);
@@ -94,8 +95,8 @@ public class CombatantScroller extends JScrollPane {
         boolean isEnemies = combatantMap.keySet().stream().allMatch(Combatant::isEnemy);
 
         var scenarioBuilder = Scenario.builder().name("bulk add");
-        if (isEnemies) scenarioBuilder.with(new HashMap<>()).against(combatantMap);
-        else scenarioBuilder.with(combatantMap).against(new HashMap<>());
+        if (isEnemies) scenarioBuilder.against(combatantMap);
+        else scenarioBuilder.with(combatantMap);
 
         scenarioBuilder.build().npcListAll(false).forEach(this::addCard);
     }
@@ -146,10 +147,8 @@ public class CombatantScroller extends JScrollPane {
 
             if (!isForQuickAdd) addSectionLabel(section);
 
-            validCombatants.forEach(c -> {
-                CombatantCard thisCard = Filterable.of(combatantCards).firstOrElseThrow(card -> card.combatant, c);
-                addCard(thisCard);
-            });
+            validCombatants.forEach(c ->
+                    Locators.firstMatching(combatantCards, card -> card.combatant, c).ifPresent(this::addCard));
             addCard(CombatantCard.getAddNewCombatantCard(this, section));
         };
 
@@ -168,20 +167,19 @@ public class CombatantScroller extends JScrollPane {
     }
 
     public CombatantCard[] getCombatantCards() {
-        return content.getComponents().of()
-                .castTo(CombatantCard.class)
-                .filteredByAsList(Objects::nonNull).toArray(new CombatantCard[0]);
+        return Filterable.of(content.getComponents(), CombatantCard.class)
+                .filteredBy(Objects::nonNull).toArray(CombatantCard[]::new);
     }
 
     public boolean areAllCardsValid() {
-        return content.getComponents().of().castToAsList(CombatantCard.class).stream()
-                .filter(c -> !c.checkBox.isSelected()).allMatch(CombatantCard::hasValidInput);
+        return Filterable.of(content.getComponents(), CombatantCard.class)
+                .filteredBy(c -> !c.checkBox.isSelected()).stream.allMatch(CombatantCard::hasValidInput);
     }
 
     public boolean containsEnemies() {
-        return content.getComponents().of().castToAsList(CombatantCard.class).stream()
-                .map(c -> c.combatant).filter(Objects::nonNull)
-                .anyMatch(Combatant::isEnemy);
+        return Filterable.of(content.getComponents(), CombatantCard.class)
+                .mapped(c -> c.combatant).filteredBy(Objects::nonNull)
+                .stream.anyMatch(Combatant::isEnemy);
     }
 
     public static CombatantScroller createForEncounterSelectionPanel(

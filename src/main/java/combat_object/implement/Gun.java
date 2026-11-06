@@ -24,6 +24,11 @@ public class Gun extends Implement {
     int numShots;
     boolean isHeavy, isExplosive;
 
+    /**
+     * Returns a Gun object from the given parameters
+     * @param params the Gun instance variables, encoded as Objects
+     *               and decoded in the Key class
+     */
     public static Gun from(EnumMap<Key, Object> params) {
         validateAll(params, "Gun");
         return Gun.builder()
@@ -41,6 +46,13 @@ public class Gun extends Implement {
                 .build();
     }
 
+    /**
+     * Returns a default Gun object with generic statistics, to be
+     * added for all Combatants as a means of attacking with an Implement
+     * not loaded into the Encounter
+     * @param name the name of the manual item
+     * @return the new Gun object
+     */
     public static Gun createManual(String name) {
         return Gun.builder()
                 .name(name)

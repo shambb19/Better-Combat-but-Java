@@ -7,14 +7,14 @@ import util.Message;
 import util.Roll;
 
 import javax.swing.*;
-import java.util.List;
+import java.util.Set;
 
 import static swing.ColorStyles.*;
 import static swing.builder.PanelBuilder.*;
 
 public class MisfireManagerPopup extends Popup {
 
-    public MisfireManagerPopup(List<MisfireManager.Misfire> misfires) {
+    public MisfireManagerPopup(Set<MisfireManager.Misfire> misfires) {
         setTitle("Misfires");
         setModalityType(DEFAULT_MODALITY_TYPE);
 

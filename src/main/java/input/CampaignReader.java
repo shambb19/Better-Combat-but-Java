@@ -15,6 +15,8 @@ import input.syntax.Key;
 import input.syntax.Tag;
 import lombok.*;
 import lombok.experimental.*;
+import util.Filterable;
+import util.Locators;
 import util.Message;
 
 import java.io.BufferedReader;
@@ -45,20 +47,27 @@ public class CampaignReader {
 
         lines = TextReader.extractConfigBlock(lines, Config::applyGlobal);
 
-        return getAllItemBlocks(lines).stream().map(CampaignReader::createObject)
-                .filter(Objects::nonNull).of().castToAsList(instanceType);
+        var objects = Filterable.of(getAllItemBlocks(lines)).mapped(CampaignReader::createObject).toList();
+        return Filterable.of(objects, instanceType).toList();
     }
 
     private static List<ItemBlock> getAllItemBlocks(List<String> lines) {
         List<ItemBlock> blocks = new ArrayList<>();
         List<String> currentLines = null;
 
-        for (String line : lines) {
+        String[] itemLines = Filterable.of(lines)
+                .filteredBy(TextReader::isComments, false)
+                .filteredBy(String::isBlank, false)
+                .toArray(String[]::new);
+
+        for (String line : itemLines) {
+            boolean lineStartsWithKey = Locators.enumNameSearch(line.key(), Key.class) != null;
+
             if (line.startsWith(".")) {
                 Optional.ofNullable(currentLines).ifPresent(l -> blocks.add(new ItemBlock(l)));
                 currentLines = new ArrayList<>();
                 currentLines.add(line);
-            } else if (currentLines != null && Key.lineStartsWithKey(line)) {
+            } else if (currentLines != null && lineStartsWithKey) {
                 currentLines.add(line);
             }
         }

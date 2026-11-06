@@ -9,11 +9,12 @@ import creator_menu.CampaignCreatorMenu;
 import com.formdev.flatlaf.intellijthemes.FlatSpacegrayIJTheme;
 import combat_menu.menu.CombatMenu;
 import encounter.Encounter;
+import exception.UnexpectedClassException;
 import lombok.experimental.FieldDefaults;
+import swing.custom.MainFrame;
 import swing.popup.CombatEndPopup;
 import lombok.*;
 import _manager.EncounterManager;
-import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -24,11 +25,10 @@ import java.util.Optional;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Main {
 
-    public static final String VERSION = "v4.8.1.1";
+
+    public static final String VERSION = "v4.9.1";
     public static final String TITLE = "DnD Red Bull Edition " + VERSION;
     public static final long START_TIME_MILLISECONDS;
-
-    public static final int COMBAT = 0, CREATOR = 1, UPLOAD = 2;
 
     @Getter static CombatMenu combatMenu;
     @Getter static CampaignCreatorMenu creatorMenu;
@@ -44,39 +44,64 @@ public class Main {
 
     public static void main(String[] args) {
         DamageImplements.init();
-        closeAndSwitch(null, UPLOAD);
+        closeAndSwitch(null, new UploadMain());
     }
 
+    /**
+     * Closes the combat menu if it exists
+     */
     public static void closeCombat() {
-        combatMenu.dispose();
+        Optional.of(combatMenu).ifPresent(MainFrame::dispose);
     }
 
-    public static void closeAndSwitch(Window toClose, @MagicConstant(intValues = {COMBAT, CREATOR, UPLOAD}) int toOpen) {
-        Runnable onOpen = switch (toOpen) {
-            case COMBAT -> () -> {
+    /**
+     * Closes the given {@code Window} and opens the given new instance of a {@code MainFrame}
+     * subclass.
+     * <p>
+     * NOTE: this method is poorly written, and you have to manually double-check that the to
+     * class is valid (valid types are {@code CombatMenu}, {@code CampaignCreatorMenu}, and
+     * {@code UploadMain})
+     * @param toClose the {@code Window} to be disposed
+     * @param to the {@code MainFrame} subclass to be opened
+     * @param <C> the type of the {@code MainFrame} subclass
+     */
+    public static <C extends MainFrame> void closeAndSwitch(Window toClose, C to) {
+        Class<?>[] validFrames = {CombatMenu.class, CampaignCreatorMenu.class, UploadMain.class};
+
+        Runnable onOpen = switch (to) {
+            case CombatMenu cm -> () -> {
                 EncounterManager.confirmQueueFinalized();
-                combatMenu = new CombatMenu();
+                combatMenu = cm;
                 combatMenu.endActionState();
                 refreshUI();
             };
-            case CREATOR -> () -> creatorMenu = new CampaignCreatorMenu();
-            case UPLOAD -> UploadMain::new;
-            default -> throw new IndexOutOfBoundsException("Main.closeAndSwitch: unexpected toOpen int " + toOpen);
+            case CampaignCreatorMenu ccm -> () -> creatorMenu = ccm;
+            case UploadMain um -> () -> um.setVisible(true);
+            default -> throw new UnexpectedClassException(to, validFrames);
         };
         SwingUtilities.invokeLater(onOpen);
 
         Optional.ofNullable(toClose).ifPresent(Window::dispose);
     }
 
+    /**
+     * Receives the given campaign {@code URL}, uploads its information to all
+     * relevant global lists, and sets the tentative campaign encounter
+     * @param file the campaign {@code URL} to be uploaded
+     */
     public static void uploadCampaign(@NonNull URL file) {
         Main.file = file;
         Combatants.init(file);
         Scenarios.init(file);
         EncounterManager.setEncounter(new Encounter(
-                Scenarios.toList(), Combatant.enemyPartition(Combatants.toList())
+                Scenarios.toSet(), Combatant.enemyPartition(Combatants.toSet())
         ));
     }
 
+    /**
+     * Forces a refresh of the combat menu if it exists and checks for
+     * win conditions, ending the combat if any are found
+     */
     public static void refreshUI() {
         Optional.ofNullable(combatMenu).ifPresent(CombatMenu::update);
 
@@ -86,6 +111,11 @@ public class Main {
         }
     }
 
+    /**
+     * Returns the app icon in {@link Resource} scaled to
+     * be the correct size for all relevant locations
+     * @return the application {@code ImageIcon}
+     */
     @NotNull public static ImageIcon getAppIcon() {
         URL imgUrl = Resource.APP_ICON.getUrl();
 

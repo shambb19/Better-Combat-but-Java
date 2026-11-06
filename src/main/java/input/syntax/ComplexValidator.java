@@ -21,8 +21,7 @@ public class ComplexValidator {
 
     @SuppressWarnings("unchecked")
     public static <T extends Implement> boolean validateImplements(Object obj) {
-        List<T> list = (List<T>) obj;
-        return list.stream().allMatch(Objects::nonNull);
+        return ((List<T>) obj).stream().allMatch(Objects::nonNull);
     }
 
 }

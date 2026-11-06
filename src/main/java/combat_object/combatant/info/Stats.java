@@ -1,12 +1,13 @@
 package combat_object.combatant.info;
 
+import input.CodeWriter;
 import input.TextReader;
 import lombok.*;
 import lombok.experimental.*;
 import util.Locators;
 import util.StringUtil;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import static combat_object.combatant.info.AbilityModifier.*;
@@ -22,25 +23,36 @@ public class Stats {
     int level;
     int proficiencyBonus;
 
-    public Stats(Class5e class5e, int level) {
+    private Stats(Class5e class5e, int level) {
         this.class5e = class5e;
         this.level = level;
 
-        for (AbilityModifier stat : AbilityModifier.values())
-            stats.put(stat, 10);
+        for (AbilityModifier stat : stats()) stats.put(stat, 10);
 
         updateProficiency();
     }
 
+    /**
+     * Manually adjusts the stats proficiency bonus based on the stats level.
+     */
     private void updateProficiency() {
-        proficiencyBonus = (level - 1) / 4 + 2;
+        if (class5e.equals(Class5e.NPC)) proficiencyBonus = 0;
+        else proficiencyBonus = (level - 1) / 4 + 2;
     }
 
+    /**
+     * Returns a default Stats object for NPCs with class NPC and level 1
+     * @return the new Stats object
+     */
     public static Stats defaultStats() {
-        Stats stats = new Stats(Class5e.NPC, 1);
-        stats.proficiencyBonus = 0;
+        return new Stats(Class5e.NPC, 1);
+    }
 
-        return stats;
+    /**
+     * @return the raw stat for the given param
+     */
+    public int get(@NonNull AbilityModifier stat) {
+        return stats.get(stat);
     }
 
     /**
@@ -67,42 +79,55 @@ public class Stats {
         return Math.floorDiv(get(stat) - 10, 2);
     }
 
+    /**
+     * Returns the associated combatant's spell save DC
+     * @return the value of the save DC
+     */
     public int saveDc() {
         if (class5e.getSpellMod() == null) return 0;
 
         return 8 + mod(class5e.getSpellMod()) + proficiencyBonus;
     }
 
+    /**
+     * Increments the level by one and adjusts the proficiency accordingly
+     * @return the new level
+     */
     public int levelUp() {
         level++;
         updateProficiency();
         return getClass5e().getHpIncrement();
     }
 
-    public ArrayList<String> toTxt() {
-        ArrayList<String> txt = new ArrayList<>();
-        txt.add("level: " + level);
-        txt.add("class: " + class5e);
-        txt.add(statLine());
-        return txt;
+    /**
+     * Returns the lines of code associated with this Stats object
+     * @return the .txt code lines
+     */
+    public CodeWriter toTxt() {
+        return new CodeWriter(null)
+                .withLine("level", level)
+                .withLine("class", class5e)
+                .withLine(statLine());
     }
 
+    /**
+     * Returns the code line for the stats ability stats
+     * @return the stats code line
+     */
     private String statLine() {
-        StringBuilder string = new StringBuilder("stats: [");
-        for (AbilityModifier stat : AbilityModifier.values())
-            if (!stat.equals(OPTION))
-                string.append(stat.name().toUpperCase()).append(": ").append(get(stat)).append(", ");
-
+        String prefix = "stats" + TextReader.KEY_DELIMITER + "[";
+        StringBuilder string = new StringBuilder(prefix);
+        Arrays.stream(stats()).map(s -> s.name() + TextReader.KEY_DELIMITER + get(s) + ", ").forEach(string::append);
         return string.delete(string.length() - 2, string.length()).append("]").toString();
     }
 
     /**
-     * @return the raw stat for the given param
+     * Returns a Stats object constructed from the given parameters
+     * @param statsObj the stat code line (precondition: instanceof String)
+     * @param class5eObj the provided 5e class (precondition: instanceof Class5e)
+     * @param levelObj the provided player level (precondition: instanceof int)
+     * @return the new Stats object
      */
-    public int get(@NonNull AbilityModifier stat) {
-        return stats.get(stat);
-    }
-
     public static Stats from(Object statsObj, Object class5eObj, Object levelObj) {
         Class5e class5e = (Class5e) class5eObj;
         int level = (int) levelObj;

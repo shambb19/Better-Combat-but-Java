@@ -5,25 +5,27 @@ import combat_object.scenario.Scenario;
 import lombok.*;
 import lombok.experimental.*;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Value public class Encounter {
 
-    List<Scenario> scenarios;
-    List<Combatant> friendlies, enemies;
+    Set<Scenario> scenarios;
+    Set<Combatant> friendlies, enemies;
 
-    public Encounter(List<Scenario> scenarios, Map<Boolean, List<Combatant>> partitionedList) {
+    public Encounter(Set<Scenario> scenarios, Map<Boolean, List<Combatant>> partitionedList) {
         this.scenarios = scenarios;
-        friendlies = partitionedList.get(false);
-        enemies = partitionedList.get(true);
+        friendlies = new HashSet<>(partitionedList.get(false));
+        enemies = new HashSet<>(partitionedList.get(true));
     }
 
     public boolean isEncounterOver() {
         return isTeamDefeated(friendlies) || isTeamDefeated(enemies);
     }
 
-    private boolean isTeamDefeated(List<Combatant> source) {
+    private boolean isTeamDefeated(Set<Combatant> source) {
         return source.stream().noneMatch(Combatant::isConscious);
     }
 

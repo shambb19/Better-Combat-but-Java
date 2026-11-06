@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import util.Filterable;
 
 import java.net.URL;
-import java.util.List;
+import java.util.Set;
 
 @NoArgsConstructor
 public class Scenarios extends GlobalList<Scenario> {
@@ -14,12 +14,12 @@ public class Scenarios extends GlobalList<Scenario> {
     private static final Scenarios INSTANCE = new Scenarios();
 
     public static void init(URL file) {
-        INSTANCE.list.clear();
+        INSTANCE.set.clear();
         INSTANCE.init(file, Scenario.class, ScenarioStarter::finalized);
     }
 
-    public static List<Scenario> toList() {
-        return Filterable.of(INSTANCE.list).castToAsList(Scenario.class);
+    public static Set<Scenario> toSet() {
+        return Filterable.of(INSTANCE.set, Scenario.class).toSet();
     }
 
 }

@@ -49,56 +49,39 @@ public class Config {
             try {
                 split = line.split("\\.");
             } catch (Exception ignored) {
-                throw new ConfigException(line, "valid configurable.value line");
+                throw new ConfigException("configurable", line, "valid configurable.value line");
             }
 
-            if (split.length == 1) throw new ConfigException(line, "valid configurable.value line");
+            if (split.length == 1) throw new ConfigException("configurable", line, "valid configurable.value line");
 
             String key = split[0];
             String value = split[1];
 
             switch (key) {
-                case "ruleset" -> rulesetNew = rulesetConfig(value);
-                case "damage" -> damageHiddenNew = damageConfig(value);
-                case "queue" -> queueTypeNew = queueConfig(value);
-                default -> throw new ConfigException(line, "valid configurable key");
+                case "ruleset" -> rulesetNew = switch (value) {
+                    case "steampunk" -> Ruleset.STEAMPUNK_RULESET;
+                    case "standard" -> Ruleset.STANDARD_RULESET;
+                    default -> throw new ConfigException("ruleset", value, "valid ruleset");
+                };
+                case "damage" -> damageHiddenNew = switch (value) {
+                    case "show" -> false;
+                    case "hide" -> true;
+                    default -> throw new ConfigException("damage", value, "\"show\" or \"hide\"");
+                };
+                case "queue" -> queueTypeNew = switch (value) {
+                    case "cath" -> PlayerQueue.CATH_QUEUE;
+                    case "standard" -> PlayerQueue.STANDARD_QUEUE;
+                    default -> throw new ConfigException("queue", value, "valid queue");
+                };
             }
         }
 
         return new ConfigSet(rulesetNew, damageHiddenNew, queueTypeNew);
     }
 
-    private static Ruleset rulesetConfig(String value) {
-        return switch (value) {
-            case "steampunk" -> Ruleset.STEAMPUNK_RULESET;
-            case "standard" -> Ruleset.STANDARD_RULESET;
-            default -> throw new ConfigException("ruleset", value, "valid ruleset");
-        };
-    }
-
-    private static boolean damageConfig(String value) {
-        return switch (value) {
-            case "show" -> false;
-            case "hide" -> true;
-            default -> throw new ConfigException("damage", value, "\"show\" or \"hide\"");
-        };
-    }
-
-    private static Class<? extends PlayerQueue> queueConfig(String value) {
-        return switch (value) {
-            case "cath" -> PlayerQueue.CATH_QUEUE;
-            case "standard" -> PlayerQueue.STANDARD_QUEUE;
-            default -> throw new ConfigException("queue", value, "valid queue");
-        };
-    }
-
     public record ConfigSet(Ruleset ruleset, boolean damageHidden, Class<? extends PlayerQueue> queue) {}
 
     public static class ConfigException extends InvalidParameterException {
-        public ConfigException(String errLine, String msg) {
-            super("Config", "configurable", errLine, msg);
-        }
-
         public ConfigException(String type, String errLine, String msg) {
             super("Config", type, errLine, msg);
         }

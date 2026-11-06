@@ -8,12 +8,13 @@ import swing.popup.MisfireManagerPopup;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 @ExtensionMethod(EffectManager.class)
 public class SteampunkQueue extends PlayerQueue {
 
-    public SteampunkQueue(List<Combatant> friendlies, List<Combatant> enemies) {
+    public SteampunkQueue(Set<Combatant> friendlies, Set<Combatant> enemies) {
         super(friendlies, enemies);
     }
 
@@ -40,7 +41,7 @@ public class SteampunkQueue extends PlayerQueue {
     }
 
     private void promptMisfires() {
-        List<MisfireManager.Misfire> misfires = MisfireManager.getCurrentCombatantMisfires();
+        Set<MisfireManager.Misfire> misfires = MisfireManager.getCurrentCombatantMisfires();
 
         if (misfires.isEmpty()) return;
 

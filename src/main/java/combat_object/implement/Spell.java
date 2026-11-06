@@ -41,6 +41,12 @@ public class Spell extends Implement {
         return effectEquals(Effect.AUTO_HIT);
     }
 
+    /**
+     * Returns a Spell object from the given parameters
+     * @param params the Spell instance variables, encoded as Objects
+     *               and decoded in the Key class
+     * @return the new Spell object
+     */
     public static Spell from(EnumMap<Key, Object> params) {
         validateAll(params, "Spell");
 
@@ -55,6 +61,13 @@ public class Spell extends Implement {
                 .build();
     }
 
+    /**
+     * Returns a default Spell object with generic statistics, to be
+     * added for all Combatants as a means of attacking with an Implement
+     * not loaded into the Encounter
+     * @param name the name of the manual item
+     * @return the new Spell object
+     */
     public static Spell createManual(String name) {
         return Spell.builder()
                 .name(name)

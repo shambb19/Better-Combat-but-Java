@@ -1,11 +1,13 @@
 package swing.popup;
 
 import combat_object.combatant.Combatant;
+import exception.ProgramRunError;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import swing.custom.Popup;
 import swing.builder.ButtonBuilder;
 import swing.builder.TextItemBuilder;
+import util.function.Writer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,16 +21,13 @@ import static swing.builder.PanelBuilder.*;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class InitiativeResolutionPopup extends Popup {
 
-    static Function<Integer, String> INSTRUCTIONS_GETTER = i -> {
-        String adjective = switch (i) {
-            case 1 -> "first";
-            case 2 -> "second";
-            case 3 -> "third";
-            case 4 -> "fourth";
-            default -> "";
-        };
+    static Writer<Integer> INSTRUCTIONS_GETTER = i -> {
+        String errorMessage = "InitiativeResolutionPopup.INSTRUCTIONS_GETTER; i out of bounds for [1, 4]";
+        if (i < 1 || i > 4) throw new IndexOutOfBoundsException(errorMessage);
+        String[] adjectives = {"", "first", "second", "third", "fourth"};
+
         return "There is an initiative conflict between these combatants. " +
-                "Select the one that will go " + adjective + " among them in the queue.";
+                "Select the one that will go " + adjectives[i + 1] + " among them in the queue.";
     };
 
     public ArrayList<Combatant> result;
@@ -37,8 +36,7 @@ public class InitiativeResolutionPopup extends Popup {
     final JTextArea instructionArea;
 
     public InitiativeResolutionPopup(List<Combatant> toCompare) {
-        if (toCompare.size() > 4)
-            throw new IllegalArgumentException("InitiativeResolutionPopup.<init>: max 4 to compare");
+        if (toCompare.size() > 4) throw new ProgramRunError("num combatants to compare cannot be > 4");
 
         result = new ArrayList<>();
         numRuns = 1;
@@ -49,7 +47,7 @@ public class InitiativeResolutionPopup extends Popup {
         modifyingPanel(this).layoutType(BORDER).vgap(12)
                         .border(SPACER_BORDER).build().validated();
 
-        instructionArea = TextItemBuilder.createTextArea(INSTRUCTIONS_GETTER.apply(numRuns))
+        instructionArea = TextItemBuilder.createTextArea(INSTRUCTIONS_GETTER.write(numRuns))
                 .build().putIn(this, BorderLayout.NORTH);
 
         Function<Combatant, JButton> buttonMaker = host ->
@@ -59,7 +57,7 @@ public class InitiativeResolutionPopup extends Popup {
                     b.setEnabled(false);
                     numRuns++;
                     if (toCompare.size() > 1) {
-                        instructionArea.setText(INSTRUCTIONS_GETTER.apply(numRuns));
+                        instructionArea.setText(INSTRUCTIONS_GETTER.write(numRuns));
                     }
                     else {
                         result.add(toCompare.removeFirst());

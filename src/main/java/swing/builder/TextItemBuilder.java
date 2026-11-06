@@ -24,6 +24,12 @@ public class TextItemBuilder<S extends JTextComponent> extends ComponentBuilder<
     @Builder.Default boolean editable = false;
     @Builder.Default boolean focusable = false;
 
+    /**
+     * Applies all changes added in the builder to this TextItemBuilder's
+     * component. This method, or one of the other inherited ComponentBuilder
+     * validator methods (putIn, validated, get), are required for the
+     * TextItemBuilder class to function
+     */
     @Override public void validated() {
         super.validated();
 
@@ -51,10 +57,28 @@ public class TextItemBuilder<S extends JTextComponent> extends ComponentBuilder<
         component.setFocusable(focusable);
     }
 
+    /**
+     * Returns a fluent TextItemBuilderBuilder object with the component set equal
+     * to the given JTextComponent. This method should only be used when a specific
+     * method does not exist for the JTextComponent being created. For example, this
+     * method should not be used to create a JTextArea.
+     * @param comp the button to be set as the hosted component of
+     *               the new TextItemBuilderBuilder object
+     * @return the new ButtonBuilderBuilder object
+     * @param <T> the subclass of JTextComponent that is the type of the button
+     *           to be added to the new TextItemBuilderBuilder object
+     */
     public static <T extends JTextComponent> TextItemBuilderBuilder<T, ?, ?> modifyingTextItem(T comp) {
         return TextItemBuilder.<T>buildTextItem().component(comp);
     }
 
+    /**
+     * Returns a fluent TextItemBuilderBuilder object with the component set to a new
+     * JTextArea created with the given text. The text area is automatically set with
+     * setLineWrap=true and setWrapStyleWord=true
+     * @param text the text to be displayed in the text area
+     * @return the new TextItemBuilderBuilder object
+     */
     public static TextItemBuilderBuilder<JTextArea, ?, ?> createTextArea(String text) {
         JTextArea area = new JTextArea(text);
         area.setLineWrap(true);
@@ -63,6 +87,14 @@ public class TextItemBuilder<S extends JTextComponent> extends ComponentBuilder<
         return TextItemBuilder.<JTextArea>buildTextItem().component(area);
     }
 
+    /**
+     * Returns a fluent TextItemBuilderBuilder object with the component set to a new
+     * JTextArea created with the given text and foreground. The text area is automatically
+     * set with setLineWrap=true and setWrapStyleWord=true
+     * @param text the text to be displayed in the text area
+     * @param foreground the foreground color of the text area
+     * @return the new TextItemBuilderBuilder object
+     */
     public static TextItemBuilderBuilder<JTextArea, ?, ?> createTextArea(String text, Color foreground) {
         return createTextArea(text).foreground(foreground);
     }

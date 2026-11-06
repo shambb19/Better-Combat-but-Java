@@ -9,6 +9,7 @@ import swing.custom.MainFrame;
 import swing.builder.PanelBuilder;
 
 import java.awt.*;
+import java.util.List;
 
 @Getter @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @ExtensionMethod(util.StringUtil.class)
@@ -24,7 +25,8 @@ public class CampaignCreatorMenu extends MainFrame {
         editorPanel = new CampaignEditor();
 
         final String errorMessage = "CampaignCreatorMenu.<init>: could not read input file";
-        String text = CampaignReader.getLines(Main.getFile(), errorMessage).fromList(false);
+        List<String> lines = CampaignReader.getLines(Main.getFile(), errorMessage);
+        String text = String.join("\n", lines);
         editorPanel.setText(text);
 
         PanelBuilder.modifyingPanel(this).layoutType(PanelBuilder.BORDER)

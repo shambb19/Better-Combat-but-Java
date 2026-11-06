@@ -12,6 +12,10 @@ public class LifeStatus {
     @Getter @MagicConstant(valuesFromClass = LifeStatus.class) private int status = ALIVE;
     private int successes = 0, fails = 0;
 
+    /**
+     * Logs the given death save roll in the life status
+     * @param d20Roll the death save throw rolled
+     */
     public void rollDeathSave(int d20Roll) {
         if (d20Roll > 20 || d20Roll < 1) throw new IndexOutOfBoundsException();
 
@@ -26,6 +30,12 @@ public class LifeStatus {
         __main.Main.refreshUI();
     }
 
+    /**
+     * Logs the given combatant as defeated. If the combatant is an enemy
+     * they are set immediately as dead, else death saving throws are started.
+     * setDefeated also breaks any concentrations had by the given combatant
+     * @param combatant the defeated combatant
+     */
     public void setDefeated(Combatant combatant) {
         if (combatant.isEnemy()) status = DEAD;
         else status = UNCONSCIOUS;
@@ -33,14 +43,18 @@ public class LifeStatus {
         ConcentrationManager.breakConcentration(combatant);
     }
 
-    public boolean isUnconscious() {
-        return status == UNCONSCIOUS;
-    }
-
+    /**
+     * Returns whether the associated combatant is dead
+     * @return true if dead, else false
+     */
     public boolean isDead() {
         return status == DEAD;
     }
 
+    /**
+     * Returns whether the associated combatant is conscious
+     * @return true if conscious, else false
+     */
     public boolean isConscious() {
         return status == ALIVE;
     }

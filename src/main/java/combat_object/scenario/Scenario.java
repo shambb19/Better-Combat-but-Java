@@ -1,19 +1,15 @@
 package combat_object.scenario;
 
-import _global_list.Combatants;
 import combat_object.CombatObject;
-import combat_object.combatant.Combatant;
 import combat_object.combatant.NPC;
-import input.syntax.Key;
+import input.CodeWriter;
 import lombok.*;
 import lombok.experimental.*;
 import util.Filterable;
 import util.StringUtil;
 
 import java.util.*;
-import java.util.function.BiFunction;
-
-import static input.syntax.Key.*;
+import java.util.function.Function;
 
 @EqualsAndHashCode(callSuper = true)
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
@@ -21,36 +17,30 @@ import static input.syntax.Key.*;
 @SuperBuilder
 public class Scenario extends CombatObject {
 
-    HashMap<NPC, Integer> with, against;
+    @Builder.Default Map<NPC, Integer> with = Map.of();
+    @Builder.Default Map<NPC, Integer> against = Map.of();
 
-    public static Scenario from(EnumMap<Key, Object> params) {
-        validateAll(params, "Scenario");
-
-        BiFunction<String, List<Combatant>, HashMap<NPC, Integer>> mapGetter = (list, source) -> {
-            HashMap<NPC, Integer> result = new HashMap<>();
-            if (list == null) return result;
-            for (String str : list.listTextAsArray()) {
-                String name = str.getNameScenario();
-                int qty = str.getQty();
-                NPC npc = Filterable.of(source, NPC.class).firstOrElseThrow(NPC::getName, name);
-                result.put(npc, qty);
-            }
-            return result;
-        };
-
-        String name = (String) params.get(NAME);
-        var with = mapGetter.apply((String) params.get(WITH), Combatants.getFriendlies());
-        var against = mapGetter.apply((String) params.get(AGAINST), Combatants.getEnemies());
-
-        return builder().name(name).with(with).against(against).build();
-    }
-
+    /**
+     * Returns a Scenario object with the with and against Maps both being
+     * empty HashMaps
+     * @return the empty Scenario object
+     */
     public static Scenario emptyScenario() {
         return Scenario.builder().name("Empty Scenario").with(new HashMap<>()).against(new HashMap<>()).build();
     }
 
+    /**
+     * Returns an ArrayList of all NPCs in the scenario on the side specified
+     * by isFriendlies. If isSingleOccurrences is true, the list only includes
+     * one copy of all NPCs, even if its quantity is > 0. Otherwise, the list
+     * includes all NPCs on the specified side, including carbon copies
+     * @param isFriendlies if true, returns allied NPCs, else all enemy NPCs
+     * @param isSingleOccurrences if true, returns all unique NPCs, else all NPCs
+     *                            including carbon copies
+     * @return the specified ArrayList
+     */
     public ArrayList<NPC> npcList(boolean isFriendlies, boolean isSingleOccurrences) {
-        HashMap<NPC, Integer> team = isFriendlies ? with : against;
+        Map<NPC, Integer> team = isFriendlies ? with : against;
         if (isSingleOccurrences) return new ArrayList<>(team.keySet());
 
         ArrayList<NPC> list = new ArrayList<>();
@@ -62,29 +52,41 @@ public class Scenario extends CombatObject {
         return list;
     }
 
+    /**
+     * Returns an ArrayList of all NPCs, both friendly and enemy, in the scenario.
+     * If isSingleOccurrences is true, the list only includes one copy of all NPCs,
+     * even if its quantity is > 0. Otherwise, the list includes all NPCs on the
+     * specified side, including carbon copies
+     * @param isSingleOccurrences if true, returns all unique NPCs, else all NPCs
+     *                            including carbon copies
+     * @return the specified ArrayList
+     */
     public ArrayList<NPC> npcListAll(boolean isSingleOccurrences) {
         ArrayList<NPC> friendlies = npcList(true, isSingleOccurrences);
         ArrayList<NPC> enemies = npcList(false, isSingleOccurrences);
-        return new ArrayList<>(Filterable.ofLists(friendlies, enemies).toList());
+        return new ArrayList<>(Filterable.ofCollections(friendlies, enemies).toList());
     }
 
-    public ArrayList<String> toTxt() {
-        BiFunction<String, HashMap<NPC, Integer>, String> formatter = (key, source) -> {
-            StringJoiner joiner = new StringJoiner(", ", ": [", "]");
-            source.forEach((npc, qty) -> {
-                String txt = npc.getName() + ("_" + qty).stringIfElseBlank(qty > 1);
-                joiner.add(txt);
-            });
+    /**
+     * Returns the lines of code associated with this Scenario object
+     * @return the .txt code lines
+     */
+    public CodeWriter toTxt() {
+        Function<Map<NPC, Integer>, String> formatter = source -> {
+            StringJoiner joiner = new StringJoiner(", ", "[", "]");
+            source.entrySet().stream().map(e ->
+                    e.getKey().getName() + ("_" + e.getValue()).stringIfElseBlank(e.getValue() > 1)
+            ).forEach(joiner::add);
             return joiner.toString();
         };
 
-        ArrayList<String> txt = new ArrayList<>();
-        txt.add(".scenario");
-        txt.add("name: " + name);
-        if (!with.isEmpty()) txt.add(formatter.apply("with", with));
-        txt.add(formatter.apply("against", against));
-        txt.add("");
-        return txt;
+        CodeWriter writer = new CodeWriter(".scenario").withLine("name", name);
+        if (!with.isEmpty()) {
+            writer = writer.withLine("with", formatter.apply(with));
+        }
+        writer = writer.withLine("against", formatter.apply(against));
+
+        return writer;
     }
 
     @Override

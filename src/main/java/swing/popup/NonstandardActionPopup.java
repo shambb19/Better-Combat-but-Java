@@ -37,9 +37,9 @@ public class NonstandardActionPopup extends Popup {
 
         //
         // header
-        Combatant[] availableSearchPool = Filterable.ofLists(
-                EncounterManager.getFriendlies(), EncounterManager.getEnemies()
-        ).toList().toArray(new Combatant[0]);
+        Combatant[] availableSearchPool = Filterable.ofCollections(
+                EncounterManager.friendlies(), EncounterManager.enemies()
+        ).toArray(Combatant[]::new);
         JComboBox<Combatant> comboBox = ComponentBuilder.createComboBox(
                 availableSearchPool,
                 b -> selectedCombatant = (Combatant) b.getSelectedItem(),

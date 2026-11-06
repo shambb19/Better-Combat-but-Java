@@ -34,7 +34,7 @@ public abstract class ActionFormPanel extends JPanel {
     @NonFinal Combatant target;
 
     protected ActionFormPanel(String confirmLabel, Combatant target) {
-        attacker = EncounterManager.getCurrentCombatant();
+        attacker = EncounterManager.currentCombatant();
         this.target = target;
 
         modifyBasicPanel(this, BORDER, BorderFactory.createEmptyBorder(16, 18, 14, 18));

@@ -2,6 +2,7 @@ package __main;
 
 import _global_list.Resource;
 import combat_menu.encounter_selection.EncounterSelectionPanel;
+import creator_menu.CampaignCreatorMenu;
 import creator_menu.ide.CampaignEditor;
 import input.CampaignReader;
 import lombok.*;
@@ -70,7 +71,7 @@ public class UploadMain extends MainFrame {
 
         creatorButton = uploadButton("Edit", () -> {
             Main.uploadCampaign(currentFile);
-            Main.closeAndSwitch(this, Main.CREATOR);
+            Main.closeAndSwitch(this, new CampaignCreatorMenu());
         });
         creatorButton.setEnabled(false);
 

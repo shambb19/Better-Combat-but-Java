@@ -10,12 +10,14 @@ import lombok.experimental.FieldDefaults;
 import swing.custom.ValidatedField;
 import swing.builder.ButtonBuilder;
 import swing.builder.ComponentBuilder;
+import util.Filterable;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
+import java.util.Set;
 
 import static swing.ColorStyles.*;
 import static swing.builder.PanelBuilder.*;
@@ -142,8 +144,9 @@ public class CombatantCard extends JPanel {
                         ((QuickAddDialog) host.getHost()).showCard(QuickAddDialog.CREATE);
                     } else {
                         boolean forEnemies = option.isEnemies();
-                        List<NPC> available = Combatants.getNpcs(forEnemies);
-                        new QuickAddDialog(forEnemies, available, host::addCardBulk).setVisible(true);
+                        Set<Combatant> available = forEnemies ? Combatants.getEnemies() : Combatants.getFriendlies();
+                        List<NPC> availableNpcs = Filterable.of(available, NPC.class).toList();
+                        new QuickAddDialog(forEnemies, availableNpcs, host::addCardBulk).setVisible(true);
                     }
                 }
             });

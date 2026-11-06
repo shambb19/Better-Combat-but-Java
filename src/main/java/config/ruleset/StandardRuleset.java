@@ -28,7 +28,7 @@ import static config.ruleset.AttackResult.SUCCEEDED;
 public class StandardRuleset implements Ruleset {
 
     @Override public AttackResult logAttack(Combatant target, Implement implement, int roll) {
-        Combatant attacker = EncounterManager.getCurrentCombatant();
+        Combatant attacker = EncounterManager.currentCombatant();
 
         boolean autoHits = implement instanceof Spell s && s.doesNotRequireAttackRoll();
         if (!autoHits) {
@@ -41,14 +41,14 @@ public class StandardRuleset implements Ruleset {
             }
         }
 
-        AttackResult continues = Ruleset.getAttackResult(attacker, target, implement, roll);
-        boolean hit = continues == SUCCEEDED;
+        AttackResult result = Ruleset.getAttackResult(attacker, target, implement, roll);
+        boolean hit = result == SUCCEEDED;
 
         if (!hit && implement instanceof Spell s) {
-            if (s.dealsHalfDamageAnyways() || autoHits) continues = SUCCEEDED;
+            if (s.dealsHalfDamageAnyways() || autoHits) result = SUCCEEDED;
         }
 
-        if (continues == SUCCEEDED) {
+        if (result == SUCCEEDED) {
             EffectManager.logEffect(target, attacker, implement);
 
             SwingUtilities.invokeLater(() ->
@@ -57,11 +57,11 @@ public class StandardRuleset implements Ruleset {
 
         Main.getCombatMenu().endActionState();
         Main.refreshUI();
-        return continues;
+        return result;
     }
 
     @Override public void logDamage(Combatant target, Implement implement, int roll, int bonus) {
-        Combatant attacker = EncounterManager.getCurrentCombatant();
+        Combatant attacker = EncounterManager.currentCombatant();
 
         if (!implement.isManual())
             attacker.logRoll(roll, implement.getRoll());
@@ -69,7 +69,7 @@ public class StandardRuleset implements Ruleset {
         if (implement.effectEquals(Effect.STAT_DROP)) {
             target.getStats().put(AbilityModifier.INT, 1);
             target.getStats().put(AbilityModifier.CHA, 1);
-        } else if (implement.effectEquals(Effect.HEAL_SELF)) {
+        } else if (implement.effectEquals(Effect.LIFE_DRAIN)) {
             attacker.heal(roll);
         }
         target.damage(roll + bonus);
@@ -83,7 +83,7 @@ public class StandardRuleset implements Ruleset {
         if (hp > maxHp) throw new InvalidParameterException("PC", "hp", hp, "hp <= hpMax");
     }
 
-    @Override public PlayerQueue getPlayerQueue(List<Combatant> friendlies, List<Combatant> enemies) {
+    @Override public PlayerQueue getPlayerQueue(Set<Combatant> friendlies, Set<Combatant> enemies) {
         return new SteampunkQueue(friendlies, enemies);
     }
 

@@ -3,6 +3,7 @@ package input;
 import config.Config;
 import config.ruleset.Ruleset;
 import exception.InvalidSyntaxError;
+import exception.UnexpectedClassException;
 import input.syntax.Tag;
 import lombok.experimental.*;
 import util.Locators;
@@ -14,33 +15,39 @@ import java.util.function.Consumer;
 public class TextReader {
 
     private static final String[] COMMENT_INITIALIZERS = {"//", "~", "#"};
+    public static final String KEY_DELIMITER = " ";
 
     /**
-     * Returns "key" from any "key: value" code line
+     * Returns "key" from any "key value" code line
      */
     public static String key(String line) {
-        if (line.startsWith("+")) return line.substringToElseEnd(1, ":");
-
-        if (!line.contains(":")) throw new InvalidSyntaxError(false, "no delimiter found in " + line);
-
-        int startIndex = line.startsWith("+") ? 1 : 0;
-        return line.substring(startIndex, line.indexOf(":"));
+        if (line.startsWith("+")) {
+            if (line.contains(KEY_DELIMITER)) return line.substring(1, line.indexOf(KEY_DELIMITER)).trim();
+            else return line.substring(1).trim();
+        }
+        try {
+            return line.substring(0, line.indexOf(KEY_DELIMITER));
+        } catch (IndexOutOfBoundsException ignored) {
+            throw new InvalidSyntaxError(false, "no delimiter found in line '" + line + "'");
+        }
     }
 
     /**
-     * Returns "value" from any "key: value" code line
+     * Returns "value" from any "key value" code line
      */
     public static String value(String line) {
-        if (line.startsWith("+") && !line.contains(":")) return "true";
+        if (line.startsWith("+") && !line.contains(KEY_DELIMITER)) return "true";
 
-        if (!line.contains(":")) throw new InvalidSyntaxError(false, "no delimiter found");
-
-        return line.substring(line.indexOf(":") + 1).trim();
+        try {
+            return line.substring(line.indexOf(KEY_DELIMITER) + 1).trim();
+        } catch (IndexOutOfBoundsException ignored) {
+            throw new InvalidSyntaxError(false, "no delimiter found in line '" + line + "'");
+        }
     }
 
     /**
      * Returns the values of code value array as String[]
-     * <p>i.e. "key: [a, b, c, d]"<p>returns<p>{"a", "b", "c", "d"}
+     * <p>i.e. "key [a, b, c, d]"<p>returns<p>{"a", "b", "c", "d"}
      */
     public static String[] listTextAsArray(String line) {
         String str;
@@ -88,13 +95,10 @@ public class TextReader {
      * @return the maximum hp value as int (for example, "6/10" returns 10)
      */
     public static int beforeSlash(Object param) {
-        if (!(param instanceof String fullString))
-            throw new ClassCastException("TxtReader.beforeSlash: String expected");
+        if (!(param instanceof String fullString)) throw new UnexpectedClassException(param, String.class);
 
-        if (!fullString.contains("/"))
-            return fullString.toInt();
-        else
-            return fullString.split("/")[1].toInt();
+        if (!fullString.contains("/")) return fullString.toInt();
+        else return fullString.split("/")[1].toInt();
     }
 
     /**
@@ -102,13 +106,10 @@ public class TextReader {
      * @return the current hp value as int (for example, "6/10" returns 6)
      */
     public static int afterSlash(Object param) {
-        if (!(param instanceof String fullString))
-            throw new ClassCastException("TxtReader.afterSlash: String expected");
+        if (!(param instanceof String fullString)) throw new UnexpectedClassException(param, String.class);
 
-        if (!fullString.contains("/"))
-            return fullString.toInt();
-        else
-            return fullString.split("/")[0].toInt();
+        if (!fullString.contains("/")) return fullString.toInt();
+        else return fullString.split("/")[0].toInt();
     }
 
     public static int getHp(Object param, boolean isMaximum) {
@@ -118,7 +119,7 @@ public class TextReader {
             return 8;
         }
 
-        if (!(param instanceof String line)) throw new ClassCastException("TxtReader.getHp: String expected");
+        if (!(param instanceof String line)) throw new UnexpectedClassException(param, String.class);
 
         if (!line.contains("/")) return line.toInt();
 
@@ -132,10 +133,8 @@ public class TextReader {
      * @return the name of the combatant (for example, "Orc_6" returns "Orc")
      */
     public static String getNameScenario(String fullString) {
-        if (!fullString.contains("_"))
-            return fullString;
-        else
-            return fullString.substring(0, fullString.indexOf("_"));
+        if (!fullString.contains("_")) return fullString;
+        else return fullString.substring(0, fullString.indexOf("_"));
     }
 
     /**
@@ -219,7 +218,6 @@ public class TextReader {
         for (String part : tagString.split("<")) {
             if (part.isBlank()) continue;
             Tag tag = Locators.enumNameSearch(part, Tag.class);
-            if (tag == null) throw new InvalidSyntaxError(true, "Unrecognized tag: " + part);
             tags.add(tag);
         }
         return tags;

@@ -4,12 +4,12 @@ import combat_object.combatant.Combatant;
 import combat_object.combatant.NPC;
 import combat_object.combatant.PC;
 import combat_object.combatant.info.AbilityModifier;
+import exception.UnexpectedClassException;
 import swing.builder.ComponentBuilder;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
-import java.util.Objects;
 
 import static swing.ColorStyles.*;
 import static swing.builder.PanelBuilder.*;
@@ -33,20 +33,10 @@ public class StatTooltipPopup extends JWindow {
                 .border(BorderFactory.createLineBorder(DIVIDER, 1)).build().get();
         setContentPane(root);
 
-        if (combatant.isEnemy())
-            root.add(buildFooter(), BorderLayout.SOUTH);
+        if (combatant.isEnemy()) root.add(buildFooter(), BorderLayout.SOUTH);
 
         pack();
         setSize(WIDTH, getPreferredSize().height);
-    }
-
-    private static String roughHpLabel(Combatant c) {
-        if (c.isUnconscious()) return "Defeated";
-        double ratio = c.getHpRatio();
-        if (ratio > 0.7) return "Healthy";
-        if (ratio > 0.50) return "Injured";
-        if (ratio > 0.25) return "Bloodied";
-        return "Critical";
     }
 
     private JPanel getHeader() {
@@ -57,15 +47,14 @@ public class StatTooltipPopup extends JWindow {
                         BorderFactory.createEmptyBorder(8, 12, 7, 12)
                 )).build().get();
 
-        ComponentBuilder.createLabel(combatant.toString(), Font.PLAIN, 13f, FOREGROUND)
-                .build().putIn(header);
+        ComponentBuilder.createLabel(combatant.toString(), Font.PLAIN, 13f, FOREGROUND).build().putIn(header);
 
         String class5e = combatant.getStats().getClass5e().toString();
         String subtitle = switch (combatant) {
             case NPC npc when npc.isEnemy() -> "Enemy " + class5e;
             case NPC ignored -> "Allied " + class5e;
             case PC pc -> "Level " + pc.getStats().getLevel() + " " + class5e;
-            default -> throw new RuntimeException("StatTooltipPopup.getHeader: unexpected combatant");
+            default -> throw new UnexpectedClassException(combatant, PC.class, NPC.class);
         };
 
         ComponentBuilder.createLabel(subtitle, Font.PLAIN, 10f, FG_MUTED).build().putIn(header);
@@ -81,9 +70,7 @@ public class StatTooltipPopup extends JWindow {
         var combatSection = sectionLabel("Combat");
 
         var ac = getStatRow("AC", String.valueOf(combatant.getArmorClass()));
-        var hp = combatant.isEnemy()
-                ? getStatRow("HP", roughHpLabel(combatant), combatant.getHealthBarColor())
-                : getStatRow("HP", combatant.getHealthBarString(), combatant.getHealthBarColor());
+        var hp = getStatRow("HP", combatant.getHealthBarString(), combatant.getHealthBarColor());
         var initiative = getStatRow("Initiative", "+" + combatant.getInitiative());
 
         addConstraintlessComponentsTo(statPanel, combatSection, ac, hp, initiative);
@@ -91,11 +78,10 @@ public class StatTooltipPopup extends JWindow {
         if (!(combatant instanceof PC pc)) return statPanel;
 
         var abilitySection = sectionLabel("Ability Scores");
-        var abilityRows = Arrays.stream(AbilityModifier.values()).map(stat -> {
-            if (stat.equals(AbilityModifier.OPTION)) return null;
-            String statVal = String.valueOf(pc.getStats().get(stat));
-            return getStatRow(stat.name().toUpperCase(), statVal);
-        }).filter(Objects::nonNull).toList();
+        var abilityRows = Arrays.stream(AbilityModifier.stats()).map(s -> {
+            String statVal = String.valueOf(pc.getStats().get(s));
+            return getStatRow(s.name().toUpperCase(), statVal);
+        }).toList();
 
         addConstraintlessComponentsTo(statPanel, abilitySection, abilityRows);
 

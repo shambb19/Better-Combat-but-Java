@@ -26,9 +26,9 @@ public class DamageFormPanel extends ActionFormPanel {
 
     static final Effect[] DAMAGE_EFFECTS = new Effect[]
             {
-                    POISON, ADVANTAGE_SOON, ILLUSION, BLIND, TRACKING,
-                    DIFFICULT_TERRAIN, DISADVANTAGE_ATTACK, FORCED_MOVE,
-                    FRIGHTEN, BANISH, PRONE, PULL, RESTRAIN, STAT_DROP, HEAL_SELF
+                    POISON, ADVANTAGE, ILLUSION, BLIND, TRACKED,
+                    DIFFICULT_TERRAIN, ATTACK_DISADVANTAGE, FORCED_MOVEMENT,
+                    FRIGHTENED, BANISHED, PRONE, PULLED, RESTRAINED, STAT_DROP, LIFE_DRAIN
             };
 
     final Implement implement;

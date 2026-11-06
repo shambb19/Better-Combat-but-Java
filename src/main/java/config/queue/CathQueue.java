@@ -5,18 +5,18 @@ import _manager.EffectManager;
 import combat_object.combatant.Combatant;
 import lombok.experimental.*;
 import util.Message;
-import swing.custom.PopupPrompt;
+import swing.popup.PopupPrompt;
 
-import java.util.List;
+import java.util.Set;
 
-import static combat_object.implement.Effect.BANISH;
+import static combat_object.implement.Effect.BANISHED;
 import static swing.ColorStyles.CONCENTRATION;
 import static swing.ColorStyles.SUCCESS;
 
 @ExtensionMethod(EffectManager.class)
 public class CathQueue extends PlayerQueue {
 
-    public CathQueue(List<Combatant> friendlies, List<Combatant> enemies) {
+    public CathQueue(Set<Combatant> friendlies, Set<Combatant> enemies) {
         super(friendlies, enemies);
     }
 
@@ -45,9 +45,9 @@ public class CathQueue extends PlayerQueue {
     }
 
     @Override protected boolean canTakeTurn() {
-        if (currentCombatant.hasEffect(BANISH)) {
+        if (currentCombatant.hasEffect(BANISHED)) {
             Message.showAsInfoMessage(currentCombatant + " is banished to another realm and cannot act.");
-            currentCombatant.removeEffect(BANISH);
+            currentCombatant.removeEffect(BANISHED);
             return false;
         }
         return super.canTakeTurn();

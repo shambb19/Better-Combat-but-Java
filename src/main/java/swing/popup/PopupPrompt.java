@@ -1,10 +1,11 @@
-package swing.custom;
+package swing.popup;
 
 import __main.Main;
 import swing.builder.ButtonBuilder;
 import swing.builder.ComponentBuilder;
 import swing.builder.Components;
 import swing.builder.TextItemBuilder;
+import swing.custom.ValidatedField;
 
 import javax.swing.*;
 import java.awt.*;

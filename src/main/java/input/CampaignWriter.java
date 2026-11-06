@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static config.Config.*;
 
@@ -24,13 +25,13 @@ import static config.Config.*;
 @RequiredArgsConstructor
 public class CampaignWriter {
 
-    private final List<Combatant> friendlySource, enemySource;
-    private final List<Scenario> scenarioSource;
+    private final Set<Combatant> friendlySource, enemySource;
+    private final Set<Scenario> scenarioSource;
 
     private ArrayList<String> code = null;
 
     public static CampaignWriter ofFullCampaign() {
-        return new CampaignWriter(Combatants.getFriendlies(), Combatants.getEnemies(), Scenarios.toList());
+        return new CampaignWriter(Combatants.getFriendlies(), Combatants.getEnemies(), Scenarios.toSet());
     }
 
     public ArrayList<String> getCode() {
@@ -68,7 +69,7 @@ public class CampaignWriter {
 
     private void writeCombatants() {
         for (Combatant c : friendlySource) if (c instanceof PC || c.isAlive()) code.addAll(c.toTxt());
-        Filterable.of(enemySource).filteredBy(Combatant::isConscious).forEach(e -> code.addAll(e.toTxt()));
+        Filterable.of(enemySource).filteredBy(Combatant::isConscious).toList().forEach(e -> code.addAll(e.toTxt()));
     }
 
     private void writeScenarios() {

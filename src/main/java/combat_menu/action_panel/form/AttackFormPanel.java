@@ -31,8 +31,8 @@ import static swing.builder.PanelBuilder.*;
 @ExtensionMethod(StringUtil.class)
 public class AttackFormPanel extends ActionFormPanel {
 
-    static final Effect[] ATTACKER_EFFECTS = new Effect[]{POISON, ADVANTAGE_SOON};
-    static final Effect[] TARGET_EFFECTS = new Effect[]{FRIGHTEN, BLIND, RESTRAIN};
+    static final Effect[] ATTACKER_EFFECTS = new Effect[]{POISON, ADVANTAGE};
+    static final Effect[] TARGET_EFFECTS = new Effect[]{FRIGHTENED, BLIND, RESTRAINED};
 
     JComboBox<Implement> attackCombo;
     ValidatedField rollField;
@@ -102,7 +102,8 @@ public class AttackFormPanel extends ActionFormPanel {
 
         AttackResult continues = CombatManager.logAttack(target, roll, implement);
 
-        if (continues != SUCCEEDED) showMissResult(continues.getReason(attacker, target));
+        String reason = continues.getReason();
+        if (continues != SUCCEEDED) showMissResult(StringUtil.infoString(reason, attacker, target));
     }
 
     @Override protected void onTargetChanged() {
